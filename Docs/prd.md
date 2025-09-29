@@ -44,6 +44,27 @@ Supports Hebrew, Russian, Arabic, and English.
 Feedback items appear in admin dashboard.
 No tracking of submitter identity.
 Categorizable by topic (safety, events, suggestions, complaints).
+
+📌 Expense Approval Workflow
+Request → Review → Approve/Reject flow.
+Attach receipts/quotes (Google Drive URLs).
+Budget remaining indicator.
+Chairman digital signature saved to Google Drive.
+Expense history and approval audit trail.
+
+📌 Meeting Agenda Builder
+Collect topics throughout the month.
+Auto-generate meeting agenda.
+Time allocation per topic.
+Link to relevant issues/tasks.
+Post-meeting: Convert to minutes with decisions.
+
+📌 Vendor/Supplier Database (Password Protected)
+Contact info, services, pricing history.
+Past event reviews and ratings.
+Preferred vendor marking.
+Contract/agreement links (Google Drive).
+Search by service type.
 Protocols / History
 Entries with title, body (summary), categories, year.
 Each protocol supports multiple external links (e.g., Google Docs/Drive).
@@ -56,6 +77,7 @@ Access Control
 View: public (no login).
 Edit: one global password (hard-coded, env var).
 📌 **Audit trail** - Track who edited what and when (editor name stored).
+📌 **Version history** - Track all changes to events, tasks, responsibilities, protocols with ability to view previous versions.
 Reminders & Notifications
 Managed by Google Calendar.
 Only Admin receives optional app/email notifications.
@@ -89,6 +111,9 @@ File uploads (URLs only).
 - **Privacy consent tracking** (photo permissions, data usage)
 - **Emergency contacts** per family
 - **Financial tracking** - Basic income/expense log
+- **Expense approval workflow** with Google Drive integration
+- **Meeting agenda builder** with minutes tracking
+- **Vendor database** (password protected)
 5. Technical Requirements
 5.1 Platform & Hosting
 Frontend: Next.js (PWA).
@@ -103,12 +128,15 @@ issues → id, title, description, status, linked_event_id, linked_task_id.
 issue_comments → id, issue_id, author_name, body.
 protocols → id, title, body, year, categories, urls[] (multiple links).
 app_settings → google_calendar_id, editor_global_password_hash.
-audit_log → id, user_name, action, entity_type, entity_id, timestamp.
+audit_log → id, user_name, action, entity_type, entity_id, timestamp, old_values, new_values.
 family_info → id, family_name, emergency_contacts, photo_permission, consent_date.
 volunteer_slots → id, event_id, slot_name, max_volunteers, volunteers[].
 financial_records → id, type (income/expense), amount, description, date, payment_link.
 event_registrations → id, event_id, form_fields[], registrant_data{}, created_at, qr_checked_in.
 anonymous_feedback → id, category, message, language, created_at, status, admin_notes.
+expense_requests → id, title, amount, description, requester, receipts[], status, approver, approval_date, drive_url.
+meeting_agendas → id, date, topics[], minutes, decisions[], attendees[].
+vendors → id, name, contact_info, services, pricing, rating, reviews[], contracts[], is_preferred.
 5.3 Security
 Edit access requires global password (bcrypt hash in env).
 Public view requires no login.
@@ -126,8 +154,8 @@ App works smoothly on mobile with RTL Hebrew layout.
 Day 1: Setup repo, DB schema, editor guard.
 Day 2: CRUD for Events/Tasks/Responsibilities.
 Day 3: Issues + comments. Event detail with linked tasks & responsibilities.
-Day 4: Protocols with multiple links + global search.
-Day 5: Google Calendar sync (app ↔ calendar).
+Day 4: Protocols with multiple links + global search + vendor database.
+Day 5: Google Calendar sync + expense workflow + meeting agendas.
 Day 6: Exports, Dashboard, UI polish (RTL, colors, Hebrew labels), offline mode.
 Day 7: QA + deploy + onboarding walkthrough + push notifications setup.
 8. Risks & Mitigations

@@ -1,0 +1,123 @@
+{
+  "name": "ועד הורים - BeeriManager",
+  "short_name": "ועד הורים",
+  "description": "מערכת ניהול ועד הורים - אירועים, משימות, הוצאות ועוד",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#0D98BA",
+  "background_color": "#ffffff",
+  "dir": "rtl",
+  "lang": "he",
+  "scope": "/",
+  "categories": ["productivity", "education", "social"],
+  "icons": [
+    {
+      "src": "/icons/icon-72x72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-128x128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-152x152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-384x384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "אירועים קרובים",
+      "short_name": "אירועים",
+      "description": "צפייה באירועים הקרובים",
+      "url": "/events?upcoming=true",
+      "icons": [{ "src": "/icons/events-shortcut.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "רשימת משימות",
+      "short_name": "משימות",
+      "description": "צפייה במשימות שלי",
+      "url": "/tasks",
+      "icons": [{ "src": "/icons/tasks-shortcut.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "לוח שנה",
+      "short_name": "לוח שנה",
+      "description": "צפייה בלוח השנה",
+      "url": "/calendar",
+      "icons": [{ "src": "/icons/calendar-shortcut.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "משוב אנונימי",
+      "short_name": "משוב",
+      "description": "שליחת משוב אנונימי",
+      "url": "/feedback",
+      "icons": [{ "src": "/icons/feedback-shortcut.png", "sizes": "96x96" }]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/desktop-home.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "בית - תצוגת שולחן עבודה"
+    },
+    {
+      "src": "/screenshots/mobile-home.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "בית - תצוגת מובייל"
+    },
+    {
+      "src": "/screenshots/mobile-calendar.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "לוח שנה - תצוגת מובייל"
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false,
+  "protocol_handlers": [],
+  "edge_side_panel": {
+    "preferred_width": 400
+  }
+}

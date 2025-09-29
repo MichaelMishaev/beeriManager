@@ -87,3 +87,5 @@ npm run test:e2e     # Run E2E tests
 - Users: School parent committee members
 - Primary use: WhatsApp link sharing for coordination
 - Critical features: Calendar sync, responsibilities tracking, protocol links
+- while develop, always build automation tool in parallel using playwright tool
+- for design use '/Users/michaelmishayev/Desktop/Projects/beeriManager/Docs/design'

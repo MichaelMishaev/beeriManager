@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BeeriCalendar Templates - Mobile First</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'sky-blue': '#87CEEB',
+                        'blue-green': '#0D98BA',
+                        'prussian-blue': '#003153',
+                        'selective-yellow': '#FFBA00',
+                        'ut-orange': '#FF8200'
+                    },
+                    fontFamily: {
+                        'hebrew': ['system-ui', '-apple-system', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: system-ui, -apple-system, sans-serif; }
+        .template { min-height: 100vh; }
+        .day-cell { aspect-ratio: 1; }
+        .event-dot { width: 6px; height: 6px; }
+    </style>
+</head>
+<body class="bg-gray-50">
+
+    <!-- Template Navigation -->
+    <div class="fixed top-0 left-0 right-0 bg-white shadow-md z-50 p-4">
+        <h1 class="text-xl font-bold text-center mb-2">BeeriCalendar Templates</h1>
+
+        <!-- Open Source Calendar Libraries -->
+        <div class="mb-4 p-3 bg-green-50 rounded-lg border-2 border-green-200">
+            <h2 class="text-sm font-bold text-green-800 mb-2">🆓 ספריות קלנדר חינמיות לתמיד - קוד פתוח:</h2>
+            <div class="text-xs space-y-2 text-green-700">
+                <div class="flex justify-between items-center p-2 bg-yellow-50 rounded border border-yellow-200">
+                    <span>• <strong>react-big-calendar</strong> - MIT License ⚠️ <span class="text-yellow-700 text-xs">לא מובייל-first</span></span>
+                    <a href="https://jquense.github.io/react-big-calendar/examples/index.html" target="_blank" class="text-yellow-700 underline text-xs">דמו</a>
+                </div>
+                <div class="flex justify-between items-center p-2 bg-white rounded border">
+                    <span>• <strong>FullCalendar</strong> - MIT License, RTL support מעולה ✅</span>
+                    <a href="https://fullcalendar.io/demos" target="_blank" class="text-blue-600 underline text-xs">דמו</a>
+                </div>
+                <div class="flex justify-between items-center p-2 bg-white rounded border">
+                    <span>• <strong>DayJS</strong> - MIT License, Hebrew locale support ✅</span>
+                    <a href="https://day.js.org/" target="_blank" class="text-blue-600 underline text-xs">אתר</a>
+                </div>
+                <div class="flex justify-between items-center p-2 bg-white rounded border">
+                    <span>• <strong>react-calendar</strong> - MIT License, פשוט ומותאם ✅</span>
+                    <a href="https://projects.wojtekmaj.pl/react-calendar/" target="_blank" class="text-blue-600 underline text-xs">דמו</a>
+                </div>
+                <div class="flex justify-between items-center p-2 bg-red-50 rounded border border-red-200">
+                    <span>• <strong>Tui.Calendar</strong> - MIT License ❌ <span class="text-red-600 text-xs">לא mobile-first, ללא RTL</span></span>
+                    <a href="https://ui.toast.com/tui-calendar" target="_blank" class="text-red-600 underline text-xs">דמו</a>
+                </div>
+            </div>
+            <div class="mt-2 text-xs text-green-600 font-medium">
+                🔒 כל הספריות עם רישיון MIT - חינמי לנצח, ללא הגבלות מסחריות
+            </div>
+            <div class="mt-2 p-2 bg-blue-100 rounded text-xs text-blue-800">
+                📱 <strong>הכי מתאים למובייל-first + RTL:</strong> FullCalendar או react-calendar
+            </div>
+            <div class="mt-2 p-2 bg-orange-100 rounded text-xs text-orange-800">
+                ⚠️ <strong>בעייתיים למובייל:</strong> react-big-calendar ו-TUI Calendar - לא מומלצים
+            </div>
+        </div>
+        <div class="flex overflow-x-auto space-x-2 pb-2">
+            <button onclick="showTemplate(1)" class="btn-nav bg-sky-blue text-white px-4 py-2 rounded-full text-sm whitespace-nowrap">1. קלאסי</button>
+            <button onclick="showTemplate(2)" class="btn-nav bg-blue-green text-white px-4 py-2 rounded-full text-sm whitespace-nowrap">2. מודרני</button>
+            <button onclick="showTemplate(3)" class="btn-nav bg-prussian-blue text-white px-4 py-2 rounded-full text-sm whitespace-nowrap">3. כהה</button>
+            <button onclick="showTemplate(4)" class="btn-nav bg-selective-yellow text-black px-4 py-2 rounded-full text-sm whitespace-nowrap">4. צבעוני</button>
+            <button onclick="showTemplate(5)" class="btn-nav bg-ut-orange text-white px-4 py-2 rounded-full text-sm whitespace-nowrap">5. מינימל</button>
+            <button onclick="showTemplate(6)" class="btn-nav bg-pink-500 text-white px-4 py-2 rounded-full text-sm whitespace-nowrap">6. כרטיסים</button>
+            <button onclick="showTemplate(7)" class="btn-nav bg-green-600 text-white px-4 py-2 rounded-full text-sm whitespace-nowrap">7. אג׳נדה</button>
+            <button onclick="showTemplate(8)" class="btn-nav bg-purple-600 text-white px-4 py-2 rounded-full text-sm whitespace-nowrap">8. טיים-ליין</button>
+            <button onclick="showTemplate(9)" class="btn-nav bg-indigo-600 text-white px-4 py-2 rounded-full text-sm whitespace-nowrap">9. נקודות</button>
+            <button onclick="showTemplate(10)" class="btn-nav bg-red-600 text-white px-4 py-2 rounded-full text-sm whitespace-nowrap">10. שבועי</button>
+        </div>
+    </div>
+
+    <!-- Template 1: Classic Grid -->
+    <div id="template-1" class="template pt-32 px-4">
+        <div class="max-w-sm mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
+            <!-- Header -->
+            <div class="bg-sky-blue text-white p-4">
+                <div class="flex justify-between items-center">
+                    <button class="text-2xl">‹</button>
+                    <h2 class="text-xl font-bold">דצמבר 2024</h2>
+                    <button class="text-2xl">›</button>
+                </div>
+                <div class="grid grid-cols-7 gap-1 mt-4 text-sm">
+                    <div class="text-center py-1">ש׳</div>
+                    <div class="text-center py-1">ו׳</div>
+                    <div class="text-center py-1">ה׳</div>
+                    <div class="text-center py-1">ד׳</div>
+                    <div class="text-center py-1">ג׳</div>
+                    <div class="text-center py-1">ב׳</div>
+                    <div class="text-center py-1">א׳</div>
+                </div>
+            </div>
+            <!-- Calendar Grid -->
+            <div class="p-4">
+                <div class="grid grid-cols-7 gap-1">
+                    <!-- Sample days -->
+                    <div class="day-cell flex flex-col items-center justify-center text-gray-400 text-sm">25</div>
+                    <div class="day-cell flex flex-col items-center justify-center text-gray-400 text-sm">26</div>
+                    <div class="day-cell flex flex-col items-center justify-center text-gray-400 text-sm">27</div>
+                    <div class="day-cell flex flex-col items-center justify-center text-gray-400 text-sm">28</div>
+                    <div class="day-cell flex flex-col items-center justify-center text-gray-400 text-sm">29</div>
+                    <div class="day-cell flex flex-col items-center justify-center text-gray-400 text-sm">30</div>
+                    <div class="day-cell flex flex-col items-center justify-center font-semibold text-sm border-2 border-sky-blue rounded">1</div>
+                    <div class="day-cell flex flex-col items-center justify-center font-semibold text-sm">2</div>
+                    <div class="day-cell flex flex-col items-center justify-center font-semibold text-sm">3</div>
+                    <div class="day-cell flex flex-col items-center justify-center font-semibold text-sm">4</div>
+                    <div class="day-cell flex flex-col items-center justify-center font-semibold text-sm bg-sky-blue text-white rounded">
+                        5
+                        <div class="event-dot bg-selective-yellow rounded-full mt-1"></div>
+                    </div>
+                    <div class="day-cell flex flex-col items-center justify-center font-semibold text-sm">6</div>
+                    <div class="day-cell flex flex-col items-center justify-center font-semibold text-sm">7</div>
+                    <div class="day-cell flex flex-col items-center justify-center font-semibold text-sm">8</div>
+                    <div class="day-cell flex flex-col items-center justify-center font-semibold text-sm">
+                        9
+                        <div class="event-dot bg-ut-orange rounded-full mt-1"></div>
+                    </div>
+                    <div class="day-cell flex flex-col items-center justify-center font-semibold text-sm">10</div>
+                    <div class="day-cell flex flex-col items-center justify-center font-semibold text-sm">11</div>
+                    <div class="day-cell flex flex-col items-center justify-center font-semibold text-sm">12</div>
+                    <div class="day-cell flex flex-col items-center justify-center font-semibold text-sm">13</div>
+                    <div class="day-cell flex flex-col items-center justify-center font-semibold text-sm">14</div>
+                </div>
+            </div>
+            <!-- Today's Events -->
+            <div class="p-4 bg-gray-50 border-t">
+                <h3 class="font-bold text-sm mb-2">אירועי היום</h3>
+                <div class="space-y-2">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-3 h-3 bg-selective-yellow rounded-full"></div>
+                        <span class="text-sm">ישיבת ועד הורים - 19:00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Template 2: Modern Card Style -->
+    <div id="template-2" class="template pt-32 px-4 hidden">
+        <div class="max-w-sm mx-auto">
+            <!-- Header Card -->
+            <div class="bg-gradient-to-r from-blue-green to-prussian-blue text-white rounded-2xl p-6 mb-4 shadow-lg">
+                <div class="flex justify-between items-center mb-4">
+                    <button class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">‹</button>
+                    <div class="text-center">
+                        <h2 class="text-2xl font-bold">דצמבר</h2>
+                        <p class="text-sm opacity-80">2024</p>
+                    </div>
+                    <button class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">›</button>
+                </div>
+                <div class="grid grid-cols-7 gap-2 text-center text-xs">
+                    <div class="py-1 opacity-60">ש׳</div>
+                    <div class="py-1 opacity-60">ו׳</div>
+                    <div class="py-1 opacity-60">ה׳</div>
+                    <div class="py-1 opacity-60">ד׳</div>
+                    <div class="py-1 opacity-60">ג׳</div>
+                    <div class="py-1 opacity-60">ב׳</div>
+                    <div class="py-1 opacity-60">א׳</div>
+                </div>
+            </div>
+
+            <!-- Calendar Card -->
+            <div class="bg-white rounded-2xl shadow-lg p-4 mb-4">
+                <div class="grid grid-cols-7 gap-2">
+                    <div class="day-cell flex items-center justify-center text-gray-300 text-sm">30</div>
+                    <div class="day-cell flex items-center justify-center text-black text-sm font-medium">1</div>
+                    <div class="day-cell flex items-center justify-center text-black text-sm font-medium">2</div>
+                    <div class="day-cell flex items-center justify-center text-black text-sm font-medium">3</div>
+                    <div class="day-cell flex items-center justify-center text-black text-sm font-medium">4</div>
+                    <div class="day-cell flex items-center justify-center text-white text-sm font-medium bg-blue-green rounded-xl">5</div>
+                    <div class="day-cell flex items-center justify-center text-black text-sm font-medium">6</div>
+                    <div class="day-cell flex items-center justify-center text-black text-sm font-medium relative">
+                        7
+                        <div class="absolute bottom-1 w-2 h-2 bg-selective-yellow rounded-full"></div>
+                    </div>
+                    <div class="day-cell flex items-center justify-center text-black text-sm font-medium">8</div>
+                    <div class="day-cell flex items-center justify-center text-black text-sm font-medium">9</div>
+                    <div class="day-cell flex items-center justify-center text-black text-sm font-medium">10</div>
+                    <div class="day-cell flex items-center justify-center text-black text-sm font-medium">11</div>
+                    <div class="day-cell flex items-center justify-center text-black text-sm font-medium">12</div>
+                    <div class="day-cell flex items-center justify-center text-black text-sm font-medium">13</div>
+                </div>
+            </div>
+
+            <!-- Events Card -->
+            <div class="bg-white rounded-2xl shadow-lg p-4">
+                <h3 class="font-bold text-lg mb-3">אירועים קרובים</h3>
+                <div class="space-y-3">
+                    <div class="flex items-start space-x-3 p-3 bg-blue-50 rounded-xl">
+                        <div class="w-4 h-4 bg-blue-green rounded-full mt-1"></div>
+                        <div>
+                            <p class="font-medium text-sm">ישיבת ועד הורים</p>
+                            <p class="text-xs text-gray-500">היום, 19:00</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start space-x-3 p-3 bg-yellow-50 rounded-xl">
+                        <div class="w-4 h-4 bg-selective-yellow rounded-full mt-1"></div>
+                        <div>
+                            <p class="font-medium text-sm">גיוס כספים</p>
+                            <p class="text-xs text-gray-500">מחר, 20:00</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Template 3: Dark Theme -->
+    <div id="template-3" class="template pt-32 px-4 hidden bg-gray-900">
+        <div class="max-w-sm mx-auto">
+            <div class="bg-gray-800 rounded-2xl shadow-2xl overflow-hidden">
+                <!-- Header -->
+                <div class="bg-gradient-to-r from-gray-700 to-gray-800 text-white p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <button class="text-gray-300 hover:text-white">‹</button>
+                        <h2 class="text-xl font-bold">דצמבר 2024</h2>
+                        <button class="text-gray-300 hover:text-white">›</button>
+                    </div>
+                    <div class="grid grid-cols-7 gap-1 text-center text-xs text-gray-400">
+                        <div class="py-2">ש׳</div>
+                        <div class="py-2">ו׳</div>
+                        <div class="py-2">ה׳</div>
+                        <div class="py-2">ד׳</div>
+                        <div class="py-2">ג׳</div>
+                        <div class="py-2">ב׳</div>
+                        <div class="py-2">א׳</div>
+                    </div>
+                </div>
+
+                <!-- Calendar -->
+                <div class="p-4">
+                    <div class="grid grid-cols-7 gap-2">
+                        <div class="day-cell flex items-center justify-center text-gray-600 text-sm">30</div>
+                        <div class="day-cell flex items-center justify-center text-white text-sm">1</div>
+                        <div class="day-cell flex items-center justify-center text-white text-sm">2</div>
+                        <div class="day-cell flex items-center justify-center text-white text-sm">3</div>
+                        <div class="day-cell flex items-center justify-center text-white text-sm">4</div>
+                        <div class="day-cell flex items-center justify-center text-black text-sm bg-sky-blue rounded-lg font-bold">5</div>
+                        <div class="day-cell flex items-center justify-center text-white text-sm">6</div>
+                        <div class="day-cell flex items-center justify-center text-white text-sm relative">
+                            7
+                            <div class="absolute bottom-1 w-2 h-2 bg-ut-orange rounded-full animate-pulse"></div>
+                        </div>
+                        <div class="day-cell flex items-center justify-center text-white text-sm">8</div>
+                        <div class="day-cell flex items-center justify-center text-white text-sm">9</div>
+                        <div class="day-cell flex items-center justify-center text-white text-sm">10</div>
+                        <div class="day-cell flex items-center justify-center text-white text-sm">11</div>
+                        <div class="day-cell flex items-center justify-center text-white text-sm">12</div>
+                        <div class="day-cell flex items-center justify-center text-white text-sm">13</div>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="p-4 bg-gray-900">
+                    <div class="flex items-center justify-between text-gray-300 text-sm">
+                        <span>2 אירועים השבוע</span>
+                        <div class="flex space-x-2">
+                            <div class="w-3 h-3 bg-sky-blue rounded-full"></div>
+                            <div class="w-3 h-3 bg-ut-orange rounded-full"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Template 4: Colorful -->
+    <div id="template-4" class="template pt-32 px-4 hidden bg-gradient-to-br from-pink-100 to-blue-100">
+        <div class="max-w-sm mx-auto">
+            <div class="bg-white rounded-3xl shadow-xl overflow-hidden">
+                <!-- Colorful Header -->
+                <div class="bg-gradient-to-r from-selective-yellow via-ut-orange to-sky-blue text-white p-6">
+                    <div class="flex justify-between items-center mb-3">
+                        <button class="w-8 h-8 bg-white/30 rounded-full flex items-center justify-center text-sm">‹</button>
+                        <h2 class="text-xl font-bold">דצמבר 2024</h2>
+                        <button class="w-8 h-8 bg-white/30 rounded-full flex items-center justify-center text-sm">›</button>
+                    </div>
+                </div>
+
+                <!-- Rainbow Days -->
+                <div class="p-1 bg-gradient-to-r from-red-200 via-yellow-200 to-blue-200">
+                    <div class="bg-white rounded-2xl p-3">
+                        <div class="grid grid-cols-7 gap-1 text-center text-xs mb-2 text-gray-500">
+                            <div class="py-1">ש׳</div>
+                            <div class="py-1">ו׳</div>
+                            <div class="py-1">ה׳</div>
+                            <div class="py-1">ד׳</div>
+                            <div class="py-1">ג׳</div>
+                            <div class="py-1">ב׳</div>
+                            <div class="py-1">א׳</div>
+                        </div>
+
+                        <div class="grid grid-cols-7 gap-1">
+                            <div class="day-cell flex items-center justify-center text-gray-300 text-sm rounded-lg">30</div>
+                            <div class="day-cell flex items-center justify-center text-black text-sm rounded-lg hover:bg-red-100">1</div>
+                            <div class="day-cell flex items-center justify-center text-black text-sm rounded-lg hover:bg-orange-100">2</div>
+                            <div class="day-cell flex items-center justify-center text-black text-sm rounded-lg hover:bg-yellow-100">3</div>
+                            <div class="day-cell flex items-center justify-center text-black text-sm rounded-lg hover:bg-green-100">4</div>
+                            <div class="day-cell flex items-center justify-center text-white text-sm rounded-lg bg-gradient-to-r from-selective-yellow to-ut-orange font-bold">5</div>
+                            <div class="day-cell flex items-center justify-center text-black text-sm rounded-lg hover:bg-blue-100">6</div>
+                            <div class="day-cell flex items-center justify-center text-black text-sm rounded-lg hover:bg-purple-100 relative">
+                                7
+                                <div class="absolute -top-1 -right-1 w-3 h-3 bg-gradient-to-r from-pink-400 to-red-400 rounded-full animate-bounce"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Colorful Events -->
+                <div class="p-4 space-y-2">
+                    <div class="flex items-center space-x-2 p-3 bg-gradient-to-r from-pink-50 to-rose-50 rounded-2xl border border-pink-200">
+                        <div class="w-4 h-4 bg-gradient-to-r from-pink-400 to-rose-400 rounded-full"></div>
+                        <span class="text-sm font-medium">ישיבה - היום</span>
+                    </div>
+                    <div class="flex items-center space-x-2 p-3 bg-gradient-to-r from-blue-50 to-sky-50 rounded-2xl border border-blue-200">
+                        <div class="w-4 h-4 bg-gradient-to-r from-blue-400 to-sky-400 rounded-full"></div>
+                        <span class="text-sm font-medium">טיול - מחר</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Template 5: Minimal -->
+    <div id="template-5" class="template pt-32 px-4 hidden bg-gray-50">
+        <div class="max-w-sm mx-auto">
+            <div class="bg-white shadow-sm border border-gray-200">
+                <!-- Minimal Header -->
+                <div class="flex justify-between items-center p-4 border-b">
+                    <button class="text-gray-400 hover:text-gray-600">‹</button>
+                    <h2 class="text-lg font-light text-gray-800">דצמבר 2024</h2>
+                    <button class="text-gray-400 hover:text-gray-600">›</button>
+                </div>
+
+                <!-- Week Days -->
+                <div class="grid grid-cols-7 border-b">
+                    <div class="text-center py-2 text-xs text-gray-400 border-r">ש׳</div>
+                    <div class="text-center py-2 text-xs text-gray-400 border-r">ו׳</div>
+                    <div class="text-center py-2 text-xs text-gray-400 border-r">ה׳</div>
+                    <div class="text-center py-2 text-xs text-gray-400 border-r">ד׳</div>
+                    <div class="text-center py-2 text-xs text-gray-400 border-r">ג׳</div>
+                    <div class="text-center py-2 text-xs text-gray-400 border-r">ב׳</div>
+                    <div class="text-center py-2 text-xs text-gray-400">א׳</div>
+                </div>
+
+                <!-- Minimal Calendar -->
+                <div class="grid grid-cols-7">
+                    <div class="day-cell flex items-center justify-center text-gray-300 text-sm border-r border-b">30</div>
+                    <div class="day-cell flex items-center justify-center text-gray-800 text-sm border-r border-b hover:bg-gray-50">1</div>
+                    <div class="day-cell flex items-center justify-center text-gray-800 text-sm border-r border-b hover:bg-gray-50">2</div>
+                    <div class="day-cell flex items-center justify-center text-gray-800 text-sm border-r border-b hover:bg-gray-50">3</div>
+                    <div class="day-cell flex items-center justify-center text-gray-800 text-sm border-r border-b hover:bg-gray-50">4</div>
+                    <div class="day-cell flex items-center justify-center text-white text-sm border-r border-b bg-gray-800">5</div>
+                    <div class="day-cell flex items-center justify-center text-gray-800 text-sm border-b hover:bg-gray-50">6</div>
+                    <div class="day-cell flex items-center justify-center text-gray-800 text-sm border-r border-b hover:bg-gray-50 relative">
+                        7
+                        <div class="absolute bottom-1 w-1 h-1 bg-gray-400 rounded-full"></div>
+                    </div>
+                    <div class="day-cell flex items-center justify-center text-gray-800 text-sm border-r border-b hover:bg-gray-50">8</div>
+                    <div class="day-cell flex items-center justify-center text-gray-800 text-sm border-r border-b hover:bg-gray-50">9</div>
+                    <div class="day-cell flex items-center justify-center text-gray-800 text-sm border-r border-b hover:bg-gray-50">10</div>
+                    <div class="day-cell flex items-center justify-center text-gray-800 text-sm border-r border-b hover:bg-gray-50">11</div>
+                    <div class="day-cell flex items-center justify-center text-gray-800 text-sm border-r border-b hover:bg-gray-50">12</div>
+                    <div class="day-cell flex items-center justify-center text-gray-800 text-sm border-b hover:bg-gray-50">13</div>
+                </div>
+
+                <!-- Minimal Event List -->
+                <div class="p-4 space-y-2">
+                    <div class="flex items-center text-sm">
+                        <div class="w-2 h-2 bg-gray-400 rounded-full ml-2"></div>
+                        <span class="text-gray-600">ישיבת ועד - היום</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Template 6: Card Layout -->
+    <div id="template-6" class="template pt-32 px-4 hidden">
+        <div class="max-w-sm mx-auto space-y-4">
+            <!-- Month Header Card -->
+            <div class="bg-white rounded-2xl shadow-lg p-6">
+                <div class="flex justify-between items-center">
+                    <button class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">‹</button>
+                    <h2 class="text-2xl font-bold text-gray-800">דצמבר 2024</h2>
+                    <button class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">›</button>
+                </div>
+            </div>
+
+            <!-- Week Cards -->
+            <div class="space-y-3">
+                <!-- Week 1 -->
+                <div class="bg-white rounded-xl shadow-md p-4">
+                    <div class="grid grid-cols-7 gap-2">
+                        <div class="text-center">
+                            <div class="text-xs text-gray-400 mb-1">א׳</div>
+                            <div class="w-8 h-8 flex items-center justify-center text-sm font-medium">1</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-xs text-gray-400 mb-1">ב׳</div>
+                            <div class="w-8 h-8 flex items-center justify-center text-sm font-medium">2</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-xs text-gray-400 mb-1">ג׳</div>
+                            <div class="w-8 h-8 flex items-center justify-center text-sm font-medium">3</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-xs text-gray-400 mb-1">ד׳</div>
+                            <div class="w-8 h-8 flex items-center justify-center text-sm font-medium">4</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-xs text-gray-400 mb-1">ה׳</div>
+                            <div class="w-8 h-8 bg-sky-blue text-white rounded-full flex items-center justify-center text-sm font-medium">5</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-xs text-gray-400 mb-1">ו׳</div>
+                            <div class="w-8 h-8 flex items-center justify-center text-sm font-medium">6</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-xs text-gray-400 mb-1">ש׳</div>
+                            <div class="w-8 h-8 flex items-center justify-center text-sm font-medium">7</div>
+                        </div>
+                    </div>
+                    <div class="mt-3 p-2 bg-sky-50 rounded-lg">
+                        <div class="text-xs text-sky-700 font-medium">ישיבת ועד הורים - ה׳ 19:00</div>
+                    </div>
+                </div>
+
+                <!-- Week 2 -->
+                <div class="bg-white rounded-xl shadow-md p-4">
+                    <div class="grid grid-cols-7 gap-2">
+                        <div class="text-center">
+                            <div class="text-xs text-gray-400 mb-1">א׳</div>
+                            <div class="w-8 h-8 flex items-center justify-center text-sm font-medium">8</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-xs text-gray-400 mb-1">ב׳</div>
+                            <div class="w-8 h-8 flex items-center justify-center text-sm font-medium">9</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-xs text-gray-400 mb-1">ג׳</div>
+                            <div class="w-8 h-8 flex items-center justify-center text-sm font-medium">10</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-xs text-gray-400 mb-1">ד׳</div>
+                            <div class="w-8 h-8 flex items-center justify-center text-sm font-medium">11</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-xs text-gray-400 mb-1">ה׳</div>
+                            <div class="w-8 h-8 flex items-center justify-center text-sm font-medium">12</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-xs text-gray-400 mb-1">ו׳</div>
+                            <div class="w-8 h-8 bg-selective-yellow text-black rounded-full flex items-center justify-center text-sm font-medium">13</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-xs text-gray-400 mb-1">ש׳</div>
+                            <div class="w-8 h-8 flex items-center justify-center text-sm font-medium">14</div>
+                        </div>
+                    </div>
+                    <div class="mt-3 p-2 bg-yellow-50 rounded-lg">
+                        <div class="text-xs text-yellow-700 font-medium">טיול שכבה - ו׳ 08:00</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Template 7: Agenda Style -->
+    <div id="template-7" class="template pt-32 px-4 hidden bg-green-50">
+        <div class="max-w-sm mx-auto">
+            <!-- Agenda Header -->
+            <div class="bg-white rounded-t-2xl shadow-lg p-6">
+                <h1 class="text-2xl font-bold text-center text-gray-800 mb-2">אג׳נדה</h1>
+                <p class="text-center text-gray-500 text-sm">דצמבר 2024</p>
+            </div>
+
+            <!-- Date Selector -->
+            <div class="bg-white shadow-lg px-6 py-4">
+                <div class="flex overflow-x-auto space-x-4 pb-2">
+                    <div class="flex flex-col items-center min-w-[60px] p-2 rounded-lg">
+                        <span class="text-xs text-gray-500 mb-1">ב׳</span>
+                        <span class="text-lg font-bold text-gray-400">2</span>
+                    </div>
+                    <div class="flex flex-col items-center min-w-[60px] p-2 rounded-lg">
+                        <span class="text-xs text-gray-500 mb-1">ג׳</span>
+                        <span class="text-lg font-bold text-gray-400">3</span>
+                    </div>
+                    <div class="flex flex-col items-center min-w-[60px] p-3 bg-green-500 text-white rounded-xl">
+                        <span class="text-xs mb-1">ד׳</span>
+                        <span class="text-lg font-bold">4</span>
+                    </div>
+                    <div class="flex flex-col items-center min-w-[60px] p-2 rounded-lg">
+                        <span class="text-xs text-gray-500 mb-1">ה׳</span>
+                        <span class="text-lg font-bold text-gray-800">5</span>
+                        <div class="w-2 h-2 bg-green-400 rounded-full mt-1"></div>
+                    </div>
+                    <div class="flex flex-col items-center min-w-[60px] p-2 rounded-lg">
+                        <span class="text-xs text-gray-500 mb-1">ו׳</span>
+                        <span class="text-lg font-bold text-gray-400">6</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Today's Schedule -->
+            <div class="bg-white rounded-b-2xl shadow-lg p-6">
+                <h3 class="font-bold text-lg mb-4 text-gray-800">היום - ד׳ 4/12</h3>
+                <div class="space-y-4">
+                    <div class="flex items-start space-x-4 p-4 bg-green-50 rounded-xl border-r-4 border-green-400">
+                        <div class="text-center min-w-[60px]">
+                            <div class="text-sm font-bold text-green-600">09:00</div>
+                            <div class="text-xs text-gray-500">בוקר</div>
+                        </div>
+                        <div>
+                            <h4 class="font-medium text-gray-800">ישיבת הנהלה</h4>
+                            <p class="text-sm text-gray-500">חדר המורים</p>
+                            <div class="flex items-center mt-2">
+                                <div class="w-2 h-2 bg-green-400 rounded-full ml-2"></div>
+                                <span class="text-xs text-gray-600">30 דקות</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start space-x-4 p-4 bg-gray-50 rounded-xl border-r-4 border-gray-300">
+                        <div class="text-center min-w-[60px]">
+                            <div class="text-sm font-bold text-gray-600">19:00</div>
+                            <div class="text-xs text-gray-500">ערב</div>
+                        </div>
+                        <div>
+                            <h4 class="font-medium text-gray-800">ועד הורים</h4>
+                            <p class="text-sm text-gray-500">אודיטוריום</p>
+                            <div class="flex items-center mt-2">
+                                <div class="w-2 h-2 bg-gray-400 rounded-full ml-2"></div>
+                                <span class="text-xs text-gray-600">90 דקות</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Template 8: Timeline -->
+    <div id="template-8" class="template pt-32 px-4 hidden bg-purple-50">
+        <div class="max-w-sm mx-auto">
+            <!-- Timeline Header -->
+            <div class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-2xl p-6 mb-4 shadow-lg">
+                <h1 class="text-xl font-bold text-center mb-2">ציר זמן</h1>
+                <p class="text-center text-sm opacity-80">השבוע הקרוב</p>
+            </div>
+
+            <!-- Timeline Events -->
+            <div class="relative">
+                <!-- Timeline Line -->
+                <div class="absolute right-6 top-0 bottom-0 w-1 bg-purple-200 rounded-full"></div>
+
+                <!-- Timeline Items -->
+                <div class="space-y-6">
+                    <!-- Today -->
+                    <div class="relative">
+                        <div class="absolute right-4 w-5 h-5 bg-purple-600 rounded-full border-4 border-white shadow-lg"></div>
+                        <div class="bg-white rounded-xl shadow-md p-4 mr-12">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="font-bold text-gray-800">היום</h3>
+                                <span class="text-sm text-purple-600 font-medium">4/12</span>
+                            </div>
+                            <div class="space-y-2">
+                                <div class="p-2 bg-purple-50 rounded-lg">
+                                    <div class="font-medium text-sm text-purple-800">ישיבת ועד הורים</div>
+                                    <div class="text-xs text-purple-600">19:00 - 20:30</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tomorrow -->
+                    <div class="relative">
+                        <div class="absolute right-4 w-5 h-5 bg-indigo-400 rounded-full border-4 border-white shadow-lg"></div>
+                        <div class="bg-white rounded-xl shadow-md p-4 mr-12">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="font-bold text-gray-800">מחר</h3>
+                                <span class="text-sm text-indigo-600 font-medium">5/12</span>
+                            </div>
+                            <div class="space-y-2">
+                                <div class="p-2 bg-indigo-50 rounded-lg">
+                                    <div class="font-medium text-sm text-indigo-800">גיוס כספים</div>
+                                    <div class="text-xs text-indigo-600">20:00 - 21:00</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- This Week -->
+                    <div class="relative">
+                        <div class="absolute right-4 w-5 h-5 bg-pink-400 rounded-full border-4 border-white shadow-lg"></div>
+                        <div class="bg-white rounded-xl shadow-md p-4 mr-12">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="font-bold text-gray-800">השבוע</h3>
+                                <span class="text-sm text-pink-600 font-medium">7/12</span>
+                            </div>
+                            <div class="space-y-2">
+                                <div class="p-2 bg-pink-50 rounded-lg">
+                                    <div class="font-medium text-sm text-pink-800">טיול שכבה</div>
+                                    <div class="text-xs text-pink-600">08:00 - 16:00</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Next Week -->
+                    <div class="relative">
+                        <div class="absolute right-4 w-5 h-5 bg-gray-300 rounded-full border-4 border-white shadow-lg"></div>
+                        <div class="bg-white rounded-xl shadow-md p-4 mr-12 opacity-75">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="font-bold text-gray-800">השבוע הבא</h3>
+                                <span class="text-sm text-gray-600 font-medium">11-15/12</span>
+                            </div>
+                            <div class="text-sm text-gray-500">אין אירועים מתוכננים</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Template 9: Dot Indicators -->
+    <div id="template-9" class="template pt-32 px-4 hidden bg-indigo-50">
+        <div class="max-w-sm mx-auto">
+            <!-- Header with Dots -->
+            <div class="bg-white rounded-2xl shadow-lg p-6 mb-4">
+                <div class="flex justify-between items-center mb-4">
+                    <button class="text-indigo-400 hover:text-indigo-600">‹</button>
+                    <h2 class="text-xl font-bold text-gray-800">דצמבר 2024</h2>
+                    <button class="text-indigo-400 hover:text-indigo-600">›</button>
+                </div>
+
+                <!-- Week Days with Dots -->
+                <div class="grid grid-cols-7 gap-1 text-center text-xs text-gray-500 mb-4">
+                    <div class="py-2">ש׳</div>
+                    <div class="py-2">ו׳</div>
+                    <div class="py-2">ה׳</div>
+                    <div class="py-2">ד׳</div>
+                    <div class="py-2">ג׳</div>
+                    <div class="py-2">ב׳</div>
+                    <div class="py-2">א׳</div>
+                </div>
+
+                <!-- Calendar with Dot Indicators -->
+                <div class="grid grid-cols-7 gap-2">
+                    <div class="day-cell flex flex-col items-center justify-center text-gray-300 text-sm">30</div>
+                    <div class="day-cell flex flex-col items-center justify-center text-gray-800 text-sm hover:bg-indigo-50 rounded-lg">1</div>
+                    <div class="day-cell flex flex-col items-center justify-center text-gray-800 text-sm hover:bg-indigo-50 rounded-lg">2</div>
+                    <div class="day-cell flex flex-col items-center justify-center text-gray-800 text-sm hover:bg-indigo-50 rounded-lg">3</div>
+                    <div class="day-cell flex flex-col items-center justify-center text-gray-800 text-sm hover:bg-indigo-50 rounded-lg">4</div>
+                    <div class="day-cell flex flex-col items-center justify-center text-white text-sm bg-indigo-600 rounded-lg font-bold">
+                        5
+                        <div class="flex space-x-1 mt-1">
+                            <div class="w-1.5 h-1.5 bg-white rounded-full"></div>
+                            <div class="w-1.5 h-1.5 bg-yellow-300 rounded-full"></div>
+                        </div>
+                    </div>
+                    <div class="day-cell flex flex-col items-center justify-center text-gray-800 text-sm hover:bg-indigo-50 rounded-lg">6</div>
+                    <div class="day-cell flex flex-col items-center justify-center text-gray-800 text-sm hover:bg-indigo-50 rounded-lg">
+                        7
+                        <div class="flex space-x-1 mt-1">
+                            <div class="w-1.5 h-1.5 bg-red-400 rounded-full"></div>
+                        </div>
+                    </div>
+                    <div class="day-cell flex flex-col items-center justify-center text-gray-800 text-sm hover:bg-indigo-50 rounded-lg">8</div>
+                    <div class="day-cell flex flex-col items-center justify-center text-gray-800 text-sm hover:bg-indigo-50 rounded-lg">
+                        9
+                        <div class="flex space-x-1 mt-1">
+                            <div class="w-1.5 h-1.5 bg-green-400 rounded-full"></div>
+                            <div class="w-1.5 h-1.5 bg-blue-400 rounded-full"></div>
+                            <div class="w-1.5 h-1.5 bg-purple-400 rounded-full"></div>
+                        </div>
+                    </div>
+                    <div class="day-cell flex flex-col items-center justify-center text-gray-800 text-sm hover:bg-indigo-50 rounded-lg">10</div>
+                    <div class="day-cell flex flex-col items-center justify-center text-gray-800 text-sm hover:bg-indigo-50 rounded-lg">11</div>
+                    <div class="day-cell flex flex-col items-center justify-center text-gray-800 text-sm hover:bg-indigo-50 rounded-lg">12</div>
+                    <div class="day-cell flex flex-col items-center justify-center text-gray-800 text-sm hover:bg-indigo-50 rounded-lg">13</div>
+                </div>
+            </div>
+
+            <!-- Dot Legend -->
+            <div class="bg-white rounded-2xl shadow-lg p-6">
+                <h3 class="font-bold text-lg mb-4">סוגי אירועים</h3>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-3 h-3 bg-red-400 rounded-full"></div>
+                        <span class="text-sm text-gray-700">ישיבות</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-3 h-3 bg-green-400 rounded-full"></div>
+                        <span class="text-sm text-gray-700">טיולים</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-3 h-3 bg-blue-400 rounded-full"></div>
+                        <span class="text-sm text-gray-700">גיוס כספים</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-3 h-3 bg-yellow-300 rounded-full"></div>
+                        <span class="text-sm text-gray-700">אירועים</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-3 h-3 bg-purple-400 rounded-full"></div>
+                        <span class="text-sm text-gray-700">התנדבות</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-3 h-3 bg-white border-2 border-indigo-400 rounded-full"></div>
+                        <span class="text-sm text-gray-700">חגים</span>
+                    </div>
+                </div>
+
+                <!-- Event Summary -->
+                <div class="mt-4 p-3 bg-indigo-50 rounded-lg">
+                    <div class="text-sm text-indigo-800 font-medium">השבוע הזה</div>
+                    <div class="text-xs text-indigo-600 mt-1">5 אירועים מתוכננים</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Template 10: Weekly Focus -->
+    <div id="template-10" class="template pt-32 px-4 hidden bg-red-50">
+        <div class="max-w-sm mx-auto space-y-4">
+            <!-- Week Navigation -->
+            <div class="bg-white rounded-2xl shadow-lg p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <button class="w-10 h-10 bg-red-100 text-red-600 rounded-full flex items-center justify-center">‹</button>
+                    <div class="text-center">
+                        <h2 class="text-lg font-bold text-gray-800">השבוע הזה</h2>
+                        <p class="text-sm text-gray-500">2-8 דצמבר 2024</p>
+                    </div>
+                    <button class="w-10 h-10 bg-red-100 text-red-600 rounded-full flex items-center justify-center">›</button>
+                </div>
+
+                <!-- Week Overview -->
+                <div class="grid grid-cols-7 gap-1 text-center">
+                    <div class="p-2">
+                        <div class="text-xs text-gray-500 mb-1">א׳</div>
+                        <div class="w-8 h-8 flex items-center justify-center text-sm rounded-lg">2</div>
+                    </div>
+                    <div class="p-2">
+                        <div class="text-xs text-gray-500 mb-1">ב׳</div>
+                        <div class="w-8 h-8 flex items-center justify-center text-sm rounded-lg">3</div>
+                    </div>
+                    <div class="p-2">
+                        <div class="text-xs text-gray-500 mb-1">ג׳</div>
+                        <div class="w-8 h-8 flex items-center justify-center text-sm rounded-lg">4</div>
+                    </div>
+                    <div class="p-2">
+                        <div class="text-xs text-red-600 mb-1">ה׳</div>
+                        <div class="w-8 h-8 bg-red-500 text-white rounded-lg flex items-center justify-center text-sm font-bold">5</div>
+                    </div>
+                    <div class="p-2">
+                        <div class="text-xs text-gray-500 mb-1">ו׳</div>
+                        <div class="w-8 h-8 flex items-center justify-center text-sm rounded-lg">6</div>
+                    </div>
+                    <div class="p-2">
+                        <div class="text-xs text-gray-500 mb-1">ו׳</div>
+                        <div class="w-8 h-8 bg-orange-100 text-orange-600 rounded-lg flex items-center justify-center text-sm">7</div>
+                    </div>
+                    <div class="p-2">
+                        <div class="text-xs text-gray-500 mb-1">ש׳</div>
+                        <div class="w-8 h-8 flex items-center justify-center text-sm rounded-lg">8</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Daily Schedule Cards -->
+            <div class="space-y-3">
+                <!-- Thursday -->
+                <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                    <div class="bg-red-500 text-white p-3">
+                        <div class="flex justify-between items-center">
+                            <h3 class="font-bold">יום ה׳ - 5 דצמבר</h3>
+                            <span class="text-sm bg-white/20 px-2 py-1 rounded-full">היום</span>
+                        </div>
+                    </div>
+                    <div class="p-4 space-y-3">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-3 h-3 bg-red-400 rounded-full"></div>
+                            <div>
+                                <div class="font-medium text-sm">ישיבת ועד הורים</div>
+                                <div class="text-xs text-gray-500">19:00 - 20:30 | אודיטוריום</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Friday -->
+                <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                    <div class="bg-orange-100 text-orange-800 p-3">
+                        <h3 class="font-bold">יום ו׳ - 6 דצמבר</h3>
+                    </div>
+                    <div class="p-4 space-y-3">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-3 h-3 bg-orange-400 rounded-full"></div>
+                            <div>
+                                <div class="font-medium text-sm">טיול שכבה</div>
+                                <div class="text-xs text-gray-500">08:00 - 16:00 | יציאה מבית הספר</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Empty Days -->
+                <div class="bg-gray-50 rounded-xl p-4 border-2 border-dashed border-gray-200">
+                    <div class="text-center text-gray-500">
+                        <div class="text-sm">שאר השבוע</div>
+                        <div class="text-xs mt-1">אין אירועים מתוכננים</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showTemplate(templateNum) {
+            // Hide all templates
+            for (let i = 1; i <= 10; i++) {
+                document.getElementById(`template-${i}`).classList.add('hidden');
+            }
+
+            // Show selected template
+            document.getElementById(`template-${templateNum}`).classList.remove('hidden');
+
+            // Update button styles
+            document.querySelectorAll('.btn-nav').forEach(btn => {
+                btn.classList.remove('ring-2', 'ring-offset-2', 'ring-current');
+            });
+
+            event.target.classList.add('ring-2', 'ring-offset-2', 'ring-current');
+        }
+
+        // Show first template by default
+        document.addEventListener('DOMContentLoaded', function() {
+            showTemplate(1);
+        });
+
+        // Add touch support for mobile
+        let startX = 0;
+        document.addEventListener('touchstart', function(e) {
+            startX = e.touches[0].clientX;
+        });
+
+        document.addEventListener('touchend', function(e) {
+            const endX = e.changedTouches[0].clientX;
+            const diff = startX - endX;
+
+            if (Math.abs(diff) > 50) { // Minimum swipe distance
+                // Get current template
+                const currentTemplate = document.querySelector('[id^="template-"]:not(.hidden)');
+                const currentNum = parseInt(currentTemplate.id.split('-')[1]);
+
+                if (diff > 0 && currentNum < 10) {
+                    // Swipe left - next template
+                    showTemplate(currentNum + 1);
+                } else if (diff < 0 && currentNum > 1) {
+                    // Swipe right - previous template
+                    showTemplate(currentNum - 1);
+                }
+            }
+        });
+    </script>
+</body>
+</html>

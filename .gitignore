@@ -1,0 +1,147 @@
+# ============================================
+# Environment Variables (NEVER COMMIT THESE!)
+# ============================================
+.env
+.env.local
+.env.production.local
+.env.development.local
+.env.test.local
+
+# ============================================
+# Dependencies
+# ============================================
+node_modules/
+/.pnp
+.pnp.js
+
+# ============================================
+# Testing
+# ============================================
+/coverage
+.nyc_output
+
+# ============================================
+# Next.js
+# ============================================
+/.next/
+/out/
+.next
+next-env.d.ts
+
+# ============================================
+# Production
+# ============================================
+/build
+/dist
+
+# ============================================
+# Debugging
+# ============================================
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# ============================================
+# IDE & OS
+# ============================================
+# VS Code
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+
+# IntelliJ
+.idea/
+*.iml
+
+# macOS
+.DS_Store
+*.pem
+
+# Windows
+Thumbs.db
+desktop.ini
+
+# ============================================
+# Vercel
+# ============================================
+.vercel
+
+# ============================================
+# TypeScript
+# ============================================
+*.tsbuildinfo
+
+# ============================================
+# PWA
+# ============================================
+public/sw.js
+public/workbox-*.js
+public/worker-*.js
+public/sw.js.map
+public/workbox-*.js.map
+public/worker-*.js.map
+
+# ============================================
+# Supabase
+# ============================================
+**/supabase/.branches
+**/supabase/.temp
+
+# ============================================
+# Temporary & Backup Files
+# ============================================
+*.swp
+*.swo
+*~
+.tmp
+*.bak
+*.backup
+*.log
+
+# ============================================
+# Private/Sensitive Files
+# ============================================
+*.key
+*.pem
+*.p12
+*.pfx
+credentials.json
+service-account.json
+
+# ============================================
+# Database
+# ============================================
+*.sqlite
+*.sqlite3
+*.db
+
+# ============================================
+# Uploads (Store in Supabase Storage)
+# ============================================
+/uploads
+/public/uploads
+
+# ============================================
+# Generated Files
+# ============================================
+/generated
+sitemap.xml
+robots.txt
+# Test artifacts
+playwright-report/
+test-results/
+tests/screenshots/
+
+# HTML test files (demo only)
+*-test-page.html
+*-showcase*.html
+design-showcase.html
+modern-forms-showcase.html
+ultra-modern-form.html
+
+# Duplicate files
+*.2.*
+*" 2."*
