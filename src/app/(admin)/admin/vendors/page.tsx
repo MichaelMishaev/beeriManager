@@ -117,12 +117,12 @@ async function VendorsList() {
             <span className="text-2xl">{categoryIcons[category] || '🏪'}</span>
             <h2 className="text-xl font-bold">{categoryLabels[category] || category}</h2>
             <Badge variant="outline" className="text-sm">
-              {categoryVendors.length} ספקים
+              {(categoryVendors as typeof vendors).length} ספקים
             </Badge>
           </div>
 
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {categoryVendors.map((vendor) => (
+            {(categoryVendors as typeof vendors).map((vendor) => (
               <Card key={vendor.id} className="hover:shadow-lg transition-shadow">
                 <CardHeader>
                   <div className="flex items-start justify-between">

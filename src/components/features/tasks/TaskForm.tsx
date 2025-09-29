@@ -4,7 +4,7 @@ import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { CheckSquare, User, Clock, AlertTriangle, Phone, FileText, Calendar } from 'lucide-react'
+import { CheckSquare, User, AlertTriangle, Phone, FileText, Calendar } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -39,16 +39,17 @@ interface TaskFormProps {
   className?: string
 }
 
-const TASK_CATEGORIES = {
-  logistics: 'לוגיסטיקה',
-  communication: 'תקשורת',
-  fundraising: 'גיוס כספים',
-  planning: 'תכנון',
-  coordination: 'תיאום',
-  documentation: 'תיעוד',
-  maintenance: 'תחזוקה',
-  other: 'אחר'
-}
+// Temporarily commented out until category field is added to schema
+// const TASK_CATEGORIES = {
+//   logistics: 'לוגיסטיקה',
+//   communication: 'תקשורת',
+//   fundraising: 'גיוס כספים',
+//   planning: 'תכנון',
+//   coordination: 'תיאום',
+//   documentation: 'תיעוד',
+//   maintenance: 'תחזוקה',
+//   other: 'אחר'
+// }
 
 export function TaskForm({
   task,
@@ -306,12 +307,13 @@ export function TaskForm({
 
           {/* Category and Estimation */}
           <div className="grid gap-4 md:grid-cols-2">
+            {/* Category field temporarily disabled - needs to be added to schema
             <div>
               <Label htmlFor="category" className="text-right font-medium">
                 קטגוריה
               </Label>
               <Select
-                value={watch('category')}
+                value={watch('category') || ''}
                 onValueChange={(value) => setValue('category', value)}
               >
                 <SelectTrigger className="text-right">
@@ -325,8 +327,9 @@ export function TaskForm({
                   ))}
                 </SelectContent>
               </Select>
-            </div>
+            </div> */}
 
+            {/* Estimated hours field temporarily disabled - needs to be added to schema
             <div>
               <Label htmlFor="estimated_hours" className="text-right font-medium flex items-center gap-2">
                 <Clock className="h-4 w-4" />
@@ -344,7 +347,7 @@ export function TaskForm({
               {errors.estimated_hours && (
                 <p className="text-sm text-red-500 mt-1">{errors.estimated_hours.message}</p>
               )}
-            </div>
+            </div> */}
           </div>
 
           {/* Advanced Settings Toggle */}
