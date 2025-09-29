@@ -1,7 +1,9 @@
 import Link from 'next/link'
+import { Suspense } from 'react'
 import { Calendar, CheckSquare, AlertTriangle, FileText, Users, DollarSign, MessageSquare, Settings, Plus, Edit, BarChart } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { createClient } from '@/lib/supabase/server'
 
 const adminSections = [
   {
@@ -78,6 +80,124 @@ const adminSections = [
   }
 ]
 
+function StatsCardsSkeleton() {
+  return (
+    <div className="grid gap-4 md:grid-cols-4">
+      {[...Array(4)].map((_, i) => (
+        <Card key={i}>
+          <CardHeader className="pb-2">
+            <div className="h-4 bg-gray-200 rounded animate-pulse w-24" />
+          </CardHeader>
+          <CardContent>
+            <div className="h-8 bg-gray-200 rounded animate-pulse w-16 mb-2" />
+            <div className="h-3 bg-gray-200 rounded animate-pulse w-32" />
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  )
+}
+
+async function DashboardStats() {
+  const supabase = createClient()
+
+  // Get current month date range
+  const now = new Date()
+  const firstDay = new Date(now.getFullYear(), now.getMonth(), 1)
+  const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0)
+
+  // Fetch all stats in parallel
+  const [eventsData, tasksData, issuesData, registrationsData] = await Promise.all([
+    // Events this month
+    supabase
+      .from('events')
+      .select('id, status', { count: 'exact' })
+      .gte('start_datetime', firstDay.toISOString())
+      .lte('start_datetime', lastDay.toISOString()),
+
+    // Open tasks
+    supabase
+      .from('tasks')
+      .select('id, status, due_date', { count: 'exact' })
+      .in('status', ['pending', 'in_progress']),
+
+    // Open issues
+    supabase
+      .from('issues')
+      .select('id, priority', { count: 'exact' })
+      .neq('status', 'closed'),
+
+    // Event registrations this month
+    supabase
+      .from('event_registrations')
+      .select('id', { count: 'exact' })
+      .gte('created_at', firstDay.toISOString())
+  ])
+
+  const eventsThisMonth = eventsData.count || 0
+  const draftEvents = eventsData.data?.filter(e => e.status === 'draft').length || 0
+
+  const openTasks = tasksData.count || 0
+  const overdueTasks = tasksData.data?.filter(t =>
+    t.due_date && new Date(t.due_date) < now
+  ).length || 0
+
+  const openIssues = issuesData.count || 0
+  const criticalIssues = issuesData.data?.filter(i => i.priority === 'critical').length || 0
+
+  const registrations = registrationsData.count || 0
+
+  return (
+    <div className="grid gap-4 md:grid-cols-4">
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-medium">אירועים החודש</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{eventsThisMonth}</div>
+          <p className="text-xs text-muted-foreground">
+            {draftEvents > 0 ? `${draftEvents} ממתינים לאישור` : 'הכל מאושר'}
+          </p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-medium">משימות פתוחות</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{openTasks}</div>
+          <p className="text-xs text-muted-foreground">
+            {overdueTasks > 0 ? `${overdueTasks} באיחור` : 'הכל בזמן'}
+          </p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-medium">בעיות לטיפול</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{openIssues}</div>
+          <p className="text-xs text-muted-foreground">
+            {criticalIssues > 0 ? `${criticalIssues} קריטיות` : 'אין קריטיות'}
+          </p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-medium">נרשמים החודש</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{registrations}</div>
+          <p className="text-xs text-muted-foreground">לאירועים</p>
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
+
 export default function AdminDashboard() {
   return (
     <div className="space-y-6">
@@ -98,44 +218,9 @@ export default function AdminDashboard() {
       </div>
 
       {/* Quick Stats */}
-      <div className="grid gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">אירועים החודש</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">8</div>
-            <p className="text-xs text-muted-foreground">3 ממתינים לאישור</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">משימות פתוחות</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">24</div>
-            <p className="text-xs text-muted-foreground">5 באיחור</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">בעיות לטיפול</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">7</div>
-            <p className="text-xs text-muted-foreground">2 קריטיות</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">נרשמים לאירועים</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">156</div>
-            <p className="text-xs text-muted-foreground">+23% החודש</p>
-          </CardContent>
-        </Card>
-      </div>
+      <Suspense fallback={<StatsCardsSkeleton />}>
+        <DashboardStats />
+      </Suspense>
 
       {/* Admin Sections */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
