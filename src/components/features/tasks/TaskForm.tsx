@@ -20,17 +20,10 @@ const taskSchema = z.object({
   title: z.string().min(2, 'כותרת חייבת להכיל לפחות 2 תווים'),
   description: z.string().optional(),
   priority: z.enum(['low', 'normal', 'high', 'urgent']).default('normal'),
-  status: z.enum(['pending', 'in_progress', 'completed', 'cancelled']).default('pending'),
+  status: z.enum(['pending', 'in_progress', 'completed', 'cancelled', 'overdue']).default('pending'),
   owner_name: z.string().min(2, 'שם האחראי חייב להכיל לפחות 2 תווים'),
   owner_phone: z.string().optional(),
-  owner_email: z.string().email('כתובת אימייל לא תקינה').optional().or(z.literal('')),
-  due_date: z.string().min(1, 'יש להזין תאריך יעד'),
-  category: z.string().optional(),
-  estimated_hours: z.number().min(0.5, 'זמן משוער חייב להיות לפחות 0.5 שעות').optional(),
-  notes: z.string().optional(),
-  related_event_id: z.string().optional(),
-  dependency_task_ids: z.array(z.string()).optional(),
-  attachment_urls: z.array(z.string()).optional()
+  due_date: z.string().min(1, 'יש להזין תאריך יעד')
 })
 
 type TaskFormData = z.infer<typeof taskSchema>
@@ -84,14 +77,7 @@ export function TaskForm({
       status: task?.status || 'pending',
       owner_name: task?.owner_name || '',
       owner_phone: task?.owner_phone || '',
-      owner_email: task?.owner_email || '',
-      due_date: task?.due_date ? new Date(task.due_date).toISOString().slice(0, 10) : '',
-      category: task?.category || '',
-      estimated_hours: task?.estimated_hours || undefined,
-      notes: task?.notes || '',
-      related_event_id: task?.related_event_id || '',
-      dependency_task_ids: task?.dependency_task_ids || [],
-      attachment_urls: task?.attachment_urls || []
+      due_date: task?.due_date ? new Date(task.due_date).toISOString().slice(0, 10) : ''
     }
   })
 
@@ -132,7 +118,6 @@ export function TaskForm({
     if (user) {
       setValue('owner_name', user.name)
       if (user.phone) setValue('owner_phone', user.phone)
-      if (user.email) setValue('owner_email', user.email)
     }
   }
 
@@ -170,8 +155,10 @@ export function TaskForm({
                 {...register('title')}
                 placeholder="הזן כותרת למשימה..."
                 className="text-right"
-                error={errors.title?.message}
               />
+              {errors.title && (
+                <p className="text-sm text-red-500 mt-1">{errors.title.message}</p>
+              )}
             </div>
 
             <div>
@@ -275,8 +262,10 @@ export function TaskForm({
                     {...register('owner_name')}
                     placeholder="הזן שם האחראי..."
                     className="text-right"
-                    error={errors.owner_name?.message}
                   />
+                )}
+                {errors.owner_name && (
+                  <p className="text-sm text-red-500 mt-1">{errors.owner_name.message}</p>
                 )}
               </div>
 
@@ -289,9 +278,11 @@ export function TaskForm({
                   type="date"
                   {...register('due_date')}
                   className="text-right"
-                  error={errors.due_date?.message}
                   min={new Date().toISOString().slice(0, 10)}
                 />
+                {errors.due_date && (
+                  <p className="text-sm text-red-500 mt-1">{errors.due_date.message}</p>
+                )}
               </div>
             </div>
 
@@ -310,19 +301,6 @@ export function TaskForm({
                 />
               </div>
 
-              <div>
-                <Label htmlFor="owner_email" className="text-right font-medium">
-                  אימייל
-                </Label>
-                <Input
-                  id="owner_email"
-                  type="email"
-                  {...register('owner_email')}
-                  placeholder="example@email.com"
-                  className="text-right"
-                  error={errors.owner_email?.message}
-                />
-              </div>
             </div>
           </div>
 
@@ -362,8 +340,10 @@ export function TaskForm({
                 {...register('estimated_hours', { valueAsNumber: true })}
                 placeholder="1.0"
                 className="text-right"
-                error={errors.estimated_hours?.message}
               />
+              {errors.estimated_hours && (
+                <p className="text-sm text-red-500 mt-1">{errors.estimated_hours.message}</p>
+              )}
             </div>
           </div>
 

@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import { Providers } from '@/components/providers'
 import { Toaster } from '@/components/ui/toaster'
+import { Navigation } from '@/components/layout/Navigation'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -36,12 +37,13 @@ export const metadata: Metadata = {
     'apple-mobile-web-app-capable': 'yes',
     'apple-mobile-web-app-status-bar-style': 'default',
   },
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 1,
-    userScalable: false,
-  },
+}
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 }
 
 export default function RootLayout({
@@ -53,6 +55,7 @@ export default function RootLayout({
     <html lang="he" dir="rtl" className={inter.variable}>
       <body className="min-h-screen bg-background font-sans antialiased">
         <Providers>
+          <Navigation />
           {children}
         </Providers>
         <Toaster />

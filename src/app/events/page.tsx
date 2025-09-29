@@ -104,12 +104,20 @@ export default function EventsPage() {
             כל האירועים והפעילויות של ועד ההורים
           </p>
         </div>
-        <Button asChild>
-          <Link href="/admin/events/new">
-            <Plus className="h-4 w-4 ml-2" />
-            אירוע חדש
-          </Link>
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" asChild>
+            <Link href="/calendar">
+              <Calendar className="h-4 w-4 ml-2" />
+              תצוגת לוח שנה
+            </Link>
+          </Button>
+          <Button asChild>
+            <Link href="/admin/events/new">
+              <Plus className="h-4 w-4 ml-2" />
+              אירוע חדש
+            </Link>
+          </Button>
+        </div>
       </div>
 
       <Suspense fallback={<EventsLoadingSkeleton />}>

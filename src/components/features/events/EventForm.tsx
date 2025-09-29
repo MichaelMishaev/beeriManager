@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { CalendarIcon, MapPin, Users, DollarSign, Clock, AlertTriangle } from 'lucide-react'
+import { CalendarIcon, MapPin, Users, DollarSign, AlertTriangle } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -13,7 +13,6 @@ import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
-import { formatHebrewDate } from '@/lib/utils/date'
 import { EVENT_TYPES, PRIORITY_LEVELS } from '@/lib/utils/constants'
 import type { Event } from '@/types'
 
@@ -33,7 +32,6 @@ const eventSchema = z.object({
   requires_payment: z.boolean().default(false),
   payment_amount: z.number().min(0, 'סכום תשלום חייב להיות חיובי').optional(),
   budget_allocated: z.number().min(0, 'תקציב מוקצב חייב להיות חיובי').optional(),
-  notes: z.string().optional(),
   status: z.enum(['draft', 'published', 'ongoing', 'completed', 'cancelled']).default('draft')
 })
 
@@ -78,7 +76,6 @@ export function EventForm({
       requires_payment: event?.requires_payment || false,
       payment_amount: event?.payment_amount || undefined,
       budget_allocated: event?.budget_allocated || undefined,
-      notes: event?.notes || '',
       status: event?.status || 'draft'
     }
   })
@@ -93,8 +90,7 @@ export function EventForm({
       const hasAdvancedSettings =
         watchRegistrationEnabled ||
         watchRequiresPayment ||
-        event?.budget_allocated ||
-        event?.notes
+        !!event?.budget_allocated
       setShowAdvanced(hasAdvancedSettings)
     }
   }, [watchEventType, watchRegistrationEnabled, watchRequiresPayment, event])
@@ -161,9 +157,11 @@ export function EventForm({
                 id="title"
                 {...register('title')}
                 placeholder="הזן כותרת לאירוע..."
-                className="text-right"
-                error={errors.title?.message}
+                className={`text-right ${errors.title ? 'border-red-500' : ''}`}
               />
+              {errors.title && (
+                <p className="text-sm text-red-500 mt-1">{errors.title.message}</p>
+              )}
             </div>
 
             <div>
@@ -238,9 +236,11 @@ export function EventForm({
                 id="start_datetime"
                 type="datetime-local"
                 {...register('start_datetime')}
-                className="text-right"
-                error={errors.start_datetime?.message}
+                className={`text-right ${errors.start_datetime ? 'border-red-500' : ''}`}
               />
+              {errors.start_datetime && (
+                <p className="text-sm text-red-500 mt-1">{errors.start_datetime.message}</p>
+              )}
             </div>
 
             <div>
@@ -315,9 +315,11 @@ export function EventForm({
                     min="1"
                     {...register('max_attendees', { valueAsNumber: true })}
                     placeholder="ללא הגבלה"
-                    className="text-right"
-                    error={errors.max_attendees?.message}
+                    className={`text-right ${errors.max_attendees ? 'border-red-500' : ''}`}
                   />
+                  {errors.max_attendees && (
+                    <p className="text-sm text-red-500 mt-1">{errors.max_attendees.message}</p>
+                  )}
                 </div>
               </div>
             )}
@@ -354,9 +356,11 @@ export function EventForm({
                   step="0.01"
                   {...register('payment_amount', { valueAsNumber: true })}
                   placeholder="0.00"
-                  className="text-right"
-                  error={errors.payment_amount?.message}
+                  className={`text-right ${errors.payment_amount ? 'border-red-500' : ''}`}
                 />
+                {errors.payment_amount && (
+                  <p className="text-sm text-red-500 mt-1">{errors.payment_amount.message}</p>
+                )}
               </div>
             )}
           </div>
@@ -387,23 +391,13 @@ export function EventForm({
                   step="0.01"
                   {...register('budget_allocated', { valueAsNumber: true })}
                   placeholder="0.00"
-                  className="text-right"
-                  error={errors.budget_allocated?.message}
+                  className={`text-right ${errors.budget_allocated ? 'border-red-500' : ''}`}
                 />
+                {errors.budget_allocated && (
+                  <p className="text-sm text-red-500 mt-1">{errors.budget_allocated.message}</p>
+                )}
               </div>
 
-              <div>
-                <Label htmlFor="notes" className="text-right font-medium">
-                  הערות פנימיות
-                </Label>
-                <Textarea
-                  id="notes"
-                  {...register('notes')}
-                  placeholder="הערות למנהלי המערכת..."
-                  className="text-right"
-                  rows={3}
-                />
-              </div>
 
               <div>
                 <Label htmlFor="status" className="text-right font-medium">

@@ -1,9 +1,8 @@
 import { Suspense } from 'react'
-import { AlertTriangle, Plus, Filter, CheckCircle, Clock, XCircle } from 'lucide-react'
+import { AlertTriangle, Plus, Filter, CheckCircle, Clock } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { IssueCard } from '@/components/features/issues/IssueCard'
-import { Badge } from '@/components/ui/badge'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 

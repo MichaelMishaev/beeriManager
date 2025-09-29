@@ -257,12 +257,21 @@ export async function DELETE(
     }
 
     // Update event attendees count
-    await supabase
+    // Decrement attendees count
+    const { data: eventData } = await supabase
       .from('events')
-      .update({
-        current_attendees: supabase.sql`current_attendees - ${registration.attendees_count}`
-      })
+      .select('current_attendees')
       .eq('id', params.id)
+      .single()
+
+    if (eventData) {
+      await supabase
+        .from('events')
+        .update({
+          current_attendees: Math.max(0, (eventData.current_attendees || 0) - registration.attendees_count)
+        })
+        .eq('id', params.id)
+    }
 
     return NextResponse.json({
       success: true,

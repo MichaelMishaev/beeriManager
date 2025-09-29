@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { AlertTriangle, CheckCircle, Clock, User, MessageCircle, Calendar, MapPin, Phone } from 'lucide-react'
+import { AlertTriangle, CheckCircle, Clock, User, Calendar } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -37,9 +37,9 @@ const ISSUE_CATEGORIES = {
   other: 'אחר'
 }
 
-const SEVERITY_LEVELS = {
+const PRIORITY_LEVELS = {
   low: 'נמוכה',
-  medium: 'בינונית',
+  normal: 'רגילה',
   high: 'גבוהה',
   critical: 'קריטית'
 }
@@ -53,8 +53,8 @@ export function IssueCard({
   className = ''
 }: IssueCardProps) {
   const createdDate = new Date(issue.created_at)
-  const isOverdue = issue.status === 'open' && issue.due_date && new Date(issue.due_date) < new Date()
-  const isUrgent = issue.severity === 'critical' || isOverdue
+  const isOverdue = false // Issues don't have due dates
+  const isUrgent = issue.priority === 'critical' || isOverdue
 
   const getStatusColor = (status: string, isOverdue: boolean) => {
     if (isOverdue) return 'bg-red-100 text-red-800 border-red-200'
@@ -69,14 +69,14 @@ export function IssueCard({
     return colors[status as keyof typeof colors] || colors.open
   }
 
-  const getSeverityColor = (severity: string) => {
+  const getPriorityColor = (priority: string) => {
     const colors = {
       low: 'bg-green-100 text-green-800',
-      medium: 'bg-yellow-100 text-yellow-800',
+      normal: 'bg-yellow-100 text-yellow-800',
       high: 'bg-orange-100 text-orange-800',
       critical: 'bg-red-100 text-red-800 animate-pulse'
     }
-    return colors[severity as keyof typeof colors] || colors.low
+    return colors[priority as keyof typeof colors] || colors.low
   }
 
   const getCategoryColor = (category: string) => {
@@ -120,18 +120,12 @@ export function IssueCard({
               <span>{issue.reporter_name}</span>
               <span>•</span>
               <span>{getHebrewRelativeTime(createdDate)}</span>
-              {issue.location && (
-                <>
-                  <span>•</span>
-                  <span>{issue.location}</span>
-                </>
-              )}
             </div>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Badge className={getSeverityColor(issue.severity)}>
-            {SEVERITY_LEVELS[issue.severity as keyof typeof SEVERITY_LEVELS]}
+          <Badge className={getPriorityColor(issue.priority)}>
+            {PRIORITY_LEVELS[issue.priority as keyof typeof PRIORITY_LEVELS]}
           </Badge>
           {showActions && (
             <Button size="sm" variant="ghost" asChild>
@@ -166,8 +160,8 @@ export function IssueCard({
                   {issue.title}
                 </h3>
                 <div className="flex gap-1 flex-shrink-0 mr-2">
-                  <Badge className={getSeverityColor(issue.severity)}>
-                    {SEVERITY_LEVELS[issue.severity as keyof typeof SEVERITY_LEVELS]}
+                  <Badge className={getPriorityColor(issue.priority)}>
+                    {PRIORITY_LEVELS[issue.priority as keyof typeof PRIORITY_LEVELS]}
                   </Badge>
                   <Badge className={getStatusColor(issue.status, !!isOverdue)}>
                     {isOverdue ? 'באיחור' : ISSUE_STATUSES[issue.status as keyof typeof ISSUE_STATUSES]}
@@ -184,20 +178,8 @@ export function IssueCard({
                   <Calendar className="h-4 w-4" />
                   <span>{formatHebrewDate(createdDate)}</span>
                 </div>
-                {issue.comment_count > 0 && (
-                  <div className="flex items-center gap-1">
-                    <MessageCircle className="h-4 w-4" />
-                    <span>{issue.comment_count}</span>
-                  </div>
-                )}
               </div>
 
-              {issue.location && (
-                <div className="flex items-center gap-1 text-sm text-muted-foreground mb-2">
-                  <MapPin className="h-4 w-4" />
-                  <span>{issue.location}</span>
-                </div>
-              )}
 
               {issue.description && (
                 <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
@@ -206,15 +188,10 @@ export function IssueCard({
               )}
 
               <div className="flex items-center gap-2 mb-3">
-                <Badge variant="outline" className={getCategoryColor(issue.category)}>
-                  {ISSUE_CATEGORIES[issue.category as keyof typeof ISSUE_CATEGORIES]}
-                </Badge>
-                {issue.due_date && (
-                  <span className={`text-xs ${
-                    isOverdue ? 'text-red-600 font-medium' : 'text-muted-foreground'
-                  }`}>
-                    יעד: {formatHebrewDate(issue.due_date)}
-                  </span>
+                {issue.category && (
+                  <Badge variant="outline" className={getCategoryColor(issue.category)}>
+                    {ISSUE_CATEGORIES[issue.category as keyof typeof ISSUE_CATEGORIES]}
+                  </Badge>
                 )}
               </div>
 
@@ -264,10 +241,10 @@ export function IssueCard({
                 {issue.title}
               </CardTitle>
               <div className="flex flex-col gap-2 items-end flex-shrink-0 mr-2">
-                <Badge variant={issue.severity === 'critical' ? 'destructive' : 'outline'}
-                       className={getSeverityColor(issue.severity)}>
+                <Badge variant={issue.priority === 'critical' ? 'destructive' : 'outline'}
+                       className={getPriorityColor(issue.priority)}>
                   <AlertTriangle className="h-3 w-3 ml-1" />
-                  {SEVERITY_LEVELS[issue.severity as keyof typeof SEVERITY_LEVELS]}
+                  {PRIORITY_LEVELS[issue.priority as keyof typeof PRIORITY_LEVELS]}
                 </Badge>
                 <Badge className={getStatusColor(issue.status, !!isOverdue)}>
                   {isOverdue ? 'באיחור' : ISSUE_STATUSES[issue.status as keyof typeof ISSUE_STATUSES]}
@@ -279,20 +256,11 @@ export function IssueCard({
               <div className="flex items-center gap-1">
                 <User className="h-4 w-4" />
                 <span>{issue.reporter_name}</span>
-                {issue.reporter_phone && (
-                  <span className="text-xs">({issue.reporter_phone})</span>
-                )}
               </div>
               <div className="flex items-center gap-1">
                 <Calendar className="h-4 w-4" />
                 <span>דווח: {formatHebrewDate(createdDate)}</span>
               </div>
-              {issue.comment_count > 0 && (
-                <div className="flex items-center gap-1">
-                  <MessageCircle className="h-4 w-4" />
-                  <span>{issue.comment_count} תגובות</span>
-                </div>
-              )}
             </div>
           </div>
         </div>
@@ -301,22 +269,10 @@ export function IssueCard({
       <CardContent className="space-y-4">
         {/* Location and Category */}
         <div className="flex items-center gap-4 text-sm">
-          {issue.location && (
-            <div className="flex items-center gap-1">
-              <MapPin className="h-4 w-4 text-muted-foreground" />
-              <span>{issue.location}</span>
-            </div>
-          )}
-          <Badge variant="outline" className={getCategoryColor(issue.category)}>
-            {ISSUE_CATEGORIES[issue.category as keyof typeof ISSUE_CATEGORIES]}
-          </Badge>
-          {issue.due_date && (
-            <span className={`text-sm ${
-              isOverdue ? 'text-red-600 font-medium' : 'text-muted-foreground'
-            }`}>
-              יעד: {formatHebrewDate(issue.due_date)}
-              {isOverdue && <AlertTriangle className="h-4 w-4 inline mr-1" />}
-            </span>
+          {issue.category && (
+            <Badge variant="outline" className={getCategoryColor(issue.category)}>
+              {ISSUE_CATEGORIES[issue.category as keyof typeof ISSUE_CATEGORIES]}
+            </Badge>
           )}
         </div>
 
@@ -331,7 +287,7 @@ export function IssueCard({
         )}
 
         {/* Assignment Info */}
-        {(issue.assigned_to || issue.resolution_notes) && (
+        {(issue.assigned_to || issue.resolution) && (
           <div className="bg-muted/50 rounded-lg p-3">
             <h4 className="text-sm font-medium mb-2">מידע על הטיפול</h4>
             <div className="space-y-1 text-sm text-muted-foreground">
@@ -341,10 +297,10 @@ export function IssueCard({
                   <span>{issue.assigned_to}</span>
                 </div>
               )}
-              {issue.resolution_notes && (
+              {issue.resolution && (
                 <div>
-                  <span className="font-medium">הערות פתרון:</span>
-                  <p className="text-xs mt-1">{issue.resolution_notes}</p>
+                  <span className="font-medium">פתרון:</span>
+                  <p className="text-xs mt-1">{issue.resolution}</p>
                 </div>
               )}
               {issue.resolved_at && (
@@ -357,30 +313,6 @@ export function IssueCard({
           </div>
         )}
 
-        {/* Attachments */}
-        {issue.attachment_urls && issue.attachment_urls.length > 0 && (
-          <div className="bg-muted/50 rounded-lg p-3">
-            <h4 className="text-sm font-medium mb-2">קבצים מצורפים</h4>
-            <div className="space-y-1">
-              {issue.attachment_urls.slice(0, 3).map((url, index) => (
-                <a
-                  key={index}
-                  href={url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-blue-600 hover:text-blue-800 block truncate"
-                >
-                  📎 קובץ מצורף {index + 1}
-                </a>
-              ))}
-              {issue.attachment_urls.length > 3 && (
-                <p className="text-xs text-muted-foreground">
-                  ועוד {issue.attachment_urls.length - 3} קבצים...
-                </p>
-              )}
-            </div>
-          </div>
-        )}
 
         {showActions && (
           <div className="flex flex-wrap gap-2 pt-2">
@@ -400,14 +332,6 @@ export function IssueCard({
               </Button>
             )}
 
-            {issue.reporter_phone && (
-              <Button variant="ghost" asChild>
-                <Link href={`https://wa.me/972${issue.reporter_phone.replace(/^0/, '')}`}>
-                  <Phone className="h-4 w-4 ml-2" />
-                  צור קשר עם המדווח
-                </Link>
-              </Button>
-            )}
 
             {onEdit && (
               <Button variant="ghost" onClick={onEdit}>

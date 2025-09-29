@@ -25,7 +25,7 @@ const EventUpdateSchema = z.object({
 
 // GET /api/events/[id] - Get single event
 export async function GET(
-  req: NextRequest,
+  _req: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {

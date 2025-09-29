@@ -10,14 +10,12 @@ const TaskSchema = z.object({
   priority: z.enum(['low', 'normal', 'high', 'urgent']).default('normal'),
   status: z.enum(['pending', 'in_progress', 'completed', 'cancelled']).default('pending'),
   owner_name: z.string().min(2, 'שם האחראי חייב להכיל לפחות 2 תווים'),
-  owner_phone: z.string().optional(),
-  owner_email: z.string().email('כתובת אימייל לא תקינה').optional().or(z.literal('')),
-  due_date: z.string().datetime('תאריך יעד לא תקין'),
-  category: z.string().optional(),
-  estimated_hours: z.number().min(0.5).optional(),
-  notes: z.string().optional(),
-  related_event_id: z.string().uuid().optional(),
-  dependency_task_ids: z.array(z.string().uuid()).optional(),
+  owner_phone: z.string().optional().nullable(),
+  due_date: z.string(), // Accept date string format
+  reminder_date: z.string().optional().nullable(),
+  event_id: z.string().optional().nullable(),
+  parent_task_id: z.string().optional().nullable(),
+  auto_remind: z.boolean().optional(),
   attachment_urls: z.array(z.string().url()).optional()
 })
 

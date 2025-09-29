@@ -1,6 +1,6 @@
 'use client'
 
-import React, { Suspense } from 'react'
+import React from 'react'
 import { Calendar, CheckSquare, FileText, AlertCircle, TrendingUp, Users } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -62,21 +62,6 @@ function StatsCard({
   )
 }
 
-function StatsCardSkeleton() {
-  return (
-    <Card>
-      <CardContent className="p-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="w-24 h-4 bg-gray-200 rounded animate-pulse mb-2"></div>
-            <div className="w-16 h-8 bg-gray-200 rounded animate-pulse"></div>
-          </div>
-          <div className="w-12 h-12 bg-gray-200 rounded-full animate-pulse"></div>
-        </div>
-      </CardContent>
-    </Card>
-  )
-}
 
 function QuickActions() {
   const actions = [

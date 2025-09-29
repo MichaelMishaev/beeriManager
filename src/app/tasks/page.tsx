@@ -3,7 +3,6 @@ import { CheckSquare, Plus, Filter, UserCheck, Clock, AlertCircle } from 'lucide
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { TaskCard } from '@/components/features/tasks/TaskCard'
-import { Badge } from '@/components/ui/badge'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 
