@@ -62,6 +62,8 @@ export function TaskForm({
   className = ''
 }: TaskFormProps) {
   const [showAdvanced, setShowAdvanced] = useState(false)
+  const [relatedEventId, setRelatedEventId] = useState<string>('')
+  const [dependencyTaskIds, setDependencyTaskIds] = useState<string[]>([])
 
   const {
     register,
@@ -356,7 +358,7 @@ export function TaskForm({
               type="button"
               variant="ghost"
               size="sm"
-              onClick={() => setShowAdvanced(!showAdvanced)}
+              size="sm" onClick={() => setShowAdvanced(!showAdvanced)}
             >
               {showAdvanced ? 'הסתר' : 'הצג'} הגדרות מתקדמות
             </Button>
@@ -373,8 +375,8 @@ export function TaskForm({
                     אירוע קשור
                   </Label>
                   <Select
-                    value={watch('related_event_id')}
-                    onValueChange={(value) => setValue('related_event_id', value)}
+                    value={relatedEventId}
+                    onValueChange={setRelatedEventId}
                   >
                     <SelectTrigger className="text-right">
                       <SelectValue placeholder="בחר אירוע קשור (אופציונלי)" />
@@ -416,14 +418,13 @@ export function TaskForm({
                             id={`dep-${taskOption.id}`}
                             value={taskOption.id}
                             onChange={(e) => {
-                              const currentDeps = watch('dependency_task_ids') || []
                               if (e.target.checked) {
-                                setValue('dependency_task_ids', [...currentDeps, taskOption.id])
+                                setDependencyTaskIds([...dependencyTaskIds, taskOption.id])
                               } else {
-                                setValue('dependency_task_ids', currentDeps.filter(id => id !== taskOption.id))
+                                setDependencyTaskIds(dependencyTaskIds.filter(id => id !== taskOption.id))
                               }
                             }}
-                            checked={(watch('dependency_task_ids') || []).includes(taskOption.id)}
+                            checked={dependencyTaskIds.includes(taskOption.id)}
                           />
                           <Label htmlFor={`dep-${taskOption.id}`} className="text-sm flex-1 text-right">
                             {taskOption.title}
@@ -445,7 +446,6 @@ export function TaskForm({
                 </Label>
                 <Textarea
                   id="notes"
-                  {...register('notes')}
                   placeholder="הערות למנהלי המערכת..."
                   className="text-right"
                   rows={3}
@@ -459,7 +459,7 @@ export function TaskForm({
             <Button
               type="button"
               variant="outline"
-              onClick={onCancel}
+              size="sm" onClick={onCancel}
               disabled={isSubmitting}
             >
               ביטול

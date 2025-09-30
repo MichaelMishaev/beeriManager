@@ -90,7 +90,7 @@ async function MeetingsList() {
         <p className="text-muted-foreground mb-6">
           התחל לתכנן את הישיבה הראשונה
         </p>
-        <Button asChild>
+        <Button asChild size="sm">
           <Link href="/admin/events/new">
             <Plus className="h-4 w-4 ml-2" />
             צור ישיבה חדשה
@@ -156,14 +156,14 @@ async function MeetingsList() {
             )}
 
             <div className="flex gap-2 mt-4">
-              <Button size="sm" variant="outline" asChild className="flex-1">
+              <Button variant="outline" asChild className="flex-1" size="sm">
                 <Link href={`/admin/meetings/${meeting.id}/agenda`}>
                   <FileText className="h-4 w-4 ml-2" />
                   סדר יום
                 </Link>
               </Button>
               {meeting.status !== 'completed' && (
-                <Button size="sm" asChild className="flex-1">
+                <Button size="sm" asChild className="flex-1" size="sm">
                   <Link href={`/admin/events/${meeting.related_event_id || ''}`}>
                     <Calendar className="h-4 w-4 ml-2" />
                     פרטי האירוע
@@ -171,7 +171,7 @@ async function MeetingsList() {
                 </Button>
               )}
               {meeting.protocol_url && (
-                <Button size="sm" variant="ghost" asChild>
+                <Button variant="ghost" asChild size="sm">
                   <a href={meeting.protocol_url} target="_blank" rel="noopener noreferrer">
                     פרוטוקול
                   </a>
@@ -274,13 +274,13 @@ export default function MeetingsPage() {
         </div>
 
         <div className="flex gap-2">
-          <Button variant="outline" asChild>
+          <Button variant="outline" asChild size="sm">
             <Link href="/admin/meetings/topics">
               <FileText className="h-4 w-4 ml-2" />
               נושאים להצבעה
             </Link>
           </Button>
-          <Button asChild>
+          <Button asChild size="sm">
             <Link href="/admin/events/new?type=meeting">
               <Plus className="h-4 w-4 ml-2" />
               ישיבה חדשה

@@ -101,7 +101,7 @@ async function ExpenseContent({ id }: { id: string }) {
   return (
     <div className="space-y-6">
       {/* Back Button */}
-      <Button variant="outline" size="sm" asChild>
+      <Button variant="outline" size="sm" asChild size="sm">
         <Link href="/finances">
           <ArrowRight className="h-4 w-4 ml-2" />
           חזרה לדוח כספי
@@ -203,7 +203,7 @@ async function ExpenseContent({ id }: { id: string }) {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <Button variant="default" asChild>
+                <Button variant="default" asChild size="sm">
                   <a href={expense.receipt_url} target="_blank" rel="noopener noreferrer">
                     <ExternalLink className="h-4 w-4 ml-2" />
                     צפה בקבלה
@@ -264,19 +264,19 @@ async function ExpenseContent({ id }: { id: string }) {
               <CardTitle className="text-base">פעולות</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-              <Button variant="outline" className="w-full">
+              <Button variant="outline" size="sm" className="w-full">
                 <Edit className="h-4 w-4 ml-2" />
                 ערוך פרטים
               </Button>
               {expense.receipt_url && (
-                <Button variant="outline" className="w-full" asChild>
+                <Button variant="outline" className="w-full" asChild size="sm">
                   <a href={expense.receipt_url} target="_blank" rel="noopener noreferrer">
                     <Receipt className="h-4 w-4 ml-2" />
                     צפה בקבלה
                   </a>
                 </Button>
               )}
-              <Button variant="outline" className="w-full">
+              <Button variant="outline" size="sm" className="w-full">
                 <FileText className="h-4 w-4 ml-2" />
                 הורד דוח
               </Button>

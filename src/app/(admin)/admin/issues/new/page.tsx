@@ -312,7 +312,7 @@ export default function NewIssuePage() {
           <Button
             type="button"
             variant="outline"
-            onClick={() => router.back()}
+            size="sm" onClick={() => router.back()}
           >
             ביטול
           </Button>

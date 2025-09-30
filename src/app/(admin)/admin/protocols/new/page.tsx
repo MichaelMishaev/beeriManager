@@ -240,7 +240,7 @@ export default function NewProtocolPage() {
               />
               <Button
                 type="button"
-                onClick={addAttendee}
+                size="sm" onClick={addAttendee}
                 variant="outline"
               >
                 <Plus className="h-4 w-4" />
@@ -258,7 +258,7 @@ export default function NewProtocolPage() {
                     <span className="text-sm">{attendee}</span>
                     <button
                       type="button"
-                      onClick={() => removeAttendee(index)}
+                      size="sm" onClick={() => removeAttendee(index)}
                       className="hover:text-destructive"
                     >
                       <X className="h-3 w-3" />
@@ -367,7 +367,7 @@ export default function NewProtocolPage() {
           <Button
             type="button"
             variant="outline"
-            onClick={() => router.back()}
+            size="sm" onClick={() => router.back()}
           >
             ביטול
           </Button>

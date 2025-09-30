@@ -76,7 +76,7 @@ export function EventCard({
           </div>
         </div>
         {showActions && (
-          <Button size="sm" variant="ghost" asChild>
+          <Button variant="ghost" asChild size="sm">
             <Link href={`/events/${event.id}`}>פרטים</Link>
           </Button>
         )}
@@ -128,11 +128,11 @@ export function EventCard({
 
           {showActions && (
             <div className="flex gap-2">
-              <Button size="sm" asChild>
+              <Button size="sm" asChild size="sm">
                 <Link href={`/events/${event.id}`}>פרטים</Link>
               </Button>
               {event.registration_enabled && onRegister && (
-                <Button size="sm" variant="outline" onClick={onRegister}>
+                <Button variant="outline" size="sm" onClick={onRegister}>
                   הרשמה
                 </Button>
               )}
@@ -258,27 +258,27 @@ export function EventCard({
 
         {showActions && (
           <div className="flex flex-wrap gap-2 pt-2">
-            <Button asChild>
+            <Button asChild size="sm">
               <Link href={`/events/${event.id}`}>
                 צפייה מלאה
               </Link>
             </Button>
 
             {event.registration_enabled && onRegister && (
-              <Button variant="outline" onClick={onRegister}>
+              <Button variant="outline" size="sm" onClick={onRegister}>
                 <Users className="h-4 w-4 ml-2" />
                 הרשמה לאירוע
               </Button>
             )}
 
-            <Button variant="ghost" asChild>
+            <Button variant="ghost" asChild size="sm">
               <Link href={`/events/${event.id}/share`}>
                 שתף באמצעות WhatsApp
               </Link>
             </Button>
 
             {onEdit && (
-              <Button variant="ghost" onClick={onEdit}>
+              <Button variant="ghost" size="sm" onClick={onEdit}>
                 עריכה
               </Button>
             )}

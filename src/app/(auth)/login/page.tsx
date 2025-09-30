@@ -32,9 +32,8 @@ export default function LoginPage() {
       const data = await response.json()
 
       if (data.success) {
-        // Redirect to admin dashboard
-        router.push('/admin')
-        router.refresh()
+        // Redirect to admin dashboard with full page reload to ensure cookie is set
+        window.location.href = '/admin'
       } else {
         setError(data.error || 'שגיאה בהתחברות')
       }
@@ -81,7 +80,7 @@ export default function LoginPage() {
                 <button
                   type="button"
                   className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                  onClick={() => setShowPassword(!showPassword)}
+                  size="sm" onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? (
                     <EyeOff className="h-4 w-4" />
@@ -104,6 +103,7 @@ export default function LoginPage() {
             <Button
               type="submit"
               className="w-full"
+              size="sm"
               disabled={isLoading || !password.trim()}
             >
               {isLoading ? (
@@ -121,7 +121,7 @@ export default function LoginPage() {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => router.push('/')}
+              size="sm" onClick={() => router.push('/')}
             >
               חזור לעמוד הבית
             </Button>

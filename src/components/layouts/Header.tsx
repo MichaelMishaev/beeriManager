@@ -70,7 +70,7 @@ export function Header({ isAdmin = false, onLogout, className }: HeaderProps) {
                   <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
                 </Button>
 
-                <Button variant="ghost" size="sm" asChild>
+                <Button variant="ghost" size="sm" asChild size="sm">
                   <Link href="/admin/settings">
                     <Settings className="w-4 h-4 ml-2" />
                     הגדרות
@@ -97,7 +97,7 @@ export function Header({ isAdmin = false, onLogout, className }: HeaderProps) {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              size="sm" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             >
               {isMobileMenuOpen ? (
                 <X className="w-5 h-5" />
@@ -118,7 +118,7 @@ export function Header({ isAdmin = false, onLogout, className }: HeaderProps) {
                     variant="ghost"
                     className="w-full justify-start gap-3"
                     asChild
-                    onClick={() => setIsMobileMenuOpen(false)}
+                    size="sm" onClick={() => setIsMobileMenuOpen(false)}
                   >
                     <Link href="/admin/settings">
                       <Settings className="w-4 h-4" />
@@ -129,7 +129,7 @@ export function Header({ isAdmin = false, onLogout, className }: HeaderProps) {
                   <Button
                     variant="ghost"
                     className="w-full justify-start gap-3 text-red-600 hover:text-red-700"
-                    onClick={handleLogout}
+                    size="sm" onClick={handleLogout}
                   >
                     <LogOut className="w-4 h-4" />
                     התנתק
@@ -139,7 +139,7 @@ export function Header({ isAdmin = false, onLogout, className }: HeaderProps) {
                 <Button
                   variant="ghost"
                   className="w-full justify-start gap-3"
-                  onClick={() => {
+                  size="sm" onClick={() => {
                     handleLogin()
                     setIsMobileMenuOpen(false)
                   }}

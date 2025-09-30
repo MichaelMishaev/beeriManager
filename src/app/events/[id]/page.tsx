@@ -1,8 +1,11 @@
-import { notFound } from 'next/navigation'
+'use client'
+
+import { useParams, notFound } from 'next/navigation'
 import { Calendar, MapPin, Clock, Users, ArrowRight } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { EventFeedbackForm } from '@/components/features/feedback/EventFeedbackForm'
 import Link from 'next/link'
 
 interface Event {
@@ -19,7 +22,7 @@ interface Event {
   status: string
 }
 
-async function getEvent(id: string): Promise<Event | null> {
+function getEvent(id: string): Event | null {
   // Mock data for now - will be replaced with Supabase query
   const mockEvents: Record<string, Event> = {
     '1': {
@@ -86,11 +89,13 @@ function getEventTypeColor(type: string): string {
   return colors[type] || 'bg-gray-100 text-gray-800'
 }
 
-export default async function EventPage({ params }: { params: { id: string } }) {
-  const event = await getEvent(params.id)
+export default function EventPage() {
+  const params = useParams()
+  const id = params.id as string
+  const event = getEvent(id)
 
   if (!event) {
-    notFound()
+    return notFound()
   }
 
   const startDate = new Date(event.start_datetime)
@@ -235,16 +240,19 @@ export default async function EventPage({ params }: { params: { id: string } }) 
       </Card>
 
       {/* Action Buttons */}
-      <div className="flex gap-3">
-        <Button size="lg" className="flex-1">
+      <div className="flex gap-2 mb-8">
+        <Button size="sm" className="flex-1">
           הרשמה לאירוע
         </Button>
-        <Button size="lg" variant="outline" asChild>
+        <Button variant="outline" asChild size="sm">
           <Link href={`/calendar?event=${event.id}`}>
             הצג בלוח שנה
           </Link>
         </Button>
       </div>
+
+      {/* Event Feedback Form */}
+      <EventFeedbackForm eventId={event.id} eventTitle={event.title} />
     </div>
   )
 }

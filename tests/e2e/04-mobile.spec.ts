@@ -1,8 +1,9 @@
 import { test, expect, devices } from '@playwright/test';
 import { HebrewHelper } from '../helpers/hebrew.helper';
 
+test.use({ ...devices['iPhone 12'] });
+
 test.describe('Mobile Experience', () => {
-  test.use({ ...devices['iPhone 12'] });
 
   test('should display mobile navigation', async ({ page }) => {
     const hebrewHelper = new HebrewHelper(page);

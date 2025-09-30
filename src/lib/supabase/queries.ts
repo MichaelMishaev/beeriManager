@@ -1,5 +1,5 @@
 import { supabase } from './client'
-import { createServerClient } from './server'
+import { createClient } from './server'
 import type { Event, Task, Issue, Protocol, Expense, Vendor, DashboardStats } from '@/types'
 
 // Events queries
@@ -285,7 +285,7 @@ export async function getVendors(filters?: {
 
 // Dashboard stats
 export async function getDashboardStats(): Promise<DashboardStats> {
-  const serverClient = createServerClient()
+  const serverClient = createClient()
 
   const { data, error } = await serverClient
     .rpc('get_dashboard_stats')

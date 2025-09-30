@@ -143,7 +143,7 @@ async function IssueContent({ id }: { id: string }) {
   return (
     <div className="space-y-6">
       {/* Back Button */}
-      <Button variant="outline" size="sm" asChild>
+      <Button variant="outline" size="sm" asChild size="sm">
         <Link href="/issues">
           <ArrowRight className="h-4 w-4 ml-2" />
           חזרה לבעיות
@@ -278,7 +278,7 @@ async function IssueContent({ id }: { id: string }) {
 
               <Separator className="my-4" />
 
-              <Button variant="outline" className="w-full" asChild>
+              <Button variant="outline" className="w-full" asChild size="sm">
                 <Link href={`/feedback?issue_id=${issue.id}`}>
                   <MessageSquare className="h-4 w-4 ml-2" />
                   הוסף תגובה
@@ -298,17 +298,17 @@ async function IssueContent({ id }: { id: string }) {
             <CardContent className="space-y-2">
               {issue.status !== 'resolved' && issue.status !== 'closed' && (
                 <>
-                  <Button variant="default" className="w-full">
+                  <Button variant="default" size="sm" className="w-full">
                     <CheckCircle className="h-4 w-4 ml-2" />
                     סמן כנפתר
                   </Button>
-                  <Button variant="outline" className="w-full">
+                  <Button variant="outline" size="sm" className="w-full">
                     <Edit className="h-4 w-4 ml-2" />
                     ערוך פרטים
                   </Button>
                 </>
               )}
-              <Button variant="outline" className="w-full" asChild>
+              <Button variant="outline" className="w-full" asChild size="sm">
                 <Link href={`/feedback?issue_id=${issue.id}`}>
                   <MessageSquare className="h-4 w-4 ml-2" />
                   הוסף תגובה

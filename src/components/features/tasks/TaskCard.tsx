@@ -61,7 +61,7 @@ export function TaskCard({
       <div className={`flex items-center justify-between p-3 bg-white rounded-lg border hover:shadow-sm transition-shadow ${className}`}>
         <div className="flex items-center gap-3 flex-1">
           <button
-            onClick={onComplete}
+            size="sm" onClick={onComplete}
             className={`p-1 rounded transition-colors ${
               task.status === 'completed'
                 ? 'text-green-600 hover:text-green-700'
@@ -84,7 +84,7 @@ export function TaskCard({
           </div>
         </div>
         {showActions && (
-          <Button size="sm" variant="ghost" asChild>
+          <Button variant="ghost" asChild size="sm">
             <Link href={`/tasks/${task.id}`}>פרטים</Link>
           </Button>
         )}
@@ -100,7 +100,7 @@ export function TaskCard({
         <CardContent className="p-4">
           <div className="flex items-start gap-3">
             <button
-              onClick={onComplete}
+              size="sm" onClick={onComplete}
               className={`p-1 rounded transition-colors flex-shrink-0 mt-0.5 ${
                 task.status === 'completed'
                   ? 'text-green-600 hover:text-green-700'
@@ -150,11 +150,11 @@ export function TaskCard({
 
               {showActions && (
                 <div className="flex gap-2">
-                  <Button size="sm" asChild>
+                  <Button size="sm" asChild size="sm">
                     <Link href={`/tasks/${task.id}`}>פרטים</Link>
                   </Button>
                   {task.status !== 'completed' && onComplete && (
-                    <Button size="sm" variant="outline" onClick={onComplete}>
+                    <Button variant="outline" size="sm" onClick={onComplete}>
                       {task.status === 'pending' ? 'התחל עבודה' : 'סיים משימה'}
                     </Button>
                   )}
@@ -175,7 +175,7 @@ export function TaskCard({
       <CardHeader className="pb-3">
         <div className="flex items-start gap-3">
           <button
-            onClick={onComplete}
+            size="sm" onClick={onComplete}
             className={`p-2 rounded-lg transition-colors flex-shrink-0 ${
               task.status === 'completed'
                 ? 'text-green-600 hover:text-green-700 bg-green-50 hover:bg-green-100'
@@ -291,21 +291,21 @@ export function TaskCard({
 
         {showActions && (
           <div className="flex flex-wrap gap-2 pt-2">
-            <Button asChild>
+            <Button asChild size="sm">
               <Link href={`/tasks/${task.id}`}>
                 צפייה מלאה
               </Link>
             </Button>
 
             {task.status !== 'completed' && onComplete && (
-              <Button variant="outline" onClick={onComplete}>
+              <Button variant="outline" size="sm" onClick={onComplete}>
                 <CheckSquare className="h-4 w-4 ml-2" />
                 {task.status === 'pending' ? 'התחל עבודה' : 'סיים משימה'}
               </Button>
             )}
 
             {task.owner_phone && (
-              <Button variant="ghost" asChild>
+              <Button variant="ghost" asChild size="sm">
                 <Link href={`https://wa.me/972${task.owner_phone.replace(/^0/, '')}`}>
                   שלח הודעה ב-WhatsApp
                 </Link>
@@ -313,7 +313,7 @@ export function TaskCard({
             )}
 
             {onEdit && (
-              <Button variant="ghost" onClick={onEdit}>
+              <Button variant="ghost" size="sm" onClick={onEdit}>
                 עריכה
               </Button>
             )}

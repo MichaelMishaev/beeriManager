@@ -1,37 +1,73 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Menu, X, Home, Calendar, CheckSquare, MessageSquare, DollarSign, AlertCircle, FileText } from 'lucide-react'
+import { Menu, X, Home, Calendar, CheckSquare, MessageSquare, DollarSign, AlertCircle, FileText, Building2, LogIn, LogOut } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { logger } from '@/lib/logger'
 
-const navItems = [
+// Public navigation for parents
+const publicNavItems = [
+  { href: '/', label: 'בית', icon: Home },
+  { href: '/events', label: 'אירועים', icon: Calendar },
+  { href: '/calendar', label: 'לוח שנה', icon: Calendar },
+]
+
+// Committee navigation (authenticated)
+const committeeNavItems = [
   { href: '/', label: 'בית', icon: Home },
   { href: '/events', label: 'אירועים', icon: Calendar },
   { href: '/calendar', label: 'לוח שנה', icon: Calendar },
   { href: '/tasks', label: 'משימות', icon: CheckSquare },
-  { href: '/feedback', label: 'משוב', icon: MessageSquare },
   { href: '/finances', label: 'כספים', icon: DollarSign },
   { href: '/issues', label: 'בעיות', icon: AlertCircle },
   { href: '/protocols', label: 'פרוטוקולים', icon: FileText },
+  { href: '/vendors', label: 'ספקים', icon: Building2 },
+  { href: '/admin/feedback', label: 'משוב מהורים', icon: MessageSquare },
 ]
 
 export function Navigation() {
   const [isOpen, setIsOpen] = useState(false)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
   const pathname = usePathname()
+
+  useEffect(() => {
+    checkAuth()
+  }, [])
+
+  async function checkAuth() {
+    try {
+      const response = await fetch('/api/auth/session')
+      const data = await response.json()
+      setIsAuthenticated(data.authenticated && data.role === 'admin')
+    } catch (error) {
+      setIsAuthenticated(false)
+    }
+  }
 
   const handleNavClick = (href: string, label: string) => {
     logger.userAction('Navigate from menu', { to: href, label })
     setIsOpen(false)
   }
 
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' })
+      setIsAuthenticated(false)
+      window.location.href = '/'
+    } catch (error) {
+      logger.error('Logout failed', { error })
+    }
+  }
+
   const isActive = (href: string) => {
     if (href === '/') return pathname === '/'
     return pathname.startsWith(href)
   }
+
+  const navItems = isAuthenticated ? committeeNavItems : publicNavItems
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -41,7 +77,7 @@ export function Navigation() {
           <Link
             href="/"
             className="flex items-center space-x-2 space-x-reverse"
-            onClick={() => handleNavClick('/', 'בית')}
+            size="sm" onClick={() => handleNavClick('/', 'בית')}
           >
             <span className="text-xl font-bold">ועד הורים</span>
           </Link>
@@ -54,7 +90,7 @@ export function Navigation() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  onClick={() => handleNavClick(item.href, item.label)}
+                  size="sm" onClick={() => handleNavClick(item.href, item.label)}
                   className={cn(
                     'flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md transition-colors',
                     isActive(item.href)
@@ -67,6 +103,31 @@ export function Navigation() {
                 </Link>
               )
             })}
+
+            {/* Login/Logout Button */}
+            {isAuthenticated ? (
+              <Button
+                variant="ghost"
+                size="sm"
+                size="sm" onClick={handleLogout}
+                className="flex items-center gap-2"
+              >
+                <LogOut className="h-4 w-4" />
+                יציאה
+              </Button>
+            ) : (
+              <Button
+                variant="ghost"
+                size="sm"
+                asChild
+                className="flex items-center gap-2"
+              >
+                <Link href="/login">
+                  <LogIn className="h-4 w-4" />
+                  כניסת ועד
+                </Link>
+              </Button>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -74,7 +135,7 @@ export function Navigation() {
             variant="ghost"
             size="icon"
             className="md:hidden"
-            onClick={() => {
+            size="sm" onClick={() => {
               setIsOpen(!isOpen)
               logger.userAction('Toggle mobile menu', { isOpen: !isOpen })
             }}
@@ -92,7 +153,7 @@ export function Navigation() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  onClick={() => handleNavClick(item.href, item.label)}
+                  size="sm" onClick={() => handleNavClick(item.href, item.label)}
                   className={cn(
                     'flex items-center gap-3 px-4 py-3 text-base font-medium rounded-md transition-colors',
                     isActive(item.href)
@@ -105,6 +166,28 @@ export function Navigation() {
                 </Link>
               )
             })}
+
+            {/* Mobile Login/Logout */}
+            <div className="pt-2 border-t">
+              {isAuthenticated ? (
+                <button
+                  size="sm" onClick={handleLogout}
+                  className="flex items-center gap-3 px-4 py-3 text-base font-medium rounded-md transition-colors text-muted-foreground hover:bg-accent hover:text-accent-foreground w-full"
+                >
+                  <LogOut className="h-5 w-5" />
+                  יציאה
+                </button>
+              ) : (
+                <Link
+                  href="/login"
+                  size="sm" onClick={() => handleNavClick('/login', 'כניסת ועד')}
+                  className="flex items-center gap-3 px-4 py-3 text-base font-medium rounded-md transition-colors text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                >
+                  <LogIn className="h-5 w-5" />
+                  כניסת ועד
+                </Link>
+              )}
+            </div>
           </div>
         )}
       </div>

@@ -111,6 +111,9 @@ public/worker-*.js.map
 credentials.json
 service-account.json
 
+# Development documentation with sensitive info
+Docs/development/commands.md
+
 # ============================================
 # Database
 # ============================================

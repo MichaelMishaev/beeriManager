@@ -12,7 +12,7 @@ export function signJWT(payload: { role: 'admin' }, expiresIn: string = '24h'): 
     throw new Error('JWT_SECRET environment variable is required')
   }
 
-  return jwt.sign(payload, secret, { expiresIn })
+  return jwt.sign(payload, secret, { expiresIn } as jwt.SignOptions)
 }
 
 export function verifyJWT(token: string): JWTPayload | null {

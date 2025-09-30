@@ -128,14 +128,14 @@ export default function BeeriCalendar({
           <Button
             variant="outline"
             size="icon"
-            onClick={handlePreviousMonth}
+            size="sm" onClick={handlePreviousMonth}
           >
             <ChevronRight className="h-4 w-4" />
           </Button>
           <Button
             variant="outline"
             size="icon"
-            onClick={handleNextMonth}
+            size="sm" onClick={handleNextMonth}
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
@@ -149,12 +149,12 @@ export default function BeeriCalendar({
           <Button
             variant="outline"
             size="sm"
-            onClick={handleToday}
+            size="sm" onClick={handleToday}
           >
             היום
           </Button>
           {showCreateButton && (
-            <Button asChild>
+            <Button asChild size="sm">
               <Link href="/admin/events/new">
                 אירוע חדש
               </Link>
@@ -192,7 +192,7 @@ export default function BeeriCalendar({
                 isSelected && 'ring-2 ring-primary',
                 isTodayDate && 'bg-primary/5'
               )}
-              onClick={() => handleDateClick(day)}
+              size="sm" onClick={() => handleDateClick(day)}
             >
               <div className="flex justify-between items-start mb-1">
                 <span className={cn(
@@ -213,7 +213,7 @@ export default function BeeriCalendar({
                 {dayEvents.slice(0, 3).map((event) => (
                   <div
                     key={event.id}
-                    onClick={(e) => {
+                    size="sm" onClick={(e) => {
                       e.stopPropagation()
                       handleEventClick(event)
                     }}
@@ -309,7 +309,7 @@ export default function BeeriCalendar({
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-bold">רשימת אירועים</h2>
         {showCreateButton && (
-          <Button asChild>
+          <Button asChild size="sm">
             <Link href="/admin/events/new">
               אירוע חדש
             </Link>
@@ -402,14 +402,14 @@ export default function BeeriCalendar({
           <Button
             variant={currentView === 'month' ? 'default' : 'ghost'}
             size="sm"
-            onClick={() => setCurrentView('month')}
+            size="sm" onClick={() => setCurrentView('month')}
           >
             חודש
           </Button>
           <Button
             variant={currentView === 'list' ? 'default' : 'ghost'}
             size="sm"
-            onClick={() => setCurrentView('list')}
+            size="sm" onClick={() => setCurrentView('list')}
           >
             רשימה
           </Button>

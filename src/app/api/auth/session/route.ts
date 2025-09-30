@@ -1,23 +1,30 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
-import { verifyJWT } from '@/lib/auth/jwt'
+import { verifyJWT } from '@/lib/auth/jwt-edge'
+import { logger } from '@/lib/logger'
 
 export async function GET() {
   try {
+    logger.apiCall('GET', '/api/auth/session', {})
+
     const cookieStore = cookies()
     const token = cookieStore.get('auth-token')
 
     if (!token?.value) {
+      logger.info('No auth token found in session check', { component: 'Session' })
       return NextResponse.json({
         authenticated: false,
         user: null
       })
     }
 
+    logger.debug('Token found, verifying', { component: 'Session', data: { tokenLength: token.value.length } })
+
     // Verify the token
-    const payload = verifyJWT(token.value)
+    const payload = await verifyJWT(token.value)
 
     if (!payload) {
+      logger.warning('Invalid token in session check, clearing cookie', { component: 'Session' })
       // Token is invalid, clear it
       cookieStore.set('auth-token', '', {
         httpOnly: true,
@@ -34,6 +41,7 @@ export async function GET() {
     }
 
     // Token is valid
+    logger.success('Session verified successfully', { component: 'Session', data: { role: payload.role } })
     return NextResponse.json({
       authenticated: true,
       user: {
@@ -42,7 +50,7 @@ export async function GET() {
     })
 
   } catch (error) {
-    console.error('Session check error:', error)
+    logger.error('Session check error', { component: 'Session', error })
     return NextResponse.json(
       { authenticated: false, user: null },
       { status: 200 } // Don't return error status for auth checks

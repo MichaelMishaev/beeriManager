@@ -66,7 +66,7 @@ async function IssuesList() {
         <p className="text-muted-foreground mb-6">
           מעולה! אין בעיות דחופות לטיפול
         </p>
-        <Button asChild>
+        <Button asChild size="sm">
           <Link href="/admin/issues/new">
             <Plus className="h-4 w-4 ml-2" />
             דווח על בעיה
@@ -212,7 +212,7 @@ export default function IssuesPage() {
             <Filter className="h-4 w-4 ml-2" />
             סנן
           </Button>
-          <Button asChild>
+          <Button asChild size="sm">
             <Link href="/feedback">
               <Plus className="h-4 w-4 ml-2" />
               דווח על בעיה

@@ -62,7 +62,7 @@ async function ProtocolContent({ id }: { id: string }) {
   return (
     <div className="space-y-6">
       {/* Back Button */}
-      <Button variant="outline" size="sm" asChild>
+      <Button variant="outline" size="sm" asChild size="sm">
         <Link href="/protocols">
           <ArrowRight className="h-4 w-4 ml-2" />
           חזרה לפרוטוקולים
@@ -186,18 +186,18 @@ async function ProtocolContent({ id }: { id: string }) {
             </CardHeader>
             <CardContent className="space-y-2">
               {protocol.external_link && (
-                <Button variant="default" className="w-full" asChild>
+                <Button variant="default" className="w-full" asChild size="sm">
                   <a href={protocol.external_link} target="_blank" rel="noopener noreferrer">
                     <ExternalLink className="h-4 w-4 ml-2" />
                     צפה במסמך המקורי
                   </a>
                 </Button>
               )}
-              <Button variant="outline" className="w-full">
+              <Button variant="outline" size="sm" className="w-full">
                 <Download className="h-4 w-4 ml-2" />
                 הורד PDF
               </Button>
-              <Button variant="outline" className="w-full">
+              <Button variant="outline" size="sm" className="w-full">
                 <Share2 className="h-4 w-4 ml-2" />
                 שתף
               </Button>

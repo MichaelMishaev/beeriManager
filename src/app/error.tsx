@@ -48,12 +48,12 @@ export default function Error({
           )}
 
           <div className="space-y-2">
-            <Button onClick={reset} className="w-full">
+            <Button size="sm" onClick={reset} className="w-full" size="sm">
               <RefreshCw className="h-4 w-4 ml-2" />
               נסה שנית
             </Button>
 
-            <Button asChild variant="outline" className="w-full">
+            <Button asChild variant="outline" size="sm" className="w-full">
               <Link href="/">
                 <Home className="h-4 w-4 ml-2" />
                 חזור לדף הבית

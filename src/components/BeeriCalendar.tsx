@@ -98,7 +98,7 @@ export function BeeriCalendar({
       <div className="bg-white rounded-2xl shadow-lg p-6 mb-4">
         <div className="flex justify-between items-center mb-4">
           <button
-            onClick={() => navigateMonth('prev')}
+            size="sm" onClick={() => navigateMonth('prev')}
             className="text-indigo-400 hover:text-indigo-600 text-2xl p-2 hover:bg-indigo-50 rounded-full transition-colors"
             aria-label="חודש קודם"
           >
@@ -108,7 +108,7 @@ export function BeeriCalendar({
             {format(currentDate, 'MMMM yyyy', { locale: he })}
           </h2>
           <button
-            onClick={() => navigateMonth('next')}
+            size="sm" onClick={() => navigateMonth('next')}
             className="text-indigo-400 hover:text-indigo-600 text-2xl p-2 hover:bg-indigo-50 rounded-full transition-colors"
             aria-label="חודש הבא"
           >
@@ -135,7 +135,7 @@ export function BeeriCalendar({
             return (
               <button
                 key={date.toISOString()}
-                onClick={() => handleDateClick(date)}
+                size="sm" onClick={() => handleDateClick(date)}
                 className={`
                   day-cell flex flex-col items-center justify-center text-sm aspect-square rounded-lg transition-all
                   ${isTodayDate
@@ -155,7 +155,7 @@ export function BeeriCalendar({
                     {dayEvents.slice(0, 3).map((event, index) => (
                       <button
                         key={`${event.id}-${index}`}
-                        onClick={(e) => {
+                        size="sm" onClick={(e) => {
                           e.stopPropagation()
                           handleEventClick(event)
                         }}

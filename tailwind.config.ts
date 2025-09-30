@@ -24,74 +24,101 @@ const config: Config = {
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
-        primary: {
-          DEFAULT: "#0D98BA", // Blue-Green
-          50: "#E6F5F9",
-          100: "#CCE9F2",
-          200: "#99D3E5",
-          300: "#66BDD8",
-          400: "#33A7CB",
-          500: "#0D98BA", // Main color
-          600: "#0A7695",
-          700: "#075570",
-          800: "#05394B",
-          900: "#021C26",
-          foreground: "hsl(var(--primary-foreground))",
+        // Primary - Royal Blue Family (Design System)
+        'royal-blue': {
+          DEFAULT: '#00296b',
+          50: '#f0f6ff',
+          100: '#dbeafe',
+          200: '#bdd7fd',
+          300: '#8db8fa',
+          400: '#5a96f7',
+          500: '#00509d', // Polynesian Blue
+          600: '#003f88', // Marian Blue
+          700: '#00296b', // Royal Blue Traditional
+          800: '#001f5a',
+          900: '#001546',
+          950: '#000b2e',
         },
-        secondary: {
-          DEFAULT: "#FF8200", // UT Orange
-          50: "#FFF4E6",
-          100: "#FFE9CC",
-          200: "#FFD399",
-          300: "#FFBD66",
-          400: "#FFA733",
-          500: "#FF8200", // Main color
-          600: "#CC6800",
-          700: "#994E00",
-          800: "#663400",
-          900: "#331A00",
-          foreground: "hsl(var(--secondary-foreground))",
+        primary: {
+          DEFAULT: "#00509d", // Polynesian Blue
+          50: "#f0f6ff",
+          100: "#dbeafe",
+          200: "#bdd7fd",
+          300: "#8db8fa",
+          400: "#5a96f7",
+          500: "#00509d",
+          600: "#003f88",
+          700: "#00296b",
+          800: "#001f5a",
+          900: "#001546",
+          foreground: "#ffffff",
+        },
+        // Accent - Gold Family (Design System)
+        gold: {
+          DEFAULT: '#ffd500',
+          50: '#fefce8',
+          100: '#fef3c7',
+          200: '#fed7aa',
+          300: '#fbbf24',
+          400: '#fdc500', // Mikado Yellow
+          500: '#ffd500', // Gold
+          600: '#d97706',
+          700: '#b45309',
+          800: '#92400e',
+          900: '#78350f',
         },
         accent: {
-          DEFAULT: "#FFBA00", // Selective Yellow
-          50: "#FFFACC",
-          100: "#FFF699",
-          200: "#FFED66",
-          300: "#FFE433",
-          400: "#FFDD00",
-          500: "#FFBA00", // Main color
-          600: "#CC9500",
-          700: "#997000",
-          800: "#664A00",
-          900: "#332500",
-          foreground: "hsl(var(--accent-foreground))",
+          DEFAULT: "#fdc500", // Mikado Yellow
+          50: "#fefce8",
+          100: "#fef3c7",
+          200: "#fed7aa",
+          300: "#fbbf24",
+          400: "#fdc500",
+          500: "#ffd500",
+          600: "#d97706",
+          700: "#b45309",
+          foreground: "#00296b",
         },
+        secondary: {
+          DEFAULT: "hsl(var(--secondary))",
+          foreground: "hsl(var(--secondary-foreground))",
+        },
+        // Semantic Colors (Design System)
+        success: {
+          DEFAULT: '#10b981',
+          50: '#ecfdf5',
+          100: '#d1fae5',
+          200: '#a7f3d0',
+          500: '#10b981',
+          600: '#059669',
+          700: '#047857',
+        },
+        warning: {
+          DEFAULT: '#fdc500',
+          50: '#fefce8',
+          100: '#fef3c7',
+          500: '#fdc500',
+        },
+        error: {
+          DEFAULT: '#dc2626',
+          50: '#fef2f2',
+          100: '#fee2e2',
+          500: '#dc2626',
+          600: '#b91c1c',
+        },
+        info: {
+          DEFAULT: '#00509d',
+          50: '#f0f6ff',
+          100: '#dbeafe',
+          500: '#00509d',
+        },
+        // Neutral Colors (Design System)
         muted: {
-          DEFAULT: "#87CEEB", // Sky Blue
-          50: "#F0F8FC",
-          100: "#E1F1F9",
-          200: "#C3E3F3",
-          300: "#A5D5ED",
-          400: "#87CEEB", // Main color
-          500: "#6BB6D6",
-          600: "#4F9EC1",
-          700: "#3B7691",
-          800: "#274E61",
-          900: "#132730",
+          DEFAULT: "hsl(var(--muted))",
           foreground: "hsl(var(--muted-foreground))",
         },
         destructive: {
-          DEFAULT: "#003153", // Prussian Blue (used for warnings/errors)
-          50: "#E6EBF0",
-          100: "#CCD7E0",
-          200: "#99AFC1",
-          300: "#6687A1",
-          400: "#335F82",
-          500: "#003153", // Main color
-          600: "#002742",
-          700: "#001D31",
-          800: "#001421",
-          900: "#000A10",
+          DEFAULT: "hsl(var(--destructive))",
           foreground: "hsl(var(--destructive-foreground))",
         },
         card: {

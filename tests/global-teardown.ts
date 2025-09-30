@@ -1,8 +1,7 @@
-import { FullConfig } from '@playwright/test';
 import { createClient } from '@supabase/supabase-js';
 import fs from 'fs';
 
-async function globalTeardown(config: FullConfig) {
+async function globalTeardown() {
   console.log('🧹 Starting global test teardown...');
 
   // Clean up test database

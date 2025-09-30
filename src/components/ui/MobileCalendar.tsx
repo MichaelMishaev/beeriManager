@@ -58,10 +58,10 @@ const EVENT_CONFIG = {
     textColor: 'text-purple-800'
   },
   holiday: {
-    color: 'bg-white border-2 border-indigo-400',
+    color: 'bg-white border-2 border-primary',
     label: 'חגים',
-    lightBg: 'bg-indigo-50',
-    textColor: 'text-indigo-800'
+    lightBg: 'bg-primary-50',
+    textColor: 'text-primary-800'
   }
 }
 
@@ -161,6 +161,7 @@ export function MobileCalendar({
   return (
     <div
       className={`w-full max-w-sm mx-auto ${className}`}
+      style={{ backgroundColor: 'hsl(214, 100%, 97%)' }}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
@@ -169,23 +170,23 @@ export function MobileCalendar({
       <div className="bg-white rounded-2xl shadow-lg p-4 mb-4">
         <div className="flex justify-between items-center mb-4">
           <button
-            onClick={() => navigateMonth('prev')}
-            className="text-indigo-400 hover:text-indigo-600 text-3xl p-3 hover:bg-indigo-50 rounded-full transition-colors touch-manipulation"
+            size="sm" onClick={() => navigateMonth('prev')}
+            className="text-primary-400 hover:text-primary-600 text-3xl p-3 hover:bg-primary-50 rounded-full transition-colors touch-manipulation"
             aria-label="חודש קודם"
           >
             ‹
           </button>
           <div className="text-center">
-            <h2 className="text-lg sm:text-xl font-bold text-gray-800">
+            <h2 className="text-lg sm:text-xl font-bold text-royal-blue-700">
               {format(currentDate, 'MMMM yyyy', { locale: he })}
             </h2>
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-royal-blue-500 mt-1">
               {format(new Date(), 'EEEE, d MMMM', { locale: he })}
             </p>
           </div>
           <button
-            onClick={() => navigateMonth('next')}
-            className="text-indigo-400 hover:text-indigo-600 text-3xl p-3 hover:bg-indigo-50 rounded-full transition-colors touch-manipulation"
+            size="sm" onClick={() => navigateMonth('next')}
+            className="text-primary-400 hover:text-primary-600 text-3xl p-3 hover:bg-primary-50 rounded-full transition-colors touch-manipulation"
             aria-label="חודש הבא"
           >
             ›
@@ -213,15 +214,15 @@ export function MobileCalendar({
             return (
               <button
                 key={date.toISOString()}
-                onClick={() => handleDateClick(date)}
+                size="sm" onClick={() => handleDateClick(date)}
                 className={`
                   relative flex flex-col items-center justify-center text-sm aspect-square rounded-lg transition-all touch-manipulation min-h-[44px]
                   ${isTodayDate
-                    ? 'bg-indigo-600 text-white font-bold shadow-lg'
+                    ? 'bg-primary text-white font-bold shadow-lg'
                     : isSelectedDate
-                      ? 'bg-indigo-100 text-indigo-800 font-semibold ring-2 ring-indigo-400'
+                      ? 'bg-primary-100 text-primary-700 font-semibold ring-2 ring-primary'
                       : isCurrentMonthDay
-                        ? 'text-gray-800 hover:bg-indigo-50 active:bg-indigo-100'
+                        ? 'text-royal-blue-800 hover:bg-primary-50 active:bg-primary-100'
                         : 'text-gray-300'
                   }
                   ${dayEvents.length > 0 ? 'cursor-pointer' : ''}
@@ -237,7 +238,7 @@ export function MobileCalendar({
                     {dayEvents.slice(0, 3).map((event, index) => (
                       <button
                         key={`${event.id}-${index}`}
-                        onClick={(e) => {
+                        size="sm" onClick={(e) => {
                           e.stopPropagation()
                           handleEventClick(event)
                         }}
@@ -250,7 +251,7 @@ export function MobileCalendar({
                       />
                     ))}
                     {dayEvents.length > 3 && (
-                      <span className={`text-[10px] font-bold ${isTodayDate ? 'text-white' : 'text-indigo-600'}`}>
+                      <span className={`text-[10px] font-bold ${isTodayDate ? 'text-white' : 'text-primary-600'}`}>
                         +{dayEvents.length - 3}
                       </span>
                     )}
@@ -289,8 +290,8 @@ export function MobileCalendar({
         <div className="bg-white rounded-2xl shadow-lg p-4">
           <div className="flex justify-between items-center">
             <div>
-              <div className="text-sm text-indigo-800 font-bold">השבוע הזה</div>
-              <div className="text-xs text-indigo-600 mt-1">
+              <div className="text-sm text-royal-blue-700 font-bold">השבוע הזה</div>
+              <div className="text-xs text-royal-blue-600 mt-1">
                 {getWeekEventCount()} אירועים מתוכננים
               </div>
             </div>
@@ -304,7 +305,7 @@ export function MobileCalendar({
             {getEventsForDate(new Date()).slice(0, 2).map((event) => (
               <button
                 key={event.id}
-                onClick={() => handleEventClick(event)}
+                size="sm" onClick={() => handleEventClick(event)}
                 className={`
                   w-full text-right p-3 rounded-lg mb-2 transition-all touch-manipulation
                   ${EVENT_CONFIG[event.type].lightBg}

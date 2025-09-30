@@ -354,7 +354,7 @@ export default function NewTaskPage() {
           <Button
             type="button"
             variant="outline"
-            onClick={() => router.back()}
+            size="sm" onClick={() => router.back()}
           >
             ביטול
           </Button>

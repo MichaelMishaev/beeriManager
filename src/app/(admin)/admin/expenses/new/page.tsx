@@ -418,7 +418,7 @@ export default function NewExpensePage() {
           <Button
             type="button"
             variant="outline"
-            onClick={() => router.back()}
+            size="sm" onClick={() => router.back()}
           >
             ביטול
           </Button>

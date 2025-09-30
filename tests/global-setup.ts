@@ -10,7 +10,9 @@ async function globalSetup(config: FullConfig) {
   await setupTestDatabase();
 
   // Create admin session for tests
-  await createAdminSession(baseURL);
+  if (baseURL) {
+    await createAdminSession(baseURL);
+  }
 
   console.log('✅ Global setup completed');
 }

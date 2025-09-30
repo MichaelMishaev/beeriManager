@@ -24,7 +24,6 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
-import { cn } from "@/lib/utils"
 
 const agendaItemSchema = z.object({
   title: z.string().min(1, "כותרת נדרשת"),
@@ -49,7 +48,6 @@ const meetingAgendaSchema = z.object({
 })
 
 type MeetingAgendaValues = z.infer<typeof meetingAgendaSchema>
-type AgendaItemValues = z.infer<typeof agendaItemSchema>
 
 interface MeetingAgendaFormProps {
   initialData?: Partial<MeetingAgendaValues>
@@ -79,8 +77,7 @@ export function MeetingAgendaForm({
   initialData,
   onSubmit,
   isLoading = false,
-  mode = 'create',
-  availableMembers = []
+  mode = 'create'
 }: MeetingAgendaFormProps) {
   const form = useForm<MeetingAgendaValues>({
     resolver: zodResolver(meetingAgendaSchema),
@@ -260,7 +257,7 @@ export function MeetingAgendaForm({
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={addAgendaItem}
+                size="sm" onClick={addAgendaItem}
               >
                 <Plus className="h-4 w-4 ml-2" />
                 הוסף נושא
@@ -288,7 +285,7 @@ export function MeetingAgendaForm({
                             type="button"
                             variant="ghost"
                             size="sm"
-                            onClick={() => moveAgendaItem(index, 'up')}
+                            size="sm" onClick={() => moveAgendaItem(index, 'up')}
                           >
                             ↑
                           </Button>
@@ -298,7 +295,7 @@ export function MeetingAgendaForm({
                             type="button"
                             variant="ghost"
                             size="sm"
-                            onClick={() => moveAgendaItem(index, 'down')}
+                            size="sm" onClick={() => moveAgendaItem(index, 'down')}
                           >
                             ↓
                           </Button>
@@ -308,7 +305,7 @@ export function MeetingAgendaForm({
                             type="button"
                             variant="ghost"
                             size="sm"
-                            onClick={() => removeAgendaItem(index)}
+                            size="sm" onClick={() => removeAgendaItem(index)}
                           >
                             <Trash2 className="h-4 w-4 text-destructive" />
                           </Button>
@@ -462,7 +459,7 @@ export function MeetingAgendaForm({
         </Card>
 
         <div className="flex gap-4 justify-end">
-          <Button type="submit" loading={isLoading} className="min-w-[120px]">
+          <Button type="submit" disabled={isLoading} className="min-w-[120px]">
             {mode === 'create' ? 'צור סדר יום' : 'עדכן סדר יום'}
           </Button>
           <Button type="button" variant="outline">

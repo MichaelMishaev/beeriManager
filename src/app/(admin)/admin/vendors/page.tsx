@@ -89,7 +89,7 @@ async function VendorsList() {
         <p className="text-muted-foreground mb-6">
           עדיין לא נוספו ספקים למערכת
         </p>
-        <Button asChild>
+        <Button asChild size="sm">
           <Link href="/admin/vendors/new">
             <Plus className="h-4 w-4 ml-2" />
             הוסף ספק
@@ -183,12 +183,12 @@ async function VendorsList() {
                   </div>
 
                   <div className="flex gap-2 mt-4">
-                    <Button size="sm" variant="outline" asChild className="flex-1">
+                    <Button variant="outline" asChild className="flex-1" size="sm">
                       <Link href={`/admin/vendors/${vendor.id}/edit`}>
                         ערוך
                       </Link>
                     </Button>
-                    <Button size="sm" variant="default" asChild className="flex-1">
+                    <Button variant="default" asChild className="flex-1" size="sm">
                       <a href={`tel:${vendor.phone}`}>
                         <Phone className="h-4 w-4 ml-2" />
                         התקשר
@@ -262,7 +262,7 @@ export default function VendorsPage() {
             <Filter className="h-4 w-4 ml-2" />
             סינון
           </Button>
-          <Button asChild>
+          <Button asChild size="sm">
             <Link href="/admin/vendors/new">
               <Plus className="h-4 w-4 ml-2" />
               ספק חדש

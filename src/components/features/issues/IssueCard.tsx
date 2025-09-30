@@ -128,7 +128,7 @@ export function IssueCard({
             {PRIORITY_LEVELS[issue.priority as keyof typeof PRIORITY_LEVELS]}
           </Badge>
           {showActions && (
-            <Button size="sm" variant="ghost" asChild>
+            <Button variant="ghost" asChild size="sm">
               <Link href={`/issues/${issue.id}`}>פרטים</Link>
             </Button>
           )}
@@ -197,14 +197,14 @@ export function IssueCard({
 
               {showActions && (
                 <div className="flex gap-2">
-                  <Button size="sm" asChild>
+                  <Button size="sm" asChild size="sm">
                     <Link href={`/issues/${issue.id}`}>פרטים</Link>
                   </Button>
                   {issue.status !== 'resolved' && issue.status !== 'closed' && onStatusChange && (
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => onStatusChange(issue.status === 'open' ? 'in_progress' : 'resolved')}
+                      size="sm" onClick={() => onStatusChange(issue.status === 'open' ? 'in_progress' : 'resolved')}
                     >
                       {issue.status === 'open' ? 'התחל טיפול' : 'סמן כנפתר'}
                     </Button>
@@ -316,7 +316,7 @@ export function IssueCard({
 
         {showActions && (
           <div className="flex flex-wrap gap-2 pt-2">
-            <Button asChild>
+            <Button asChild size="sm">
               <Link href={`/issues/${issue.id}`}>
                 צפייה מלאה
               </Link>
@@ -325,7 +325,7 @@ export function IssueCard({
             {issue.status !== 'resolved' && issue.status !== 'closed' && onStatusChange && (
               <Button
                 variant="outline"
-                onClick={() => onStatusChange(issue.status === 'open' ? 'in_progress' : 'resolved')}
+                size="sm" onClick={() => onStatusChange(issue.status === 'open' ? 'in_progress' : 'resolved')}
               >
                 <CheckCircle className="h-4 w-4 ml-2" />
                 {issue.status === 'open' ? 'התחל טיפול' : 'סמן כנפתר'}
@@ -334,7 +334,7 @@ export function IssueCard({
 
 
             {onEdit && (
-              <Button variant="ghost" onClick={onEdit}>
+              <Button variant="ghost" size="sm" onClick={onEdit}>
                 עריכה
               </Button>
             )}

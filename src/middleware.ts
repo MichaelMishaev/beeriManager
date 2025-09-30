@@ -1,7 +1,16 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { verifyJWT } from '@/lib/auth/jwt-edge'
 
-export function middleware(request: NextRequest) {
+const isDev = process.env.NODE_ENV === 'development'
+
+function log(message: string, data?: any) {
+  if (isDev) {
+    console.log(`[Middleware] ${message}`, data || '')
+  }
+}
+
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   // Skip middleware for static files and API routes (except auth)
@@ -15,19 +24,51 @@ export function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
-  // Admin routes protection
-  if (pathname.startsWith('/admin')) {
-    const token = request.cookies.get('auth-token')
+  log(`Request to: ${pathname}`)
+
+  // Committee routes protection (admin + internal pages)
+  const committeeRoutes = [
+    '/admin',
+    '/tasks',
+    '/protocols',
+    '/finances',
+    '/issues',
+    '/vendors'
+  ]
+
+  const isCommitteeRoute = committeeRoutes.some(route => pathname.startsWith(route))
+
+  if (isCommitteeRoute) {
+    log(`Protected route accessed: ${pathname}`)
+
+    const token = request.cookies.get('auth-token')?.value
 
     if (!token) {
+      log(`No auth token found, redirecting to login`)
       const url = request.nextUrl.clone()
       url.pathname = '/login'
       url.searchParams.set('redirect', pathname)
       return NextResponse.redirect(url)
     }
 
-    // TODO: Verify JWT token here when auth is implemented
-    // For now, just check if token exists
+    log(`Auth token found, verifying JWT`)
+
+    // Verify JWT token
+    try {
+      const payload = await verifyJWT(token)
+      if (!payload || payload.role !== 'admin') {
+        log(`Invalid JWT payload`, { payload })
+        throw new Error('Invalid token')
+      }
+      log(`JWT verified successfully`, { role: payload.role })
+    } catch (error) {
+      log(`JWT verification failed`, { error: error instanceof Error ? error.message : error })
+      // Invalid token - redirect to login
+      const url = request.nextUrl.clone()
+      url.pathname = '/login'
+      url.searchParams.set('redirect', pathname)
+      return NextResponse.redirect(url)
+    }
   }
 
   // Add security headers to all responses

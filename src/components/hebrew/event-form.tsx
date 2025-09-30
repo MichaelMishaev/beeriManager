@@ -2,7 +2,7 @@ import * as React from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
-import { CalendarIcon, MapPin, Users, Clock, Plus, Trash2 } from "lucide-react"
+import { CalendarIcon, MapPin, Users, Plus, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
@@ -334,14 +334,14 @@ export function EventForm({
               type="button"
               variant="outline"
               size="sm"
-              onClick={addVolunteerSlot}
+              size="sm" onClick={addVolunteerSlot}
             >
               <Plus className="h-4 w-4 ml-2" />
               הוסף תפקיד
             </Button>
           </CardHeader>
           <CardContent className="space-y-4">
-            {volunteerSlots.map((slot, index) => (
+            {volunteerSlots.map((_slot, index) => (
               <div key={index} className="border rounded-lg p-4 space-y-4">
                 <div className="flex items-center justify-between">
                   <h4 className="font-medium">תפקיד {index + 1}</h4>
@@ -350,7 +350,7 @@ export function EventForm({
                       type="button"
                       variant="ghost"
                       size="sm"
-                      onClick={() => removeVolunteerSlot(index)}
+                      size="sm" onClick={() => removeVolunteerSlot(index)}
                     >
                       <Trash2 className="h-4 w-4 text-destructive" />
                     </Button>
@@ -419,7 +419,7 @@ export function EventForm({
         </Card>
 
         <div className="flex gap-4 justify-end">
-          <Button type="submit" loading={isLoading} className="min-w-[120px]">
+          <Button type="submit" disabled={isLoading} className="min-w-[120px]">
             {mode === 'create' ? 'צור אירוע' : 'עדכן אירוע'}
           </Button>
           <Button type="button" variant="outline">

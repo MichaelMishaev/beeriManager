@@ -87,14 +87,14 @@ function ProtocolCard({ protocol }: { protocol: any }) {
             )}
           </div>
           <div className="flex gap-2">
-            <Button size="sm" variant="outline" asChild>
+            <Button variant="outline" asChild size="sm">
               <Link href={`/protocols/${protocol.id}`}>
                 <FileText className="h-4 w-4 ml-2" />
                 צפייה
               </Link>
             </Button>
             {protocol.external_link && (
-              <Button size="sm" variant="outline" asChild>
+              <Button variant="outline" asChild size="sm">
                 <a href={protocol.external_link} target="_blank" rel="noopener noreferrer">
                   <ExternalLink className="h-4 w-4 ml-2" />
                   מסמך מקורי
@@ -119,7 +119,7 @@ async function ProtocolsList() {
         <p className="text-muted-foreground mb-6">
           עדיין לא נוספו פרוטוקולים למערכת
         </p>
-        <Button asChild>
+        <Button asChild size="sm">
           <Link href="/admin/protocols/new">
             <Plus className="h-4 w-4 ml-2" />
             הוסף פרוטוקול
@@ -217,7 +217,7 @@ export default function ProtocolsPage() {
             <Download className="h-4 w-4 ml-2" />
             ייצוא
           </Button>
-          <Button asChild>
+          <Button asChild size="sm">
             <Link href="/admin/protocols/new">
               <Plus className="h-4 w-4 ml-2" />
               פרוטוקול חדש

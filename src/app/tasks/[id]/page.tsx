@@ -143,7 +143,7 @@ async function TaskDetail({ id }: { id: string }) {
                 עריכה
               </Button>
               {task.status !== 'completed' && (
-                <Button size="sm" variant="default">
+                <Button variant="default" size="sm">
                   <CheckSquare className="h-4 w-4 ml-2" />
                   סמן כהושלם
                 </Button>

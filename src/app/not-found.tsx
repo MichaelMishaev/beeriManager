@@ -21,28 +21,28 @@ export default function NotFound() {
             </p>
 
             <div className="space-y-2">
-              <Button asChild variant="outline" className="w-full justify-start">
+              <Button asChild variant="outline" size="sm" className="w-full justify-start">
                 <Link href="/">
                   <Home className="h-4 w-4 ml-2" />
                   דף הבית
                 </Link>
               </Button>
 
-              <Button asChild variant="outline" className="w-full justify-start">
+              <Button asChild variant="outline" size="sm" className="w-full justify-start">
                 <Link href="/events">
                   <ArrowRight className="h-4 w-4 ml-2" />
                   אירועים
                 </Link>
               </Button>
 
-              <Button asChild variant="outline" className="w-full justify-start">
+              <Button asChild variant="outline" size="sm" className="w-full justify-start">
                 <Link href="/tasks">
                   <ArrowRight className="h-4 w-4 ml-2" />
                   משימות
                 </Link>
               </Button>
 
-              <Button asChild variant="outline" className="w-full justify-start">
+              <Button asChild variant="outline" size="sm" className="w-full justify-start">
                 <Link href="/feedback">
                   <ArrowRight className="h-4 w-4 ml-2" />
                   משוב אנונימי
@@ -51,7 +51,7 @@ export default function NotFound() {
             </div>
 
             <div className="pt-4">
-              <Button asChild className="w-full">
+              <Button asChild className="w-full" size="sm">
                 <Link href="/">
                   <Home className="h-4 w-4 ml-2" />
                   חזור לדף הבית

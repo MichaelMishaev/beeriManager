@@ -371,7 +371,7 @@ export function EventForm({
               type="button"
               variant="ghost"
               size="sm"
-              onClick={() => setShowAdvanced(!showAdvanced)}
+              size="sm" onClick={() => setShowAdvanced(!showAdvanced)}
             >
               {showAdvanced ? 'הסתר' : 'הצג'} הגדרות מתקדמות
             </Button>
@@ -427,7 +427,7 @@ export function EventForm({
             <Button
               type="button"
               variant="outline"
-              onClick={onCancel}
+              size="sm" onClick={onCancel}
               disabled={isSubmitting}
             >
               ביטול

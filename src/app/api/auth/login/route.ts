@@ -1,13 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { verifyPassword } from '@/lib/auth/password'
-import { signJWT } from '@/lib/auth/jwt'
+import { signJWT } from '@/lib/auth/jwt-edge'
+import { logger } from '@/lib/logger'
 
 export async function POST(req: NextRequest) {
   try {
+    logger.apiCall('POST', '/api/auth/login', { attempt: true })
+
     const { password } = await req.json()
 
     if (!password) {
+      logger.warning('Login attempt without password', { component: 'Auth' })
       return NextResponse.json(
         { success: false, error: 'סיסמה נדרשת' },
         { status: 400 }
@@ -17,24 +21,34 @@ export async function POST(req: NextRequest) {
     // Get hashed password from environment
     const adminPasswordHash = process.env.ADMIN_PASSWORD_HASH
     if (!adminPasswordHash) {
-      console.error('ADMIN_PASSWORD_HASH environment variable not set')
+      logger.error('ADMIN_PASSWORD_HASH not set in environment', { component: 'Auth' })
       return NextResponse.json(
         { success: false, error: 'שגיאה בהגדרות השרת' },
         { status: 500 }
       )
     }
 
+    logger.debug('Verifying password', {
+      component: 'Auth',
+      data: { hashLength: adminPasswordHash.length }
+    })
+
     // Verify password
     const isValid = await verifyPassword(password, adminPasswordHash)
+
     if (!isValid) {
+      logger.warning('Invalid password attempt', { component: 'Auth' })
       return NextResponse.json(
         { success: false, error: 'סיסמה שגויה' },
         { status: 401 }
       )
     }
 
+    logger.success('Password verified successfully', { component: 'Auth' })
+
     // Create JWT token
-    const token = signJWT({ role: 'admin' }, '24h')
+    const token = await signJWT({ role: 'admin' }, '24h')
+    logger.debug('JWT token created', { component: 'Auth' })
 
     // Set HTTP-only cookie
     const cookieStore = cookies()
@@ -46,13 +60,15 @@ export async function POST(req: NextRequest) {
       path: '/'
     })
 
+    logger.success('Auth cookie set, login successful', { component: 'Auth' })
+
     return NextResponse.json({
       success: true,
       message: 'התחברת בהצלחה'
     })
 
   } catch (error) {
-    console.error('Login error:', error)
+    logger.error('Login error', { component: 'Auth', error })
     return NextResponse.json(
       { success: false, error: 'שגיאה בהתחברות' },
       { status: 500 }

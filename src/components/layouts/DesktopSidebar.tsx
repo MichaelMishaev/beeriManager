@@ -123,7 +123,7 @@ export function DesktopSidebar({ isAdmin = false, onLogout, className }: Desktop
         {isAdmin && onLogout && (
           <Button
             variant="ghost"
-            onClick={onLogout}
+            size="sm" onClick={onLogout}
             className="w-full justify-start gap-3 text-red-600 hover:text-red-700 hover:bg-red-50"
           >
             <LogOut className="w-5 h-5" />

@@ -493,7 +493,7 @@ export default function EditEventPage({ params }: { params: { id: string } }) {
           <Button
             type="button"
             variant="destructive"
-            onClick={handleDelete}
+            size="sm" onClick={handleDelete}
             disabled={isDeleting}
           >
             {isDeleting ? (
@@ -508,7 +508,7 @@ export default function EditEventPage({ params }: { params: { id: string } }) {
           <Button
             type="button"
             variant="outline"
-            onClick={() => router.back()}
+            size="sm" onClick={() => router.back()}
           >
             ביטול
           </Button>

@@ -105,13 +105,13 @@ export default function EventsPage() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" asChild>
+          <Button variant="outline" asChild size="sm">
             <Link href="/calendar">
               <Calendar className="h-4 w-4 ml-2" />
               תצוגת לוח שנה
             </Link>
           </Button>
-          <Button asChild>
+          <Button asChild size="sm">
             <Link href="/admin/events/new">
               <Plus className="h-4 w-4 ml-2" />
               אירוע חדש

@@ -176,11 +176,11 @@ export default function ExpensesPage() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={exportToCSV}>
+          <Button variant="outline" size="sm" onClick={exportToCSV}>
             <Download className="h-4 w-4 ml-2" />
             ייצא לאקסל
           </Button>
-          <Button asChild>
+          <Button asChild size="sm">
             <Link href="/admin/expenses/new">
               <Plus className="h-4 w-4 ml-2" />
               רשומה חדשה
@@ -434,7 +434,7 @@ export default function ExpensesPage() {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => handleApprove(expense.id)}
+                        size="sm" onClick={() => handleApprove(expense.id)}
                       >
                         אשר
                       </Button>

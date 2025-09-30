@@ -249,19 +249,33 @@ body {
 
 /* Button Size Variations */
 .button-sm {
-  padding: 0.75rem 2rem;
+  padding: 0.5rem 1.5rem;
   font-size: 0.875rem;
 }
 
+.button-default {
+  padding: 0.625rem 1.75rem;
+  font-size: 0.9375rem;
+}
+
 .button-lg {
-  padding: 1.25rem 3rem;
-  font-size: 1.125rem;
+  padding: 0.875rem 2.25rem;
+  font-size: 1rem;
 }
 
 .button-xl {
-  padding: 1.5rem 4rem;
-  font-size: 1.25rem;
+  padding: 1rem 2.75rem;
+  font-size: 1.125rem;
 }
+
+/* UI/UX Guidelines for Button Sizes:
+ * - Use button-sm for secondary/tertiary actions
+ * - Use button-default for primary actions in forms and cards (recommended for most use cases)
+ * - Use button-lg sparingly for hero sections or prominent CTAs only
+ * - Use button-xl only for landing pages or special marketing sections
+ * - Maintain consistent sizing within the same component or section
+ * - Consider mobile touch targets: minimum 44px height recommended
+ */
 ```
 
 ### Modern Card Layout

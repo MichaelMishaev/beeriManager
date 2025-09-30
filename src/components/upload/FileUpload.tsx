@@ -213,7 +213,7 @@ export default function FileUpload({
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => handleRemove(index)}
+                size="sm" onClick={() => handleRemove(index)}
                 disabled={disabled}
               >
                 <X className="h-4 w-4" />

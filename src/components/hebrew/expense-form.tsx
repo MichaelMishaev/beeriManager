@@ -2,7 +2,7 @@ import * as React from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
-import { Receipt, Upload, Trash2, Plus, DollarSign } from "lucide-react"
+import { Receipt, Trash2, Plus, DollarSign } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
@@ -405,7 +405,7 @@ export function ExpenseForm({
               type="button"
               variant="outline"
               size="sm"
-              onClick={addReceiptUrl}
+              size="sm" onClick={addReceiptUrl}
             >
               <Plus className="h-4 w-4 ml-2" />
               הוסף קבלה
@@ -418,7 +418,7 @@ export function ExpenseForm({
                   type="button"
                   variant="ghost"
                   size="sm"
-                  onClick={() => removeReceiptUrl(index)}
+                  size="sm" onClick={() => removeReceiptUrl(index)}
                   className="text-destructive"
                 >
                   <Trash2 className="h-4 w-4" />
@@ -462,7 +462,7 @@ export function ExpenseForm({
         </Card>
 
         <div className="flex gap-4 justify-end">
-          <Button type="submit" loading={isLoading} className="min-w-[120px]">
+          <Button type="submit" disabled={isLoading} className="min-w-[120px]">
             {mode === 'create' ? 'צור הוצאה' : 'עדכן הוצאה'}
           </Button>
           <Button type="button" variant="outline">

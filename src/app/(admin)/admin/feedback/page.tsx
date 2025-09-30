@@ -240,7 +240,7 @@ export default function AdminFeedbackPage() {
                 'transition-all',
                 feedback.status === 'new' && 'border-primary'
               )}
-              onClick={() => feedback.status === 'new' && markAsRead(feedback.id)}
+              size="sm" onClick={() => feedback.status === 'new' && markAsRead(feedback.id)}
             >
               <CardHeader>
                 <div className="flex items-start justify-between">

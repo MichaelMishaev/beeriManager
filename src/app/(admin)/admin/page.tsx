@@ -209,7 +209,7 @@ export default function AdminDashboard() {
             ניהול מרכזי של כל פעילויות ועד ההורים
           </p>
         </div>
-        <Button asChild>
+        <Button asChild size="sm">
           <Link href="/admin/settings">
             <Settings className="h-4 w-4 ml-2" />
             הגדרות
@@ -266,31 +266,31 @@ export default function AdminDashboard() {
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-2">
-            <Button asChild>
+            <Button asChild size="sm">
               <Link href="/admin/events/new">
                 <Calendar className="h-4 w-4 ml-2" />
                 אירוע חדש
               </Link>
             </Button>
-            <Button variant="outline" asChild>
+            <Button variant="outline" asChild size="sm">
               <Link href="/admin/tasks/new">
                 <CheckSquare className="h-4 w-4 ml-2" />
                 משימה חדשה
               </Link>
             </Button>
-            <Button variant="outline" asChild>
+            <Button variant="outline" asChild size="sm">
               <Link href="/admin/protocols/new">
                 <FileText className="h-4 w-4 ml-2" />
                 פרוטוקול חדש
               </Link>
             </Button>
-            <Button variant="outline" asChild>
+            <Button variant="outline" asChild size="sm">
               <Link href="/admin/broadcast">
                 <MessageSquare className="h-4 w-4 ml-2" />
                 שליחת הודעה
               </Link>
             </Button>
-            <Button variant="outline" asChild>
+            <Button variant="outline" asChild size="sm">
               <Link href="/admin/reports">
                 <BarChart className="h-4 w-4 ml-2" />
                 דוחות

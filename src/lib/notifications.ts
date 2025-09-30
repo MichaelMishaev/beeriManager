@@ -70,7 +70,7 @@ class NotificationService {
         // Subscribe to push
         subscription = await registration.pushManager.subscribe({
           userVisibleOnly: true,
-          applicationServerKey
+          applicationServerKey: applicationServerKey as BufferSource
         })
       }
 
@@ -134,7 +134,6 @@ class NotificationService {
         data: payload.data,
         tag: payload.tag,
         requireInteraction: payload.requireInteraction || false,
-        vibrate: [200, 100, 200],
         dir: 'rtl',
         lang: 'he'
       })

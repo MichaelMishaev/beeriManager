@@ -259,7 +259,7 @@ export default function FeedbackPage() {
                   <button
                     key={rating}
                     type="button"
-                    onClick={() => {
+                    size="sm" onClick={() => {
                       logger.userAction('Set rating', { rating })
                       setValue('rating', rating)
                     }}
@@ -286,13 +286,13 @@ export default function FeedbackPage() {
               type="submit"
               disabled={isSubmitting}
               className="w-full"
-              size="lg"
+              size="sm"
             >
               {isSubmitting ? (
                 <>טוען...</>
               ) : (
                 <>
-                  <Send className="h-4 w-4 ml-2" />
+                  <Send className="h-3 w-3 ml-2" />
                   שלח משוב
                 </>
               )}

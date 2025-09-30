@@ -111,7 +111,7 @@ function QuickActions() {
           {actions.map((action) => {
             const Icon = action.icon
             return (
-              <Button key={action.title} asChild variant="outline" className="h-auto p-4 flex-col gap-2">
+              <Button key={action.title} asChild variant="outline" size="sm" className="h-auto p-4 flex-col gap-2">
                 <Link href={action.href}>
                   <div className={`p-2 rounded-lg ${action.color} text-white`}>
                     <Icon className="h-5 w-5" />
@@ -202,7 +202,7 @@ function RecentActivity() {
           })}
         </div>
         <div className="mt-4 text-center">
-          <Button variant="ghost" size="sm" asChild>
+          <Button variant="ghost" size="sm" asChild size="sm">
             <Link href="/activity">
               צפה בכל הפעילות
             </Link>
@@ -281,7 +281,7 @@ export function Dashboard({ stats, upcomingEvents, pendingTasks, calendarEvents 
                 className="max-w-none"
               />
               <div className="mt-4 text-center">
-                <Button variant="outline" asChild>
+                <Button variant="outline" asChild size="sm">
                   <Link href="/calendar">
                     צפה בלוח השנה המלא
                   </Link>
@@ -308,7 +308,7 @@ export function Dashboard({ stats, upcomingEvents, pendingTasks, calendarEvents 
                   האירועים הבאים בלוח השנה
                 </CardDescription>
               </div>
-              <Button variant="outline" size="sm" asChild>
+              <Button variant="outline" size="sm" asChild size="sm">
                 <Link href="/events">
                   צפה בכל האירועים
                 </Link>
@@ -328,7 +328,7 @@ export function Dashboard({ stats, upcomingEvents, pendingTasks, calendarEvents 
                   <div className="text-center py-8">
                     <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                     <p className="text-muted-foreground">אין אירועים קרובים</p>
-                    <Button variant="outline" className="mt-4" asChild>
+                    <Button variant="outline" className="mt-4" asChild size="sm">
                       <Link href="/admin/events/new">
                         צור אירוע חדש
                       </Link>
@@ -351,7 +351,7 @@ export function Dashboard({ stats, upcomingEvents, pendingTasks, calendarEvents 
                   משימות שדורשות טיפול
                 </CardDescription>
               </div>
-              <Button variant="outline" size="sm" asChild>
+              <Button variant="outline" size="sm" asChild size="sm">
                 <Link href="/tasks">
                   צפה בכל המשימות
                 </Link>
@@ -371,7 +371,7 @@ export function Dashboard({ stats, upcomingEvents, pendingTasks, calendarEvents 
                   <div className="text-center py-8">
                     <CheckSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                     <p className="text-muted-foreground">אין משימות פתוחות</p>
-                    <Button variant="outline" className="mt-4" asChild>
+                    <Button variant="outline" className="mt-4" asChild size="sm">
                       <Link href="/admin/tasks/new">
                         הוסף משימה חדשה
                       </Link>

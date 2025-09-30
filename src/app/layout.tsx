@@ -1,14 +1,15 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+import { Heebo } from 'next/font/google'
 import './globals.css'
 import { Providers } from '@/components/providers'
 import { Toaster } from '@/components/ui/toaster'
 import { Navigation } from '@/components/layout/Navigation'
 
-const inter = Inter({
-  subsets: ['latin'],
-  variable: '--font-sans',
+const heebo = Heebo({
+  subsets: ['hebrew', 'latin'],
+  variable: '--font-hebrew',
   display: 'swap',
+  weight: ['300', '400', '500', '600', '700', '800'],
 })
 
 export const metadata: Metadata = {
@@ -52,8 +53,8 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="he" dir="rtl" className={inter.variable}>
-      <body className="min-h-screen bg-background font-sans antialiased">
+    <html lang="he" dir="rtl" className={heebo.variable}>
+      <body className="min-h-screen bg-background font-sans antialiased" style={{ fontFamily: 'var(--font-hebrew), system-ui, sans-serif' }}>
         <Providers>
           <Navigation />
           {children}

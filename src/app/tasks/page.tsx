@@ -65,7 +65,7 @@ async function TasksList() {
         <p className="text-muted-foreground mb-6">
           עדיין לא נוספו משימות למערכת
         </p>
-        <Button asChild>
+        <Button asChild size="sm">
           <Link href="/admin/tasks/new">
             <Plus className="h-4 w-4 ml-2" />
             צור משימה חדשה
@@ -213,7 +213,7 @@ export default function TasksPage() {
             <Filter className="h-4 w-4 ml-2" />
             סנן
           </Button>
-          <Button asChild>
+          <Button asChild size="sm">
             <Link href="/admin/tasks/new">
               <Plus className="h-4 w-4 ml-2" />
               משימה חדשה
