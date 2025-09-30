@@ -40,11 +40,6 @@ const nextConfig = {
   experimental: {
     // Server Actions are enabled by default in Next.js 14
   },
-  // RTL support
-  i18n: {
-    locales: ['he'],
-    defaultLocale: 'he',
-  },
   // Environment variables
   env: {
     NEXT_PUBLIC_APP_NAME: 'BeeriManager',
