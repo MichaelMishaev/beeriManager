@@ -209,7 +209,7 @@ export function VendorCard({
           <Button
             variant="outline"
             size="sm"
-            size="sm" onClick={onView}
+            onClick={onView}
             className="flex-1"
           >
             פרטים
@@ -221,7 +221,7 @@ export function VendorCard({
                 <Button
                   variant="secondary"
                   size="sm"
-                  size="sm" onClick={onContact}
+                  onClick={onContact}
                   className="flex-1"
                 >
                   יצירת קשר
@@ -231,7 +231,7 @@ export function VendorCard({
               {vendor.availability === 'available' && (
                 <Button
                   size="sm"
-                  size="sm" onClick={onHire}
+                  onClick={onHire}
                   className="flex-1"
                   variant={vendor.status === 'preferred' ? 'default' : 'outline'}
                 >
@@ -245,7 +245,7 @@ export function VendorCard({
             <Button
               variant="ghost"
               size="sm"
-              size="sm" onClick={onEdit}
+              onClick={onEdit}
             >
               עריכה
             </Button>

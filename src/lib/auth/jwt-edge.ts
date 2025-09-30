@@ -41,7 +41,7 @@ export async function verifyJWT(token: string): Promise<JWTPayload | null> {
   try {
     const secret = getSecret()
     const { payload } = await jwtVerify(token, secret)
-    return payload as JWTPayload
+    return payload as unknown as JWTPayload
   } catch (error) {
     console.error('JWT verification failed (Edge):', error)
     return null

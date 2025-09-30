@@ -170,7 +170,7 @@ export function MobileCalendar({
       <div className="bg-white rounded-2xl shadow-lg p-4 mb-4">
         <div className="flex justify-between items-center mb-4">
           <button
-            size="sm" onClick={() => navigateMonth('prev')}
+            onClick={() => navigateMonth('prev')}
             className="text-primary-400 hover:text-primary-600 text-3xl p-3 hover:bg-primary-50 rounded-full transition-colors touch-manipulation"
             aria-label="חודש קודם"
           >
@@ -185,7 +185,7 @@ export function MobileCalendar({
             </p>
           </div>
           <button
-            size="sm" onClick={() => navigateMonth('next')}
+            onClick={() => navigateMonth('next')}
             className="text-primary-400 hover:text-primary-600 text-3xl p-3 hover:bg-primary-50 rounded-full transition-colors touch-manipulation"
             aria-label="חודש הבא"
           >
@@ -214,7 +214,7 @@ export function MobileCalendar({
             return (
               <button
                 key={date.toISOString()}
-                size="sm" onClick={() => handleDateClick(date)}
+                onClick={() => handleDateClick(date)}
                 className={`
                   relative flex flex-col items-center justify-center text-sm aspect-square rounded-lg transition-all touch-manipulation min-h-[44px]
                   ${isTodayDate
@@ -238,7 +238,7 @@ export function MobileCalendar({
                     {dayEvents.slice(0, 3).map((event, index) => (
                       <button
                         key={`${event.id}-${index}`}
-                        size="sm" onClick={(e) => {
+                        onClick={(e) => {
                           e.stopPropagation()
                           handleEventClick(event)
                         }}
@@ -305,7 +305,7 @@ export function MobileCalendar({
             {getEventsForDate(new Date()).slice(0, 2).map((event) => (
               <button
                 key={event.id}
-                size="sm" onClick={() => handleEventClick(event)}
+                onClick={() => handleEventClick(event)}
                 className={`
                   w-full text-right p-3 rounded-lg mb-2 transition-all touch-manipulation
                   ${EVENT_CONFIG[event.type].lightBg}

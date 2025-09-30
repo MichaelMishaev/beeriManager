@@ -97,7 +97,7 @@ export function Header({ isAdmin = false, onLogout, className }: HeaderProps) {
             <Button
               variant="ghost"
               size="sm"
-              size="sm" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             >
               {isMobileMenuOpen ? (
                 <X className="w-5 h-5" />

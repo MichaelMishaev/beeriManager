@@ -190,7 +190,7 @@ export function TaskCard({
           <Button
             variant="outline"
             size="sm"
-            size="sm" onClick={onEdit}
+            onClick={onEdit}
             className="flex-1"
           >
             עריכה
@@ -199,7 +199,7 @@ export function TaskCard({
           {!isCompleted && task.status !== 'cancelled' && (
             <Button
               size="sm"
-              size="sm" onClick={onComplete}
+              onClick={onComplete}
               className="flex-1"
               variant={task.status === 'in_progress' ? 'default' : 'secondary'}
             >
@@ -211,7 +211,7 @@ export function TaskCard({
             <Button
               variant="ghost"
               size="sm"
-              size="sm" onClick={onAssign}
+              onClick={onAssign}
             >
               הקצה
             </Button>

@@ -160,7 +160,7 @@ export function EventCard({
           <Button
             variant="outline"
             size="sm"
-            size="sm" onClick={onView}
+            onClick={onView}
             className="flex-1"
           >
             פרטים
@@ -169,7 +169,7 @@ export function EventCard({
           {canRegister && !isFull && (
             <Button
               size="sm"
-              size="sm" onClick={onRegister}
+              onClick={onRegister}
               className="flex-1"
             >
               {event.registration_enabled ? 'הרשמה' : 'הצטרף'}
@@ -191,7 +191,7 @@ export function EventCard({
             <Button
               variant="ghost"
               size="sm"
-              size="sm" onClick={onEdit}
+              onClick={onEdit}
             >
               עריכה
             </Button>

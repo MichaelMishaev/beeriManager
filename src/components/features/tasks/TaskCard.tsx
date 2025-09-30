@@ -61,7 +61,7 @@ export function TaskCard({
       <div className={`flex items-center justify-between p-3 bg-white rounded-lg border hover:shadow-sm transition-shadow ${className}`}>
         <div className="flex items-center gap-3 flex-1">
           <button
-            size="sm" onClick={onComplete}
+            onClick={onComplete}
             className={`p-1 rounded transition-colors ${
               task.status === 'completed'
                 ? 'text-green-600 hover:text-green-700'
@@ -100,7 +100,7 @@ export function TaskCard({
         <CardContent className="p-4">
           <div className="flex items-start gap-3">
             <button
-              size="sm" onClick={onComplete}
+              onClick={onComplete}
               className={`p-1 rounded transition-colors flex-shrink-0 mt-0.5 ${
                 task.status === 'completed'
                   ? 'text-green-600 hover:text-green-700'
@@ -175,7 +175,7 @@ export function TaskCard({
       <CardHeader className="pb-3">
         <div className="flex items-start gap-3">
           <button
-            size="sm" onClick={onComplete}
+            onClick={onComplete}
             className={`p-2 rounded-lg transition-colors flex-shrink-0 ${
               task.status === 'completed'
                 ? 'text-green-600 hover:text-green-700 bg-green-50 hover:bg-green-100'
