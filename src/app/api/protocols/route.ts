@@ -12,8 +12,8 @@ const ProtocolSchema = z.object({
   agenda: z.string().optional(),
   decisions: z.string().optional(),
   action_items: z.string().optional(),
-  document_url: z.string().url().optional(),
-  attachment_urls: z.array(z.string().url()).optional(),
+  document_url: z.string().url().nullable().or(z.literal('')).optional(),
+  attachment_urls: z.array(z.string().url()).optional().default([]),
   is_public: z.boolean().default(true),
   approved: z.boolean().default(false)
 })

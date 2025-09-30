@@ -120,6 +120,21 @@ export interface Responsibility {
   version: number
 }
 
+export interface Committee {
+  id: string
+  name: string
+  description?: string
+  color: string // hex color for visual indicator
+  responsibilities: string[] // array of responsibility keywords
+  members: string[] // array of member names
+
+  // Audit
+  created_at: string
+  updated_at: string
+  created_by?: string
+  version: number
+}
+
 export interface Issue {
   id: string
   title: string
@@ -354,6 +369,7 @@ export interface DashboardStats {
   recentProtocols: number
   pendingExpenses: number
   thisMonthEvents: number
+  activeCommittees?: number
 }
 
 // Calendar types

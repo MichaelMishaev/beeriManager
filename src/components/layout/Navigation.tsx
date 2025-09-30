@@ -17,7 +17,7 @@ const publicNavItems = [
 
 // Committee navigation (authenticated)
 const committeeNavItems = [
-  { href: '/', label: 'בית', icon: Home },
+  { href: '/admin', label: 'בית', icon: Home },
   { href: '/events', label: 'אירועים', icon: Calendar },
   { href: '/calendar', label: 'לוח שנה', icon: Calendar },
   { href: '/tasks', label: 'משימות', icon: CheckSquare },
@@ -41,7 +41,7 @@ export function Navigation() {
     try {
       const response = await fetch('/api/auth/session')
       const data = await response.json()
-      setIsAuthenticated(data.authenticated && data.role === 'admin')
+      setIsAuthenticated(data.authenticated && data.user?.role === 'admin')
     } catch (error) {
       setIsAuthenticated(false)
     }
@@ -63,7 +63,7 @@ export function Navigation() {
   }
 
   const isActive = (href: string) => {
-    if (href === '/') return pathname === '/'
+    if (href === '/' || href === '/admin') return pathname === href
     return pathname.startsWith(href)
   }
 
@@ -75,9 +75,9 @@ export function Navigation() {
         <div className="flex h-16 items-center justify-between">
           {/* Logo/Title */}
           <Link
-            href="/"
+            href={isAuthenticated ? "/admin" : "/"}
             className="flex items-center space-x-2 space-x-reverse"
-            size="sm" onClick={() => handleNavClick('/', 'בית')}
+            onClick={() => handleNavClick(isAuthenticated ? '/admin' : '/', 'בית')}
           >
             <span className="text-xl font-bold">ועד הורים</span>
           </Link>

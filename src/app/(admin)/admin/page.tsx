@@ -31,6 +31,18 @@ const adminSections = [
     ]
   },
   {
+    title: 'וועדות',
+    description: 'ניהול וועדות תחומיות ותחומי אחריות',
+    icon: Users,
+    color: 'text-teal-600',
+    bgColor: 'bg-teal-50',
+    links: [
+      { href: '/admin/committees/new', label: 'וועדה חדשה', icon: Plus },
+      { href: '/admin/committees', label: 'רשימת וועדות', icon: Edit },
+      { href: '/admin/committees', label: 'ניהול חברים', icon: Users }
+    ]
+  },
+  {
     title: 'בעיות',
     description: 'ניהול בעיות ופניות',
     icon: AlertTriangle,
