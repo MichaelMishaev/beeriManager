@@ -4,22 +4,6 @@
   "framework": "nextjs",
   "installCommand": "npm install",
   "regions": ["iad1"],
-  "env": {
-    "NEXT_PUBLIC_APP_URL": "@production_url",
-    "NODE_ENV": "production"
-  },
-  "build": {
-    "env": {
-      "NEXT_PUBLIC_SUPABASE_URL": "@supabase_url",
-      "NEXT_PUBLIC_SUPABASE_ANON_KEY": "@supabase_anon_key",
-      "SUPABASE_SERVICE_KEY": "@supabase_service_key",
-      "JWT_SECRET": "@jwt_secret",
-      "ADMIN_PASSWORD": "@admin_password",
-      "NEXT_PUBLIC_GOOGLE_CALENDAR_ID": "@google_calendar_id",
-      "GOOGLE_CLIENT_EMAIL": "@google_client_email",
-      "GOOGLE_PRIVATE_KEY": "@google_private_key"
-    }
-  },
   "headers": [
     {
       "source": "/(.*)",
