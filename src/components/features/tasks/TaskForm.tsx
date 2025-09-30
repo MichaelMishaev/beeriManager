@@ -357,8 +357,8 @@ export function TaskForm({
             <Button
               type="button"
               variant="ghost"
-              size="sm"
-              size="sm" onClick={() => setShowAdvanced(!showAdvanced)}
+ 
+ onClick={() => setShowAdvanced(!showAdvanced)}
             >
               {showAdvanced ? 'הסתר' : 'הצג'} הגדרות מתקדמות
             </Button>
@@ -459,7 +459,7 @@ export function TaskForm({
             <Button
               type="button"
               variant="outline"
-              size="sm" onClick={onCancel}
+ onClick={onCancel}
               disabled={isSubmitting}
             >
               ביטול

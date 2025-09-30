@@ -434,7 +434,7 @@ export default function EditTaskPage({ params }: { params: { id: string } }) {
           <Button
             type="button"
             variant="destructive"
-            size="sm" onClick={handleDelete}
+ onClick={handleDelete}
             disabled={isDeleting}
           >
             {isDeleting ? (
@@ -449,7 +449,7 @@ export default function EditTaskPage({ params }: { params: { id: string } }) {
           <Button
             type="button"
             variant="outline"
-            size="sm" onClick={() => router.back()}
+ onClick={() => router.back()}
           >
             ביטול
           </Button>

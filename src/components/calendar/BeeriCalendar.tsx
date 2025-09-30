@@ -128,14 +128,14 @@ export default function BeeriCalendar({
           <Button
             variant="outline"
             size="icon"
-            size="sm" onClick={handlePreviousMonth}
+            onClick={handlePreviousMonth}
           >
             <ChevronRight className="h-4 w-4" />
           </Button>
           <Button
             variant="outline"
             size="icon"
-            size="sm" onClick={handleNextMonth}
+            onClick={handleNextMonth}
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
@@ -149,7 +149,7 @@ export default function BeeriCalendar({
           <Button
             variant="outline"
             size="sm"
-            size="sm" onClick={handleToday}
+            onClick={handleToday}
           >
             היום
           </Button>
@@ -192,7 +192,7 @@ export default function BeeriCalendar({
                 isSelected && 'ring-2 ring-primary',
                 isTodayDate && 'bg-primary/5'
               )}
-              size="sm" onClick={() => handleDateClick(day)}
+              onClick={() => handleDateClick(day)}
             >
               <div className="flex justify-between items-start mb-1">
                 <span className={cn(
@@ -213,7 +213,7 @@ export default function BeeriCalendar({
                 {dayEvents.slice(0, 3).map((event) => (
                   <div
                     key={event.id}
-                    size="sm" onClick={(e) => {
+                    onClick={(e) => {
                       e.stopPropagation()
                       handleEventClick(event)
                     }}
@@ -402,14 +402,14 @@ export default function BeeriCalendar({
           <Button
             variant={currentView === 'month' ? 'default' : 'ghost'}
             size="sm"
-            size="sm" onClick={() => setCurrentView('month')}
+            onClick={() => setCurrentView('month')}
           >
             חודש
           </Button>
           <Button
             variant={currentView === 'list' ? 'default' : 'ghost'}
             size="sm"
-            size="sm" onClick={() => setCurrentView('list')}
+            onClick={() => setCurrentView('list')}
           >
             רשימה
           </Button>

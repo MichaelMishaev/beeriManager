@@ -110,7 +110,7 @@ export function EventFeedbackForm({ eventId, eventTitle }: EventFeedbackFormProp
                 <button
                   key={star}
                   type="button"
-                  size="sm" onClick={() => setRating(star)}
+ onClick={() => setRating(star)}
                   onMouseEnter={() => setHoveredRating(star)}
                   onMouseLeave={() => setHoveredRating(0)}
                   className="transition-transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-primary rounded"

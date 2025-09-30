@@ -256,8 +256,8 @@ export function MeetingAgendaForm({
               <Button
                 type="button"
                 variant="outline"
-                size="sm"
-                size="sm" onClick={addAgendaItem}
+ 
+ onClick={addAgendaItem}
               >
                 <Plus className="h-4 w-4 ml-2" />
                 הוסף נושא
@@ -284,8 +284,8 @@ export function MeetingAgendaForm({
                           <Button
                             type="button"
                             variant="ghost"
-                            size="sm"
-                            size="sm" onClick={() => moveAgendaItem(index, 'up')}
+ 
+ onClick={() => moveAgendaItem(index, 'up')}
                           >
                             ↑
                           </Button>
@@ -294,8 +294,8 @@ export function MeetingAgendaForm({
                           <Button
                             type="button"
                             variant="ghost"
-                            size="sm"
-                            size="sm" onClick={() => moveAgendaItem(index, 'down')}
+ 
+ onClick={() => moveAgendaItem(index, 'down')}
                           >
                             ↓
                           </Button>
@@ -304,8 +304,8 @@ export function MeetingAgendaForm({
                           <Button
                             type="button"
                             variant="ghost"
-                            size="sm"
-                            size="sm" onClick={() => removeAgendaItem(index)}
+ 
+ onClick={() => removeAgendaItem(index)}
                           >
                             <Trash2 className="h-4 w-4 text-destructive" />
                           </Button>

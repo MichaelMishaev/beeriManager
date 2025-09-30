@@ -244,7 +244,7 @@ export default function NewCommitteePage() {
               />
               <Button
                 type="button"
-                size="sm"
+ 
                 onClick={addMember}
                 variant="outline"
               >
@@ -300,7 +300,7 @@ export default function NewCommitteePage() {
               />
               <Button
                 type="button"
-                size="sm"
+ 
                 onClick={addResponsibility}
                 variant="outline"
               >

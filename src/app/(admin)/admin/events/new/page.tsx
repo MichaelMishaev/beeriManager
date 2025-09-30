@@ -408,7 +408,7 @@ export default function NewEventPage() {
           <Button
             type="button"
             variant="outline"
-            size="sm" onClick={() => router.back()}
+ onClick={() => router.back()}
           >
             ביטול
           </Button>

@@ -333,8 +333,8 @@ export function EventForm({
             <Button
               type="button"
               variant="outline"
-              size="sm"
-              size="sm" onClick={addVolunteerSlot}
+ 
+ onClick={addVolunteerSlot}
             >
               <Plus className="h-4 w-4 ml-2" />
               הוסף תפקיד
@@ -349,8 +349,8 @@ export function EventForm({
                     <Button
                       type="button"
                       variant="ghost"
-                      size="sm"
-                      size="sm" onClick={() => removeVolunteerSlot(index)}
+ 
+ onClick={() => removeVolunteerSlot(index)}
                     >
                       <Trash2 className="h-4 w-4 text-destructive" />
                     </Button>

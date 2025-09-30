@@ -259,7 +259,7 @@ export default function EditCommitteePage({ params }: { params: { id: string } }
                   }
                 }}
               />
-              <Button type="button" size="sm" onClick={addMember} variant="outline">
+              <Button type="button" onClick={addMember} variant="outline">
                 <Plus className="h-4 w-4" />
                 הוסף
               </Button>
@@ -309,7 +309,7 @@ export default function EditCommitteePage({ params }: { params: { id: string } }
                   }
                 }}
               />
-              <Button type="button" size="sm" onClick={addResponsibility} variant="outline">
+              <Button type="button" onClick={addResponsibility} variant="outline">
                 <Plus className="h-4 w-4" />
                 הוסף
               </Button>

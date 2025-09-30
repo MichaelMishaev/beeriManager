@@ -259,7 +259,7 @@ export default function FeedbackPage() {
                   <button
                     key={rating}
                     type="button"
-                    size="sm" onClick={() => {
+                    onClick={() => {
                       logger.userAction('Set rating', { rating })
                       setValue('rating', rating)
                     }}

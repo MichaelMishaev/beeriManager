@@ -404,8 +404,8 @@ export function ExpenseForm({
             <Button
               type="button"
               variant="outline"
-              size="sm"
-              size="sm" onClick={addReceiptUrl}
+ 
+ onClick={addReceiptUrl}
             >
               <Plus className="h-4 w-4 ml-2" />
               הוסף קבלה
@@ -417,8 +417,8 @@ export function ExpenseForm({
                 <Button
                   type="button"
                   variant="ghost"
-                  size="sm"
-                  size="sm" onClick={() => removeReceiptUrl(index)}
+ 
+ onClick={() => removeReceiptUrl(index)}
                   className="text-destructive"
                 >
                   <Trash2 className="h-4 w-4" />
