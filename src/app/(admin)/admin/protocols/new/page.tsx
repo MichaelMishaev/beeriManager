@@ -258,7 +258,7 @@ export default function NewProtocolPage() {
                     <span className="text-sm">{attendee}</span>
                     <button
                       type="button"
-                      size="sm" onClick={() => removeAttendee(index)}
+                      onClick={() => removeAttendee(index)}
                       className="hover:text-destructive"
                     >
                       <X className="h-3 w-3" />

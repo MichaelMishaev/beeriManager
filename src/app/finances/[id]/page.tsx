@@ -101,7 +101,7 @@ async function ExpenseContent({ id }: { id: string }) {
   return (
     <div className="space-y-6">
       {/* Back Button */}
-      <Button variant="outline" size="sm" asChild size="sm">
+      <Button variant="outline" size="sm" asChild>
         <Link href="/finances">
           <ArrowRight className="h-4 w-4 ml-2" />
           חזרה לדוח כספי

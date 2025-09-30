@@ -202,7 +202,7 @@ function RecentActivity() {
           })}
         </div>
         <div className="mt-4 text-center">
-          <Button variant="ghost" size="sm" asChild size="sm">
+          <Button variant="ghost" size="sm" asChild>
             <Link href="/activity">
               צפה בכל הפעילות
             </Link>
@@ -308,7 +308,7 @@ export function Dashboard({ stats, upcomingEvents, pendingTasks, calendarEvents 
                   האירועים הבאים בלוח השנה
                 </CardDescription>
               </div>
-              <Button variant="outline" size="sm" asChild size="sm">
+              <Button variant="outline" size="sm" asChild>
                 <Link href="/events">
                   צפה בכל האירועים
                 </Link>
@@ -351,7 +351,7 @@ export function Dashboard({ stats, upcomingEvents, pendingTasks, calendarEvents 
                   משימות שדורשות טיפול
                 </CardDescription>
               </div>
-              <Button variant="outline" size="sm" asChild size="sm">
+              <Button variant="outline" size="sm" asChild>
                 <Link href="/tasks">
                   צפה בכל המשימות
                 </Link>

@@ -90,7 +90,7 @@ export function Navigation() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  size="sm" onClick={() => handleNavClick(item.href, item.label)}
+                  onClick={() => handleNavClick(item.href, item.label)}
                   className={cn(
                     'flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md transition-colors',
                     isActive(item.href)
@@ -109,7 +109,7 @@ export function Navigation() {
               <Button
                 variant="ghost"
                 size="sm"
-                size="sm" onClick={handleLogout}
+                onClick={handleLogout}
                 className="flex items-center gap-2"
               >
                 <LogOut className="h-4 w-4" />
@@ -135,7 +135,7 @@ export function Navigation() {
             variant="ghost"
             size="icon"
             className="md:hidden"
-            size="sm" onClick={() => {
+            onClick={() => {
               setIsOpen(!isOpen)
               logger.userAction('Toggle mobile menu', { isOpen: !isOpen })
             }}
@@ -153,7 +153,7 @@ export function Navigation() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  size="sm" onClick={() => handleNavClick(item.href, item.label)}
+                  onClick={() => handleNavClick(item.href, item.label)}
                   className={cn(
                     'flex items-center gap-3 px-4 py-3 text-base font-medium rounded-md transition-colors',
                     isActive(item.href)
@@ -171,7 +171,7 @@ export function Navigation() {
             <div className="pt-2 border-t">
               {isAuthenticated ? (
                 <button
-                  size="sm" onClick={handleLogout}
+                  onClick={handleLogout}
                   className="flex items-center gap-3 px-4 py-3 text-base font-medium rounded-md transition-colors text-muted-foreground hover:bg-accent hover:text-accent-foreground w-full"
                 >
                   <LogOut className="h-5 w-5" />
@@ -180,7 +180,7 @@ export function Navigation() {
               ) : (
                 <Link
                   href="/login"
-                  size="sm" onClick={() => handleNavClick('/login', 'כניסת ועד')}
+                  onClick={() => handleNavClick('/login', 'כניסת ועד')}
                   className="flex items-center gap-3 px-4 py-3 text-base font-medium rounded-md transition-colors text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                 >
                   <LogIn className="h-5 w-5" />

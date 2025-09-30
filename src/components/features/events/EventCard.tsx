@@ -128,7 +128,7 @@ export function EventCard({
 
           {showActions && (
             <div className="flex gap-2">
-              <Button size="sm" asChild size="sm">
+              <Button size="sm" asChild>
                 <Link href={`/events/${event.id}`}>פרטים</Link>
               </Button>
               {event.registration_enabled && onRegister && (

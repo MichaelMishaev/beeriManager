@@ -48,7 +48,7 @@ export default function Error({
           )}
 
           <div className="space-y-2">
-            <Button size="sm" onClick={reset} className="w-full" size="sm">
+            <Button size="sm" onClick={reset} className="w-full">
               <RefreshCw className="h-4 w-4 ml-2" />
               נסה שנית
             </Button>

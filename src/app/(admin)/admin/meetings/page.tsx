@@ -163,7 +163,7 @@ async function MeetingsList() {
                 </Link>
               </Button>
               {meeting.status !== 'completed' && (
-                <Button size="sm" asChild className="flex-1" size="sm">
+                <Button size="sm" asChild className="flex-1">
                   <Link href={`/admin/events/${meeting.related_event_id || ''}`}>
                     <Calendar className="h-4 w-4 ml-2" />
                     פרטי האירוע

@@ -150,7 +150,7 @@ export function TaskCard({
 
               {showActions && (
                 <div className="flex gap-2">
-                  <Button size="sm" asChild size="sm">
+                  <Button size="sm" asChild>
                     <Link href={`/tasks/${task.id}`}>פרטים</Link>
                   </Button>
                   {task.status !== 'completed' && onComplete && (

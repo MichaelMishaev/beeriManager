@@ -112,7 +112,7 @@ async function CommitteesList() {
                 </div>
                 {committee.members && committee.members.length > 0 && (
                   <div className="flex flex-wrap gap-1">
-                    {committee.members.slice(0, 3).map((member, idx) => (
+                    {committee.members.slice(0, 3).map((member: string, idx: number) => (
                       <Badge key={idx} variant="outline" className="text-xs">
                         {member}
                       </Badge>
@@ -138,7 +138,7 @@ async function CommitteesList() {
                 </div>
                 {committee.responsibilities && committee.responsibilities.length > 0 && (
                   <div className="flex flex-wrap gap-1">
-                    {committee.responsibilities.slice(0, 3).map((resp, idx) => (
+                    {committee.responsibilities.slice(0, 3).map((resp: string, idx: number) => (
                       <Badge
                         key={idx}
                         variant="outline"

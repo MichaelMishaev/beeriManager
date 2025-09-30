@@ -80,7 +80,7 @@ export default function LoginPage() {
                 <button
                   type="button"
                   className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                  size="sm" onClick={() => setShowPassword(!showPassword)}
+                  onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? (
                     <EyeOff className="h-4 w-4" />
@@ -121,7 +121,7 @@ export default function LoginPage() {
             <Button
               variant="ghost"
               size="sm"
-              size="sm" onClick={() => router.push('/')}
+              onClick={() => router.push('/')}
             >
               חזור לעמוד הבית
             </Button>

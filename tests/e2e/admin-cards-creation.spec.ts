@@ -1,12 +1,17 @@
 import { test, expect } from '@playwright/test';
+import { AuthHelper } from '../helpers/auth.helper';
 
 test.describe('Admin Dashboard - Create Entities from Cards', () => {
   test.beforeEach(async ({ page }) => {
+    // Login as admin
+    const authHelper = new AuthHelper(page);
+    await authHelper.loginAsAdmin();
+
     // Navigate to admin dashboard
     await page.goto('http://localhost:4500/admin');
 
     // Wait for the page to load
-    await page.waitForSelector('.grid.gap-6.md\\:grid-cols-2.lg\\:grid-cols-3');
+    await page.waitForSelector('.grid.gap-6.md\\:grid-cols-2.lg\\:grid-cols-3', { timeout: 10000 });
   });
 
   test('should create new event from אירועים card', async ({ page }) => {

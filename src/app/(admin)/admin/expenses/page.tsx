@@ -434,7 +434,7 @@ export default function ExpensesPage() {
                       <Button
                         size="sm"
                         variant="outline"
-                        size="sm" onClick={() => handleApprove(expense.id)}
+                        onClick={() => handleApprove(expense.id)}
                       >
                         אשר
                       </Button>

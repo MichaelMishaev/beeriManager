@@ -87,7 +87,7 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
                     ))}
                     {upcomingEvents.length > 5 && (
                       <div className="text-center pt-4">
-                        <Button variant="outline" size="sm" asChild size="sm">
+                        <Button variant="outline" size="sm" asChild>
                           <Link href="/events">
                             צפה בכל האירועים ({upcomingEvents.length})
                           </Link>
@@ -154,7 +154,7 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
                 className="max-w-none"
               />
               <div className="mt-4 text-center">
-                <Button variant="outline" size="sm" asChild className="w-full" size="sm">
+                <Button variant="outline" size="sm" asChild className="w-full">
                   <Link href="/calendar">
                     <Calendar className="h-3 w-3 ml-2" />
                     לוח שנה מלא

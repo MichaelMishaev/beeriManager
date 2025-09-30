@@ -197,14 +197,14 @@ export function IssueCard({
 
               {showActions && (
                 <div className="flex gap-2">
-                  <Button size="sm" asChild size="sm">
+                  <Button size="sm" asChild>
                     <Link href={`/issues/${issue.id}`}>פרטים</Link>
                   </Button>
                   {issue.status !== 'resolved' && issue.status !== 'closed' && onStatusChange && (
                     <Button
                       size="sm"
                       variant="outline"
-                      size="sm" onClick={() => onStatusChange(issue.status === 'open' ? 'in_progress' : 'resolved')}
+                      onClick={() => onStatusChange(issue.status === 'open' ? 'in_progress' : 'resolved')}
                     >
                       {issue.status === 'open' ? 'התחל טיפול' : 'סמן כנפתר'}
                     </Button>
