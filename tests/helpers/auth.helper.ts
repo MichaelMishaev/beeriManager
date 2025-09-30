@@ -5,10 +5,12 @@ export class AuthHelper {
 
   async loginAsAdmin(password: string = process.env.ADMIN_PASSWORD || 'test-password') {
     await this.page.goto('/login');
-    await this.page.waitForSelector('input[type="password"]');
-    await this.page.fill('input[type="password"]', password);
+    await this.page.waitForSelector('#password');
+    await this.page.fill('#password', password);
+
+    // Click submit and wait for navigation
     await this.page.click('button[type="submit"]');
-    await this.page.waitForURL('/admin');
+    await this.page.waitForURL(/.*\/admin/, { timeout: 10000 });
   }
 
   async logout() {
