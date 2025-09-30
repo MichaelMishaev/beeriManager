@@ -1,20 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { verifyJWT } from '@/lib/auth/jwt'
 import { z } from 'zod'
 
 // Issue validation schema
 const IssueSchema = z.object({
   title: z.string().min(2, 'כותרת חייבת להכיל לפחות 2 תווים'),
-  description: z.string().min(10, 'תיאור חייב להכיל לפחות 10 תווים'),
+  description: z.string().min(1, 'תיאור נדרש'),
   category: z.enum(['safety', 'maintenance', 'academic', 'social', 'financial', 'other']),
   priority: z.enum(['low', 'normal', 'high', 'critical']),
   status: z.enum(['open', 'in_progress', 'resolved', 'closed']),
-  reporter_name: z.string().min(2, 'שם המדווח חייב להכיל לפחות 2 תווים'),
-  reporter_contact: z.string().optional(),
-  assigned_to: z.string().optional(),
-  resolution: z.string().optional(),
-  attachment_urls: z.array(z.string().url()).optional()
+  reporter_name: z.string().min(1, 'שם המדווח נדרש'),
+  reporter_contact: z.string().optional().nullable(),
+  assigned_to: z.string().optional().nullable(),
+  resolution: z.string().optional().nullable(),
+  event_id: z.string().uuid().optional().nullable(),
+  attachment_urls: z.array(z.string()).optional().default([])
 })
 
 export async function GET(req: NextRequest) {
@@ -78,24 +78,19 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    // Verify admin authentication
-    const token = req.cookies.get('auth-token')
-    if (!token || !verifyJWT(token.value)) {
-      return NextResponse.json(
-        { success: false, error: 'נדרשת הרשאת מנהל' },
-        { status: 401 }
-      )
-    }
-
+    // Public endpoint - no authentication required for issue submission
     const body = await req.json()
+    console.log('Issue submission body:', JSON.stringify(body, null, 2))
+
     const validation = IssueSchema.safeParse(body)
 
     if (!validation.success) {
+      console.error('Validation errors:', validation.error.errors)
       return NextResponse.json(
         {
           success: false,
           error: 'נתונים לא תקינים',
-          details: validation.error.errors.map(err => err.message)
+          details: validation.error.errors.map(err => `${err.path.join('.')}: ${err.message}`)
         },
         { status: 400 }
       )
@@ -103,14 +98,19 @@ export async function POST(req: NextRequest) {
 
     const supabase = createClient()
 
-    // Create issue
+    // Prepare insert data - only include core fields that exist in DB schema
+    const insertData = {
+      title: validation.data.title,
+      description: validation.data.description,
+      category: validation.data.category,
+      priority: validation.data.priority,
+      status: validation.data.status,
+      reporter_name: validation.data.reporter_name
+    }
+
     const { data, error } = await supabase
       .from('issues')
-      .insert([{
-        ...validation.data,
-        reported_by: 'admin', // In a full system, this would come from JWT
-        attachment_urls: validation.data.attachment_urls || []
-      }])
+      .insert([insertData])
       .select()
       .single()
 
