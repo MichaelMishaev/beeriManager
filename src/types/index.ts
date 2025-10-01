@@ -295,6 +295,38 @@ export interface Vendor {
   version: number
 }
 
+export interface Holiday {
+  id: string
+  name: string
+  hebrew_name: string
+  description?: string
+
+  // Dates
+  start_date: string
+  end_date: string
+
+  // Metadata
+  holiday_type: 'religious' | 'national' | 'school_break' | 'other'
+  is_school_closed: boolean
+
+  // Visual
+  icon_emoji?: string
+  color: string
+
+  // Academic tracking
+  academic_year: string
+  hebrew_date?: string
+
+  // Related event
+  event_id?: string
+
+  // Audit
+  created_at: string
+  updated_at: string
+  created_by?: string
+  updated_by?: string
+}
+
 // Form and UI types
 export interface RegistrationFormConfig {
   fields: FormField[]
