@@ -25,8 +25,24 @@ interface Event {
   current_attendees?: number
 }
 
+interface Holiday {
+  id: string
+  name: string
+  hebrew_name: string
+  description?: string
+  start_date: string
+  end_date: string
+  holiday_type: 'religious' | 'national' | 'school_break' | 'other'
+  is_school_closed: boolean
+  icon_emoji?: string
+  color: string
+  academic_year: string
+  hebrew_date?: string
+}
+
 interface BeeriCalendarProps {
   events: Event[]
+  holidays?: Holiday[]
   view?: 'month' | 'week' | 'list'
   onEventClick?: (event: Event) => void
   showCreateButton?: boolean
@@ -62,6 +78,7 @@ const priorityLabels = {
 
 export default function BeeriCalendar({
   events = [],
+  holidays = [],
   view = 'month',
   onEventClick,
   showCreateButton = false
@@ -69,6 +86,7 @@ export default function BeeriCalendar({
   const [currentDate, setCurrentDate] = useState(new Date())
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [currentView, setCurrentView] = useState(view)
+  const [showHolidays, setShowHolidays] = useState(true)
 
   // Filter events to only show published ones
   const publishedEvents = events.filter(e => e.status === 'published')
@@ -82,6 +100,22 @@ export default function BeeriCalendar({
     acc[dateKey].push(event)
     return acc
   }, {} as Record<string, Event[]>)
+
+  // Group holidays by date (handle date ranges)
+  const holidaysByDate = holidays.reduce((acc, holiday) => {
+    const start = new Date(holiday.start_date)
+    const end = new Date(holiday.end_date)
+
+    // Add holiday to all dates in range
+    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+      const dateKey = format(d, 'yyyy-MM-dd')
+      if (!acc[dateKey]) {
+        acc[dateKey] = []
+      }
+      acc[dateKey].push(holiday)
+    }
+    return acc
+  }, {} as Record<string, Holiday[]>)
 
   const monthStart = startOfMonth(currentDate)
   const monthEnd = endOfMonth(monthStart)
@@ -118,6 +152,11 @@ export default function BeeriCalendar({
   const getEventsForDate = (date: Date) => {
     const dateKey = format(date, 'yyyy-MM-dd')
     return eventsByDate[dateKey] || []
+  }
+
+  const getHolidaysForDate = (date: Date) => {
+    const dateKey = format(date, 'yyyy-MM-dd')
+    return holidaysByDate[dateKey] || []
   }
 
   const renderMonthView = () => (
@@ -179,9 +218,12 @@ export default function BeeriCalendar({
       <div className="grid grid-cols-7 gap-px bg-muted rounded-b-lg overflow-hidden">
         {days.map((day) => {
           const dayEvents = getEventsForDate(day)
+          const dayHolidays = showHolidays ? getHolidaysForDate(day) : []
           const isCurrentMonth = isSameMonth(day, currentDate)
           const isSelected = selectedDate && isSameDay(day, selectedDate)
           const isTodayDate = isToday(day)
+          const hasHoliday = dayHolidays.length > 0
+          const firstHoliday = dayHolidays[0]
 
           return (
             <div
@@ -192,6 +234,11 @@ export default function BeeriCalendar({
                 isSelected && 'ring-2 ring-primary',
                 isTodayDate && 'bg-primary/5'
               )}
+              style={
+                hasHoliday && firstHoliday
+                  ? { background: `linear-gradient(135deg, ${firstHoliday.color}10, ${firstHoliday.color}05)` }
+                  : undefined
+              }
               onClick={() => handleDateClick(day)}
             >
               <div className="flex justify-between items-start mb-1">
@@ -201,16 +248,39 @@ export default function BeeriCalendar({
                 )}>
                   {format(day, 'd')}
                 </span>
-                {dayEvents.length > 0 && (
-                  <Badge variant="secondary" className="text-xs">
-                    {dayEvents.length}
-                  </Badge>
-                )}
+                <div className="flex gap-1">
+                  {hasHoliday && firstHoliday?.icon_emoji && (
+                    <span className="text-xs" title={firstHoliday.hebrew_name}>
+                      {firstHoliday.icon_emoji}
+                    </span>
+                  )}
+                  {(dayEvents.length > 0 || dayHolidays.length > 0) && (
+                    <Badge variant="secondary" className="text-xs">
+                      {dayEvents.length + dayHolidays.length}
+                    </Badge>
+                  )}
+                </div>
               </div>
 
-              {/* Event Pills */}
+              {/* Holiday Pills */}
               <div className="space-y-1">
-                {dayEvents.slice(0, 3).map((event) => (
+                {dayHolidays.slice(0, 1).map((holiday) => (
+                  <div
+                    key={holiday.id}
+                    className="text-xs p-1 rounded cursor-pointer hover:opacity-80 transition-opacity truncate border font-medium"
+                    style={{
+                      backgroundColor: holiday.color + '30',
+                      borderColor: holiday.color + '60',
+                      color: '#000'
+                    }}
+                    title={holiday.hebrew_name}
+                  >
+                    {holiday.icon_emoji} {holiday.hebrew_name}
+                  </div>
+                ))}
+
+                {/* Event Pills */}
+                {dayEvents.slice(0, hasHoliday ? 2 : 3).map((event) => (
                   <div
                     key={event.id}
                     onClick={(e) => {
@@ -226,9 +296,10 @@ export default function BeeriCalendar({
                     {format(new Date(event.start_datetime), 'HH:mm')} {event.title}
                   </div>
                 ))}
-                {dayEvents.length > 3 && (
+
+                {(dayEvents.length + dayHolidays.length) > 3 && (
                   <div className="text-xs text-muted-foreground text-center">
-                    +{dayEvents.length - 3} נוספים
+                    +{(dayEvents.length + dayHolidays.length) - 3} נוספים
                   </div>
                 )}
               </div>
@@ -242,16 +313,63 @@ export default function BeeriCalendar({
         <Card className="mt-6">
           <CardHeader>
             <CardTitle>
-              אירועים ב-{format(selectedDate, 'd בMMMM yyyy', { locale: he })}
+              אירועים וחגים ב-{format(selectedDate, 'd בMMMM yyyy', { locale: he })}
             </CardTitle>
             <CardDescription>
               {getEventsForDate(selectedDate).length} אירועים
+              {getHolidaysForDate(selectedDate).length > 0 && ` • ${getHolidaysForDate(selectedDate).length} חגים`}
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {getEventsForDate(selectedDate).length === 0 ? (
-              <p className="text-muted-foreground">אין אירועים בתאריך זה</p>
-            ) : (
+            {/* Show Holidays First */}
+            {getHolidaysForDate(selectedDate).length > 0 && (
+              <div className="space-y-3 mb-4">
+                {getHolidaysForDate(selectedDate).map((holiday) => (
+                  <Card
+                    key={holiday.id}
+                    className="border-2"
+                    style={{
+                      background: `linear-gradient(135deg, ${holiday.color}20, ${holiday.color}08)`,
+                      borderColor: holiday.color + '60'
+                    }}
+                  >
+                    <CardContent className="p-4">
+                      <div className="flex items-start gap-3">
+                        {holiday.icon_emoji && (
+                          <div className="text-3xl flex-shrink-0">
+                            {holiday.icon_emoji}
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h4 className="font-bold text-lg">{holiday.hebrew_name}</h4>
+                            {holiday.is_school_closed && (
+                              <Badge variant="secondary" className="bg-red-100 text-red-800">
+                                בית הספר סגור
+                              </Badge>
+                            )}
+                          </div>
+                          {holiday.hebrew_date && (
+                            <p className="text-sm text-muted-foreground">
+                              {holiday.hebrew_date}
+                            </p>
+                          )}
+                          {holiday.description && (
+                            <p className="text-sm text-muted-foreground mt-2">
+                              {holiday.description}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+
+            {getEventsForDate(selectedDate).length === 0 && getHolidaysForDate(selectedDate).length === 0 ? (
+              <p className="text-muted-foreground">אין אירועים או חגים בתאריך זה</p>
+            ) : getEventsForDate(selectedDate).length > 0 ? (
               <div className="space-y-3">
                 {getEventsForDate(selectedDate).map((event) => (
                   <Card key={event.id} className="cursor-pointer hover:bg-accent transition-colors">
@@ -297,7 +415,7 @@ export default function BeeriCalendar({
                   </Card>
                 ))}
               </div>
-            )}
+            ) : null}
           </CardContent>
         </Card>
       )}

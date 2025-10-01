@@ -5,10 +5,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { MobileCalendar } from '@/components/ui/MobileCalendar'
 import { CommitteeCard } from './CommitteeCard'
+// import { NextHolidayWidget } from '@/components/features/holidays/NextHolidayWidget'
+// import { HolidaysFAB } from '@/components/features/holidays/HolidaysFAB'
 import type { Event, CalendarEvent } from '@/types'
 import Link from 'next/link'
 import { format } from 'date-fns'
 import { he } from 'date-fns/locale'
+import { useState } from 'react'
 
 interface PublicHomepageProps {
   upcomingEvents: Event[]
@@ -53,6 +56,8 @@ function EventItem({ event }: { event: Event }) {
 }
 
 export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepageProps) {
+  // const [holidaysModalOpen, setHolidaysModalOpen] = useState(false)
+
   // Get recent events with photos (past events only)
   const now = new Date()
   const eventsWithPhotos = upcomingEvents
@@ -64,7 +69,7 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
     .slice(0, 4)
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-6xl">
+      <div className="container mx-auto px-4 py-8 max-w-6xl">
       {/* Welcome Header */}
       <div className="text-center space-y-3 mb-8">
         <h1 className="text-4xl font-bold text-foreground">

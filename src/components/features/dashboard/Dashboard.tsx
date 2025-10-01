@@ -1,12 +1,14 @@
 'use client'
 
-import React from 'react'
+import React, { useState } from 'react'
 import { Calendar, CheckSquare, FileText, AlertCircle, TrendingUp, Users } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { MobileCalendar } from '@/components/ui/MobileCalendar'
 import { EventCard } from '@/components/features/events/EventCard'
 import { TaskCard } from '@/components/features/tasks/TaskCard'
+// import { NextHolidayWidget } from '@/components/features/holidays/NextHolidayWidget'
+// import { HolidaysFAB } from '@/components/features/holidays/HolidaysFAB'
 import type { DashboardStats, Event, Task, CalendarEvent } from '@/types'
 import Link from 'next/link'
 
@@ -214,6 +216,8 @@ function RecentActivity() {
 }
 
 export function Dashboard({ stats, upcomingEvents, pendingTasks, calendarEvents }: DashboardProps) {
+  // const [holidaysModalOpen, setHolidaysModalOpen] = useState(false)
+
   return (
     <div className="container mx-auto px-4 py-6 space-y-6">
       {/* Welcome Header */}
@@ -261,7 +265,7 @@ export function Dashboard({ stats, upcomingEvents, pendingTasks, calendarEvents 
       {/* Main Content Grid */}
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Calendar Column */}
-        <div className="lg:col-span-1">
+        <div className="lg:col-span-1 space-y-6">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
