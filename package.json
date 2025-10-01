@@ -25,6 +25,9 @@
     "db:reset": "./scripts/db-commands.sh reset",
     "db:backup": "./scripts/db-commands.sh backup",
     "db:connect": "./scripts/db-commands.sh connect",
+    "db:export-schema": "./scripts/export-schema.sh",
+    "db:import-schema": "./scripts/import-schema.sh",
+    "db:compare-schemas": "./scripts/compare-schemas.sh",
     "type-check": "tsc --noEmit",
     "icons:generate": "node scripts/generate-icons.js",
     "postinstall": "npm run icons:generate"

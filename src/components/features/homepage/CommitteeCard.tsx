@@ -54,13 +54,13 @@ export function CommitteeCard() {
   const [isExpanded, setIsExpanded] = useState(false)
 
   const handleWhatsAppShare = () => {
-    const text = `נציגי ועד ההורים 👥
+    const text = `👥 נציגי ועד ההורים 👥
 
 ${Object.entries(groupedMembers).map(([gradeLevel, members]) =>
-  `${gradeLevel}׳:\n${members.map(m => `  ${m.grade} - ${m.name}`).join('\n')}`
+  `📚 ${gradeLevel}׳:\n${members.map(m => `   ✓ ${m.grade} - ${m.name}`).join('\n')}`
 ).join('\n\n')}
 
-📱 לכל שאלה או הצעה`
+💬 לכל שאלה או הצעה - צרו קשר!`
 
     const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(text)}`
     window.open(whatsappUrl, '_blank')
