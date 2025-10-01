@@ -87,7 +87,7 @@ export function NextHolidayWidget({ onClick }: NextHolidayWidgetProps) {
           )}
           <div className="flex-1 min-w-0">
             <h3 className="text-xl font-bold mb-1">
-              {nextHoliday.hebrew_name}
+              {nextHoliday.name}
             </h3>
             {nextHoliday.hebrew_date && (
               <p className="text-sm text-muted-foreground">

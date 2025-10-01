@@ -50,7 +50,7 @@ export function HolidaysModal({ open, onOpenChange }: HolidaysModalProps) {
 
   const handleShare = async () => {
     const text = holidays
-      .map(h => `${h.icon_emoji || '📅'} ${h.hebrew_name} - ${h.hebrew_date || format(parseISO(h.start_date), 'd/M', { locale: he })}${h.is_school_closed ? ' (בית הספר סגור)' : ''}`)
+      .map(h => `${h.icon_emoji || '📅'} ${h.name} - ${h.hebrew_date || format(parseISO(h.start_date), 'd/M', { locale: he })}${h.is_school_closed ? ' (בית הספר סגור)' : ''}`)
       .join('\n')
 
     const fullText = `🗓️ לוח חגים שנת הלימודים ${academicYear}\n\n${text}\n\n📱 מערכת ניהול ועד הורים - pipguru.club`
@@ -150,7 +150,7 @@ export function HolidaysModal({ open, onOpenChange }: HolidaysModalProps) {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-2 mb-1">
                           <h3 className="text-lg font-bold">
-                            {holiday.hebrew_name}
+                            {holiday.name}
                           </h3>
                           {holiday.is_school_closed && (
                             <Badge
