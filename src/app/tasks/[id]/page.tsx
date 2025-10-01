@@ -1,12 +1,12 @@
 import { notFound } from 'next/navigation'
 import { Suspense } from 'react'
-import { CheckSquare, User, Clock, Calendar, Phone, AlertCircle, ChevronRight, Edit } from 'lucide-react'
+import { CheckSquare, User, Clock, Calendar, Phone, AlertCircle, ChevronRight } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { formatHebrewDate, getHebrewRelativeTime } from '@/lib/utils/date'
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
+import { TaskActions } from '@/components/tasks/task-actions'
 
 async function getTask(id: string) {
   const supabase = createClient()
@@ -137,18 +137,11 @@ async function TaskDetail({ id }: { id: string }) {
               </div>
             </div>
 
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm">
-                <Edit className="h-4 w-4 ml-2" />
-                עריכה
-              </Button>
-              {task.status !== 'completed' && (
-                <Button variant="default" size="sm">
-                  <CheckSquare className="h-4 w-4 ml-2" />
-                  סמן כהושלם
-                </Button>
-              )}
-            </div>
+            <TaskActions
+              taskId={task.id}
+              taskTitle={task.title}
+              isCompleted={task.status === 'completed'}
+            />
           </div>
         </CardHeader>
 
