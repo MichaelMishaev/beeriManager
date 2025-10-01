@@ -1,12 +1,33 @@
+'use client'
+
 import Link from 'next/link'
-import { Suspense } from 'react'
-import { Calendar, CheckSquare, AlertTriangle, FileText, Users, DollarSign, MessageSquare, Settings, Plus, Edit, BarChart } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Calendar, CheckSquare, AlertTriangle, FileText, Users, DollarSign, MessageSquare, Settings, Plus, Edit, BarChart, GripVertical } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { createClient } from '@/lib/supabase/server'
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core'
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
+import { createClient } from '@/lib/supabase/client'
 
-const adminSections = [
+const defaultAdminSections = [
   {
+    id: 'events',
     title: 'אירועים',
     description: 'ניהול אירועים, הרשמות ולוח שנה',
     icon: Calendar,
@@ -19,6 +40,7 @@ const adminSections = [
     ]
   },
   {
+    id: 'tasks',
     title: 'משימות',
     description: 'הקצאת משימות ומעקב ביצוע',
     icon: CheckSquare,
@@ -31,6 +53,7 @@ const adminSections = [
     ]
   },
   {
+    id: 'committees',
     title: 'וועדות',
     description: 'ניהול וועדות תחומיות ותחומי אחריות',
     icon: Users,
@@ -38,11 +61,11 @@ const adminSections = [
     bgColor: 'bg-teal-50',
     links: [
       { href: '/admin/committees/new', label: 'וועדה חדשה', icon: Plus },
-      { href: '/admin/committees', label: 'רשימת וועדות', icon: Edit },
-      { href: '/admin/committees', label: 'ניהול חברים', icon: Users }
+      { href: '/admin/committees', label: 'רשימת וועדות', icon: Edit }
     ]
   },
   {
+    id: 'issues',
     title: 'בעיות',
     description: 'ניהול בעיות ופניות',
     icon: AlertTriangle,
@@ -55,6 +78,7 @@ const adminSections = [
     ]
   },
   {
+    id: 'protocols',
     title: 'פרוטוקולים',
     description: 'ניהול מסמכים ופרוטוקולים',
     icon: FileText,
@@ -67,6 +91,7 @@ const adminSections = [
     ]
   },
   {
+    id: 'expenses',
     title: 'כספים',
     description: 'ניהול הוצאות ותקציבים',
     icon: DollarSign,
@@ -79,6 +104,7 @@ const adminSections = [
     ]
   },
   {
+    id: 'feedback',
     title: 'משוב',
     description: 'משוב אנונימי מהורים',
     icon: MessageSquare,
@@ -92,125 +118,246 @@ const adminSections = [
   }
 ]
 
-function StatsCardsSkeleton() {
+function SortableCard({ section }: { section: typeof defaultAdminSections[0] }) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: section.id })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  }
+
+  const Icon = section.icon
+
   return (
-    <div className="grid gap-4 md:grid-cols-4">
-      {[...Array(4)].map((_, i) => (
-        <Card key={i}>
-          <CardHeader className="pb-2">
-            <div className="h-4 bg-gray-200 rounded animate-pulse w-24" />
-          </CardHeader>
-          <CardContent>
-            <div className="h-8 bg-gray-200 rounded animate-pulse w-16 mb-2" />
-            <div className="h-3 bg-gray-200 rounded animate-pulse w-32" />
-          </CardContent>
-        </Card>
-      ))}
+    <div ref={setNodeRef} style={style}>
+      <Card className="hover:shadow-lg transition-shadow">
+        <CardHeader>
+          <div className="flex items-start justify-between">
+            <div className={`inline-flex p-3 rounded-lg ${section.bgColor} mb-3`}>
+              <Icon className={`h-6 w-6 ${section.color}`} />
+            </div>
+            <button
+              {...attributes}
+              {...listeners}
+              className="cursor-grab active:cursor-grabbing p-2 hover:bg-gray-100 rounded touch-none"
+              onTouchStart={(e) => e.stopPropagation()}
+            >
+              <GripVertical className="h-5 w-5 text-gray-400" />
+            </button>
+          </div>
+          <CardTitle>{section.title}</CardTitle>
+          <CardDescription>{section.description}</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          {section.links.map((link) => {
+            const LinkIcon = link.icon
+            return (
+              <Button
+                key={link.href}
+                variant="ghost"
+                className="w-full justify-start"
+                asChild
+              >
+                <Link href={link.href}>
+                  <LinkIcon className="h-4 w-4 ml-2" />
+                  {link.label}
+                </Link>
+              </Button>
+            )
+          })}
+        </CardContent>
+      </Card>
     </div>
   )
 }
 
-async function DashboardStats() {
-  const supabase = createClient()
+function DashboardStats() {
+  const [stats, setStats] = useState({
+    eventsThisMonth: 0,
+    draftEvents: 0,
+    openTasks: 0,
+    overdueTasks: 0,
+    openIssues: 0,
+    criticalIssues: 0,
+    registrations: 0,
+  })
+  const [isLoading, setIsLoading] = useState(true)
 
-  // Get current month date range
-  const now = new Date()
-  const firstDay = new Date(now.getFullYear(), now.getMonth(), 1)
-  const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0)
+  useEffect(() => {
+    async function fetchStats() {
+      const supabase = createClient()
 
-  // Fetch all stats in parallel
-  const [eventsData, tasksData, issuesData, registrationsData] = await Promise.all([
-    // Events this month
-    supabase
-      .from('events')
-      .select('id, status', { count: 'exact' })
-      .gte('start_datetime', firstDay.toISOString())
-      .lte('start_datetime', lastDay.toISOString()),
+      // Get current month date range
+      const now = new Date()
+      const firstDay = new Date(now.getFullYear(), now.getMonth(), 1)
+      const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0)
 
-    // Open tasks
-    supabase
-      .from('tasks')
-      .select('id, status, due_date', { count: 'exact' })
-      .in('status', ['pending', 'in_progress']),
+      // Fetch all stats in parallel
+      const [eventsData, tasksData, issuesData, registrationsData] = await Promise.all([
+        // Events this month
+        supabase
+          .from('events')
+          .select('id, status', { count: 'exact' })
+          .gte('start_datetime', firstDay.toISOString())
+          .lte('start_datetime', lastDay.toISOString()),
 
-    // Open issues
-    supabase
-      .from('issues')
-      .select('id, priority', { count: 'exact' })
-      .neq('status', 'closed'),
+        // Open tasks
+        supabase
+          .from('tasks')
+          .select('id, status, due_date', { count: 'exact' })
+          .in('status', ['pending', 'in_progress']),
 
-    // Event registrations this month
-    supabase
-      .from('event_registrations')
-      .select('id', { count: 'exact' })
-      .gte('created_at', firstDay.toISOString())
-  ])
+        // Open issues
+        supabase
+          .from('issues')
+          .select('id, priority', { count: 'exact' })
+          .neq('status', 'closed'),
 
-  const eventsThisMonth = eventsData.count || 0
-  const draftEvents = eventsData.data?.filter(e => e.status === 'draft').length || 0
+        // Event registrations this month
+        supabase
+          .from('event_registrations')
+          .select('id', { count: 'exact' })
+          .gte('created_at', firstDay.toISOString())
+      ])
 
-  const openTasks = tasksData.count || 0
-  const overdueTasks = tasksData.data?.filter(t =>
-    t.due_date && new Date(t.due_date) < now
-  ).length || 0
+      setStats({
+        eventsThisMonth: eventsData.count || 0,
+        draftEvents: eventsData.data?.filter(e => e.status === 'draft').length || 0,
+        openTasks: tasksData.count || 0,
+        overdueTasks: tasksData.data?.filter(t => t.due_date && new Date(t.due_date) < now).length || 0,
+        openIssues: issuesData.count || 0,
+        criticalIssues: issuesData.data?.filter(i => i.priority === 'critical').length || 0,
+        registrations: registrationsData.count || 0,
+      })
+      setIsLoading(false)
+    }
 
-  const openIssues = issuesData.count || 0
-  const criticalIssues = issuesData.data?.filter(i => i.priority === 'critical').length || 0
+    fetchStats()
+  }, [])
 
-  const registrations = registrationsData.count || 0
+  if (isLoading) {
+    return (
+      <Card>
+        <CardContent className="pt-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="text-center">
+                <div className="h-6 bg-gray-200 rounded animate-pulse w-12 mx-auto mb-1" />
+                <div className="h-3 bg-gray-200 rounded animate-pulse w-20 mx-auto" />
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
 
   return (
-    <div className="grid gap-4 md:grid-cols-4">
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium">אירועים החודש</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{eventsThisMonth}</div>
-          <p className="text-xs text-muted-foreground">
-            {draftEvents > 0 ? `${draftEvents} ממתינים לאישור` : 'הכל מאושר'}
-          </p>
-        </CardContent>
-      </Card>
+    <Card>
+      <CardContent className="pt-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <Link href="/events" className="text-center hover:bg-accent p-3 rounded-lg transition-colors">
+            <div className="text-2xl md:text-3xl font-bold">{stats.eventsThisMonth}</div>
+            <div className="text-sm font-medium text-muted-foreground mt-1">אירועים החודש</div>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {stats.draftEvents > 0 ? `${stats.draftEvents} ממתינים` : 'הכל מאושר'}
+            </p>
+          </Link>
 
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium">משימות פתוחות</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{openTasks}</div>
-          <p className="text-xs text-muted-foreground">
-            {overdueTasks > 0 ? `${overdueTasks} באיחור` : 'הכל בזמן'}
-          </p>
-        </CardContent>
-      </Card>
+          <Link href="/tasks" className="text-center hover:bg-accent p-3 rounded-lg transition-colors">
+            <div className="text-2xl md:text-3xl font-bold">{stats.openTasks}</div>
+            <div className="text-sm font-medium text-muted-foreground mt-1">משימות פתוחות</div>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {stats.overdueTasks > 0 ? `${stats.overdueTasks} באיחור` : 'הכל בזמן'}
+            </p>
+          </Link>
 
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium">בעיות לטיפול</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{openIssues}</div>
-          <p className="text-xs text-muted-foreground">
-            {criticalIssues > 0 ? `${criticalIssues} קריטיות` : 'אין קריטיות'}
-          </p>
-        </CardContent>
-      </Card>
+          <Link href="/issues" className="text-center hover:bg-accent p-3 rounded-lg transition-colors">
+            <div className="text-2xl md:text-3xl font-bold">{stats.openIssues}</div>
+            <div className="text-sm font-medium text-muted-foreground mt-1">בעיות לטיפול</div>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {stats.criticalIssues > 0 ? `${stats.criticalIssues} קריטיות` : 'אין קריטיות'}
+            </p>
+          </Link>
 
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium">נרשמים החודש</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{registrations}</div>
-          <p className="text-xs text-muted-foreground">לאירועים</p>
-        </CardContent>
-      </Card>
-    </div>
+          <Link href="/events" className="text-center hover:bg-accent p-3 rounded-lg transition-colors">
+            <div className="text-2xl md:text-3xl font-bold">{stats.registrations}</div>
+            <div className="text-sm font-medium text-muted-foreground mt-1">נרשמים החודש</div>
+            <p className="text-xs text-muted-foreground mt-0.5">לאירועים</p>
+          </Link>
+        </div>
+      </CardContent>
+    </Card>
   )
 }
 
 export default function AdminDashboard() {
+  const [sections, setSections] = useState(defaultAdminSections)
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 200,
+        tolerance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  )
+
+  // Load saved order from localStorage on mount
+  useEffect(() => {
+    const savedOrder = localStorage.getItem('admin-sections-order')
+    if (savedOrder) {
+      try {
+        const orderIds = JSON.parse(savedOrder)
+        const reordered = orderIds
+          .map((id: string) => defaultAdminSections.find(s => s.id === id))
+          .filter(Boolean)
+
+        // Add any new sections that weren't in saved order
+        const existingIds = new Set(orderIds)
+        const newSections = defaultAdminSections.filter(s => !existingIds.has(s.id))
+
+        setSections([...reordered, ...newSections])
+      } catch (e) {
+        console.error('Failed to load sections order:', e)
+      }
+    }
+  }, [])
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event
+
+    if (over && active.id !== over.id) {
+      setSections((items) => {
+        const oldIndex = items.findIndex((item) => item.id === active.id)
+        const newIndex = items.findIndex((item) => item.id === over.id)
+
+        const newOrder = arrayMove(items, oldIndex, newIndex)
+
+        // Save to localStorage
+        localStorage.setItem('admin-sections-order', JSON.stringify(newOrder.map(s => s.id)))
+
+        return newOrder
+      })
+    }
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -230,45 +377,25 @@ export default function AdminDashboard() {
       </div>
 
       {/* Quick Stats */}
-      <Suspense fallback={<StatsCardsSkeleton />}>
-        <DashboardStats />
-      </Suspense>
+      <DashboardStats />
 
-      {/* Admin Sections */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {adminSections.map((section) => {
-          const Icon = section.icon
-          return (
-            <Card key={section.title} className="hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <div className={`inline-flex p-3 rounded-lg ${section.bgColor} mb-3`}>
-                  <Icon className={`h-6 w-6 ${section.color}`} />
-                </div>
-                <CardTitle>{section.title}</CardTitle>
-                <CardDescription>{section.description}</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                {section.links.map((link) => {
-                  const LinkIcon = link.icon
-                  return (
-                    <Button
-                      key={link.href}
-                      variant="ghost"
-                      className="w-full justify-start"
-                      asChild
-                    >
-                      <Link href={link.href}>
-                        <LinkIcon className="h-4 w-4 ml-2" />
-                        {link.label}
-                      </Link>
-                    </Button>
-                  )
-                })}
-              </CardContent>
-            </Card>
-          )
-        })}
-      </div>
+      {/* Admin Sections - Draggable */}
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+      >
+        <SortableContext
+          items={sections.map(s => s.id)}
+          strategy={verticalListSortingStrategy}
+        >
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {sections.map((section) => (
+              <SortableCard key={section.id} section={section} />
+            ))}
+          </div>
+        </SortableContext>
+      </DndContext>
 
       {/* Quick Actions */}
       <Card>

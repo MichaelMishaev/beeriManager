@@ -44,6 +44,9 @@ export interface Event {
   // Relationships
   meeting_agenda_id?: string
 
+  // Photos
+  photos_url?: string
+
   // Audit
   created_at: string
   updated_at: string

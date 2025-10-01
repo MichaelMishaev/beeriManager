@@ -9,60 +9,70 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { format } from 'date-fns'
 
-interface Committee {
+interface Feedback {
   id: string
-  name: string
-  description?: string
-  members?: string[]
-  responsibilities?: string[]
-  color?: string
+  category: string
+  subject?: string
+  message: string
+  created_at: string
 }
 
 interface WhatsAppShareButtonProps {
-  committee: Committee
+  feedback: Feedback
 }
 
-export function WhatsAppShareButton({ committee }: WhatsAppShareButtonProps) {
+const categoryLabels: Record<string, string> = {
+  general: 'כללי',
+  event: 'אירוע',
+  task: 'משימה',
+  suggestion: 'הצעה',
+  complaint: 'תלונה',
+  other: 'אחר'
+}
+
+const categoryEmojis: Record<string, string> = {
+  general: '💬',
+  event: '📅',
+  task: '✅',
+  suggestion: '💡',
+  complaint: '⚠️',
+  other: '📝'
+}
+
+export function WhatsAppShareButton({ feedback }: WhatsAppShareButtonProps) {
   const [copied, setCopied] = useState(false)
 
-  const formatCommitteeForWhatsApp = () => {
-    let message = `*${committee.name}*\n`
+  const formatFeedbackForWhatsApp = () => {
+    const emoji = categoryEmojis[feedback.category] || '📝'
 
-    if (committee.description) {
-      message += `\n${committee.description}\n`
+    let message = `${emoji} *משוב מהורים*\n\n`
+    message += `*סוג:* ${categoryLabels[feedback.category] || feedback.category}\n`
+
+    if (feedback.subject) {
+      message += `*נושא:* ${feedback.subject}\n`
     }
 
-    if (committee.members && committee.members.length > 0) {
-      message += `\n*חברי ועדה:*\n`
-      committee.members.forEach((member) => {
-        message += `  - ${member}\n`
-      })
-    }
-
-    if (committee.responsibilities && committee.responsibilities.length > 0) {
-      message += `\n*תחומי אחריות:*\n`
-      committee.responsibilities.forEach((resp) => {
-        message += `  - ${resp}\n`
-      })
-    }
-
+    message += `*תאריך:* ${format(new Date(feedback.created_at), 'dd/MM/yyyy HH:mm')}\n`
+    message += `\n-------------------\n\n`
+    message += `${feedback.message}\n`
     message += `\n-------------------\n`
-    message += `*לצפייה בכל הועדות:*\n`
-    message += `${window.location.origin}/committees`
+    message += `*לצפייה בכל המשובים:*\n`
+    message += `${window.location.origin}/admin/feedback`
 
     return message
   }
 
   const handleCopy = async () => {
-    const text = formatCommitteeForWhatsApp()
+    const text = formatFeedbackForWhatsApp()
     await navigator.clipboard.writeText(text)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
 
   const handleWhatsAppShare = () => {
-    const text = formatCommitteeForWhatsApp()
+    const text = formatFeedbackForWhatsApp()
     const encodedText = encodeURIComponent(text)
     const whatsappUrl = `https://wa.me/?text=${encodedText}`
     window.open(whatsappUrl, '_blank')
@@ -75,7 +85,6 @@ export function WhatsAppShareButton({ committee }: WhatsAppShareButtonProps) {
           size="sm"
           variant="outline"
           className="gap-1"
-          style={{ borderColor: committee.color, color: committee.color }}
         >
           <MessageCircle className="h-3 w-3" />
           שתף

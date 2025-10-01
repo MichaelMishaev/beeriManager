@@ -6,14 +6,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Parent Committee Coordination App** - A Hebrew-only PWA for managing school parent committee activities, events, tasks, responsibilities, issues, and protocols.
 
-## Tech Stack (Planned)
+## Tech Stack
 
 - **Frontend**: Next.js 14+ (App Router) with TypeScript
 - **Styling**: Tailwind CSS with RTL support
 - **Database**: Supabase (PostgreSQL)
 - **Calendar**: Google Calendar API v3 (two-way sync)
-- **Hosting**: Vercel (frontend) + Supabase (backend)
+- **Hosting**: Railway (http://pipguru.club)
 - **PWA**: next-pwa for offline support
+- **Domain**: pipguru.club (configured via Railway)
 
 ## Commands (To be implemented)
 
@@ -48,16 +49,19 @@ npm run test:e2e     # Run E2E tests
 ### Core Entities
 1. **Events** - Calendar items with date/time, synced with Google Calendar
 2. **Tasks** - Actionable items with owners and due dates
-3. **Responsibilities** - Long-term role assignments (new feature)
+3. **Responsibilities** - Long-term role assignments
 4. **Issues** - Problem tracking with status workflow
 5. **Protocols** - Historical documents with external links
-6. **Comments** - Attached to issues for discussion
+6. **Committees** - Committee management with members and responsibilities
+7. **Feedback** - Anonymous parent feedback system
+8. **Comments** - Attached to issues for discussion
 
 ### Database Schema
 - Uses Supabase with PostgreSQL
-- Main tables: events, tasks, responsibilities, issues, protocols, app_settings
+- Main tables: events, tasks, responsibilities, issues, protocols, committees, anonymous_feedback, app_settings
 - All timestamps tracked (created_at, updated_at)
 - Google Calendar sync via google_event_id field
+- Row Level Security (RLS) for public read, admin write access
 
 ### Security Model
 - Public read access (no auth required)
@@ -89,3 +93,5 @@ npm run test:e2e     # Run E2E tests
 - Critical features: Calendar sync, responsibilities tracking, protocol links
 - while develop, always build automation tool in parallel using playwright tool
 - for design use '/Users/michaelmishayev/Desktop/Projects/beeriManager/Docs/design'
+- whe dev check if what you change can create egresion bugs in other places.
+- when i ask to push, push to git to connected repository but do not push files that should not be in git, like temp files etc

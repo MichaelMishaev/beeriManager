@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from 'sonner'
 import { format } from 'date-fns'
 import { cn } from '@/lib/utils'
+import { WhatsAppShareButton } from '@/components/feedback/WhatsAppShareButton'
 
 interface Feedback {
   id: string
@@ -244,7 +245,7 @@ export default function AdminFeedbackPage() {
             >
               <CardHeader>
                 <div className="flex items-start justify-between">
-                  <div className="space-y-1">
+                  <div className="space-y-1 flex-1">
                     <div className="flex items-center gap-2">
                       <CardTitle className="text-lg">{feedback.subject}</CardTitle>
                       <Badge className={categoryColors[feedback.category]}>
@@ -254,32 +255,30 @@ export default function AdminFeedbackPage() {
                         {statusLabels[feedback.status]}
                       </Badge>
                     </div>
-                    <CardDescription>
-                      <div className="flex items-center gap-4 text-sm">
-                        <span className="flex items-center gap-1">
-                          <Calendar className="h-3 w-3" />
-                          {format(new Date(feedback.created_at), 'dd/MM/yyyy HH:mm')}
-                        </span>
-                        {feedback.is_anonymous ? (
-                          <span className="text-muted-foreground">משוב אנונימי</span>
-                        ) : (
-                          <>
-                            {feedback.parent_name && (
-                              <span className="flex items-center gap-1">
-                                <User className="h-3 w-3" />
-                                {feedback.parent_name}
-                              </span>
-                            )}
-                            {feedback.contact_email && (
-                              <span className="flex items-center gap-1">
-                                <Mail className="h-3 w-3" />
-                                {feedback.contact_email}
-                              </span>
-                            )}
-                          </>
-                        )}
-                      </div>
-                    </CardDescription>
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground text-right font-medium">
+                      <span className="flex items-center gap-1">
+                        <Calendar className="h-3 w-3" />
+                        {format(new Date(feedback.created_at), 'dd/MM/yyyy HH:mm')}
+                      </span>
+                      {feedback.is_anonymous ? (
+                        <span className="text-muted-foreground">משוב אנונימי</span>
+                      ) : (
+                        <>
+                          {feedback.parent_name && (
+                            <span className="flex items-center gap-1">
+                              <User className="h-3 w-3" />
+                              {feedback.parent_name}
+                            </span>
+                          )}
+                          {feedback.contact_email && (
+                            <span className="flex items-center gap-1">
+                              <Mail className="h-3 w-3" />
+                              {feedback.contact_email}
+                            </span>
+                          )}
+                        </>
+                      )}
+                    </div>
                   </div>
                   {feedback.rating && (
                     <div className="flex items-center gap-1">
@@ -300,6 +299,11 @@ export default function AdminFeedbackPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-sm whitespace-pre-wrap">{feedback.message}</p>
+
+                {/* Actions - Share button at the bottom like committees */}
+                <div className="flex gap-2 pt-4" onClick={(e) => e.stopPropagation()}>
+                  <WhatsAppShareButton feedback={feedback} />
+                </div>
                 {feedback.response && (
                   <div className="mt-4 p-3 bg-muted rounded-lg">
                     <div className="flex items-center gap-2 mb-2">

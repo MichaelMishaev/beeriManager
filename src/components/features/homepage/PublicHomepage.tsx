@@ -1,6 +1,6 @@
 'use client'
 
-import { Calendar, MessageSquare, ChevronLeft } from 'lucide-react'
+import { Calendar, MessageSquare, ChevronLeft, Camera, ArrowLeft } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { MobileCalendar } from '@/components/ui/MobileCalendar'
@@ -52,6 +52,16 @@ function EventItem({ event }: { event: Event }) {
 }
 
 export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepageProps) {
+  // Get recent events with photos (past events only)
+  const now = new Date()
+  const eventsWithPhotos = upcomingEvents
+    .filter(event => {
+      const eventEnd = event.end_datetime ? new Date(event.end_datetime) : new Date(event.start_datetime)
+      return event.photos_url && eventEnd < now
+    })
+    .sort((a, b) => new Date(b.start_datetime).getTime() - new Date(a.start_datetime).getTime())
+    .slice(0, 4)
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
       {/* Welcome Header */}
@@ -63,6 +73,64 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
           צפו באירועים הקרובים, לוח השנה, ושלחו משוב לועד ההורים
         </p>
       </div>
+
+      {/* Photos Gallery Section */}
+      {eventsWithPhotos.length > 0 && (
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-2xl font-bold flex items-center gap-2">
+              <Camera className="h-6 w-6 text-primary" />
+              גלריית תמונות מאירועים
+            </h2>
+            <Button variant="ghost" asChild size="sm">
+              <Link href="/events?tab=photos" className="gap-1">
+                כל הגלריות
+                <ArrowLeft className="h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
+
+          {/* Horizontal Scroll Container */}
+          <div className="relative">
+            <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+              {eventsWithPhotos.map((event) => {
+                const eventDate = new Date(event.start_datetime)
+                return (
+                  <Card
+                    key={event.id}
+                    className="flex-shrink-0 w-[280px] snap-start hover:shadow-lg transition-shadow cursor-pointer"
+                  >
+                    <a href={event.photos_url} target="_blank" rel="noopener noreferrer">
+                      <CardHeader className="pb-3">
+                        <div className="flex items-start justify-between gap-2 mb-2">
+                          <Camera className="h-12 w-12 text-primary/20 flex-shrink-0" />
+                          <div className="text-xs text-muted-foreground text-left" dir="ltr">
+                            {format(eventDate, 'd MMM yyyy', { locale: he })}
+                          </div>
+                        </div>
+                        <CardTitle className="text-base leading-tight line-clamp-2">
+                          {event.title}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="pt-0">
+                        {event.location && (
+                          <p className="text-xs text-muted-foreground mb-3 line-clamp-1">
+                            📍 {event.location}
+                          </p>
+                        )}
+                        <Button size="sm" variant="outline" className="w-full gap-2">
+                          <Camera className="h-4 w-4" />
+                          צפה בתמונות
+                        </Button>
+                      </CardContent>
+                    </a>
+                  </Card>
+                )
+              })}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Main Content Grid */}
       <div className="grid gap-6 lg:grid-cols-3">

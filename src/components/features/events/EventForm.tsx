@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { CalendarIcon, MapPin, Users, DollarSign, AlertTriangle } from 'lucide-react'
+import { CalendarIcon, MapPin, Users, DollarSign, AlertTriangle, Camera } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -32,6 +32,7 @@ const eventSchema = z.object({
   requires_payment: z.boolean().default(false),
   payment_amount: z.number().min(0, 'סכום תשלום חייב להיות חיובי').optional(),
   budget_allocated: z.number().min(0, 'תקציב מוקצב חייב להיות חיובי').optional(),
+  photos_url: z.string().url('יש להזין כתובת URL תקינה').optional().or(z.literal('')),
   status: z.enum(['draft', 'published', 'ongoing', 'completed', 'cancelled']).default('draft')
 })
 
@@ -76,6 +77,7 @@ export function EventForm({
       requires_payment: event?.requires_payment || false,
       payment_amount: event?.payment_amount || undefined,
       budget_allocated: event?.budget_allocated || undefined,
+      photos_url: event?.photos_url || '',
       status: event?.status || 'draft'
     }
   })
@@ -398,6 +400,25 @@ export function EventForm({
                 )}
               </div>
 
+              <div>
+                <Label htmlFor="photos_url" className="text-right font-medium flex items-center gap-2">
+                  <Camera className="h-4 w-4" />
+                  קישור לגלריית תמונות
+                </Label>
+                <Input
+                  id="photos_url"
+                  {...register('photos_url')}
+                  placeholder="https://drive.google.com/drive/folders/..."
+                  className={`text-right ${errors.photos_url ? 'border-red-500' : ''}`}
+                  dir="ltr"
+                />
+                {errors.photos_url && (
+                  <p className="text-sm text-red-500 mt-1">{errors.photos_url.message}</p>
+                )}
+                <p className="text-xs text-muted-foreground mt-1 text-right">
+                  הדבק קישור לתיקיית Google Drive או Google Photos עם תמונות מהאירוע
+                </p>
+              </div>
 
               <div>
                 <Label htmlFor="status" className="text-right font-medium">

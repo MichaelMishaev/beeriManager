@@ -1,7 +1,7 @@
 'use client'
 
 import { useParams, notFound } from 'next/navigation'
-import { Calendar, MapPin, Clock, Users, ArrowRight } from 'lucide-react'
+import { Calendar, MapPin, Clock, Users, ArrowRight, Camera } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -20,6 +20,7 @@ interface Event {
   current_participants?: number
   organizer_name?: string
   status: string
+  photos_url?: string
 }
 
 function getEvent(id: string): Event | null {
@@ -36,31 +37,48 @@ function getEvent(id: string): Event | null {
       max_participants: 20,
       current_participants: 12,
       organizer_name: 'דני כהן',
-      status: 'published'
+      status: 'published',
+      photos_url: undefined
     },
     '2': {
       id: '2',
       title: 'יום ספורט',
       description: 'יום פעילות ספורטיבית לכל התלמידים במגרש בית הספר. פעילויות מגוונות למשפחות.',
-      start_datetime: '2024-10-20T09:00:00Z',
-      end_datetime: '2024-10-20T14:00:00Z',
+      start_datetime: '2024-09-20T09:00:00Z',
+      end_datetime: '2024-09-20T14:00:00Z',
       location: 'מגרש בית הספר',
       event_type: 'general',
       max_participants: 200,
       current_participants: 85,
       organizer_name: 'מיכל לוי',
-      status: 'published'
+      status: 'published',
+      photos_url: 'https://drive.google.com/drive/folders/example123'
     },
     '3': {
       id: '3',
       title: 'מכירת עוגות לגיוס כספים',
       description: 'מכירת עוגות ביתיות לגיוס כספים לטיול שכבה. מוזמנים להביא עוגות ולקנות!',
-      start_datetime: '2024-10-25T08:00:00Z',
-      end_datetime: '2024-10-25T12:00:00Z',
+      start_datetime: '2024-09-10T08:00:00Z',
+      end_datetime: '2024-09-10T12:00:00Z',
       location: 'כניסה לבית הספר',
       event_type: 'fundraiser',
       organizer_name: 'שרה גולן',
-      status: 'published'
+      status: 'published',
+      photos_url: undefined
+    },
+    '4': {
+      id: '4',
+      title: 'מסיבת סיום כיתות ו 2024',
+      description: 'מסיבת סיום שנה מרגשת לתלמידי כיתות ו. ערב מלא הופעות, מוזיקה ומחוות לתלמידים היוצאים לחטיבה.',
+      start_datetime: '2024-06-25T18:00:00Z',
+      end_datetime: '2024-06-25T22:00:00Z',
+      location: 'אולם בית הספר',
+      event_type: 'general',
+      max_participants: 300,
+      current_participants: 287,
+      organizer_name: 'ועד כיתות ו',
+      status: 'completed',
+      photos_url: 'https://drive.google.com/drive/folders/1TlwKxDvwySmWSMgDGlxf7mC5Ts5Q1WHL?usp=sharing'
     }
   }
 
@@ -239,16 +257,47 @@ export default function EventPage() {
         </CardContent>
       </Card>
 
+      {/* Photos Section - Only show if event has ended and has photos */}
+      {event.photos_url && event.end_datetime && new Date(event.end_datetime) < new Date() && (
+        <Card className="mb-6 border-primary/20 bg-primary/5">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <Camera className="h-5 w-5 text-primary" />
+              גלריית תמונות מהאירוע
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground mb-4">
+              התמונות מהאירוע זמינות לצפייה ב-Google Drive
+            </p>
+            <Button asChild className="w-full sm:w-auto">
+              <a href={event.photos_url} target="_blank" rel="noopener noreferrer">
+                <Camera className="h-4 w-4 ml-2" />
+                פתח גלריה
+              </a>
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Action Buttons */}
-      <div className="flex gap-2 mb-8">
+      <div className="flex flex-col sm:flex-row gap-2 mb-8">
         <Button size="sm" className="flex-1">
           הרשמה לאירוע
         </Button>
-        <Button variant="outline" asChild size="sm">
+        <Button variant="outline" asChild size="sm" className="flex-1">
           <Link href={`/calendar?event=${event.id}`}>
             הצג בלוח שנה
           </Link>
         </Button>
+        {event.photos_url && (
+          <Button variant="outline" asChild size="sm" className="flex-1">
+            <a href={event.photos_url} target="_blank" rel="noopener noreferrer">
+              <Camera className="h-4 w-4 ml-2" />
+              תמונות
+            </a>
+          </Button>
+        )}
       </div>
 
       {/* Event Feedback Form */}
