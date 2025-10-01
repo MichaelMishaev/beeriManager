@@ -54,16 +54,17 @@ export function CommitteeCard() {
   const [isExpanded, setIsExpanded] = useState(false)
 
   const handleWhatsAppShare = () => {
-    // RTL mark character to force right-to-left rendering in WhatsApp
-    const RLM = '\u200F'
+    // RTL EMBEDDING character to force right-to-left text direction
+    const RLE = '\u202B' // RIGHT-TO-LEFT EMBEDDING
+    const PDF = '\u202C' // POP DIRECTIONAL FORMATTING
 
-    const text = `${RLM}נציגי ועד ההורים
+    const text = `${RLE}נציגי ועד ההורים${PDF}
 
 ${Object.entries(groupedMembers).map(([gradeLevel, members]) =>
-  `${RLM}${gradeLevel}׳:\n${members.map(m => `${RLM}${m.name} - ${m.grade} ✓`).join('\n')}`
+  `${RLE}${gradeLevel}׳:${PDF}\n${members.map(m => `${RLE}${m.name} - ${m.grade}${PDF}`).join('\n')}`
 ).join('\n\n')}
 
-${RLM}לכל שאלה או הצעה - צרו קשר
+${RLE}לכל שאלה או הצעה - צרו קשר${PDF}
 https://beeri.online/`
 
     const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(text)}`
