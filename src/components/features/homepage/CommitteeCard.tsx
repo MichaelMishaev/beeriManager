@@ -57,7 +57,7 @@ export function CommitteeCard() {
     const text = `נציגי ועד ההורים
 
 ${Object.entries(groupedMembers).map(([gradeLevel, members]) =>
-  `${gradeLevel}׳:\n${members.map(m => `   ✓ ${m.grade} - ${m.name}`).join('\n')}`
+  `:${gradeLevel}׳\n${members.map(m => `${m.name} - ${m.grade} ✓`).join('\n')}`
 ).join('\n\n')}
 
 לכל שאלה או הצעה - צרו קשר
