@@ -28,7 +28,6 @@ interface Event {
 interface Holiday {
   id: string
   name: string
-  hebrew_name: string
   description?: string
   start_date: string
   end_date: string
@@ -86,7 +85,7 @@ export default function BeeriCalendar({
   const [currentDate, setCurrentDate] = useState(new Date())
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [currentView, setCurrentView] = useState(view)
-  const [showHolidays, setShowHolidays] = useState(true)
+  const [showHolidays] = useState(true)
 
   // Filter events to only show published ones
   const publishedEvents = events.filter(e => e.status === 'published')
@@ -242,15 +241,30 @@ export default function BeeriCalendar({
               onClick={() => handleDateClick(day)}
             >
               <div className="flex justify-between items-start mb-1">
-                <span className={cn(
-                  'text-sm font-medium',
-                  isTodayDate && 'bg-primary text-white rounded-full w-6 h-6 flex items-center justify-center'
-                )}>
-                  {format(day, 'd')}
-                </span>
-                <div className="flex gap-1">
+                <div className="flex flex-col items-center">
+                  <span className={cn(
+                    'text-sm font-medium',
+                    isTodayDate && 'bg-primary text-white rounded-full w-6 h-6 flex items-center justify-center'
+                  )}>
+                    {format(day, 'd')}
+                  </span>
+                  {/* Holiday indicator dots */}
+                  {hasHoliday && dayHolidays.length > 0 && (
+                    <div className="flex gap-0.5 mt-0.5">
+                      {dayHolidays.slice(0, 3).map((holiday, idx) => (
+                        <div
+                          key={idx}
+                          className="w-1.5 h-1.5 rounded-full"
+                          style={{ backgroundColor: holiday.color }}
+                          title={holiday.name}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <div className="flex gap-1 items-center">
                   {hasHoliday && firstHoliday?.icon_emoji && (
-                    <span className="text-xs" title={firstHoliday.hebrew_name}>
+                    <span className="text-lg" title={firstHoliday.name}>
                       {firstHoliday.icon_emoji}
                     </span>
                   )}
@@ -267,15 +281,15 @@ export default function BeeriCalendar({
                 {dayHolidays.slice(0, 1).map((holiday) => (
                   <div
                     key={holiday.id}
-                    className="text-xs p-1 rounded cursor-pointer hover:opacity-80 transition-opacity truncate border font-medium"
+                    className="text-xs px-2 py-1 rounded-md cursor-pointer hover:opacity-90 transition-all truncate border-2 font-semibold shadow-sm"
                     style={{
-                      backgroundColor: holiday.color + '30',
-                      borderColor: holiday.color + '60',
-                      color: '#000'
+                      backgroundColor: holiday.color + '40',
+                      borderColor: holiday.color,
+                      color: '#1a1a1a'
                     }}
-                    title={holiday.hebrew_name}
+                    title={`${holiday.name} - ${holiday.hebrew_date || ''}`}
                   >
-                    {holiday.icon_emoji} {holiday.hebrew_name}
+                    <span className="text-sm">{holiday.icon_emoji}</span> {holiday.name}
                   </div>
                 ))}
 
@@ -342,7 +356,7 @@ export default function BeeriCalendar({
                         )}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
-                            <h4 className="font-bold text-lg">{holiday.hebrew_name}</h4>
+                            <h4 className="font-bold text-lg">{holiday.name}</h4>
                             {holiday.is_school_closed && (
                               <Badge variant="secondary" className="bg-red-100 text-red-800">
                                 בית הספר סגור

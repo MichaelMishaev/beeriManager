@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { X, Calendar, Download, Share2 } from 'lucide-react'
+import { Calendar, Download, Share2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -24,7 +24,7 @@ interface HolidaysModalProps {
 export function HolidaysModal({ open, onOpenChange }: HolidaysModalProps) {
   const [holidays, setHolidays] = useState<Holiday[]>([])
   const [loading, setLoading] = useState(true)
-  const [academicYear, setAcademicYear] = useState('תשפ״ה')
+  const [academicYear] = useState('תשפ״ה')
 
   useEffect(() => {
     if (open) {
@@ -127,7 +127,6 @@ export function HolidaysModal({ open, onOpenChange }: HolidaysModalProps) {
             <div className="space-y-3">
               {holidays.map((holiday) => {
                 const isPast = parseISO(holiday.end_date) < new Date()
-                const isUpcoming = parseISO(holiday.start_date) > new Date()
 
                 return (
                   <div

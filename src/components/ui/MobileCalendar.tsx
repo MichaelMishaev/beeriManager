@@ -58,10 +58,10 @@ const EVENT_CONFIG = {
     textColor: 'text-purple-800'
   },
   holiday: {
-    color: 'bg-white border-2 border-primary',
+    color: 'bg-orange-400',
     label: 'חגים',
-    lightBg: 'bg-primary-50',
-    textColor: 'text-primary-800'
+    lightBg: 'bg-orange-50',
+    textColor: 'text-orange-800'
   }
 }
 

@@ -4,12 +4,13 @@ import { useEffect, useState } from 'react'
 import { Loader2 } from 'lucide-react'
 import { Dashboard } from '@/components/features/dashboard/Dashboard'
 import { PublicHomepage } from '@/components/features/homepage/PublicHomepage'
-import type { DashboardStats, Event, Task, CalendarEvent } from '@/types'
+import type { DashboardStats, Event, Task, CalendarEvent, Holiday } from '@/types'
 
 export default function HomePage() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [events, setEvents] = useState<Event[]>([])
+  const [holidays, setHolidays] = useState<Holiday[]>([])
   const [tasks, setTasks] = useState<Task[]>([])
   const [stats, setStats] = useState<DashboardStats>({
     upcomingEvents: 0,
@@ -37,6 +38,13 @@ export default function HomePage() {
       const eventsData = await eventsResponse.json()
       if (eventsData.success) {
         setEvents(eventsData.data || [])
+      }
+
+      // Load holidays
+      const holidaysResponse = await fetch('/api/holidays')
+      const holidaysData = await holidaysResponse.json()
+      if (holidaysData.success) {
+        setHolidays(holidaysData.data || [])
       }
 
       // Load tasks (if authenticated)
@@ -74,12 +82,22 @@ export default function HomePage() {
     )
   }
 
-  const calendarEvents: CalendarEvent[] = events.map(e => ({
-    id: e.id,
-    title: e.title,
-    date: new Date(e.start_datetime),
-    type: 'event' as const
-  }))
+  // Combine events and holidays for calendar
+  const calendarEvents: CalendarEvent[] = [
+    ...events.map(e => ({
+      id: e.id,
+      title: e.title,
+      date: new Date(e.start_datetime),
+      type: 'event' as const
+    })),
+    ...holidays.map(h => ({
+      id: h.id,
+      title: h.name,
+      date: new Date(h.start_date),
+      type: 'holiday' as const,
+      description: h.description
+    }))
+  ]
 
   // Show appropriate homepage based on auth status
   if (isAuthenticated) {
