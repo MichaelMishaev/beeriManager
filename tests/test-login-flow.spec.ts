@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test } from '@playwright/test';
 
 test('complete login flow with redirect', async ({ page }) => {
   // Start at login page

@@ -6,101 +6,64 @@ import { Dashboard } from '@/components/features/dashboard/Dashboard'
 import { PublicHomepage } from '@/components/features/homepage/PublicHomepage'
 import type { DashboardStats, Event, Task, CalendarEvent } from '@/types'
 
-// Mock data - will be replaced with real API calls
-function getMockData() {
-  const mockEvents: Event[] = [
-    {
-      id: '1',
-      title: 'ישיבת ועד חודשית',
-      description: 'ישיבת ועד שגרתית לסיכום החודש',
-      start_datetime: '2025-10-15T19:00:00Z',
-      end_datetime: '2025-10-15T21:00:00Z',
-      location: 'בית הספר',
-      event_type: 'meeting',
-      status: 'published',
-      visibility: 'public',
-      priority: 'normal',
-      registration_enabled: false,
-      current_attendees: 0,
-      rsvp_yes_count: 0,
-      rsvp_no_count: 0,
-      rsvp_maybe_count: 0,
-      budget_spent: 0,
-      requires_payment: false,
-      version: 1,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    },
-    {
-      id: '2',
-      title: 'חנוכה - אירוע משפחות',
-      description: 'חגיגת חנוכה לכל המשפחות',
-      start_datetime: '2025-12-15T17:00:00Z',
-      end_datetime: '2025-12-15T20:00:00Z',
-      location: 'חצר בית הספר',
-      event_type: 'general',
-      status: 'published',
-      visibility: 'public',
-      priority: 'normal',
-      registration_enabled: false,
-      current_attendees: 0,
-      rsvp_yes_count: 0,
-      rsvp_no_count: 0,
-      rsvp_maybe_count: 0,
-      budget_spent: 0,
-      requires_payment: false,
-      version: 1,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    }
-  ]
-
-  const mockTasks: Task[] = []
-
-  const mockCalendarEvents: CalendarEvent[] = mockEvents.map(e => ({
-    id: e.id,
-    title: e.title,
-    date: new Date(e.start_datetime),
-    type: 'event' as const
-  }))
-
-  const mockStats: DashboardStats = {
-    upcomingEvents: 5,
-    pendingTasks: 12,
-    activeIssues: 3,
-    recentProtocols: 8,
-    pendingExpenses: 2,
-    thisMonthEvents: 5
-  }
-
-  return {
-    events: mockEvents,
-    tasks: mockTasks,
-    calendarEvents: mockCalendarEvents,
-    stats: mockStats
-  }
-}
-
 export default function HomePage() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
-  const data = getMockData()
+  const [isLoading, setIsLoading] = useState(true)
+  const [events, setEvents] = useState<Event[]>([])
+  const [tasks, setTasks] = useState<Task[]>([])
+  const [stats, setStats] = useState<DashboardStats>({
+    upcomingEvents: 0,
+    pendingTasks: 0,
+    activeIssues: 0,
+    recentProtocols: 0,
+    pendingExpenses: 0,
+    thisMonthEvents: 0
+  })
 
   useEffect(() => {
-    checkAuth()
+    loadData()
   }, [])
 
-  async function checkAuth() {
+  async function loadData() {
     try {
-      const response = await fetch('/api/auth/session')
-      const data = await response.json()
-      setIsAuthenticated(data.authenticated && data.role === 'admin')
+      // Check authentication
+      const authResponse = await fetch('/api/auth/session')
+      const authData = await authResponse.json()
+      const isAuth = authData.authenticated && authData.role === 'admin'
+      setIsAuthenticated(isAuth)
+
+      // Load events (upcoming, published)
+      const eventsResponse = await fetch('/api/events?upcoming=true&limit=10')
+      const eventsData = await eventsResponse.json()
+      if (eventsData.success) {
+        setEvents(eventsData.data || [])
+      }
+
+      // Load tasks (if authenticated)
+      if (isAuth) {
+        const tasksResponse = await fetch('/api/tasks?status=pending,in_progress&limit=10')
+        const tasksData = await tasksResponse.json()
+        if (tasksData.success) {
+          setTasks(tasksData.data || [])
+        }
+
+        // Load dashboard stats
+        const statsResponse = await fetch('/api/dashboard/stats')
+        const statsData = await statsResponse.json()
+        if (statsData.success) {
+          setStats(statsData.data)
+        }
+      }
     } catch (error) {
+      console.error('Error loading data:', error)
       setIsAuthenticated(false)
+    } finally {
+      setIsLoading(false)
     }
   }
 
   // Loading state
-  if (isAuthenticated === null) {
+  if (isLoading || isAuthenticated === null) {
     return (
       <div className="flex items-center justify-center min-h-[80vh]">
         <div className="text-center">
@@ -111,15 +74,22 @@ export default function HomePage() {
     )
   }
 
+  const calendarEvents: CalendarEvent[] = events.map(e => ({
+    id: e.id,
+    title: e.title,
+    date: new Date(e.start_datetime),
+    type: 'event' as const
+  }))
+
   // Show appropriate homepage based on auth status
   if (isAuthenticated) {
     // Committee member - show full dashboard
     return (
       <Dashboard
-        stats={data.stats}
-        upcomingEvents={data.events}
-        pendingTasks={data.tasks}
-        calendarEvents={data.calendarEvents}
+        stats={stats}
+        upcomingEvents={events}
+        pendingTasks={tasks}
+        calendarEvents={calendarEvents}
       />
     )
   }
@@ -127,8 +97,8 @@ export default function HomePage() {
   // Regular parent - show public homepage
   return (
     <PublicHomepage
-      upcomingEvents={data.events}
-      calendarEvents={data.calendarEvents}
+      upcomingEvents={events}
+      calendarEvents={calendarEvents}
     />
   )
 }

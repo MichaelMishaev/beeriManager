@@ -145,7 +145,7 @@ export async function performSearch(options: SearchOptions): Promise<SearchRespo
       .from('vendors')
       .select('id, name, description, category')
       .or(`name.ilike.${searchTerm},description.ilike.${searchTerm}`)
-      .eq('is_active', true)
+      .eq('status', 'active')
       .limit(limit)
 
     if (vendors) {

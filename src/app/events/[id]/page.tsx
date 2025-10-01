@@ -1,75 +1,14 @@
 'use client'
 
 import { useParams, notFound } from 'next/navigation'
-import { Calendar, MapPin, Clock, Users, ArrowRight, Camera } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { Calendar, MapPin, Clock, Users, ArrowRight, Camera, Loader2 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { EventFeedbackForm } from '@/components/features/feedback/EventFeedbackForm'
 import Link from 'next/link'
-
-interface Event {
-  id: string
-  title: string
-  description: string
-  start_datetime: string
-  end_datetime?: string
-  location?: string
-  event_type: string
-  max_participants?: number
-  current_participants?: number
-  organizer_name?: string
-  status: string
-  photos_url?: string
-}
-
-function getEvent(id: string): Event | null {
-  // Mock data for now - will be replaced with Supabase query
-  const mockEvents: Record<string, Event> = {
-    '1': {
-      id: '1',
-      title: 'ישיבת ועד חודשית',
-      description: 'ישיבה חודשית לדיון בנושאים שוטפים של ועד ההורים. נדון בתקציב, אירועים קרובים ונושאים נוספים.',
-      start_datetime: '2024-10-15T19:00:00Z',
-      end_datetime: '2024-10-15T21:00:00Z',
-      location: 'חדר המורים',
-      event_type: 'meeting',
-      max_participants: 20,
-      current_participants: 12,
-      organizer_name: 'דני כהן',
-      status: 'published',
-      photos_url: undefined
-    },
-    '2': {
-      id: '2',
-      title: 'יום ספורט',
-      description: 'יום פעילות ספורטיבית לכל התלמידים במגרש בית הספר. פעילויות מגוונות למשפחות.',
-      start_datetime: '2024-09-20T09:00:00Z',
-      end_datetime: '2024-09-20T14:00:00Z',
-      location: 'מגרש בית הספר',
-      event_type: 'general',
-      max_participants: 200,
-      current_participants: 85,
-      organizer_name: 'מיכל לוי',
-      status: 'published',
-      photos_url: 'https://drive.google.com/drive/folders/example123'
-    },
-    '3': {
-      id: '3',
-      title: 'מכירת עוגות לגיוס כספים',
-      description: 'מכירת עוגות ביתיות לגיוס כספים לטיול שכבה. מוזמנים להביא עוגות ולקנות!',
-      start_datetime: '2024-09-10T08:00:00Z',
-      end_datetime: '2024-09-10T12:00:00Z',
-      location: 'כניסה לבית הספר',
-      event_type: 'fundraiser',
-      organizer_name: 'שרה גולן',
-      status: 'published',
-      photos_url: 'https://drive.google.com/drive/folders/example456'
-    }
-  }
-
-  return mockEvents[id] || null
-}
+import type { Event } from '@/types'
 
 function getEventTypeLabel(type: string): string {
   const labels: Record<string, string> = {
@@ -96,7 +35,37 @@ function getEventTypeColor(type: string): string {
 export default function EventPage() {
   const params = useParams()
   const id = params.id as string
-  const event = getEvent(id)
+  const [event, setEvent] = useState<Event | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    loadEvent()
+  }, [id])
+
+  async function loadEvent() {
+    try {
+      const response = await fetch(`/api/events/${id}`)
+      const data = await response.json()
+      if (data.success && data.data) {
+        setEvent(data.data)
+      } else {
+        setEvent(null)
+      }
+    } catch (error) {
+      console.error('Error loading event:', error)
+      setEvent(null)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[80vh]">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    )
+  }
 
   if (!event) {
     return notFound()
@@ -186,7 +155,7 @@ export default function EventPage() {
         )}
 
         {/* Participants Card */}
-        {event.max_participants && (
+        {event.max_attendees && (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg">
@@ -199,7 +168,7 @@ export default function EventPage() {
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">נרשמו:</span>
                   <span className="font-medium">
-                    {event.current_participants || 0} / {event.max_participants}
+                    {event.current_attendees || 0} / {event.max_attendees}
                   </span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2">
@@ -207,25 +176,13 @@ export default function EventPage() {
                     className="bg-primary h-2 rounded-full transition-all"
                     style={{
                       width: `${Math.min(
-                        ((event.current_participants || 0) / event.max_participants) * 100,
+                        ((event.current_attendees || 0) / event.max_attendees) * 100,
                         100
                       )}%`
                     }}
                   />
                 </div>
               </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Organizer Card */}
-        {event.organizer_name && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">מארגן</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm">{event.organizer_name}</p>
             </CardContent>
           </Card>
         )}

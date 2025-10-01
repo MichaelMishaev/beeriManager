@@ -1,47 +1,43 @@
 'use client'
 
-import { useState } from 'react'
-import { Calendar, Plus, Camera } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Calendar, Plus, Camera, Loader2 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
 import Link from 'next/link'
+import type { Event } from '@/types'
 
 function EventsList({ filter }: { filter: 'all' | 'upcoming' | 'past' | 'photos' }) {
-  // This will be replaced with actual Supabase query
-  const allEvents = [
-    {
-      id: '1',
-      title: 'ישיבת ועד חודשית',
-      description: 'ישיבה חודשית לדיון בנושאים שוטפים',
-      start_datetime: '2024-10-15T19:00:00Z',
-      end_datetime: '2024-10-15T21:00:00Z',
-      location: 'חדר המורים',
-      event_type: 'meeting',
-      photos_url: undefined
-    },
-    {
-      id: '2',
-      title: 'יום ספורט',
-      description: 'יום פעילות ספורטיבית לכל התלמידים',
-      start_datetime: '2024-09-20T09:00:00Z',
-      end_datetime: '2024-09-20T14:00:00Z',
-      location: 'מגרש בית הספר',
-      event_type: 'general',
-      photos_url: 'https://drive.google.com/drive/folders/example123'
-    },
-    {
-      id: '3',
-      title: 'מכירת עוגות לגיוס כספים',
-      description: 'מכירת עוגות ביתיות לגיוס כספים לטיול שכבה',
-      start_datetime: '2024-09-10T08:00:00Z',
-      end_datetime: '2024-09-10T12:00:00Z',
-      location: 'כניסה לבית הספר',
-      event_type: 'fundraiser',
-      photos_url: 'https://drive.google.com/drive/folders/example456'
+  const [allEvents, setAllEvents] = useState<Event[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    loadEvents()
+  }, [])
+
+  async function loadEvents() {
+    try {
+      const response = await fetch('/api/events?limit=100')
+      const data = await response.json()
+      if (data.success) {
+        setAllEvents(data.data || [])
+      }
+    } catch (error) {
+      console.error('Error loading events:', error)
+    } finally {
+      setIsLoading(false)
     }
-  ]
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    )
+  }
 
   const now = new Date()
 

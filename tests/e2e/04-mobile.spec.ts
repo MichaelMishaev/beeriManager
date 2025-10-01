@@ -78,11 +78,11 @@ test.describe('Mobile Experience', () => {
 
     // Navigation should adapt to landscape
     const nav = page.locator('[data-testid="mobile-nav"]');
-    const navHeight = await nav.evaluate(el => el.offsetHeight);
+    const navHeight = await nav.evaluate(el => (el as HTMLElement).offsetHeight);
     expect(navHeight).toBeLessThan(80); // Should be smaller in landscape
   });
 
-  test('should handle PWA install prompt', async ({ page, context }) => {
+  test('should handle PWA install prompt', async ({ page }) => {
     await page.goto('/');
 
     // Trigger PWA install prompt (simulated)

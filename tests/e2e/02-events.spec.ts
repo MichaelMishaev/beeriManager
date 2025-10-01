@@ -11,7 +11,8 @@ test.describe('Events Management', () => {
     await hebrewHelper.verifyHebrewText('h1', 'אירועים');
 
     // Should display at least one test event
-    await expect(page.locator('[data-testid="event-card"]')).toHaveCount.atLeast(1);
+    const eventCards = page.locator('[data-testid="event-card"]');
+    await expect(eventCards.first()).toBeVisible();
 
     // Check event card content
     const firstEvent = page.locator('[data-testid="event-card"]').first();
@@ -28,14 +29,16 @@ test.describe('Events Management', () => {
     // Click on meeting filter
     await page.click('[data-testid="filter-meeting"]');
 
-    // Should show only meeting events
-    await expect(page.locator('[data-testid="event-type-meeting"]')).toHaveCount.atLeast(0);
+    // Should show only meeting events - count may be 0 or more
+    const meetingEvents = await page.locator('[data-testid="event-type-meeting"]').count();
+    expect(meetingEvents).toBeGreaterThanOrEqual(0);
 
     // Click on all filter
     await page.click('[data-testid="filter-all"]');
 
     // Should show all events again
-    await expect(page.locator('[data-testid="event-card"]')).toHaveCount.atLeast(1);
+    const allEvents = page.locator('[data-testid="event-card"]');
+    await expect(allEvents.first()).toBeVisible();
   });
 
   test('should navigate to event detail', async ({ page }) => {
@@ -92,7 +95,8 @@ test.describe('Events Management', () => {
     await expect(page.locator('.calendar-header')).toBeVisible();
 
     // Should display events on calendar
-    await expect(page.locator('.calendar-event')).toHaveCount.atLeast(1);
+    const calendarEvents = page.locator('.calendar-event');
+    await expect(calendarEvents.first()).toBeVisible();
   });
 
   test('should export to iCal', async ({ page }) => {

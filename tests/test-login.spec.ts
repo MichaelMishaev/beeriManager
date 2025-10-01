@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test } from '@playwright/test';
 
 test('test login with password 6262', async ({ page }) => {
   // Navigate to login page

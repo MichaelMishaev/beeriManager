@@ -34,7 +34,7 @@ async function getVendors() {
   const { data: vendors, error } = await supabase
     .from('vendors')
     .select('*')
-    .eq('is_active', true)
+    .eq('status', 'active')
     .order('name', { ascending: true })
 
   if (error) {
@@ -49,14 +49,14 @@ async function getVendorStats() {
   const supabase = createClient()
 
   const [totalCount, categoriesData, avgRating] = await Promise.all([
-    supabase.from('vendors').select('id', { count: 'exact', head: true }).eq('is_active', true),
-    supabase.from('vendors').select('category').eq('is_active', true),
-    supabase.from('vendors').select('average_rating').eq('is_active', true)
+    supabase.from('vendors').select('id', { count: 'exact', head: true }).eq('status', 'active'),
+    supabase.from('vendors').select('category').eq('status', 'active'),
+    supabase.from('vendors').select('rating').eq('status', 'active')
   ])
 
   const categories = new Set(categoriesData.data?.map(v => v.category) || []).size
 
-  const ratings = avgRating.data?.map(v => v.average_rating).filter(Boolean) || []
+  const ratings = avgRating.data?.map(v => v.rating).filter(Boolean) || []
   const avgRatingValue = ratings.length > 0
     ? ratings.reduce((sum, r) => sum + r, 0) / ratings.length
     : 0

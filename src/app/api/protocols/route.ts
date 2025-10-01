@@ -6,7 +6,7 @@ import { z } from 'zod'
 // Protocol validation schema
 const ProtocolSchema = z.object({
   title: z.string().min(2, 'כותרת חייבת להכיל לפחות 2 תווים'),
-  meeting_date: z.string(),
+  protocol_date: z.string(),
   protocol_type: z.enum(['regular', 'special', 'annual', 'emergency']),
   attendees: z.array(z.string()).min(1, 'חייב להיות לפחות משתתף אחד'),
   agenda: z.string().optional(),
@@ -48,8 +48,8 @@ export async function GET(req: NextRequest) {
       const startDate = `${year}-01-01`
       const endDate = `${year}-12-31`
       query = query
-        .gte('meeting_date', startDate)
-        .lte('meeting_date', endDate)
+        .gte('protocol_date', startDate)
+        .lte('protocol_date', endDate)
     }
 
     // Only show public protocols for non-admins
@@ -58,9 +58,9 @@ export async function GET(req: NextRequest) {
       query = query.eq('is_public', true)
     }
 
-    // Order by meeting date
+    // Order by protocol date
     query = query
-      .order('meeting_date', { ascending: false })
+      .order('protocol_date', { ascending: false })
       .limit(Math.min(limit, 100))
 
     const { data, error } = await query

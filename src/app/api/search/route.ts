@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { performSearch, SearchType } from '@/lib/search'
 
+// Mark as dynamic route to prevent static rendering
+export const dynamic = 'force-dynamic'
+
 export async function GET(req: NextRequest) {
   try {
-    const { searchParams } = new URL(req.url)
+    const searchParams = req.nextUrl.searchParams
     const query = searchParams.get('q') || ''
     const types = searchParams.get('types')?.split(',') as SearchType[] | undefined
     const limit = parseInt(searchParams.get('limit') || '20')
