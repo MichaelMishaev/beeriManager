@@ -64,21 +64,7 @@ function getEvent(id: string): Event | null {
       event_type: 'fundraiser',
       organizer_name: 'שרה גולן',
       status: 'published',
-      photos_url: undefined
-    },
-    '4': {
-      id: '4',
-      title: 'מסיבת סיום כיתות ו 2024',
-      description: 'מסיבת סיום שנה מרגשת לתלמידי כיתות ו. ערב מלא הופעות, מוזיקה ומחוות לתלמידים היוצאים לחטיבה.',
-      start_datetime: '2024-06-25T18:00:00Z',
-      end_datetime: '2024-06-25T22:00:00Z',
-      location: 'אולם בית הספר',
-      event_type: 'general',
-      max_participants: 300,
-      current_participants: 287,
-      organizer_name: 'ועד כיתות ו',
-      status: 'completed',
-      photos_url: 'https://drive.google.com/drive/folders/1TlwKxDvwySmWSMgDGlxf7mC5Ts5Q1WHL?usp=sharing'
+      photos_url: 'https://drive.google.com/drive/folders/example456'
     }
   }
 

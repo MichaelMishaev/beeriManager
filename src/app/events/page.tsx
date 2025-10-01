@@ -61,16 +61,6 @@ function EventsList({ filter }: { filter: 'all' | 'upcoming' | 'past' | 'photos'
       location: 'כניסה לבית הספר',
       event_type: 'fundraiser',
       photos_url: 'https://drive.google.com/drive/folders/example456'
-    },
-    {
-      id: '4',
-      title: 'מסיבת סיום כיתות ו 2024',
-      description: 'מסיבת סיום שנה לתלמידי כיתות ו',
-      start_datetime: '2024-06-25T18:00:00Z',
-      end_datetime: '2024-06-25T22:00:00Z',
-      location: 'אולם בית הספר',
-      event_type: 'general',
-      photos_url: 'https://drive.google.com/drive/folders/1TlwKxDvwySmWSMgDGlxf7mC5Ts5Q1WHL?usp=sharing'
     }
   ]
 
