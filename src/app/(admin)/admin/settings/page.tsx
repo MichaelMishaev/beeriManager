@@ -1,8 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { Settings, Save, Key, Bell, Globe, Calendar, Mail, Shield, Database, Palette, Lock } from 'lucide-react'
+import { useState } from 'react'
+import { Settings, Save, Key, Bell, Globe, Calendar, Shield, Palette, Lock } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -44,7 +43,6 @@ interface AppSettings {
 }
 
 export default function AdminSettingsPage() {
-  const router = useRouter()
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
   const [isAuthenticated, setIsAuthenticated] = useState(false)

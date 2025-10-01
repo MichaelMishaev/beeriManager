@@ -1,33 +1,12 @@
 'use client'
 
-import { Suspense, useState } from 'react'
+import { useState } from 'react'
 import { Calendar, Plus, Camera } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
 import Link from 'next/link'
-
-function EventsLoadingSkeleton() {
-  return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-      {Array.from({ length: 6 }).map((_, i) => (
-        <Card key={i} className="animate-pulse">
-          <CardHeader>
-            <div className="h-6 bg-gray-200 rounded w-3/4"></div>
-            <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <div className="h-4 bg-gray-200 rounded"></div>
-              <div className="h-4 bg-gray-200 rounded w-2/3"></div>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
-  )
-}
 
 function EventsList({ filter }: { filter: 'all' | 'upcoming' | 'past' | 'photos' }) {
   // This will be replaced with actual Supabase query
