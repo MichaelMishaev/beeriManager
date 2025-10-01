@@ -54,13 +54,16 @@ export function CommitteeCard() {
   const [isExpanded, setIsExpanded] = useState(false)
 
   const handleWhatsAppShare = () => {
-    const text = `נציגי ועד ההורים
+    // RTL mark character to force right-to-left rendering in WhatsApp
+    const RLM = '\u200F'
+
+    const text = `${RLM}נציגי ועד ההורים
 
 ${Object.entries(groupedMembers).map(([gradeLevel, members]) =>
-  `:${gradeLevel}׳\n${members.map(m => `${m.name} - ${m.grade} ✓`).join('\n')}`
+  `${RLM}${gradeLevel}׳:\n${members.map(m => `${RLM}${m.name} - ${m.grade} ✓`).join('\n')}`
 ).join('\n\n')}
 
-לכל שאלה או הצעה - צרו קשר
+${RLM}לכל שאלה או הצעה - צרו קשר
 https://beeri.online/`
 
     const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(text)}`
