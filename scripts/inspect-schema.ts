@@ -21,7 +21,7 @@ async function inspectSchema() {
 
   // Query 1: Check if table exists
   console.log('Query 1: Checking if anonymous_feedback table exists...\n');
-  const { data: tableExists, error: tableError } = await supabase
+  const { error: tableError } = await supabase
     .rpc('exec_sql', {
       query: `
         SELECT EXISTS (
@@ -34,7 +34,7 @@ async function inspectSchema() {
 
   if (tableError) {
     console.log('Trying direct table check via REST API...');
-    const { data: tables } = await supabase
+    await supabase
       .from('anonymous_feedback')
       .select('*')
       .limit(0);
