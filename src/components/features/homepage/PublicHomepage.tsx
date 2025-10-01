@@ -4,6 +4,7 @@ import { Calendar, MessageSquare, ChevronLeft, Camera, ArrowLeft } from 'lucide-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { MobileCalendar } from '@/components/ui/MobileCalendar'
+import { CommitteeCard } from './CommitteeCard'
 import type { Event, CalendarEvent } from '@/types'
 import Link from 'next/link'
 import { format } from 'date-fns'
@@ -72,6 +73,11 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
           צפו באירועים הקרובים, לוח השנה, ושלחו משוב לועד ההורים
         </p>
+      </div>
+
+      {/* Committee Members Card */}
+      <div className="mb-8">
+        <CommitteeCard />
       </div>
 
       {/* Photos Gallery Section */}
