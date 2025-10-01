@@ -73,10 +73,10 @@ async function generateIcons() {
 
   // Generate shortcut icons
   const shortcutIcons = [
-    { name: 'events-shortcut', emoji: '📅', color: '#0D98BA' },
-    { name: 'tasks-shortcut', emoji: '✓', color: '#FFBA00' },
-    { name: 'calendar-shortcut', emoji: '🗓️', color: '#003153' },
-    { name: 'feedback-shortcut', emoji: '💬', color: '#FF8200' }
+    { name: 'events-shortcut', emoji: '📅', color: '#0D98BA', letter: 'א' },
+    { name: 'tasks-shortcut', emoji: '✓', color: '#FFBA00', letter: 'מ' },
+    { name: 'calendar-shortcut', emoji: '🗓️', color: '#003153', letter: 'ל' },
+    { name: 'feedback-shortcut', emoji: '💬', color: '#FF8200', letter: 'פ' }
   ];
 
   for (const icon of shortcutIcons) {
@@ -91,16 +91,23 @@ async function generateIcons() {
     fs.writeFileSync(svgPath, svg);
     console.log(`✅ Generated ${icon.name} SVG`);
 
+    // For PNG, use simple text instead of emoji to avoid Pango font rendering crashes
     if (sharp) {
       try {
+        const pngSvg = `<?xml version="1.0" encoding="UTF-8"?>
+<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg">
+  <rect width="${size}" height="${size}" fill="${icon.color}" rx="${size * 0.15}"/>
+  <text x="50%" y="60%" font-family="Arial, sans-serif" font-size="${size * 0.6}" font-weight="bold" fill="white" text-anchor="middle" dominant-baseline="middle">${icon.letter}</text>
+</svg>`;
         const pngPath = path.join(iconsDir, `${icon.name}.png`);
-        await sharp(Buffer.from(svg))
+        await sharp(Buffer.from(pngSvg))
           .resize(size, size)
           .png()
           .toFile(pngPath);
         console.log(`✅ Generated ${icon.name} PNG`);
       } catch (error) {
-        console.log(`⚠️  Could not generate ${icon.name} PNG`);
+        console.log(`⚠️  Could not generate ${icon.name} PNG (${error.message})`);
+        // This is okay - SVG works everywhere, PNG is just an optimization
       }
     }
   }

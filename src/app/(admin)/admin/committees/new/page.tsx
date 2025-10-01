@@ -144,7 +144,7 @@ export default function NewCommitteePage() {
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold">יצירת וועדה חדשה</h1>
+        <h1 className="text-2xl md:text-3xl font-bold">יצירת וועדה חדשה</h1>
         <p className="text-muted-foreground mt-2">
           הגדרת וועדה תחומית עם חברים ותחומי אחריות
         </p>
@@ -343,7 +343,7 @@ export default function NewCommitteePage() {
         </Card>
 
         {/* Actions */}
-        <div className="flex gap-4">
+        <div className="flex flex-col sm:flex-row gap-3">
           <Button
             type="submit"
             disabled={isSubmitting}
@@ -362,6 +362,7 @@ export default function NewCommitteePage() {
             type="button"
             variant="outline"
             onClick={() => router.back()}
+            className="sm:w-auto"
           >
             ביטול
           </Button>

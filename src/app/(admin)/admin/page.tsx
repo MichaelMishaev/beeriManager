@@ -214,14 +214,14 @@ export default function AdminDashboard() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">לוח בקרה למנהל</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-foreground">לוח בקרה למנהל</h1>
           <p className="text-muted-foreground mt-2">
             ניהול מרכזי של כל פעילויות ועד ההורים
           </p>
         </div>
-        <Button asChild size="sm">
+        <Button asChild size="sm" className="w-full sm:w-auto">
           <Link href="/admin/settings">
             <Settings className="h-4 w-4 ml-2" />
             הגדרות
@@ -277,7 +277,7 @@ export default function AdminDashboard() {
           <CardDescription>פעולות נפוצות לניהול יומיומי</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-wrap gap-2">
+          <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2">
             <Button asChild size="sm">
               <Link href="/admin/events/new">
                 <Calendar className="h-4 w-4 ml-2" />

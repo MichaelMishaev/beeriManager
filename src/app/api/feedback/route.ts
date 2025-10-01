@@ -3,14 +3,13 @@ import { createClient } from '@/lib/supabase/server'
 import { verifyJWT } from '@/lib/auth/jwt'
 import { z } from 'zod'
 
-// Feedback validation schema
+// Feedback validation schema - matches complaint form fields
 const FeedbackSchema = z.object({
   category: z.enum(['general', 'event', 'task', 'suggestion', 'complaint', 'other']),
   subject: z.string().min(2, 'נושא חייב להכיל לפחות 2 תווים').max(100),
-  message: z.string().min(10, 'הודעה חייבת להכיל לפחות 10 תווים').max(1000),
-  rating: z.number().min(1).max(5).optional(),
-  parent_name: z.string().optional(), // Optional for anonymous feedback
-  contact_email: z.string().email('כתובת אימייל לא תקינה').optional(),
+  message: z.string().min(1, 'הודעה נדרשת'),
+  parent_name: z.string().optional().nullable(),
+  contact_email: z.string().optional().nullable(), // Can be email or phone
   is_anonymous: z.boolean().default(true)
 })
 
@@ -31,11 +30,10 @@ export async function GET(req: NextRequest) {
     // Query parameters
     const category = searchParams.get('category')
     const status = searchParams.get('status')
-    const rating = searchParams.get('rating')
     const limit = searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : 50
 
     let query = supabase
-      .from('feedback')
+      .from('anonymous_feedback')
       .select('*')
 
     // Apply filters
@@ -45,10 +43,6 @@ export async function GET(req: NextRequest) {
 
     if (status && status !== 'all') {
       query = query.eq('status', status)
-    }
-
-    if (rating) {
-      query = query.eq('rating', parseInt(rating))
     }
 
     // Order by created date
@@ -85,9 +79,12 @@ export async function POST(req: NextRequest) {
   try {
     // Anyone can submit feedback (no auth required for anonymous feedback)
     const body = await req.json()
+    console.log('Feedback submission body:', JSON.stringify(body, null, 2))
+
     const validation = FeedbackSchema.safeParse(body)
 
     if (!validation.success) {
+      console.error('Feedback validation errors:', validation.error.errors)
       return NextResponse.json(
         {
           success: false,
@@ -98,32 +95,50 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    console.log('Feedback validation passed:', validation.data)
+
     const supabase = createClient()
 
-    // If not anonymous, remove identifying info
-    const feedbackData = {
-      ...validation.data,
-      parent_name: validation.data.is_anonymous ? null : validation.data.parent_name,
-      contact_email: validation.data.is_anonymous ? null : validation.data.contact_email,
-      status: 'new' as const,
-      response: null,
-      responded_at: null
+    // Prepare message combining subject and detailed message
+    const fullMessage = validation.data.subject +
+      (validation.data.message && validation.data.message !== validation.data.subject
+        ? '\n\n' + validation.data.message
+        : '')
+
+    // Store contact info in admin_notes as JSON if provided
+    const contactInfo = (validation.data.parent_name || validation.data.contact_email) ? {
+      parent_name: validation.data.parent_name || null,
+      contact: validation.data.contact_email || null
+    } : null
+
+    // Map to actual database columns
+    const feedbackData: any = {
+      message: fullMessage,
+      category: validation.data.category || 'complaint',
     }
+
+    if (contactInfo) {
+      feedbackData.admin_notes = JSON.stringify(contactInfo)
+    }
+
+    console.log('Inserting feedback data:', JSON.stringify(feedbackData, null, 2))
 
     // Create feedback
     const { data, error } = await supabase
-      .from('feedback')
+      .from('anonymous_feedback')
       .insert([feedbackData])
       .select()
       .single()
 
     if (error) {
-      console.error('Feedback creation error:', error)
+      console.error('Feedback creation error:', JSON.stringify(error, null, 2))
       return NextResponse.json(
-        { success: false, error: 'שגיאה בשליחת המשוב' },
+        { success: false, error: 'שגיאה בשליחת המשוב', details: error.message },
         { status: 500 }
       )
     }
+
+    console.log('Feedback created successfully:', data)
 
     return NextResponse.json({
       success: true,

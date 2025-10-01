@@ -47,7 +47,9 @@ export function WhatsAppShareButton({ committee }: WhatsAppShareButtonProps) {
       })
     }
 
-    message += `\n🔗 לפרטים נוספים: ${window.location.origin}/admin/committees`
+    message += `\n━━━━━━━━━━━━━━━━━━━\n`
+    message += `📋 *לצפייה בכל הוועדות:*\n`
+    message += `${window.location.origin}/committees`
 
     return message
   }

@@ -200,20 +200,20 @@ export default function TasksPage() {
   return (
     <div className="container mx-auto px-4 py-6 space-y-6">
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">משימות</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-foreground">משימות</h1>
           <p className="text-muted-foreground mt-2">
             ניהול משימות ומעקב אחר ביצוע
           </p>
         </div>
 
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm">
+        <div className="flex gap-2 w-full sm:w-auto">
+          <Button variant="outline" size="sm" className="flex-1 sm:flex-initial">
             <Filter className="h-4 w-4 ml-2" />
             סנן
           </Button>
-          <Button asChild size="sm">
+          <Button asChild size="sm" className="flex-1 sm:flex-initial">
             <Link href="/admin/tasks/new">
               <Plus className="h-4 w-4 ml-2" />
               משימה חדשה

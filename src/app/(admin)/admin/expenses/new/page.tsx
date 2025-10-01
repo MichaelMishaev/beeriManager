@@ -157,7 +157,7 @@ export default function NewExpensePage() {
               value={expenseType}
               onValueChange={(value) => setValue('expense_type', value as any)}
             >
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <label
                   className={cn(
                     "flex items-center justify-center gap-2 p-4 border-2 rounded-lg cursor-pointer transition-colors",

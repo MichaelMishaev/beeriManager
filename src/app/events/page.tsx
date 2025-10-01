@@ -94,27 +94,29 @@ async function EventsList() {
 export default function EventsPage() {
   return (
     <div className="container mx-auto px-4 py-6 space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-foreground flex items-center gap-2">
-            <Calendar className="h-8 w-8" />
+          <h1 className="text-2xl md:text-3xl font-bold text-foreground flex items-center gap-2">
+            <Calendar className="h-6 w-6 md:h-8 md:w-8" />
             אירועים
           </h1>
-          <p className="text-lg text-muted-foreground mt-2">
+          <p className="text-base md:text-lg text-muted-foreground mt-2">
             כל האירועים והפעילויות של ועד ההורים
           </p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" asChild size="sm">
+        <div className="flex gap-2 w-full sm:w-auto">
+          <Button variant="outline" asChild size="sm" className="flex-1 sm:flex-initial">
             <Link href="/calendar">
               <Calendar className="h-4 w-4 ml-2" />
-              תצוגת לוח שנה
+              <span className="hidden sm:inline">תצוגת לוח שנה</span>
+              <span className="sm:hidden">לוח שנה</span>
             </Link>
           </Button>
-          <Button asChild size="sm">
+          <Button asChild size="sm" className="flex-1 sm:flex-initial">
             <Link href="/admin/events/new">
               <Plus className="h-4 w-4 ml-2" />
-              אירוע חדש
+              <span className="hidden sm:inline">אירוע חדש</span>
+              <span className="sm:hidden">חדש</span>
             </Link>
           </Button>
         </div>

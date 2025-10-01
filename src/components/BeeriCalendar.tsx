@@ -182,7 +182,7 @@ export function BeeriCalendar({
       {/* Event Legend */}
       <div className="bg-white rounded-2xl shadow-lg p-6">
         <h3 className="font-bold text-lg mb-4">סוגי אירועים</h3>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {Object.entries(EVENT_TYPES).map(([type, config]) => (
             <div key={type} className="flex items-center space-x-2">
               <div className={`w-3 h-3 rounded-full ${config.color}`} />

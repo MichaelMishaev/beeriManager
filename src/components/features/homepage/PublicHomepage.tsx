@@ -105,7 +105,7 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
             </CardContent>
           </Card>
 
-          {/* Feedback CTA */}
+          {/* Complaint CTA */}
           <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -119,12 +119,12 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
             <CardContent>
               <p className="text-sm mb-4">
                 המשוב שלכם עוזר לנו לשפר ולארגן אירועים טובים יותר עבור כולם.
-                תוכלו לשלוח משוב אנונימי על כל אירוע.
+                תוכלו לשלוח תלונה או משוב אנונימי על כל נושא.
               </p>
-              <Button asChild className="w-full" size="sm">
-                <Link href="/events">
-                  <MessageSquare className="h-3 w-3 ml-2" />
-                  בחרו אירוע לשליחת משוב
+              <Button asChild className="w-full" size="lg">
+                <Link href="/complaint">
+                  <MessageSquare className="h-4 w-4 ml-2" />
+                  שלחו תלונה או משוב
                 </Link>
               </Button>
             </CardContent>
