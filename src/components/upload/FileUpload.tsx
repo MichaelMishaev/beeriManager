@@ -14,7 +14,6 @@ interface FileUploadProps {
   accept?: string
   maxSize?: number // in MB
   bucket?: string
-  path?: string
   disabled?: boolean
   className?: string
 }
@@ -33,7 +32,6 @@ export default function FileUpload({
   accept = '.pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png',
   maxSize = 10,
   bucket = 'documents',
-  path = '',
   disabled = false,
   className
 }: FileUploadProps) {

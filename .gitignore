@@ -148,3 +148,4 @@ ultra-modern-form.html
 # Duplicate files
 *.2.*
 *" 2."*
+Docs/.env

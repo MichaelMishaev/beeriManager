@@ -8,7 +8,6 @@ export async function POST(req: NextRequest) {
 
     const formData = await req.formData()
     const file = formData.get('file') as File
-    const folder = formData.get('folder') as string || 'protocols'
 
     if (!file) {
       return NextResponse.json(
@@ -76,10 +75,8 @@ export async function POST(req: NextRequest) {
       },
     })
 
-    logger.success('File uploaded to Google Drive', {
-      component: 'GoogleDrive',
-      fileId: response.data.id,
-      fileName: response.data.name,
+    logger.success(`File uploaded to Google Drive: ${response.data.name}`, {
+      component: 'GoogleDrive'
     })
 
     return NextResponse.json({

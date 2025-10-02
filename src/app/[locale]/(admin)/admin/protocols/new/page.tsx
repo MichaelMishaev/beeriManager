@@ -325,7 +325,6 @@ export default function NewProtocolPage() {
                 accept=".pdf,.doc,.docx"
                 maxSize={10}
                 bucket="protocols"
-                path="main"
               />
             </div>
 
@@ -338,7 +337,6 @@ export default function NewProtocolPage() {
                 accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png"
                 maxSize={10}
                 bucket="protocols"
-                path="attachments"
               />
             </div>
           </CardContent>
