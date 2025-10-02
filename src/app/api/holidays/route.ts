@@ -10,6 +10,7 @@ export async function GET(request: Request) {
     const upcoming = searchParams.get('upcoming') === 'true'
     const limit = parseInt(searchParams.get('limit') || '100')
     const academicYear = searchParams.get('academic_year')
+    const locale = searchParams.get('locale') || 'he'
 
     const supabase = createClient()
     let query = supabase
@@ -48,9 +49,15 @@ export async function GET(request: Request) {
       )
     }
 
+    // Transform data to include translated holiday names
+    const transformedData = (data || []).map(holiday => ({
+      ...holiday,
+      hebrew_name: holiday.hebrew_name_i18n?.[locale] || holiday.hebrew_name_i18n?.he || holiday.hebrew_name
+    }))
+
     return NextResponse.json({
       success: true,
-      data: data || []
+      data: transformedData
     })
   } catch (error) {
     console.error('Error fetching holidays:', error)

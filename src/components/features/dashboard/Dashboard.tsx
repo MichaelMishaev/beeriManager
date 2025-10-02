@@ -9,6 +9,7 @@ import { TaskCard } from '@/components/features/tasks/TaskCard'
 import { CollapsibleCalendarWidget } from '@/components/features/holidays/CollapsibleCalendarWidget'
 import type { DashboardStats, Event, Task, CalendarEvent } from '@/types'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 
 interface DashboardProps {
   stats: DashboardStats
@@ -64,31 +65,33 @@ function StatsCard({
 
 
 function QuickActions() {
+  const t = useTranslations('dashboard')
+
   const actions = [
     {
-      title: 'אירוע חדש',
-      description: 'צור אירוע או ישיבה',
+      title: t('newEvent'),
+      description: t('createEvent'),
       href: '/admin/events/new',
       icon: Calendar,
       color: 'bg-blue-500 hover:bg-blue-600'
     },
     {
-      title: 'משימה חדשה',
-      description: 'הוסף משימה למישהו',
+      title: t('newTask'),
+      description: t('addTask'),
       href: '/admin/tasks/new',
       icon: CheckSquare,
       color: 'bg-green-500 hover:bg-green-600'
     },
     {
-      title: 'דיווח בעיה',
-      description: 'דווח על בעיה או תקלה',
+      title: t('reportIssue'),
+      description: t('reportProblem'),
       href: '/issues/new',
       icon: AlertCircle,
       color: 'bg-orange-500 hover:bg-orange-600'
     },
     {
-      title: 'משוב אנונימי',
-      description: 'שלח משוב בעילום שם',
+      title: t('anonymousFeedback', { ns: 'homepage' }),
+      description: t('sendAnonymousFeedback'),
       href: '/feedback',
       icon: Users,
       color: 'bg-purple-500 hover:bg-purple-600'
@@ -100,10 +103,10 @@ function QuickActions() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <TrendingUp className="h-5 w-5" />
-          פעולות מהירות
+          {t('quickActions')}
         </CardTitle>
         <CardDescription>
-          גישה מהירה לפעולות נפוצות במערכת
+          {t('quickAccessActions')}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -131,12 +134,14 @@ function QuickActions() {
 }
 
 function RecentActivity() {
+  const t = useTranslations('dashboard')
+
   // Mock data - replace with real activity feed
   const activities = [
     {
       id: '1',
       type: 'event_created',
-      title: 'אירוע חדש נוסף',
+      title: t('eventAdded'),
       description: '"ישיבת ועד חודשית" - 15 באוקטובר 2024',
       time: '2 hours ago',
       icon: Calendar,
@@ -145,7 +150,7 @@ function RecentActivity() {
     {
       id: '2',
       type: 'task_completed',
-      title: 'משימה הושלמה',
+      title: t('taskCompleted'),
       description: '"הזמנת כיבוד לאירוע הפתיחה" - על ידי שרה כהן',
       time: '4 hours ago',
       icon: CheckSquare,
@@ -154,7 +159,7 @@ function RecentActivity() {
     {
       id: '3',
       type: 'protocol_added',
-      title: 'פרוטוקול חדש',
+      title: t('newProtocol'),
       description: 'פרוטוקול ישיבה מספר 3 - ספטמבר 2024',
       time: '1 day ago',
       icon: FileText,
@@ -163,7 +168,7 @@ function RecentActivity() {
     {
       id: '4',
       type: 'issue_resolved',
-      title: 'בעיה נפתרה',
+      title: t('issueResolved'),
       description: 'בעיית התאורה במסדרון תוקנה',
       time: '2 days ago',
       icon: AlertCircle,
@@ -174,9 +179,9 @@ function RecentActivity() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>פעילות אחרונה</CardTitle>
+        <CardTitle>{t('recentActivity')}</CardTitle>
         <CardDescription>
-          עדכונים ופעילות במערכת
+          {t('activityUpdates')}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -204,7 +209,7 @@ function RecentActivity() {
         <div className="mt-4 text-center">
           <Button variant="ghost" size="sm" asChild>
             <Link href="/activity">
-              צפה בכל הפעילות
+              {t('viewAllActivity')}
             </Link>
           </Button>
         </div>
@@ -214,44 +219,46 @@ function RecentActivity() {
 }
 
 export function Dashboard({ stats, upcomingEvents, pendingTasks, calendarEvents }: DashboardProps) {
+  const t = useTranslations('dashboard')
+
   return (
     <>
     <div className="container mx-auto px-4 py-6 space-y-6">
       {/* Welcome Header */}
       <div className="text-center space-y-2">
         <h1 className="text-3xl font-bold text-foreground">
-          ברוכים הבאים לועד ההורים
+          {t('welcome')}
         </h1>
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-          סקירה מהירה של הפעילות במערכת ניהול ועד ההורים
+          {t('subtitle')}
         </p>
       </div>
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatsCard
-          title="אירועים קרובים"
+          title={t('upcomingEvents')}
           value={stats.upcomingEvents}
           icon={Calendar}
           href="/events"
           color="text-blue-600"
         />
         <StatsCard
-          title="משימות פתוחות"
+          title={t('pendingTasks')}
           value={stats.pendingTasks}
           icon={CheckSquare}
           href="/tasks"
           color="text-green-600"
         />
         <StatsCard
-          title="בעיות פעילות"
+          title={t('activeIssues')}
           value={stats.activeIssues}
           icon={AlertCircle}
           href="/issues"
           color="text-orange-600"
         />
         <StatsCard
-          title="פרוטוקולים"
+          title={t('protocols')}
           value={stats.recentProtocols}
           icon={FileText}
           href="/protocols"
@@ -288,15 +295,15 @@ export function Dashboard({ stats, upcomingEvents, pendingTasks, calendarEvents 
               <div>
                 <CardTitle className="flex items-center gap-2">
                   <Calendar className="h-5 w-5" />
-                  אירועים קרובים
+                  {t('upcomingEvents')}
                 </CardTitle>
                 <CardDescription>
-                  האירועים הבאים בלוח השנה
+                  {t('upcomingEventsInCalendar')}
                 </CardDescription>
               </div>
               <Button variant="outline" size="sm" asChild>
                 <Link href="/events">
-                  צפה בכל האירועים
+                  {t('viewAllEvents')}
                 </Link>
               </Button>
             </CardHeader>
@@ -313,10 +320,10 @@ export function Dashboard({ stats, upcomingEvents, pendingTasks, calendarEvents 
                 {upcomingEvents.length === 0 && (
                   <div className="text-center py-8">
                     <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                    <p className="text-muted-foreground">אין אירועים קרובים</p>
+                    <p className="text-muted-foreground">{t('noUpcomingEvents')}</p>
                     <Button variant="outline" className="mt-4" asChild size="sm">
                       <Link href="/admin/events/new">
-                        צור אירוע חדש
+                        {t('createNewEvent')}
                       </Link>
                     </Button>
                   </div>
@@ -331,15 +338,15 @@ export function Dashboard({ stats, upcomingEvents, pendingTasks, calendarEvents 
               <div>
                 <CardTitle className="flex items-center gap-2">
                   <CheckSquare className="h-5 w-5" />
-                  משימות פתוחות
+                  {t('pendingTasks')}
                 </CardTitle>
                 <CardDescription>
-                  משימות שדורשות טיפול
+                  {t('tasksRequiringAttention')}
                 </CardDescription>
               </div>
               <Button variant="outline" size="sm" asChild>
                 <Link href="/tasks">
-                  צפה בכל המשימות
+                  {t('viewAllTasks')}
                 </Link>
               </Button>
             </CardHeader>
@@ -356,10 +363,10 @@ export function Dashboard({ stats, upcomingEvents, pendingTasks, calendarEvents 
                 {pendingTasks.length === 0 && (
                   <div className="text-center py-8">
                     <CheckSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                    <p className="text-muted-foreground">אין משימות פתוחות</p>
+                    <p className="text-muted-foreground">{t('noPendingTasks')}</p>
                     <Button variant="outline" className="mt-4" asChild size="sm">
                       <Link href="/admin/tasks/new">
-                        הוסף משימה חדשה
+                        {t('addNewTask')}
                       </Link>
                     </Button>
                   </div>

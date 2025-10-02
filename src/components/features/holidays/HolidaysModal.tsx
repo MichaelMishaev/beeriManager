@@ -14,7 +14,10 @@ import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import type { Holiday } from '@/types'
 import { format, parseISO } from 'date-fns'
-import { he } from 'date-fns/locale'
+import { he, ru } from 'date-fns/locale'
+import { useParams } from 'next/navigation'
+import { useTranslations } from 'next-intl'
+import type { Locale } from '@/i18n/config'
 
 interface HolidaysModalProps {
   open: boolean
@@ -22,20 +25,26 @@ interface HolidaysModalProps {
 }
 
 export function HolidaysModal({ open, onOpenChange }: HolidaysModalProps) {
+  const params = useParams()
+  const locale = (params.locale || 'he') as Locale
+  const t = useTranslations('calendar')
   const [holidays, setHolidays] = useState<Holiday[]>([])
   const [loading, setLoading] = useState(true)
   const [academicYear] = useState('תשפ״ה')
+
+  // Get the appropriate date-fns locale
+  const dateLocale = locale === 'ru' ? ru : he
 
   useEffect(() => {
     if (open) {
       loadHolidays()
     }
-  }, [open, academicYear])
+  }, [open, academicYear, locale])
 
   async function loadHolidays() {
     try {
       setLoading(true)
-      const response = await fetch(`/api/holidays?academic_year=${academicYear}`)
+      const response = await fetch(`/api/holidays?academic_year=${academicYear}&locale=${locale}`)
       const data = await response.json()
 
       if (data.success) {
@@ -49,36 +58,42 @@ export function HolidaysModal({ open, onOpenChange }: HolidaysModalProps) {
   }
 
   const handleShare = async () => {
+    const schoolClosedText = locale === 'ru' ? 'Школа закрыта' : 'בית הספר סגור'
     const text = holidays
       .map(h => {
         const start = parseISO(h.start_date)
         const end = parseISO(h.end_date)
 
-        // Format dates with Hebrew month names
+        // Format dates with locale-specific month names
         let dateRange
         if (h.start_date === h.end_date) {
           // Single day
-          dateRange = format(start, 'd בMMMM', { locale: he })
+          dateRange = locale === 'ru'
+            ? format(start, 'd MMMM', { locale: dateLocale })
+            : format(start, 'd בMMMM', { locale: dateLocale })
         } else {
           // Date range
-          const startFormatted = format(start, 'd', { locale: he })
-          const endFormatted = format(end, 'd בMMMM', { locale: he })
+          const startFormatted = format(start, 'd', { locale: dateLocale })
+          const endFormatted = locale === 'ru'
+            ? format(end, 'd MMMM', { locale: dateLocale })
+            : format(end, 'd בMMMM', { locale: dateLocale })
           dateRange = `${endFormatted} - ${startFormatted}`
         }
 
         const hebrewDate = h.hebrew_date ? `\n${h.hebrew_date}` : ''
-        const schoolClosed = h.is_school_closed ? '\nבית הספר סגור' : ''
+        const schoolClosed = h.is_school_closed ? `\n${schoolClosedText}` : ''
 
         return `${h.icon_emoji || '📅'} *${h.hebrew_name}*${hebrewDate}\n${dateRange}${schoolClosed}`
       })
       .join('\n\n')
 
-    const fullText = `📆 *לוח חגים ומועדים*\nשנת הלימודים ${academicYear}\n\n${text}\n\n🔗 https://beeri.online/`
+    const modalTitle = t('holidaysAndEvents')
+    const fullText = `📆 *${modalTitle}*\n${t('schoolYearHolidays')}\n\n${text}\n\n🔗 https://beeri.online/`
 
     if (navigator.share) {
       try {
         await navigator.share({
-          title: `לוח חגים ${academicYear}`,
+          title: `${modalTitle} ${academicYear}`,
           text: fullText
         })
       } catch (err) {
@@ -87,7 +102,8 @@ export function HolidaysModal({ open, onOpenChange }: HolidaysModalProps) {
     } else {
       // Fallback to clipboard
       await navigator.clipboard.writeText(fullText)
-      alert('הלוח הועתק ללוח!')
+      const copiedText = locale === 'ru' ? 'Скопировано в буфер обмена!' : 'הלוח הועתק ללוח!'
+      alert(copiedText)
     }
   }
 
@@ -101,10 +117,10 @@ export function HolidaysModal({ open, onOpenChange }: HolidaysModalProps) {
         <DialogHeader>
           <DialogTitle className="text-2xl flex items-center gap-2">
             <Calendar className="h-6 w-6 text-primary" />
-            לוח חגים ומועדים
+            {t('holidaysAndEvents')}
           </DialogTitle>
           <DialogDescription>
-            שנת הלימודים {academicYear}
+            {t('schoolYearHolidays')}
           </DialogDescription>
         </DialogHeader>
 
@@ -116,7 +132,7 @@ export function HolidaysModal({ open, onOpenChange }: HolidaysModalProps) {
             className="flex items-center gap-2"
           >
             <Share2 className="h-4 w-4" />
-            שיתוף
+            {t('share')}
           </Button>
           <Button
             variant="outline"
@@ -125,7 +141,7 @@ export function HolidaysModal({ open, onOpenChange }: HolidaysModalProps) {
             className="flex items-center gap-2 print:hidden"
           >
             <Download className="h-4 w-4" />
-            הדפסה
+            {t('print')}
           </Button>
         </div>
 
@@ -141,7 +157,9 @@ export function HolidaysModal({ open, onOpenChange }: HolidaysModalProps) {
           ) : holidays.length === 0 ? (
             <div className="text-center py-12">
               <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-              <p className="text-muted-foreground">לא נמצאו חגים לשנה זו</p>
+              <p className="text-muted-foreground">
+                {locale === 'ru' ? 'Праздники не найдены' : 'לא נמצאו חגים לשנה זו'}
+              </p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -176,7 +194,7 @@ export function HolidaysModal({ open, onOpenChange }: HolidaysModalProps) {
                               variant="secondary"
                               className="bg-red-100 text-red-800 text-xs flex-shrink-0"
                             >
-                              בית הספר סגור
+                              {locale === 'ru' ? 'Школа закрыта' : 'בית הספר סגור'}
                             </Badge>
                           )}
                         </div>
@@ -186,9 +204,15 @@ export function HolidaysModal({ open, onOpenChange }: HolidaysModalProps) {
                             {holiday.hebrew_date}
                           </div>
                           <div className="font-medium">
-                            {format(parseISO(holiday.start_date), 'd בMMMM', { locale: he })}
+                            {locale === 'ru'
+                              ? format(parseISO(holiday.start_date), 'd MMMM', { locale: dateLocale })
+                              : format(parseISO(holiday.start_date), 'd בMMMM', { locale: dateLocale })
+                            }
                             {holiday.start_date !== holiday.end_date && (
-                              <> - {format(parseISO(holiday.end_date), 'd בMMMM', { locale: he })}</>
+                              <> - {locale === 'ru'
+                                ? format(parseISO(holiday.end_date), 'd MMMM', { locale: dateLocale })
+                                : format(parseISO(holiday.end_date), 'd בMMMM', { locale: dateLocale })
+                              }</>
                             )}
                           </div>
                         </div>

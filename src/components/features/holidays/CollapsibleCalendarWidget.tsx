@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react'
 import { ChevronDown, ChevronUp, Calendar } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { Button } from '@/components/ui/button'
 import { MobileCalendar } from '@/components/ui/MobileCalendar'
 import { NextHolidayWidget } from './NextHolidayWidget'
@@ -20,6 +21,7 @@ export function CollapsibleCalendarWidget({
   onEventClick,
   defaultExpanded = false
 }: CollapsibleCalendarWidgetProps) {
+  const t = useTranslations('calendar')
   const [isExpanded, setIsExpanded] = useState(defaultExpanded)
   const contentRef = useRef<HTMLDivElement>(null)
   const [contentHeight, setContentHeight] = useState(0)
@@ -81,12 +83,12 @@ export function CollapsibleCalendarWidget({
           <Calendar className="h-4 w-4 ml-2" />
           {isExpanded ? (
             <>
-              הסתר לוח שנה
+              {t('hideCalendar')}
               <ChevronUp className="h-4 w-4 mr-2 transition-transform" />
             </>
           ) : (
             <>
-              הצג לוח שנה
+              {t('showCalendar')}
               <ChevronDown className="h-4 w-4 mr-2 transition-transform" />
             </>
           )}
@@ -102,7 +104,7 @@ export function CollapsibleCalendarWidget({
             color: '#FF8200'
           }}
           onClick={() => setHolidaysModalOpen(true)}
-          title="לוח חגים"
+          title={t('holidaysAndEvents')}
         >
           <Calendar className="h-4 w-4" />
         </Button>

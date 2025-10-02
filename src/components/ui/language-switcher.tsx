@@ -4,14 +4,7 @@ import { useParams } from 'next/navigation'
 import { usePathname, useRouter } from '@/i18n/navigation'
 import { locales, localeNames, type Locale } from '@/i18n/config'
 import { featureFlags } from '@/lib/features'
-import { Globe } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+import { cn } from '@/lib/utils'
 
 export function LanguageSwitcher() {
   const params = useParams()
@@ -28,24 +21,21 @@ export function LanguageSwitcher() {
   }
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="h-9 w-9">
-          <Globe className="h-4 w-4" />
-          <span className="sr-only">Switch language</span>
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        {locales.map((locale) => (
-          <DropdownMenuItem
-            key={locale}
-            onClick={() => switchLanguage(locale)}
-            className={currentLocale === locale ? 'bg-accent' : ''}
-          >
-            {localeNames[locale]}
-          </DropdownMenuItem>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <div className="flex items-center gap-1.5">
+      {locales.map((locale) => (
+        <button
+          key={locale}
+          onClick={() => switchLanguage(locale)}
+          className={cn(
+            'px-2.5 py-1 text-xs md:text-sm font-medium rounded-full transition-all duration-300',
+            currentLocale === locale
+              ? 'bg-primary text-primary-foreground shadow-sm'
+              : 'bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+          )}
+        >
+          {localeNames[locale]}
+        </button>
+      ))}
+    </div>
   )
 }

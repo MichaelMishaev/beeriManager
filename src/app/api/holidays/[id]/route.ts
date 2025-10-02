@@ -10,10 +10,13 @@ export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
+    const { searchParams } = new URL(request.url)
+    const locale = searchParams.get('locale') || 'he'
+
     const { data: holiday, error } = await supabase
       .from('holidays')
       .select('*')
@@ -35,7 +38,13 @@ export async function GET(
       )
     }
 
-    return NextResponse.json({ success: true, data: holiday })
+    // Transform data to include translated holiday name
+    const transformedHoliday = {
+      ...holiday,
+      hebrew_name: holiday.hebrew_name_i18n?.[locale] || holiday.hebrew_name_i18n?.he || holiday.hebrew_name
+    }
+
+    return NextResponse.json({ success: true, data: transformedHoliday })
   } catch (error) {
     console.error('Error in holiday API:', error)
     return NextResponse.json(

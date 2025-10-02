@@ -16,7 +16,8 @@ function log(message: string, data?: any) {
 const intlMiddleware = createMiddleware({
   locales,
   defaultLocale,
-  localePrefix: 'always'
+  localePrefix: 'always',
+  localeDetection: true
 })
 
 export async function middleware(request: NextRequest) {
