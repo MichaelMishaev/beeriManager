@@ -13,6 +13,7 @@ interface CalendarEvent {
   description?: string
   time?: string
   location?: string
+  isSchoolClosed?: boolean // For holidays - indicates if school is closed
 }
 
 interface MobileCalendarProps {
@@ -210,6 +211,7 @@ export function MobileCalendar({
             const isCurrentMonthDay = isCurrentMonth(date)
             const isTodayDate = isToday(date)
             const isSelectedDate = isSelected(date)
+            const hasSchoolClosure = dayEvents.some(e => e.type === 'holiday' && e.isSchoolClosed)
 
             return (
               <button
@@ -219,11 +221,13 @@ export function MobileCalendar({
                   relative flex flex-col items-center justify-center text-sm aspect-square rounded-lg transition-all touch-manipulation min-h-[44px]
                   ${isTodayDate
                     ? 'bg-primary text-white font-bold shadow-lg'
-                    : isSelectedDate
-                      ? 'bg-primary-100 text-primary-700 font-semibold ring-2 ring-primary'
-                      : isCurrentMonthDay
-                        ? 'text-royal-blue-800 hover:bg-primary-50 active:bg-primary-100'
-                        : 'text-gray-300'
+                    : hasSchoolClosure && isCurrentMonthDay
+                      ? 'bg-red-100 text-red-900 font-semibold border-2 border-red-400'
+                      : isSelectedDate
+                        ? 'bg-primary-100 text-primary-700 font-semibold ring-2 ring-primary'
+                        : isCurrentMonthDay
+                          ? 'text-royal-blue-800 hover:bg-primary-50 active:bg-primary-100'
+                          : 'text-gray-300'
                   }
                   ${dayEvents.length > 0 ? 'cursor-pointer' : ''}
                 `}

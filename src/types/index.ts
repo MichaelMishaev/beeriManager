@@ -416,6 +416,7 @@ export interface CalendarEvent {
   description?: string
   time?: string
   location?: string
+  isSchoolClosed?: boolean // For holidays - indicates if school is closed
 }
 
 // Auth types

@@ -95,7 +95,8 @@ export default function HomePage() {
       title: h.hebrew_name,
       date: new Date(h.start_date),
       type: 'holiday' as const,
-      description: h.description
+      description: h.description,
+      isSchoolClosed: h.is_school_closed
     }))
   ]
 
