@@ -3,35 +3,44 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { Menu, X, Home, Calendar, CheckSquare, MessageSquare, DollarSign, AlertCircle, FileText, Building2, LogIn, LogOut } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { LanguageSwitcher } from '@/components/ui/language-switcher'
 import { cn } from '@/lib/utils'
 import { logger } from '@/lib/logger'
 
-// Public navigation for parents
-const publicNavItems = [
-  { href: '/', label: 'בית', icon: Home },
-  { href: '/events', label: 'אירועים', icon: Calendar },
-  { href: '/calendar', label: 'לוח שנה', icon: Calendar },
-]
+// Navigation items - now using translation keys
+function useNavItems() {
+  const t = useTranslations('navigation')
 
-// Committee navigation (authenticated)
-const committeeNavItems = [
-  { href: '/admin', label: 'בית', icon: Home },
-  { href: '/events', label: 'אירועים', icon: Calendar },
-  { href: '/calendar', label: 'לוח שנה', icon: Calendar },
-  { href: '/tasks', label: 'משימות', icon: CheckSquare },
-  { href: '/finances', label: 'כספים', icon: DollarSign },
-  { href: '/issues', label: 'בעיות', icon: AlertCircle },
-  { href: '/protocols', label: 'פרוטוקולים', icon: FileText },
-  { href: '/vendors', label: 'ספקים', icon: Building2 },
-  { href: '/admin/feedback', label: 'משוב מהורים', icon: MessageSquare },
-]
+  return {
+    public: [
+      { href: '/', label: t('home'), icon: Home },
+      { href: '/events', label: t('events'), icon: Calendar },
+      { href: '/calendar', label: t('calendar'), icon: Calendar },
+    ],
+    committee: [
+      { href: '/admin', label: t('home'), icon: Home },
+      { href: '/events', label: t('events'), icon: Calendar },
+      { href: '/calendar', label: t('calendar'), icon: Calendar },
+      { href: '/tasks', label: t('tasks'), icon: CheckSquare },
+      { href: '/finances', label: t('finances'), icon: DollarSign },
+      { href: '/issues', label: t('issues'), icon: AlertCircle },
+      { href: '/protocols', label: t('protocols'), icon: FileText },
+      { href: '/vendors', label: t('vendors'), icon: Building2 },
+      { href: '/admin/feedback', label: t('feedback'), icon: MessageSquare },
+    ]
+  }
+}
 
 export function Navigation() {
   const [isOpen, setIsOpen] = useState(false)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const pathname = usePathname()
+  const t = useTranslations('common')
+  const tAuth = useTranslations('auth')
+  const navItems = useNavItems()
 
   useEffect(() => {
     checkAuth()
@@ -67,7 +76,7 @@ export function Navigation() {
     return pathname.startsWith(href)
   }
 
-  const navItems = isAuthenticated ? committeeNavItems : publicNavItems
+  const items = isAuthenticated ? navItems.committee : navItems.public
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -84,7 +93,7 @@ export function Navigation() {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex md:items-center md:gap-2">
-            {navItems.map((item) => {
+            {items.map((item) => {
               const Icon = item.icon
               return (
                 <Link
@@ -104,6 +113,9 @@ export function Navigation() {
               )
             })}
 
+            {/* Language Switcher */}
+            <LanguageSwitcher />
+
             {/* Login/Logout Button */}
             {isAuthenticated ? (
               <Button
@@ -113,7 +125,7 @@ export function Navigation() {
                 className="flex items-center gap-2"
               >
                 <LogOut className="h-4 w-4" />
-                יציאה
+                {tAuth('logout')}
               </Button>
             ) : (
               <Button
@@ -124,7 +136,7 @@ export function Navigation() {
               >
                 <Link href="/login">
                   <LogIn className="h-4 w-4" />
-                  כניסת ועד
+                  {t('committeeLogin')}
                 </Link>
               </Button>
             )}
@@ -147,7 +159,7 @@ export function Navigation() {
         {/* Mobile Navigation */}
         {isOpen && (
           <div className="md:hidden py-4 space-y-1">
-            {navItems.map((item) => {
+            {items.map((item) => {
               const Icon = item.icon
               return (
                 <Link
@@ -175,16 +187,16 @@ export function Navigation() {
                   className="flex items-center gap-3 px-4 py-3 text-base font-medium rounded-md transition-colors text-muted-foreground hover:bg-accent hover:text-accent-foreground w-full"
                 >
                   <LogOut className="h-5 w-5" />
-                  יציאה
+                  {tAuth('logout')}
                 </button>
               ) : (
                 <Link
                   href="/login"
-                  onClick={() => handleNavClick('/login', 'כניסת ועד')}
+                  onClick={() => handleNavClick('/login', t('committeeLogin'))}
                   className="flex items-center gap-3 px-4 py-3 text-base font-medium rounded-md transition-colors text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                 >
                   <LogIn className="h-5 w-5" />
-                  כניסת ועד
+                  {t('committeeLogin')}
                 </Link>
               )}
             </div>

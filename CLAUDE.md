@@ -96,3 +96,4 @@ npm run test:e2e     # Run E2E tests
 - whe dev check if what you change can create egresion bugs in other places.
 - when i ask to push, push to git to connected repository but do not push files that should not be in git, like temp files etc
 - all code must follow strict typescript
+- always develop strict typescript

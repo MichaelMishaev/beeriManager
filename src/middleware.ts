@@ -1,6 +1,8 @@
+import createMiddleware from 'next-intl/middleware'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { verifyJWT } from '@/lib/auth/jwt-edge'
+import { locales, defaultLocale } from '@/i18n/config'
 
 const isDev = process.env.NODE_ENV === 'development'
 
@@ -9,6 +11,13 @@ function log(message: string, data?: any) {
     console.log(`[Middleware] ${message}`, data || '')
   }
 }
+
+// Create the i18n middleware
+const intlMiddleware = createMiddleware({
+  locales,
+  defaultLocale,
+  localePrefix: 'always'
+})
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
@@ -26,6 +35,19 @@ export async function middleware(request: NextRequest) {
 
   log(`Request to: ${pathname}`)
 
+  // Handle i18n routing first
+  const intlResponse = intlMiddleware(request)
+  if (intlResponse) {
+    // If intl middleware redirects, return early
+    if (intlResponse.status === 307 || intlResponse.status === 308) {
+      return intlResponse
+    }
+  }
+
+  // Extract locale from pathname (e.g., /he/admin -> locale: 'he', path: '/admin')
+  const pathnameWithoutLocale = pathname.replace(/^\/[a-z]{2}/, '') || '/'
+  const locale = pathname.match(/^\/([a-z]{2})/)?.[1] || defaultLocale
+
   // Committee routes protection (admin + internal pages)
   const committeeRoutes = [
     '/admin',
@@ -36,7 +58,7 @@ export async function middleware(request: NextRequest) {
     '/vendors'
   ]
 
-  const isCommitteeRoute = committeeRoutes.some(route => pathname.startsWith(route))
+  const isCommitteeRoute = committeeRoutes.some(route => pathnameWithoutLocale.startsWith(route))
 
   if (isCommitteeRoute) {
     log(`Protected route accessed: ${pathname}`)
@@ -46,7 +68,7 @@ export async function middleware(request: NextRequest) {
     if (!token) {
       log(`No auth token found, redirecting to login`)
       const url = request.nextUrl.clone()
-      url.pathname = '/login'
+      url.pathname = `/${locale}/login`
       url.searchParams.set('redirect', pathname)
       return NextResponse.redirect(url)
     }
@@ -65,7 +87,7 @@ export async function middleware(request: NextRequest) {
       log(`JWT verification failed`, { error: error instanceof Error ? error.message : error })
       // Invalid token - redirect to login
       const url = request.nextUrl.clone()
-      url.pathname = '/login'
+      url.pathname = `/${locale}/login`
       url.searchParams.set('redirect', pathname)
       return NextResponse.redirect(url)
     }

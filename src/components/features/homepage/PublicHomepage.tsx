@@ -8,14 +8,17 @@ import { CollapsibleCalendarWidget } from '@/components/features/holidays/Collap
 import type { Event, CalendarEvent } from '@/types'
 import Link from 'next/link'
 import { format } from 'date-fns'
-import { he } from 'date-fns/locale'
+import { he, ru } from 'date-fns/locale'
+import { useTranslations } from 'next-intl'
+import { useParams } from 'next/navigation'
+import type { Locale } from '@/i18n/config'
 
 interface PublicHomepageProps {
   upcomingEvents: Event[]
   calendarEvents: CalendarEvent[]
 }
 
-function EventItem({ event }: { event: Event }) {
+function EventItem({ event, dateLocale }: { event: Event; dateLocale: typeof he | typeof ru }) {
   const startDate = new Date(event.start_datetime)
 
   return (
@@ -24,10 +27,10 @@ function EventItem({ event }: { event: Event }) {
         <div className="flex-shrink-0 text-center">
           <div className="bg-primary text-primary-foreground rounded-lg p-3">
             <div className="text-2xl font-bold">
-              {format(startDate, 'd', { locale: he })}
+              {format(startDate, 'd', { locale: dateLocale })}
             </div>
             <div className="text-xs uppercase">
-              {format(startDate, 'MMM', { locale: he })}
+              {format(startDate, 'MMM', { locale: dateLocale })}
             </div>
           </div>
         </div>
@@ -41,9 +44,9 @@ function EventItem({ event }: { event: Event }) {
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <Calendar className="h-3 w-3" />
             <span>
-              {format(startDate, 'EEEE, d MMMM yyyy', { locale: he })}
+              {format(startDate, 'EEEE, d MMMM yyyy', { locale: dateLocale })}
             </span>
-            <span className="mr-2">• {format(startDate, 'HH:mm', { locale: he })}</span>
+            <span className="mr-2">• {format(startDate, 'HH:mm', { locale: dateLocale })}</span>
           </div>
         </div>
         <ChevronLeft className="h-5 w-5 text-muted-foreground flex-shrink-0" />
@@ -53,6 +56,11 @@ function EventItem({ event }: { event: Event }) {
 }
 
 export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepageProps) {
+  const t = useTranslations('homepage')
+  const params = useParams()
+  const currentLocale = params.locale as Locale
+  const dateLocale = currentLocale === 'ru' ? ru : he
+
   // Get recent events with photos (past events only)
   const now = new Date()
   const eventsWithPhotos = upcomingEvents
@@ -69,10 +77,10 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
       {/* Welcome Header */}
       <div className="text-center space-y-3 mb-8">
         <h1 className="text-4xl font-bold text-foreground">
-          ברוכים הבאים להורים בית הספר
+          {t('welcome')}
         </h1>
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-          צפו באירועים הקרובים, לוח השנה, ושלחו משוב לועד ההורים
+          {t('subtitle')}
         </p>
       </div>
 
@@ -82,11 +90,11 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-2xl font-bold flex items-center gap-2">
               <Camera className="h-6 w-6 text-primary" />
-              גלריית תמונות מאירועים
+              {t('photoGallery')}
             </h2>
             <Button variant="ghost" asChild size="sm">
               <Link href="/events?tab=photos" className="gap-1">
-                כל הגלריות
+                {t('allGalleries')}
                 <ArrowLeft className="h-4 w-4" />
               </Link>
             </Button>
@@ -107,7 +115,7 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
                         <div className="flex items-start justify-between gap-2 mb-2">
                           <Camera className="h-12 w-12 text-primary/20 flex-shrink-0" />
                           <div className="text-xs text-muted-foreground text-left" dir="ltr">
-                            {format(eventDate, 'd MMM yyyy', { locale: he })}
+                            {format(eventDate, 'd MMM yyyy', { locale: dateLocale })}
                           </div>
                         </div>
                         <CardTitle className="text-base leading-tight line-clamp-2">
@@ -122,7 +130,7 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
                         )}
                         <Button size="sm" variant="outline" className="w-full gap-2">
                           <Camera className="h-4 w-4" />
-                          צפה בתמונות
+                          {t('viewPhotos')}
                         </Button>
                       </CardContent>
                     </a>
@@ -142,10 +150,10 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Calendar className="h-5 w-5" />
-                אירועים קרובים
+                {t('upcomingEvents')}
               </CardTitle>
               <CardDescription>
-                האירועים הבאים בבית הספר
+                {t('nextSchoolEvents')}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -153,13 +161,13 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
                 {upcomingEvents.length > 0 ? (
                   <>
                     {upcomingEvents.slice(0, 5).map((event) => (
-                      <EventItem key={event.id} event={event} />
+                      <EventItem key={event.id} event={event} dateLocale={dateLocale} />
                     ))}
                     {upcomingEvents.length > 5 && (
                       <div className="text-center pt-4">
                         <Button variant="outline" size="sm" asChild>
                           <Link href="/events">
-                            צפה בכל האירועים ({upcomingEvents.length})
+                            {t('viewAllEvents')} ({upcomingEvents.length})
                           </Link>
                         </Button>
                       </div>
@@ -168,7 +176,7 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
                 ) : (
                   <div className="text-center py-12">
                     <Calendar className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-                    <p className="text-muted-foreground">אין אירועים קרובים כרגע</p>
+                    <p className="text-muted-foreground">{t('noUpcomingEvents')}</p>
                   </div>
                 )}
               </div>
@@ -180,21 +188,20 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <MessageSquare className="h-5 w-5 text-primary" />
-                יש לכם משוב?
+                {t('haveFeedback')}
               </CardTitle>
               <CardDescription>
-                שתפו את דעתכם על האירועים שהשתתפתם בהם
+                {t('shareOpinion')}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <p className="text-sm mb-4">
-                המשוב שלכם עוזר לנו לשפר ולארגן אירועים טובים יותר עבור כולם.
-                תוכלו לשלוח תלונה או משוב אנונימי על כל נושא.
+                {t('feedbackHelps')}
               </p>
               <Button asChild className="w-full" size="lg">
                 <Link href="/complaint">
                   <MessageSquare className="h-4 w-4 ml-2" />
-                  שלחו תלונה או משוב
+                  {t('sendComplaint')}
                 </Link>
               </Button>
             </CardContent>
@@ -231,9 +238,9 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
               <MessageSquare className="h-6 w-6 text-primary" />
             </div>
             <div className="flex-1">
-              <h3 className="font-semibold mb-2">שאלות או הצעות?</h3>
+              <h3 className="font-semibold mb-2">{t('questionsOrSuggestions')}</h3>
               <p className="text-sm text-muted-foreground mb-3">
-                אנחנו כאן בשבילכם! לכל שאלה, הצעה או בקשה - נשמח לשמוע.
+                {t('hereForYou')}
               </p>
               <div className="mb-3">
                 <Button
@@ -248,12 +255,12 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
                     rel="noopener noreferrer"
                   >
                     <MessageSquare className="h-3 w-3 ml-2" />
-                    שלחו הודעה בוואטסאפ
+                    {t('sendWhatsApp')}
                   </a>
                 </Button>
               </div>
               <p className="text-sm text-muted-foreground">
-                חברי ועד ההורים יכולים להתחבר למערכת הניהול באמצעות כפתור "כניסת ועד" בתפריט.
+                {t('committeeLoginInfo')}
               </p>
             </div>
           </div>

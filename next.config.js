@@ -1,3 +1,5 @@
+const withNextIntl = require('next-intl/plugin')('./src/i18n/request.ts')
+
 const withPWA = require('next-pwa')({
   dest: 'public',
   register: true,
@@ -73,4 +75,4 @@ const nextConfig = {
   }
 }
 
-module.exports = withPWA(nextConfig)
+module.exports = withNextIntl(withPWA(nextConfig))

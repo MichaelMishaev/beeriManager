@@ -125,7 +125,7 @@ export function CollapsibleCalendarWidget({
           <MobileCalendar
             events={calendarEvents}
             onEventClick={handleEventClick}
-            showLegend={true}
+            showLegend={false}
             showWeeklySummary={true}
           />
         </div>
