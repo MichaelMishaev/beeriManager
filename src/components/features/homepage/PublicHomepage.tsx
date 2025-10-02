@@ -3,15 +3,12 @@
 import { Calendar, MessageSquare, ChevronLeft, Camera, ArrowLeft } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { MobileCalendar } from '@/components/ui/MobileCalendar'
 import { CommitteeCard } from './CommitteeCard'
-import { NextHolidayWidget } from '@/components/features/holidays/NextHolidayWidget'
-import { HolidaysFAB } from '@/components/features/holidays/HolidaysFAB'
+import { CollapsibleCalendarWidget } from '@/components/features/holidays/CollapsibleCalendarWidget'
 import type { Event, CalendarEvent } from '@/types'
 import Link from 'next/link'
 import { format } from 'date-fns'
 import { he } from 'date-fns/locale'
-import { useState } from 'react'
 
 interface PublicHomepageProps {
   upcomingEvents: Event[]
@@ -56,8 +53,6 @@ function EventItem({ event }: { event: Event }) {
 }
 
 export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepageProps) {
-  const [, setHolidaysModalOpen] = useState(false)
-
   // Get recent events with photos (past events only)
   const now = new Date()
   const eventsWithPhotos = upcomingEvents
@@ -79,11 +74,6 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
           צפו באירועים הקרובים, לוח השנה, ושלחו משוב לועד ההורים
         </p>
-      </div>
-
-      {/* Committee Members Card */}
-      <div className="mb-8">
-        <CommitteeCard />
       </div>
 
       {/* Photos Gallery Section */}
@@ -147,7 +137,7 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
       {/* Main Content Grid */}
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Upcoming Events - Takes 2 columns */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-6 order-2 lg:order-1">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -209,43 +199,27 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
               </Button>
             </CardContent>
           </Card>
+
+          {/* Committee Members Card */}
+          <CommitteeCard />
         </div>
 
         {/* Calendar & Holidays - Takes 1 column */}
-        <div className="lg:col-span-1 space-y-6">
-          {/* Next Holiday Widget */}
-          <NextHolidayWidget onClick={() => setHolidaysModalOpen(true)} />
-
-          <Card className="sticky top-20">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Calendar className="h-5 w-5" />
-                לוח שנה
-              </CardTitle>
-              <CardDescription>
-                כל האירועים במבט אחד
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <MobileCalendar
-                events={calendarEvents}
-                onEventClick={(event) => {
+        <div className="lg:col-span-1 order-1 lg:order-2">
+          {/* Collapsible Calendar Widget */}
+          <div className="lg:sticky lg:top-20">
+            <CollapsibleCalendarWidget
+              calendarEvents={calendarEvents}
+              onEventClick={(event) => {
+                // Only navigate for non-holiday events
+                // Holiday events are handled by CollapsibleCalendarWidget
+                if (event.type !== 'holiday') {
                   window.location.href = `/events/${event.id}`
-                }}
-                showLegend={false}
-                showWeeklySummary={true}
-                className="max-w-none"
-              />
-              <div className="mt-4 text-center">
-                <Button variant="outline" size="sm" asChild className="w-full">
-                  <Link href="/calendar">
-                    <Calendar className="h-3 w-3 ml-2" />
-                    לוח שנה מלא
-                  </Link>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+                }
+              }}
+              defaultExpanded={false}
+            />
+          </div>
         </div>
       </div>
 
@@ -286,9 +260,6 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
         </CardContent>
       </Card>
     </div>
-
-    {/* Floating Holidays Button */}
-    <HolidaysFAB />
     </>
   )
 }

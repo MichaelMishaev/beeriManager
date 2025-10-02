@@ -51,14 +51,29 @@ export function HolidaysModal({ open, onOpenChange }: HolidaysModalProps) {
   const handleShare = async () => {
     const text = holidays
       .map(h => {
-        const startDate = format(parseISO(h.start_date), 'd/M/yyyy')
-        const hebrewDate = h.hebrew_date ? ` (${h.hebrew_date})` : ''
-        const schoolClosed = h.is_school_closed ? ' - בית הספר סגור' : ''
-        return `${h.hebrew_name}${hebrewDate} - ${startDate}${schoolClosed}`
-      })
-      .join('\n')
+        const start = parseISO(h.start_date)
+        const end = parseISO(h.end_date)
 
-    const fullText = `לוח חגים שנת הלימודים ${academicYear}\n\n${text}\n\nhttps://beeri.online/`
+        // Format dates with Hebrew month names
+        let dateRange
+        if (h.start_date === h.end_date) {
+          // Single day
+          dateRange = format(start, 'd בMMMM', { locale: he })
+        } else {
+          // Date range
+          const startFormatted = format(start, 'd', { locale: he })
+          const endFormatted = format(end, 'd בMMMM', { locale: he })
+          dateRange = `${endFormatted} - ${startFormatted}`
+        }
+
+        const hebrewDate = h.hebrew_date ? `\n${h.hebrew_date}` : ''
+        const schoolClosed = h.is_school_closed ? '\nבית הספר סגור' : ''
+
+        return `${h.icon_emoji || '📅'} *${h.hebrew_name}*${hebrewDate}\n${dateRange}${schoolClosed}`
+      })
+      .join('\n\n')
+
+    const fullText = `📆 *לוח חגים ומועדים*\nשנת הלימודים ${academicYear}\n\n${text}\n\n🔗 https://beeri.online/`
 
     if (navigator.share) {
       try {

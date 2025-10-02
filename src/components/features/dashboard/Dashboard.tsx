@@ -4,11 +4,9 @@ import React from 'react'
 import { Calendar, CheckSquare, FileText, AlertCircle, TrendingUp, Users } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { MobileCalendar } from '@/components/ui/MobileCalendar'
 import { EventCard } from '@/components/features/events/EventCard'
 import { TaskCard } from '@/components/features/tasks/TaskCard'
-import { NextHolidayWidget } from '@/components/features/holidays/NextHolidayWidget'
-import { HolidaysFAB } from '@/components/features/holidays/HolidaysFAB'
+import { CollapsibleCalendarWidget } from '@/components/features/holidays/CollapsibleCalendarWidget'
 import type { DashboardStats, Event, Task, CalendarEvent } from '@/types'
 import Link from 'next/link'
 
@@ -264,41 +262,23 @@ export function Dashboard({ stats, upcomingEvents, pendingTasks, calendarEvents 
       {/* Main Content Grid */}
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Calendar & Holidays Column */}
-        <div className="lg:col-span-1 space-y-6">
-          {/* Next Holiday Widget */}
-          <NextHolidayWidget onClick={() => {}} />
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Calendar className="h-5 w-5" />
-                לוח שנה
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <MobileCalendar
-                events={calendarEvents}
-                onEventClick={(event) => {
-                  // Navigate to event details
-                  window.location.href = `/events/${event.id}`
-                }}
-                showLegend={false}
-                showWeeklySummary={true}
-                className="max-w-none"
-              />
-              <div className="mt-4 text-center">
-                <Button variant="outline" asChild size="sm">
-                  <Link href="/calendar">
-                    צפה בלוח השנה המלא
-                  </Link>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+        <div className="lg:col-span-1 order-1 lg:order-1">
+          {/* Collapsible Calendar Widget */}
+          <CollapsibleCalendarWidget
+            calendarEvents={calendarEvents}
+            onEventClick={(event) => {
+              // Only navigate for non-holiday events
+              // Holiday events are handled by CollapsibleCalendarWidget
+              if (event.type !== 'holiday') {
+                window.location.href = `/events/${event.id}`
+              }
+            }}
+            defaultExpanded={false}
+          />
         </div>
 
         {/* Content Columns */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-6 order-2 lg:order-2">
           {/* Quick Actions */}
           <QuickActions />
 
@@ -393,9 +373,6 @@ export function Dashboard({ stats, upcomingEvents, pendingTasks, calendarEvents 
         </div>
       </div>
     </div>
-
-    {/* Floating Holidays Button */}
-    <HolidaysFAB />
     </>
   )
 }

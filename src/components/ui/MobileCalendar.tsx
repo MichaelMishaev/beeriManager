@@ -149,7 +149,14 @@ export function MobileCalendar({
 
   const handleDateClick = useCallback((date: Date) => {
     onDateClick?.(date)
-  }, [onDateClick])
+
+    // If clicking a day with a school closure holiday, trigger onEventClick
+    const dayEvents = getEventsForDate(date)
+    const schoolClosureHoliday = dayEvents.find(e => e.type === 'holiday' && e.isSchoolClosed)
+    if (schoolClosureHoliday && onEventClick) {
+      onEventClick(schoolClosureHoliday)
+    }
+  }, [onDateClick, onEventClick, getEventsForDate])
 
   const handleEventClick = useCallback((event: CalendarEvent) => {
     onEventClick?.(event)
