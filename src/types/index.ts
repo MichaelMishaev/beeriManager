@@ -297,7 +297,8 @@ export interface Vendor {
 
 export interface Holiday {
   id: string
-  name: string  // Hebrew name only
+  name: string
+  hebrew_name: string
   description?: string
 
   // Dates

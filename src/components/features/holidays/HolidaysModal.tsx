@@ -50,10 +50,15 @@ export function HolidaysModal({ open, onOpenChange }: HolidaysModalProps) {
 
   const handleShare = async () => {
     const text = holidays
-      .map(h => `${h.icon_emoji || '📅'} ${h.name} - ${h.hebrew_date || format(parseISO(h.start_date), 'd/M', { locale: he })}${h.is_school_closed ? ' (בית הספר סגור)' : ''}`)
+      .map(h => {
+        const startDate = format(parseISO(h.start_date), 'd/M/yyyy')
+        const hebrewDate = h.hebrew_date ? ` (${h.hebrew_date})` : ''
+        const schoolClosed = h.is_school_closed ? ' - בית הספר סגור' : ''
+        return `${h.hebrew_name}${hebrewDate} - ${startDate}${schoolClosed}`
+      })
       .join('\n')
 
-    const fullText = `🗓️ לוח חגים שנת הלימודים ${academicYear}\n\n${text}\n\n📱 מערכת ניהול ועד הורים - pipguru.club`
+    const fullText = `לוח חגים שנת הלימודים ${academicYear}\n\n${text}\n\nhttps://beeri.online/`
 
     if (navigator.share) {
       try {
@@ -149,7 +154,7 @@ export function HolidaysModal({ open, onOpenChange }: HolidaysModalProps) {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-2 mb-1">
                           <h3 className="text-lg font-bold">
-                            {holiday.name}
+                            {holiday.hebrew_name}
                           </h3>
                           {holiday.is_school_closed && (
                             <Badge
@@ -188,7 +193,7 @@ export function HolidaysModal({ open, onOpenChange }: HolidaysModalProps) {
         </ScrollArea>
 
         <div className="text-xs text-muted-foreground text-center mt-4 print:block">
-          נוצר באמצעות מערכת ניהול ועד הורים • pipguru.club
+          נוצר באמצעות מערכת ניהול ועד הורים • beeri.online
         </div>
       </DialogContent>
     </Dialog>

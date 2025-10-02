@@ -92,7 +92,7 @@ export default function HomePage() {
     })),
     ...holidays.map(h => ({
       id: h.id,
-      title: h.name,
+      title: h.hebrew_name,
       date: new Date(h.start_date),
       type: 'holiday' as const,
       description: h.description

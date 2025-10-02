@@ -28,6 +28,7 @@ interface Event {
 interface Holiday {
   id: string
   name: string
+  hebrew_name: string
   description?: string
   start_date: string
   end_date: string
