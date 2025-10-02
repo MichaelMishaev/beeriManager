@@ -82,6 +82,7 @@
     "concurrently": "^9.2.1",
     "date-fns": "^2.30.0",
     "date-fns-tz": "^2.0.0",
+    "googleapis": "^161.0.0",
     "html2canvas": "^1.4.1",
     "ical-generator": "^4.1.0",
     "jose": "^6.1.0",

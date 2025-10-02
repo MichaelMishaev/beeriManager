@@ -71,8 +71,7 @@ export default function FileUpload({
     try {
       const formData = new FormData()
       formData.append('file', file)
-      formData.append('bucket', bucket)
-      if (path) formData.append('path', path)
+      formData.append('folder', bucket || 'protocols')
 
       // Simulate upload progress
       const progressInterval = setInterval(() => {
@@ -85,7 +84,7 @@ export default function FileUpload({
         })
       }, 200)
 
-      const response = await fetch('/api/upload', {
+      const response = await fetch('/api/upload/google-drive', {
         method: 'POST',
         body: formData
       })

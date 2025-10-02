@@ -44,8 +44,6 @@ export default function NewProtocolPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [attendeeInput, setAttendeeInput] = useState('')
   const [attendees, setAttendees] = useState<string[]>([])
-  const [documentUrl, setDocumentUrl] = useState<string>('')
-  const [attachmentUrls, setAttachmentUrls] = useState<string[]>([])
 
   const {
     register,
@@ -93,9 +91,7 @@ export default function NewProtocolPage() {
     try {
       const protocolData = {
         ...data,
-        attendees,
-        document_url: documentUrl || null,
-        attachment_urls: attachmentUrls
+        attendees
       }
 
       const response = await fetch('/api/protocols', {
@@ -317,14 +313,14 @@ export default function NewProtocolPage() {
         <Card>
           <CardHeader>
             <CardTitle>מסמכים</CardTitle>
-            <CardDescription>העלה את קובץ הפרוטוקול ומסמכים נוספים</CardDescription>
+            <CardDescription>גרור ושחרר קבצים - יישמרו אוטומטית ב-Google Drive</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
               <Label>קובץ פרוטוקול ראשי</Label>
               <FileUpload
-                value={documentUrl}
-                onChange={(url) => setDocumentUrl(url as string)}
+                value={watch('document_url') || ''}
+                onChange={(url) => setValue('document_url', url as string)}
                 multiple={false}
                 accept=".pdf,.doc,.docx"
                 maxSize={10}
@@ -336,8 +332,8 @@ export default function NewProtocolPage() {
             <div>
               <Label>מסמכים נוספים</Label>
               <FileUpload
-                value={attachmentUrls}
-                onChange={(urls) => setAttachmentUrls(urls as string[])}
+                value={watch('attachment_urls') || []}
+                onChange={(urls) => setValue('attachment_urls', urls as string[])}
                 multiple={true}
                 accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png"
                 maxSize={10}
