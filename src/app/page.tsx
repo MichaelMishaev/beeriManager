@@ -90,14 +90,25 @@ export default function HomePage() {
       date: new Date(e.start_datetime),
       type: 'event' as const
     })),
-    ...holidays.map(h => ({
-      id: h.id,
-      title: h.hebrew_name,
-      date: new Date(h.start_date),
-      type: 'holiday' as const,
-      description: h.description,
-      isSchoolClosed: h.is_school_closed
-    }))
+    // Expand holidays to include all days in the range
+    ...holidays.flatMap(h => {
+      const start = new Date(h.start_date)
+      const end = new Date(h.end_date)
+      const days: CalendarEvent[] = []
+
+      for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+        days.push({
+          id: `${h.id}-${d.toISOString().split('T')[0]}`,
+          title: h.hebrew_name,
+          date: new Date(d),
+          type: 'holiday' as const,
+          description: h.description,
+          isSchoolClosed: h.is_school_closed
+        })
+      }
+
+      return days
+    })
   ]
 
   // Show appropriate homepage based on auth status
