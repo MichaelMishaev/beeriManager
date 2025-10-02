@@ -1,11 +1,12 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { Calendar, Clock } from 'lucide-react'
+import { Calendar, Clock, Share2 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import type { Holiday } from '@/types'
-import { format, differenceInDays, parseISO } from 'date-fns'
+import { format, differenceInDays, parseISO, startOfDay, addDays } from 'date-fns'
 import { he, ru } from 'date-fns/locale'
 import { useParams } from 'next/navigation'
 import type { Locale } from '@/i18n/config'
@@ -63,9 +64,68 @@ export function NextHolidayWidget({ onClick }: NextHolidayWidgetProps) {
   const isToday = daysUntil === 0
   const isTomorrow = daysUntil === 1
 
+  const handleShare = async (e: React.MouseEvent) => {
+    e.stopPropagation() // Prevent card click
+
+    const startDate = parseISO(nextHoliday.start_date)
+    const endDate = parseISO(nextHoliday.end_date)
+    const today = startOfDay(new Date())
+    const tomorrow = addDays(today, 1)
+
+    // Check if it's tomorrow
+    const isTomorrowDate = startDate.getTime() === tomorrow.getTime()
+    const isTodayDate = startDate.getTime() === today.getTime()
+
+    let whenText = ''
+    if (isTodayDate) {
+      whenText = locale === 'ru' ? '🔴 СЕГОДНЯ' : '🔴 היום'
+    } else if (isTomorrowDate) {
+      whenText = locale === 'ru' ? '⚠️ ЗАВТРА' : '⚠️ מחר'
+    } else {
+      const formattedDate = format(startDate, locale === 'ru' ? 'd MMMM' : 'd בMMMM', { locale: dateLocale })
+      whenText = locale === 'ru' ? `📅 ${formattedDate}` : `📅 ${formattedDate}`
+    }
+
+    const schoolClosedText = nextHoliday.is_school_closed
+      ? (locale === 'ru' ? '\n🏫 ШКОЛА ЗАКРЫТА' : '\n🏫 בית הספר סגור')
+      : ''
+    const hebrewDate = nextHoliday.hebrew_date ? `\n(${nextHoliday.hebrew_date})` : ''
+
+    // Date range
+    let dateRange = ''
+    if (nextHoliday.start_date !== nextHoliday.end_date) {
+      const endFormatted = format(endDate, locale === 'ru' ? 'd MMMM' : 'd בMMMM', { locale: dateLocale })
+      const rangeText = locale === 'ru' ? 'по' : 'עד'
+      dateRange = `\n${rangeText} ${endFormatted}`
+    }
+
+    const moreInfo = locale === 'ru'
+      ? '\n\nПодробнее на https://beeri.online'
+      : '\n\nלעוד מידע כנסו ל https://beeri.online'
+
+    const text = `${whenText}\n\n*${nextHoliday.hebrew_name}*${hebrewDate}${dateRange}${schoolClosedText}${moreInfo}`
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: locale === 'ru' ? nextHoliday.hebrew_name : nextHoliday.hebrew_name,
+          text
+        })
+      } catch (err) {
+        if ((err as Error).name !== 'AbortError') {
+          await navigator.clipboard.writeText(text)
+          alert(locale === 'ru' ? 'Скопировано!' : 'הועתק!')
+        }
+      }
+    } else {
+      const encodedText = encodeURIComponent(text)
+      window.open(`https://wa.me/?text=${encodedText}`, '_blank')
+    }
+  }
+
   return (
     <Card
-      className="cursor-pointer hover:shadow-lg transition-all hover:scale-[1.02]"
+      className="cursor-pointer hover:shadow-lg transition-all hover:scale-[1.02] relative"
       onClick={onClick}
       style={{
         background: `linear-gradient(135deg, ${nextHoliday.color}15, ${nextHoliday.color}05)`,
@@ -73,16 +133,27 @@ export function NextHolidayWidget({ onClick }: NextHolidayWidgetProps) {
       }}
     >
       <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-2">
           <CardTitle className="text-base font-medium text-muted-foreground flex items-center gap-2">
             <Calendar className="h-4 w-4" />
             {locale === 'ru' ? 'Следующий праздник' : 'החג הבא'}
           </CardTitle>
-          {nextHoliday.is_school_closed && (
-            <Badge variant="secondary" className="bg-red-100 text-red-800 text-xs">
-              {locale === 'ru' ? 'Школа закрыта' : 'בית הספר סגור'}
-            </Badge>
-          )}
+          <div className="flex items-center gap-2">
+            {nextHoliday.is_school_closed && (
+              <Badge variant="secondary" className="bg-red-100 text-red-800 text-xs">
+                {locale === 'ru' ? 'Школа закрыта' : 'בית הספר סגור'}
+              </Badge>
+            )}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0 hover:bg-primary/10"
+              onClick={handleShare}
+              title={locale === 'ru' ? 'Поделиться' : 'שיתוף'}
+            >
+              <Share2 className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       </CardHeader>
       <CardContent className="space-y-3">

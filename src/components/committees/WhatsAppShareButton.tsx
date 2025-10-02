@@ -9,6 +9,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { useParams } from 'next/navigation'
+import type { Locale } from '@/i18n/config'
 
 interface Committee {
   id: string
@@ -24,6 +26,8 @@ interface WhatsAppShareButtonProps {
 }
 
 export function WhatsAppShareButton({ committee }: WhatsAppShareButtonProps) {
+  const params = useParams()
+  const locale = (params.locale || 'he') as Locale
   const [copied, setCopied] = useState(false)
 
   const formatCommitteeForWhatsApp = () => {
@@ -34,22 +38,26 @@ export function WhatsAppShareButton({ committee }: WhatsAppShareButtonProps) {
     }
 
     if (committee.members && committee.members.length > 0) {
-      message += `\n*חברי ועדה:*\n`
+      const membersLabel = locale === 'ru' ? '*Члены комитета:*' : '*חברי ועדה:*'
+      message += `\n${membersLabel}\n`
       committee.members.forEach((member) => {
         message += `  - ${member}\n`
       })
     }
 
     if (committee.responsibilities && committee.responsibilities.length > 0) {
-      message += `\n*תחומי אחריות:*\n`
+      const responsibilitiesLabel = locale === 'ru' ? '*Обязанности:*' : '*תחומי אחריות:*'
+      message += `\n${responsibilitiesLabel}\n`
       committee.responsibilities.forEach((resp) => {
         message += `  - ${resp}\n`
       })
     }
 
     message += `\n-------------------\n`
-    message += `*לצפייה בכל הועדות:*\n`
-    message += `${window.location.origin}/committees`
+    const moreInfo = locale === 'ru'
+      ? 'Подробнее на https://beeri.online'
+      : 'לעוד מידע כנסו ל https://beeri.online'
+    message += moreInfo
 
     return message
   }

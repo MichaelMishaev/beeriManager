@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { Loader2 } from 'lucide-react'
 import { Dashboard } from '@/components/features/dashboard/Dashboard'
 import { PublicHomepage } from '@/components/features/homepage/PublicHomepage'
+import { eachDayOfInterval, parseISO } from 'date-fns'
 import type { DashboardStats, Event, Task, CalendarEvent, Holiday } from '@/types'
 
 export default function HomePage() {
@@ -90,24 +91,22 @@ export default function HomePage() {
       date: new Date(e.start_datetime),
       type: 'event' as const
     })),
-    // Expand holidays to include all days in the range
+    // Expand holidays to include all days in the range (inclusive of start and end dates)
     ...holidays.flatMap(h => {
-      const start = new Date(h.start_date)
-      const end = new Date(h.end_date)
-      const days: CalendarEvent[] = []
+      const start = parseISO(h.start_date)
+      const end = parseISO(h.end_date)
 
-      for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-        days.push({
-          id: `${h.id}-${d.toISOString().split('T')[0]}`,
-          title: h.hebrew_name,
-          date: new Date(d),
-          type: 'holiday' as const,
-          description: h.description,
-          isSchoolClosed: h.is_school_closed
-        })
-      }
+      // Use eachDayOfInterval to get all days from start to end (inclusive)
+      const days = eachDayOfInterval({ start, end })
 
-      return days
+      return days.map(date => ({
+        id: `${h.id}-${date.toISOString().split('T')[0]}`,
+        title: h.hebrew_name,
+        date,
+        type: 'holiday' as const,
+        description: h.description,
+        isSchoolClosed: h.is_school_closed
+      }))
     })
   ]
 

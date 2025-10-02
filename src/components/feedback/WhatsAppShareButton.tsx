@@ -10,6 +10,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { format } from 'date-fns'
+import { useParams } from 'next/navigation'
+import type { Locale } from '@/i18n/config'
 
 interface Feedback {
   id: string
@@ -23,13 +25,23 @@ interface WhatsAppShareButtonProps {
   feedback: Feedback
 }
 
-const categoryLabels: Record<string, string> = {
-  general: 'כללי',
-  event: 'אירוע',
-  task: 'משימה',
-  suggestion: 'הצעה',
-  complaint: 'תלונה',
-  other: 'אחר'
+const categoryLabels: Record<string, Record<string, string>> = {
+  he: {
+    general: 'כללי',
+    event: 'אירוע',
+    task: 'משימה',
+    suggestion: 'הצעה',
+    complaint: 'תלונה',
+    other: 'אחר'
+  },
+  ru: {
+    general: 'Общее',
+    event: 'Событие',
+    task: 'Задача',
+    suggestion: 'Предложение',
+    complaint: 'Жалоба',
+    other: 'Другое'
+  }
 }
 
 const categoryEmojis: Record<string, string> = {
@@ -42,24 +54,32 @@ const categoryEmojis: Record<string, string> = {
 }
 
 export function WhatsAppShareButton({ feedback }: WhatsAppShareButtonProps) {
+  const params = useParams()
+  const locale = (params.locale || 'he') as Locale
   const [copied, setCopied] = useState(false)
 
   const formatFeedbackForWhatsApp = () => {
     const emoji = categoryEmojis[feedback.category] || '📝'
+    const feedbackTitle = locale === 'ru' ? 'Отзыв от родителей' : 'משוב מהורים'
+    const typeLabel = locale === 'ru' ? 'Тип:' : 'סוג:'
+    const subjectLabel = locale === 'ru' ? 'Тема:' : 'נושא:'
+    const dateLabel = locale === 'ru' ? 'Дата:' : 'תאריך:'
 
-    let message = `${emoji} *משוב מהורים*\n\n`
-    message += `*סוג:* ${categoryLabels[feedback.category] || feedback.category}\n`
+    let message = `${emoji} *${feedbackTitle}*\n\n`
+    message += `*${typeLabel}* ${categoryLabels[locale]?.[feedback.category] || feedback.category}\n`
 
     if (feedback.subject) {
-      message += `*נושא:* ${feedback.subject}\n`
+      message += `*${subjectLabel}* ${feedback.subject}\n`
     }
 
-    message += `*תאריך:* ${format(new Date(feedback.created_at), 'dd/MM/yyyy HH:mm')}\n`
+    message += `*${dateLabel}* ${format(new Date(feedback.created_at), 'dd/MM/yyyy HH:mm')}\n`
     message += `\n-------------------\n\n`
     message += `${feedback.message}\n`
     message += `\n-------------------\n`
-    message += `*לצפייה בכל המשובים:*\n`
-    message += `${window.location.origin}/admin/feedback`
+    const moreInfo = locale === 'ru'
+      ? 'Подробнее на https://beeri.online'
+      : 'לעוד מידע כנסו ל https://beeri.online'
+    message += moreInfo
 
     return message
   }

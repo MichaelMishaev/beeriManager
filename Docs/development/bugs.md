@@ -89,3 +89,75 @@ npx playwright test tests/test-login-flow.spec.ts --project=chromium
 - Use `jose` library by default for all JWT operations
 - Document that middleware handles auth, no need for client checks
 - Include auth flow test in CI/CD pipeline
+
+---
+
+### Bug #2: Login fails with "סיסמה שגויה" for correct "admin1" password
+
+**Date**: 2025-10-02
+
+**Symptoms**:
+- User enters correct password "admin1" on login page
+- Login API returns 401 error with "סיסמה שגויה" (Wrong password)
+- bcrypt verification consistently returns false
+- Password hash verification works correctly when tested standalone with Node.js
+
+**Root Cause**:
+- **Shell variable substitution in `.env.local`** for bcrypt hash
+  - Bcrypt hashes contain `$` characters (e.g., `$2a$10$...`)
+  - Without proper escaping, shell/dotenv interprets `$2a`, `$10`, etc. as variable names
+  - Hash was truncated from:
+    - **Expected**: `$2a$10$eenxWBA20s/sLN2afWNviOry2c79jAtN1PixMihV3djZUBVcmyhEC` (60 chars)
+    - **Actual**: `/sLN2afWNviOry2c79jAtN1PixMihV3djZUBVcmyhEC` (43 chars - first 17 chars missing!)
+  - Missing prefix made hash invalid for bcrypt verification
+
+**Debugging Process**:
+1. Tested hash offline with bcryptjs - verified hash is correct for "admin1"
+2. Added debug logging to login route to inspect hash value at runtime
+3. Discovered hash was truncated (43 chars vs 60 chars expected)
+4. Identified that `$2a$10$een` was being interpreted as shell variables
+5. Tested with single quotes `'$2a...'` - still truncated
+6. Fixed with backslash escaping `\$2a\$10\$...` - success!
+
+**Solution**:
+Escape all dollar signs in bcrypt hash with backslashes in `.env.local`:
+
+```bash
+# ❌ Wrong - causes variable substitution:
+ADMIN_PASSWORD_HASH=$2a$10$eenxWBA20s/sLN2afWNviOry2c79jAtN1PixMihV3djZUBVcmyhEC
+
+# ❌ Wrong - single quotes don't prevent substitution in .env files:
+ADMIN_PASSWORD_HASH='$2a$10$eenxWBA20s/sLN2afWNviOry2c79jAtN1PixMihV3djZUBVcmyhEC'
+
+# ✅ Correct - backslash escapes prevent substitution:
+ADMIN_PASSWORD_HASH=\$2a\$10\$eenxWBA20s/sLN2afWNviOry2c79jAtN1PixMihV3djZUBVcmyhEC
+```
+
+**Files Modified**:
+- `.env.local` - Escaped all `$` in ADMIN_PASSWORD_HASH with `\$`
+- `.env.example` - Updated example with escaped hash
+- `src/app/api/auth/login/route.ts` - Added debug logging for hash verification
+
+**Testing**:
+```bash
+# Test bcrypt hash locally
+node -e "const bcrypt = require('bcryptjs'); bcrypt.compare('admin1', '\$2a\$10\$eenxWBA20s/sLN2afWNviOry2c79jAtN1PixMihV3djZUBVcmyhEC').then(r => console.log(r))"
+# Should output: true
+
+# Test login via API
+curl -X POST http://localhost:4500/api/auth/login -H "Content-Type: application/json" -d '{"password":"admin1"}'
+# Should return: {"success":true,"message":"התחברת בהצלחה"}
+```
+
+**Lessons Learned**:
+- Always escape `$` characters in `.env` files with backslashes
+- Single quotes don't prevent variable substitution in dotenv
+- Debug logging in API routes is essential for environment variable issues
+- Test environment variable values at runtime, not just in isolation
+- Bcrypt hashes ALWAYS start with `$2a$` or `$2b$` followed by cost and salt
+
+**Prevention**:
+- Updated `.env.example` with properly escaped hash example
+- Added note in `.env.example` about escaping special characters
+- Consider using `.env.local` validator script to check for common issues
+- Add integration test for login with actual password (not mocked)

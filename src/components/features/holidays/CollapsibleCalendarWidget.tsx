@@ -8,6 +8,7 @@ import { MobileCalendar } from '@/components/ui/MobileCalendar'
 import { NextHolidayWidget } from './NextHolidayWidget'
 import { HolidayDetailModal } from './HolidayDetailModal'
 import { HolidaysModal } from './HolidaysModal'
+import { ShareNextClosureButton } from './ShareNextClosureButton'
 import type { CalendarEvent, Holiday } from '@/types'
 
 interface CollapsibleCalendarWidgetProps {
@@ -71,7 +72,10 @@ export function CollapsibleCalendarWidget({
 
   return (
     <div className="space-y-3">
-      {/* Action Buttons - At Top */}
+      {/* Share Next Closure Button - At Very Top */}
+      <ShareNextClosureButton />
+
+      {/* Action Buttons */}
       <div className="flex gap-2">
         {/* Toggle Calendar Button */}
         <Button

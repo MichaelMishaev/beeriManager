@@ -28,11 +28,6 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    logger.debug('Verifying password', {
-      component: 'Auth',
-      data: { hashLength: adminPasswordHash.length }
-    })
-
     // Verify password
     const isValid = await verifyPassword(password, adminPasswordHash)
 

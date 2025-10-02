@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { format, parseISO } from 'date-fns'
-import { he } from 'date-fns/locale'
+import { he, ru } from 'date-fns/locale'
 import { Share2, Calendar as CalendarIcon, X } from 'lucide-react'
 import {
   Dialog,
@@ -13,6 +13,8 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import type { Holiday } from '@/types'
+import { useParams } from 'next/navigation'
+import type { Locale } from '@/i18n/config'
 
 interface HolidayDetailModalProps {
   holiday: Holiday | null
@@ -21,19 +23,29 @@ interface HolidayDetailModalProps {
 }
 
 export function HolidayDetailModal({ holiday, isOpen, onClose }: HolidayDetailModalProps) {
+  const params = useParams()
+  const locale = (params.locale || 'he') as Locale
+  const dateLocale = locale === 'ru' ? ru : he
+
   if (!holiday) return null
 
   const handleShare = async () => {
-    const startDate = format(parseISO(holiday.start_date), 'd/M/yyyy', { locale: he })
-    const endDate = format(parseISO(holiday.end_date), 'd/M/yyyy', { locale: he })
+    const startDate = format(parseISO(holiday.start_date), 'd/M/yyyy', { locale: dateLocale })
+    const endDate = format(parseISO(holiday.end_date), 'd/M/yyyy', { locale: dateLocale })
     const dateRange = holiday.start_date === holiday.end_date
       ? startDate
       : `${startDate} - ${endDate}`
 
     const hebrewDate = holiday.hebrew_date ? ` (${holiday.hebrew_date})` : ''
-    const schoolClosed = holiday.is_school_closed ? '\n🏫 בית הספר סגור' : ''
+    const schoolClosed = holiday.is_school_closed
+      ? (locale === 'ru' ? '\n🏫 Школа закрыта' : '\n🏫 בית הספר סגור')
+      : ''
 
-    const text = `${holiday.hebrew_name}${hebrewDate}\n📅 ${dateRange}${schoolClosed}\n\nhttps://beeri.online/`
+    const moreInfo = locale === 'ru'
+      ? 'Подробнее на https://beeri.online'
+      : 'לעוד מידע כנסו ל https://beeri.online'
+
+    const text = `${holiday.hebrew_name}${hebrewDate}\n📅 ${dateRange}${schoolClosed}\n\n${moreInfo}`
 
     if (navigator.share) {
       try {

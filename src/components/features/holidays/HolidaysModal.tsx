@@ -88,7 +88,10 @@ export function HolidaysModal({ open, onOpenChange }: HolidaysModalProps) {
       .join('\n\n')
 
     const modalTitle = t('holidaysAndEvents')
-    const fullText = `📆 *${modalTitle}*\n${t('schoolYearHolidays')}\n\n${text}\n\n🔗 https://beeri.online/`
+    const moreInfo = locale === 'ru'
+      ? 'Подробнее на https://beeri.online'
+      : 'לעוד מידע כנסו ל https://beeri.online'
+    const fullText = `📆 *${modalTitle}*\n${t('schoolYearHolidays')}\n\n${text}\n\n${moreInfo}`
 
     if (navigator.share) {
       try {
