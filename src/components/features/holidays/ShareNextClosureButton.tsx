@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { Share2, MessageCircle } from 'lucide-react'
+import { Share2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { format, parseISO, isAfter, isBefore, addDays, startOfDay } from 'date-fns'
 import { he, ru } from 'date-fns/locale'
@@ -28,7 +28,6 @@ export function ShareNextClosureButton() {
 
       if (data.success && data.data) {
         const today = startOfDay(new Date())
-        const tomorrow = addDays(today, 1)
         const nextWeek = addDays(today, 7)
 
         // Find ongoing or upcoming school closures within the next 7 days
