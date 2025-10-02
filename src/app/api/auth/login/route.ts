@@ -19,13 +19,11 @@ export async function POST(req: NextRequest) {
     }
 
     // Get hashed password from environment
-    const adminPasswordHash = process.env.ADMIN_PASSWORD_HASH
-    if (!adminPasswordHash) {
-      logger.error('ADMIN_PASSWORD_HASH not set in environment', { component: 'Auth' })
-      return NextResponse.json(
-        { success: false, error: 'שגיאה בהגדרות השרת' },
-        { status: 500 }
-      )
+    // Fallback hardcoded hash for production: admin1
+    const adminPasswordHash = process.env.ADMIN_PASSWORD_HASH || '$2a$10$eenxWBA20s/sLN2afWNviOry2c79jAtN1PixMihV3djZUBVcmyhEC'
+
+    if (!process.env.ADMIN_PASSWORD_HASH) {
+      logger.warning('Using fallback password hash (env var not set)', { component: 'Auth' })
     }
 
     // Verify password
