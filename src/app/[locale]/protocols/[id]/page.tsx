@@ -1,7 +1,7 @@
 import { Suspense } from 'react'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { FileText, ExternalLink, Calendar, ArrowRight, Download } from 'lucide-react'
+import { FileText, ExternalLink, Calendar, ArrowRight } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -131,10 +131,6 @@ async function ProtocolContent({ id }: { id: string }) {
                 </Button>
               )}
               <EditProtocolButton protocolId={protocol.id} />
-              <Button variant="outline" size="sm" className="w-full">
-                <Download className="h-4 w-4 ml-2" />
-                הורד PDF
-              </Button>
               <ShareProtocolButton protocol={protocol} />
             </CardContent>
           </Card>
