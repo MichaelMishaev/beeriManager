@@ -49,19 +49,18 @@ export async function middleware(request: NextRequest) {
   const pathnameWithoutLocale = pathname.replace(/^\/[a-z]{2}/, '') || '/'
   const locale = pathname.match(/^\/([a-z]{2})/)?.[1] || defaultLocale
 
-  // Committee routes protection (admin + internal pages)
-  const committeeRoutes = [
+  // Protected routes (admin only)
+  const protectedRoutes = [
     '/admin',
     '/tasks',
-    '/protocols',
     '/finances',
     '/issues',
     '/vendors'
   ]
 
-  const isCommitteeRoute = committeeRoutes.some(route => pathnameWithoutLocale.startsWith(route))
+  const isProtectedRoute = protectedRoutes.some(route => pathnameWithoutLocale.startsWith(route))
 
-  if (isCommitteeRoute) {
+  if (isProtectedRoute) {
     log(`Protected route accessed: ${pathname}`)
 
     const token = request.cookies.get('auth-token')?.value

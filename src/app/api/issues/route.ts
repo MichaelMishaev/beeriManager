@@ -136,3 +136,65 @@ export async function POST(req: NextRequest) {
     )
   }
 }
+
+export async function DELETE(req: NextRequest) {
+  try {
+    // Only admins can delete issues - check auth token
+    const token = req.cookies.get('auth-token')
+    if (!token) {
+      return NextResponse.json(
+        { success: false, error: 'נדרשת הרשאת מנהל' },
+        { status: 401 }
+      )
+    }
+
+    const supabase = createClient()
+
+    // Delete all issues (get all IDs first, then delete)
+    const { data: allIssues, error: fetchError } = await supabase
+      .from('issues')
+      .select('id')
+
+    if (fetchError) {
+      console.error('Issues fetch error:', fetchError)
+      return NextResponse.json(
+        { success: false, error: 'שגיאה בטעינת הבעיות' },
+        { status: 500 }
+      )
+    }
+
+    if (!allIssues || allIssues.length === 0) {
+      return NextResponse.json({
+        success: true,
+        message: 'אין בעיות למחיקה'
+      })
+    }
+
+    // Delete each issue individually to satisfy audit trigger
+    let deletedCount = 0
+    for (const issue of allIssues) {
+      const { error } = await supabase
+        .from('issues')
+        .delete()
+        .eq('id', issue.id)
+
+      if (!error) {
+        deletedCount++
+      } else {
+        console.error('Error deleting issue:', issue.id, error)
+      }
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: `${deletedCount} בעיות נמחקו בהצלחה`
+    })
+
+  } catch (error) {
+    console.error('Issues DELETE error:', error)
+    return NextResponse.json(
+      { success: false, error: 'שגיאה במחיקת הבעיות' },
+      { status: 500 }
+    )
+  }
+}

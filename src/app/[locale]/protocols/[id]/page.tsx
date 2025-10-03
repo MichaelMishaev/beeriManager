@@ -1,13 +1,15 @@
 import { Suspense } from 'react'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { FileText, ExternalLink, Calendar, ArrowRight, Download, Share2 } from 'lucide-react'
+import { FileText, ExternalLink, Calendar, ArrowRight, Download } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { formatHebrewDate } from '@/lib/utils/date'
 import { createClient } from '@/lib/supabase/server'
+import { ShareProtocolButton } from '@/components/protocols/ShareProtocolButton'
+import { EditProtocolButton } from '@/components/protocols/EditProtocolButton'
 
 async function getProtocol(id: string) {
   const supabase = createClient()
@@ -128,14 +130,12 @@ async function ProtocolContent({ id }: { id: string }) {
                   </a>
                 </Button>
               )}
+              <EditProtocolButton protocolId={protocol.id} />
               <Button variant="outline" size="sm" className="w-full">
                 <Download className="h-4 w-4 ml-2" />
                 הורד PDF
               </Button>
-              <Button variant="outline" size="sm" className="w-full">
-                <Share2 className="h-4 w-4 ml-2" />
-                שתף
-              </Button>
+              <ShareProtocolButton protocol={protocol} />
             </CardContent>
           </Card>
 

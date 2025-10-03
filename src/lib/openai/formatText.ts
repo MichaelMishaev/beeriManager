@@ -1,9 +1,5 @@
 import OpenAI from 'openai'
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-})
-
 export interface FormattedTextResult {
   html: string
   error?: string
@@ -17,6 +13,11 @@ export async function formatTextToHTML(plainText: string): Promise<FormattedText
   if (!plainText || plainText.trim().length === 0) {
     return { html: '', error: 'No text provided' }
   }
+
+  // Initialize OpenAI client at runtime, not at module level
+  const openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+  })
 
   // Limit text length to avoid high costs (max ~4000 words)
   const maxLength = 16000 // ~4000 words
