@@ -13,8 +13,7 @@ const ProtocolUpdateSchema = z.object({
   extracted_text: z.string().optional(),
   agenda: z.string().optional(),
   decisions: z.string().optional(),
-  action_items: z.string().optional(),
-  external_link: z.string().optional()
+  action_items: z.string().optional()
 })
 
 export async function GET(

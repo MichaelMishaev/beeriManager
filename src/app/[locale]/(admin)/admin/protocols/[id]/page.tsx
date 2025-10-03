@@ -24,8 +24,7 @@ const protocolSchema = z.object({
   extracted_text: z.string().optional(),
   agenda: z.string().optional(),
   decisions: z.string().optional(),
-  action_items: z.string().optional(),
-  external_link: z.string().optional()
+  action_items: z.string().optional()
 })
 
 type ProtocolFormData = z.infer<typeof protocolSchema>
@@ -91,7 +90,6 @@ export default function EditProtocolPage() {
       setValue('agenda', protocol.agenda || '')
       setValue('decisions', protocol.decisions || '')
       setValue('action_items', protocol.action_items || '')
-      setValue('external_link', protocol.external_link || '')
     } catch (error) {
       console.error('Error loading protocol:', error)
       toast.error('שגיאה בטעינת הפרוטוקול')
@@ -274,16 +272,6 @@ export default function EditProtocolPage() {
               <p className="text-xs text-muted-foreground mt-1">
                 תוכן זה מוצג בעמוד הפרוטוקול. ניתן לערוך ידנית או להעלות קובץ חדש.
               </p>
-            </div>
-
-            <div>
-              <Label htmlFor="external_link">קישור למסמך חיצוני</Label>
-              <Input
-                id="external_link"
-                {...register('external_link')}
-                placeholder="https://drive.google.com/..."
-                type="url"
-              />
             </div>
           </CardContent>
         </Card>
