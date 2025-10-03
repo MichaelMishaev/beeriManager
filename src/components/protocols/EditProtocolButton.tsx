@@ -22,7 +22,7 @@ export function EditProtocolButton({ protocolId }: EditProtocolButtonProps) {
     try {
       const response = await fetch('/api/auth/session')
       const data = await response.json()
-      setIsAdmin(data.authenticated && data.role === 'admin')
+      setIsAdmin(data.authenticated && data.user?.role === 'admin')
     } catch (error) {
       console.error('Auth check error:', error)
       setIsAdmin(false)
