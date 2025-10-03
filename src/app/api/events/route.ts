@@ -150,3 +150,65 @@ export async function POST(req: NextRequest) {
     )
   }
 }
+
+export async function DELETE(req: NextRequest) {
+  try {
+    // Only admins can delete events
+    const token = req.cookies.get('auth-token')
+    if (!token || !verifyJWT(token.value)) {
+      return NextResponse.json(
+        { success: false, error: 'נדרשת הרשאת מנהל' },
+        { status: 401 }
+      )
+    }
+
+    const supabase = createClient()
+
+    // Delete all events (get all IDs first, then delete)
+    const { data: allEvents, error: fetchError } = await supabase
+      .from('events')
+      .select('id')
+
+    if (fetchError) {
+      console.error('Events fetch error:', fetchError)
+      return NextResponse.json(
+        { success: false, error: 'שגיאה בטעינת האירועים' },
+        { status: 500 }
+      )
+    }
+
+    if (!allEvents || allEvents.length === 0) {
+      return NextResponse.json({
+        success: true,
+        message: 'אין אירועים למחיקה'
+      })
+    }
+
+    // Delete each event individually to satisfy audit trigger
+    let deletedCount = 0
+    for (const event of allEvents) {
+      const { error } = await supabase
+        .from('events')
+        .delete()
+        .eq('id', event.id)
+
+      if (!error) {
+        deletedCount++
+      } else {
+        console.error('Error deleting event:', event.id, error)
+      }
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: `${deletedCount} אירועים נמחקו בהצלחה`
+    })
+
+  } catch (error) {
+    console.error('Events DELETE error:', error)
+    return NextResponse.json(
+      { success: false, error: 'שגיאה במחיקת האירועים' },
+      { status: 500 }
+    )
+  }
+}

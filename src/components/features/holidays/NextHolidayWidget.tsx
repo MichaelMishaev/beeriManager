@@ -60,7 +60,7 @@ export function NextHolidayWidget({ onClick }: NextHolidayWidgetProps) {
     return null
   }
 
-  const daysUntil = differenceInDays(parseISO(nextHoliday.start_date), new Date())
+  const daysUntil = differenceInDays(startOfDay(parseISO(nextHoliday.start_date)), startOfDay(new Date()))
   const isToday = daysUntil === 0
   const isTomorrow = daysUntil === 1
 

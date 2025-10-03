@@ -44,7 +44,8 @@ export function HolidaysModal({ open, onOpenChange }: HolidaysModalProps) {
   async function loadHolidays() {
     try {
       setLoading(true)
-      const response = await fetch(`/api/holidays?academic_year=${academicYear}&locale=${locale}`)
+      // Don't filter by academic_year to show all holidays including past ones
+      const response = await fetch(`/api/holidays?locale=${locale}&limit=100`)
       const data = await response.json()
 
       if (data.success) {
