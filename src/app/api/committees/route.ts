@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { verifyJWT } from '@/lib/auth/jwt-edge'
 import { z } from 'zod'
@@ -123,6 +124,10 @@ export async function POST(req: NextRequest) {
       data: { id: data.id, name: data.name }
     })
 
+    // Revalidate the committees page to show the new committee
+    revalidatePath('/admin/committees')
+    revalidatePath('/he/admin/committees')
+
     return NextResponse.json({
       success: true,
       data,
@@ -190,6 +195,10 @@ export async function PUT(req: NextRequest) {
       )
     }
 
+    // Revalidate the committees page
+    revalidatePath('/admin/committees')
+    revalidatePath('/he/admin/committees')
+
     return NextResponse.json({
       success: true,
       data,
@@ -247,6 +256,10 @@ export async function DELETE(req: NextRequest) {
         )
       }
 
+      // Revalidate the committees page
+      revalidatePath('/admin/committees')
+      revalidatePath('/he/admin/committees')
+
       return NextResponse.json({
         success: true,
         message: 'כל הוועדות נמחקו בהצלחה'
@@ -266,6 +279,10 @@ export async function DELETE(req: NextRequest) {
         { status: 500 }
       )
     }
+
+    // Revalidate the committees page
+    revalidatePath('/admin/committees')
+    revalidatePath('/he/admin/committees')
 
     return NextResponse.json({
       success: true,
