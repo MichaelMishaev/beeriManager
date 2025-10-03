@@ -15,7 +15,7 @@ interface ShareProtocolButtonProps {
 export function ShareProtocolButton({ protocol }: ShareProtocolButtonProps) {
   const handleShare = async () => {
     const url = `${window.location.origin}/he/protocols/${protocol.id}`
-    const text = `📋 *${protocol.title}*\n\n📅 ${formatHebrewDate(new Date(protocol.protocol_date))}\n\n🔗 לצפייה בפרוטוקול המלא:\n${url}`
+    const text = `📋 *${protocol.title}*\n\n📅 ${formatHebrewDate(new Date(protocol.protocol_date))}\n\n🔗 לצפייה בפרוטוקול המלא:\n${url}\n\nלמידע נוסף: https://beeri.online`
 
     if (navigator.share) {
       try {
