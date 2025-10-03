@@ -2,9 +2,17 @@
 
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
-import { Calendar, CheckSquare, AlertTriangle, FileText, Users, DollarSign, MessageSquare, Settings, Plus, Edit, BarChart, GripVertical } from 'lucide-react'
+import { Calendar, CheckSquare, AlertTriangle, FileText, Users, DollarSign, MessageSquare, Settings, Plus, Edit, BarChart, GripVertical, HelpCircle } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
 import {
   DndContext,
   closestCenter,
@@ -368,12 +376,171 @@ export default function AdminDashboard() {
             ניהול מרכזי של כל פעילויות ועד ההורים
           </p>
         </div>
-        <Button asChild size="sm" className="w-full sm:w-auto">
-          <Link href="/admin/settings">
-            <Settings className="h-4 w-4 ml-2" />
-            הגדרות
-          </Link>
-        </Button>
+        <div className="flex gap-2 w-full sm:w-auto">
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="outline" size="sm" className="flex-1 sm:flex-initial">
+                <HelpCircle className="h-4 w-4 ml-2" />
+                הוראות שימוש
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle className="text-2xl">📚 הוראות שימוש למנהלים</DialogTitle>
+                <DialogDescription>
+                  מדריך פשוט ואינטראקטיבי לניהול ועד ההורים
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="space-y-6 mt-4">
+                {/* אירועים */}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <div className="bg-blue-50 p-2 rounded-lg">
+                      <Calendar className="h-5 w-5 text-blue-600" />
+                    </div>
+                    <h3 className="font-bold text-lg">אירועים 📅</h3>
+                  </div>
+                  <ul className="space-y-1 text-sm mr-9">
+                    <li>• <strong>צרו אירוע חדש</strong> - הוסיפו אירוע ללוח השנה (ישתלב אוטומטית עם Google Calendar)</li>
+                    <li>• <strong>רשימת אירועים</strong> - ערכו או מחקו אירועים קיימים</li>
+                    <li>• <strong>ניהול הרשמות</strong> - צפו במי נרשם לכל אירוע</li>
+                    <li className="text-muted-foreground mt-2">💡 טיפ: השתמשו בסטטוס "טיוטה" לאירועים שעדיין לא מוכנים לפרסום</li>
+                  </ul>
+                </div>
+
+                {/* משימות */}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <div className="bg-green-50 p-2 rounded-lg">
+                      <CheckSquare className="h-5 w-5 text-green-600" />
+                    </div>
+                    <h3 className="font-bold text-lg">משימות ✅</h3>
+                  </div>
+                  <ul className="space-y-1 text-sm mr-9">
+                    <li>• <strong>צרו משימה</strong> - הקצו משימה לחבר ועד עם תאריך יעד</li>
+                    <li>• <strong>רשימת משימות</strong> - עקבו אחרי התקדמות כל המשימות</li>
+                    <li>• <strong>הקצאת משימות</strong> - חלקו משימות בין חברי הועד</li>
+                    <li className="text-muted-foreground mt-2">💡 טיפ: הלוח מציג כמה משימות באיחור - תנו עדיפות לאלו!</li>
+                  </ul>
+                </div>
+
+                {/* וועדות */}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <div className="bg-teal-50 p-2 rounded-lg">
+                      <Users className="h-5 w-5 text-teal-600" />
+                    </div>
+                    <h3 className="font-bold text-lg">וועדות 👥</h3>
+                  </div>
+                  <ul className="space-y-1 text-sm mr-9">
+                    <li>• <strong>וועדה חדשה</strong> - צרו וועדה תחומית (תרבות, ספורט, וכו')</li>
+                    <li>• <strong>רשימת וועדות</strong> - נהלו חברים ותחומי אחריות</li>
+                    <li className="text-muted-foreground mt-2">💡 טיפ: כל וועדה יכולה להיות בעלת תקציב משלה</li>
+                  </ul>
+                </div>
+
+                {/* בעיות */}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <div className="bg-orange-50 p-2 rounded-lg">
+                      <AlertTriangle className="h-5 w-5 text-orange-600" />
+                    </div>
+                    <h3 className="font-bold text-lg">בעיות 🚨</h3>
+                  </div>
+                  <ul className="space-y-1 text-sm mr-9">
+                    <li>• <strong>דווחו על בעיה</strong> - תעדו בעיה שדורשת טיפול</li>
+                    <li>• <strong>רשימת בעיות</strong> - עקבו אחרי סטטוס כל בעיה</li>
+                    <li>• <strong>סטטיסטיקות</strong> - ראו כמה בעיות נפתרו בזמן</li>
+                    <li className="text-muted-foreground mt-2">💡 טיפ: הלוח מציג כמה בעיות קריטיות - טפלו בהן ראשונות!</li>
+                  </ul>
+                </div>
+
+                {/* פרוטוקולים */}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <div className="bg-purple-50 p-2 rounded-lg">
+                      <FileText className="h-5 w-5 text-purple-600" />
+                    </div>
+                    <h3 className="font-bold text-lg">פרוטוקולים 📝</h3>
+                  </div>
+                  <ul className="space-y-1 text-sm mr-9">
+                    <li>• <strong>הוסיפו פרוטוקול</strong> - העלו פרוטוקול של ישיבה</li>
+                    <li>• <strong>ארכיון</strong> - כל הפרוטוקולים ההיסטוריים</li>
+                    <li>• <strong>העלאת מסמכים</strong> - העלו קבצי PDF או DOCX (המערכת תמיר אותם אוטומטית)</li>
+                    <li className="text-muted-foreground mt-2">💡 טיפ: ניתן להעלות קובץ והמערכת תחלץ את הטקסט ותעצב אותו</li>
+                  </ul>
+                </div>
+
+                {/* כספים */}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <div className="bg-emerald-50 p-2 rounded-lg">
+                      <DollarSign className="h-5 w-5 text-emerald-600" />
+                    </div>
+                    <h3 className="font-bold text-lg">כספים 💰</h3>
+                  </div>
+                  <ul className="space-y-1 text-sm mr-9">
+                    <li>• <strong>הוסיפו הוצאה</strong> - תעדו כל הוצאה של הועד</li>
+                    <li>• <strong>רשימת הוצאות</strong> - צפו בכל ההוצאות</li>
+                    <li>• <strong>דוחות כספיים</strong> - קבלו דוח מסודר לשקיפות מלאה</li>
+                    <li className="text-muted-foreground mt-2">💡 טיפ: שמרו תמיד קבלות וצרפו אותן להוצאות</li>
+                  </ul>
+                </div>
+
+                {/* משוב */}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <div className="bg-indigo-50 p-2 rounded-lg">
+                      <MessageSquare className="h-5 w-5 text-indigo-600" />
+                    </div>
+                    <h3 className="font-bold text-lg">משוב הורים 💬</h3>
+                  </div>
+                  <ul className="space-y-1 text-sm mr-9">
+                    <li>• <strong>צפייה במשובים</strong> - קראו משוב אנונימי מהורים</li>
+                    <li>• <strong>סטטיסטיקות</strong> - ראו מגמות במשובים</li>
+                    <li>• <strong>ייצוא נתונים</strong> - הורידו את כל המשובים לקובץ</li>
+                    <li className="text-muted-foreground mt-2">💡 טיפ: משוב הוא אנונימי לחלוטין - עודדו הורים לשתף</li>
+                  </ul>
+                </div>
+
+                {/* טיפים כלליים */}
+                <div className="bg-sky-50 p-4 rounded-lg border-2 border-sky-200">
+                  <h3 className="font-bold text-lg mb-2">🌟 טיפים לשימוש יעיל</h3>
+                  <ul className="space-y-1 text-sm">
+                    <li>✨ <strong>גררו כרטיסים</strong> - לחצו על <GripVertical className="inline h-4 w-4" /> וגררו כדי לסדר את הלוח לפי העדפתכם</li>
+                    <li>✨ <strong>הסטטיסטיקות למעלה</strong> - לחצו עליהן כדי לעבור ישירות למקטע המתאים</li>
+                    <li>✨ <strong>שתפו קישורים</strong> - כל עמוד במערכת יכול להישלח בווטסאפ</li>
+                    <li>✨ <strong>גרסת מובייל</strong> - כל המערכת מותאמת לסלולר - עובדת גם ללא אינטרנט!</li>
+                  </ul>
+                </div>
+
+                {/* רעיונות והצעות */}
+                <div className="bg-green-50 p-4 rounded-lg border-2 border-green-200">
+                  <h3 className="font-bold text-lg mb-2">💡 רעיונות והצעות לשיפור</h3>
+                  <p className="text-sm mb-2">יש לכם רעיון לשיפור המערכת? הצעה לתכונה חדשה? נשמח לשמוע!</p>
+                  <Button asChild variant="default" className="w-full bg-green-600 hover:bg-green-700">
+                    <a
+                      href="https://wa.me/972544345287?text=שלום, יש לי רעיון לשיפור המערכת:"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <MessageSquare className="h-4 w-4 ml-2" />
+                      שלחו הצעה בווטסאפ
+                    </a>
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          <Button asChild size="sm" className="flex-1 sm:flex-initial">
+            <Link href="/admin/settings">
+              <Settings className="h-4 w-4 ml-2" />
+              הגדרות
+            </Link>
+          </Button>
+        </div>
       </div>
 
       {/* Quick Stats */}

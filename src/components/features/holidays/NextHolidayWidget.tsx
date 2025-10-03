@@ -60,9 +60,18 @@ export function NextHolidayWidget({ onClick }: NextHolidayWidgetProps) {
     return null
   }
 
-  const daysUntil = differenceInDays(startOfDay(parseISO(nextHoliday.start_date)), startOfDay(new Date()))
-  const isToday = daysUntil === 0
-  const isTomorrow = daysUntil === 1
+  const today = startOfDay(new Date())
+  const startDate = startOfDay(parseISO(nextHoliday.start_date))
+  const endDate = startOfDay(parseISO(nextHoliday.end_date))
+
+  // Check if holiday is currently ongoing
+  const isOngoing = startDate <= today && endDate >= today
+
+  // Calculate days until start
+  const daysUntilStart = differenceInDays(startDate, today)
+
+  const isStartToday = daysUntilStart === 0
+  const isStartTomorrow = daysUntilStart === 1
 
   const handleShare = async (e: React.MouseEvent) => {
     e.stopPropagation() // Prevent card click
@@ -179,16 +188,20 @@ export function NextHolidayWidget({ onClick }: NextHolidayWidgetProps) {
           <div className="flex items-center gap-1">
             <Clock className="h-4 w-4 text-muted-foreground" />
             <span className="font-medium">
-              {locale === 'ru'
-                ? (isToday ? 'Сегодня!' : isTomorrow ? 'Завтра' : `Через ${daysUntil} ${daysUntil === 1 ? 'день' : daysUntil < 5 ? 'дня' : 'дней'}`)
-                : (isToday ? 'היום!' : isTomorrow ? 'מחר' : `בעוד ${daysUntil} ימים`)
+              {isOngoing
+                ? (locale === 'ru' ? `До ${format(endDate, 'd MMMM', { locale: dateLocale })}` : `עד ${format(endDate, 'd בMMMM', { locale: dateLocale })}`)
+                : locale === 'ru'
+                  ? (isStartToday ? 'Сегодня!' : isStartTomorrow ? 'Завтра' : `Через ${daysUntilStart} ${daysUntilStart === 1 ? 'день' : daysUntilStart < 5 ? 'дня' : 'дней'}`)
+                  : (isStartToday ? 'היום!' : isStartTomorrow ? 'מחר' : `בעוד ${daysUntilStart} ימים`)
               }
             </span>
           </div>
           <div className="text-muted-foreground">
-            {locale === 'ru'
-              ? format(parseISO(nextHoliday.start_date), 'd MMMM', { locale: dateLocale })
-              : format(parseISO(nextHoliday.start_date), 'd בMMMM', { locale: dateLocale })
+            {isOngoing
+              ? (locale === 'ru' ? 'Сейчас' : 'כעת')
+              : locale === 'ru'
+                ? format(startDate, 'd MMMM', { locale: dateLocale })
+                : format(startDate, 'd בMMMM', { locale: dateLocale })
             }
           </div>
         </div>
