@@ -44,6 +44,7 @@ export default function NewProtocolPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [attendeeInput, setAttendeeInput] = useState('')
   const [attendees, setAttendees] = useState<string[]>([])
+  const [formattedHTML, setFormattedHTML] = useState('')
 
   const {
     register,
@@ -91,7 +92,8 @@ export default function NewProtocolPage() {
     try {
       const protocolData = {
         ...data,
-        attendees
+        attendees,
+        extracted_text: formattedHTML
       }
 
       const response = await fetch('/api/protocols', {
@@ -313,14 +315,17 @@ export default function NewProtocolPage() {
         <Card>
           <CardHeader>
             <CardTitle>מסמכים</CardTitle>
-            <CardDescription>גרור ושחרר קבצים - יישמרו אוטומטית ב-Google Drive</CardDescription>
+            <CardDescription>גרור ושחרר קבצים - הטקסט יחולץ ויעוצב אוטומטית עם AI</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
               <Label>קובץ פרוטוקול ראשי</Label>
               <FileUpload
                 value={watch('document_url') || ''}
-                onChange={(url) => setValue('document_url', url as string)}
+                onChange={(fileName, html) => {
+                  setValue('document_url', fileName as string)
+                  if (html) setFormattedHTML(html)
+                }}
                 multiple={false}
                 accept=".pdf,.doc,.docx"
                 maxSize={10}
@@ -332,7 +337,10 @@ export default function NewProtocolPage() {
               <Label>מסמכים נוספים</Label>
               <FileUpload
                 value={watch('attachment_urls') || []}
-                onChange={(urls) => setValue('attachment_urls', urls as string[])}
+                onChange={(fileName, html) => {
+                  setValue('attachment_urls', [fileName] as string[])
+                  if (html) setFormattedHTML(prev => prev ? `${prev}\n\n${html}` : html)
+                }}
                 multiple={true}
                 accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png"
                 maxSize={10}

@@ -10,6 +10,8 @@ interface LogOptions {
   action?: string
   data?: any
   error?: Error | unknown
+  fileType?: string
+  [key: string]: any
 }
 
 class Logger {
@@ -64,6 +66,10 @@ class Logger {
   }
 
   warning(message: string, options?: LogOptions) {
+    this.log('warning', message, options)
+  }
+
+  warn(message: string, options?: LogOptions) {
     this.log('warning', message, options)
   }
 

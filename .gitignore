@@ -122,10 +122,11 @@ Docs/development/commands.md
 *.db
 
 # ============================================
-# Uploads (Store in Supabase Storage)
+# Uploads (Store locally - files extracted to DB)
 # ============================================
 /uploads
-/public/uploads
+/public/uploads/*
+!/public/uploads/.gitkeep
 
 # ============================================
 # Generated Files
@@ -149,3 +150,4 @@ ultra-modern-form.html
 *.2.*
 *" 2."*
 Docs/.env
+public/uploads/

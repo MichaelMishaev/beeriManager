@@ -219,16 +219,41 @@ export async function DELETE(req: NextRequest) {
     const { searchParams } = new URL(req.url)
     const id = searchParams.get('id')
 
-    if (!id) {
-      return NextResponse.json(
-        { success: false, error: 'מזהה וועדה חסר' },
-        { status: 400 }
-      )
-    }
-
     const supabase = createClient()
 
-    // Delete committee
+    if (!id) {
+      // Delete all committees if no ID provided
+      const { data: allCommittees, error: fetchError } = await supabase
+        .from('committees')
+        .select('id')
+
+      if (fetchError || !allCommittees || allCommittees.length === 0) {
+        return NextResponse.json({
+          success: true,
+          message: 'אין ועדות למחיקה'
+        })
+      }
+
+      const { error } = await supabase
+        .from('committees')
+        .delete()
+        .in('id', allCommittees.map(c => c.id))
+
+      if (error) {
+        console.error('Committees deletion error:', error)
+        return NextResponse.json(
+          { success: false, error: 'שגיאה במחיקת הוועדות' },
+          { status: 500 }
+        )
+      }
+
+      return NextResponse.json({
+        success: true,
+        message: 'כל הוועדות נמחקו בהצלחה'
+      })
+    }
+
+    // Delete single committee by ID
     const { error } = await supabase
       .from('committees')
       .delete()

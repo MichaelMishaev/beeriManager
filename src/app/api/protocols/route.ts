@@ -6,16 +6,17 @@ import { z } from 'zod'
 // Protocol validation schema
 const ProtocolSchema = z.object({
   title: z.string().min(2, 'כותרת חייבת להכיל לפחות 2 תווים'),
-  protocol_date: z.string(),
+  meeting_date: z.string().min(1, 'תאריך ישיבה נדרש'),
   protocol_type: z.enum(['regular', 'special', 'annual', 'emergency']),
   attendees: z.array(z.string()).min(1, 'חייב להיות לפחות משתתף אחד'),
-  agenda: z.string().optional(),
-  decisions: z.string().optional(),
-  action_items: z.string().optional(),
-  document_url: z.string().url().nullable().or(z.literal('')).optional(),
-  attachment_urls: z.array(z.string().url()).optional().default([]),
+  agenda: z.string().optional().default(''),
+  decisions: z.string().optional().default(''),
+  action_items: z.string().optional().default(''),
+  document_url: z.string().optional().default(''),
+  attachment_urls: z.array(z.string()).optional().default([]),
   is_public: z.boolean().default(true),
-  approved: z.boolean().default(false)
+  approved: z.boolean().optional().default(false),
+  extracted_text: z.string().optional().default('')
 })
 
 export async function GET(req: NextRequest) {
@@ -100,14 +101,17 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json()
+    console.log('Received protocol data:', JSON.stringify(body, null, 2))
+
     const validation = ProtocolSchema.safeParse(body)
 
     if (!validation.success) {
+      console.error('Validation errors:', validation.error.errors)
       return NextResponse.json(
         {
           success: false,
           error: 'נתונים לא תקינים',
-          details: validation.error.errors.map(err => err.message)
+          details: validation.error.errors.map(err => `${err.path.join('.')}: ${err.message}`)
         },
         { status: 400 }
       )
@@ -115,14 +119,35 @@ export async function POST(req: NextRequest) {
 
     const supabase = createClient()
 
+    // Use columns that exist in DB (verified by check-protocols-schema.ts)
+    const attendeesList = validation.data.attendees.join(', ')
+    const fullExtractedText = `<!-- ATTENDEES: ${attendeesList} -->\n${validation.data.extracted_text}`
+
+    // Extract year from meeting_date
+    const year = new Date(validation.data.meeting_date).getFullYear()
+
+    const protocolData = {
+      title: validation.data.title,
+      protocol_date: validation.data.meeting_date,
+      year: year, // Required NOT NULL field
+      categories: [validation.data.protocol_type], // Map protocol_type to categories array
+      is_public: validation.data.is_public,
+      extracted_text: fullExtractedText,
+      agenda: validation.data.agenda || '',
+      decisions: validation.data.decisions || '',
+      action_items: validation.data.action_items || '',
+      document_url: validation.data.document_url || '',
+      attachment_urls: validation.data.attachment_urls || [],
+      approved: validation.data.approved || false,
+      created_by: 'admin'
+    }
+
+    console.log('Inserting protocol data:', JSON.stringify(protocolData, null, 2))
+
     // Create protocol
     const { data, error } = await supabase
       .from('protocols')
-      .insert([{
-        ...validation.data,
-        created_by: 'admin', // In a full system, this would come from JWT
-        attachment_urls: validation.data.attachment_urls || []
-      }])
+      .insert([protocolData])
       .select()
       .single()
 

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { google } from 'googleapis'
 import { logger } from '@/lib/logger'
+import { extractTextFromFile } from '@/lib/textExtraction'
 
 export async function POST(req: NextRequest) {
   try {
@@ -53,6 +54,26 @@ export async function POST(req: NextRequest) {
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
 
+    // Extract text from document
+    let extractedText = ''
+    try {
+      const extraction = await extractTextFromFile(buffer, file.type)
+      extractedText = extraction.text || ''
+      if (extraction.error) {
+        logger.warn('Text extraction failed', {
+          component: 'TextExtraction',
+          error: extraction.error,
+          fileType: file.type
+        })
+      } else if (extractedText) {
+        logger.success(`Extracted ${extractedText.length} characters from ${file.name}`, {
+          component: 'TextExtraction'
+        })
+      }
+    } catch (error) {
+      logger.warn('Text extraction error', { component: 'TextExtraction', error })
+    }
+
     // Upload file to Google Drive
     const response = await drive.files.create({
       requestBody: {
@@ -86,6 +107,9 @@ export async function POST(req: NextRequest) {
         name: response.data.name,
         url: response.data.webViewLink,
         downloadUrl: response.data.webContentLink,
+        extractedText: extractedText,
+        size: buffer.length,
+        type: file.type
       },
     })
   } catch (error) {

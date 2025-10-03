@@ -9,7 +9,7 @@ import { cn } from '@/lib/utils'
 
 interface FileUploadProps {
   value?: string | string[]
-  onChange?: (value: string | string[]) => void
+  onChange?: (value: string | string[], formattedHTML?: string) => void
   multiple?: boolean
   accept?: string
   maxSize?: number // in MB
@@ -19,31 +19,24 @@ interface FileUploadProps {
 }
 
 interface UploadedFile {
-  url: string
   name: string
   size: number
   type: string
+  formattedHTML?: string
 }
 
 export default function FileUpload({
-  value,
   onChange,
   multiple = false,
   accept = '.pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png',
   maxSize = 10,
-  bucket = 'documents',
+  bucket = 'protocols',
   disabled = false,
   className
 }: FileUploadProps) {
   const [isUploading, setIsUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
-  const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>(() => {
-    if (!value) return []
-    if (Array.isArray(value)) {
-      return value.map(url => ({ url, name: url.split('/').pop() || '', size: 0, type: '' }))
-    }
-    return value ? [{ url: value, name: value.split('/').pop() || '', size: 0, type: '' }] : []
-  })
+  const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([])
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
@@ -82,7 +75,7 @@ export default function FileUpload({
         })
       }, 200)
 
-      const response = await fetch('/api/upload/google-drive', {
+      const response = await fetch('/api/upload/local', {
         method: 'POST',
         body: formData
       })
@@ -94,10 +87,10 @@ export default function FileUpload({
 
       if (data.success) {
         const newFile: UploadedFile = {
-          url: data.data.url,
           name: data.data.name,
           size: data.data.size,
-          type: data.data.type
+          type: data.data.type,
+          formattedHTML: data.data.formattedHTML
         }
 
         const newFiles = multiple
@@ -106,13 +99,21 @@ export default function FileUpload({
 
         setUploadedFiles(newFiles)
 
-        // Call onChange with URLs
+        // Call onChange with formatted HTML
         if (onChange) {
-          const urls = newFiles.map(f => f.url)
-          onChange(multiple ? urls : urls[0])
+          const allFormattedHTML = newFiles
+            .map(f => f.formattedHTML)
+            .filter(Boolean)
+            .join('\n\n')
+          onChange(file.name, allFormattedHTML || undefined)
         }
 
-        toast.success(`הקובץ ${file.name} הועלה בהצלחה`)
+        // Notify about text extraction and formatting
+        if (data.data.formattedHTML && data.data.formattedHTML.length > 0) {
+          toast.success(`${file.name} - הטקסט חולץ ועוצב בהצלחה! (${data.data.formattedHTML.length} תווים)`)
+        } else {
+          toast.success(`${file.name} הועלה בהצלחה`)
+        }
       } else {
         toast.error(data.error || 'שגיאה בהעלאת הקובץ')
       }
@@ -129,10 +130,13 @@ export default function FileUpload({
     const newFiles = uploadedFiles.filter((_, i) => i !== index)
     setUploadedFiles(newFiles)
 
-    // Call onChange with updated URLs
+    // Call onChange with updated formatted HTML
     if (onChange) {
-      const urls = newFiles.map(f => f.url)
-      onChange(multiple ? urls : urls[0] || '')
+      const allFormattedHTML = newFiles
+        .map(f => f.formattedHTML)
+        .filter(Boolean)
+        .join('\n\n')
+      onChange('', allFormattedHTML || undefined)
     }
   }
 

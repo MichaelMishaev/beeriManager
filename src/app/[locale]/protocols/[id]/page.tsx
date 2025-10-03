@@ -96,82 +96,17 @@ async function ProtocolContent({ id }: { id: string }) {
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Left Column - Main Content */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Summary */}
-          {protocol.summary && (
+          {/* ChatGPT Formatted Content */}
+          {protocol.extracted_text && (
             <Card>
               <CardHeader>
-                <CardTitle>תקציר</CardTitle>
+                <CardTitle>תוכן הפרוטוקול</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground whitespace-pre-wrap">
-                  {protocol.summary}
-                </p>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Full Content */}
-          {protocol.content && (
-            <Card>
-              <CardHeader>
-                <CardTitle>תוכן מלא</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="prose prose-sm max-w-none">
-                  <div className="whitespace-pre-wrap text-muted-foreground">
-                    {protocol.content}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Decisions */}
-          {protocol.decisions && protocol.decisions.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle>החלטות</CardTitle>
-                <CardDescription>
-                  החלטות שהתקבלו בישיבה
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-3">
-                  {protocol.decisions.map((decision: string, index: number) => (
-                    <li key={index} className="flex gap-3">
-                      <span className="font-semibold text-primary">{index + 1}.</span>
-                      <span className="text-muted-foreground flex-1">{decision}</span>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Action Items */}
-          {protocol.action_items && protocol.action_items.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle>משימות המשך</CardTitle>
-                <CardDescription>
-                  פעולות לביצוע בעקבות הישיבה
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-3">
-                  {protocol.action_items.map((item: any, index: number) => (
-                    <li key={index} className="flex items-start gap-3 p-3 bg-muted rounded-lg">
-                      <div className="flex-1">
-                        <p className="font-medium">{item.task}</p>
-                        {item.assignee && (
-                          <p className="text-sm text-muted-foreground mt-1">
-                            אחראי: {item.assignee}
-                          </p>
-                        )}
-                      </div>
-                    </li>
-                  ))}
-                </ul>
+                <div
+                  className="prose prose-sm max-w-none prose-headings:text-primary prose-h2:text-xl prose-h3:text-lg"
+                  dangerouslySetInnerHTML={{ __html: protocol.extracted_text }}
+                />
               </CardContent>
             </Card>
           )}

@@ -154,3 +154,65 @@ export async function POST(req: NextRequest) {
     )
   }
 }
+
+export async function DELETE(req: NextRequest) {
+  try {
+    // Only admins can delete tasks
+    const token = req.cookies.get('auth-token')
+    if (!token || !verifyJWT(token.value)) {
+      return NextResponse.json(
+        { success: false, error: 'נדרשת הרשאת מנהל' },
+        { status: 401 }
+      )
+    }
+
+    const supabase = createClient()
+
+    // Delete all tasks one by one to work with audit triggers
+    const { data: allTasks, error: fetchError } = await supabase
+      .from('tasks')
+      .select('id')
+
+    if (fetchError) {
+      console.error('Tasks fetch error:', fetchError)
+      return NextResponse.json(
+        { success: false, error: 'שגיאה בטעינת המשימות' },
+        { status: 500 }
+      )
+    }
+
+    if (!allTasks || allTasks.length === 0) {
+      return NextResponse.json({
+        success: true,
+        message: 'אין משימות למחיקה'
+      })
+    }
+
+    // Delete each task individually to satisfy audit trigger
+    let deletedCount = 0
+    for (const task of allTasks) {
+      const { error } = await supabase
+        .from('tasks')
+        .delete()
+        .eq('id', task.id)
+
+      if (!error) {
+        deletedCount++
+      } else {
+        console.error('Error deleting task:', task.id, error)
+      }
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: `${deletedCount} משימות נמחקו בהצלחה`
+    })
+
+  } catch (error) {
+    console.error('Tasks DELETE error:', error)
+    return NextResponse.json(
+      { success: false, error: 'שגיאה במחיקת המשימות' },
+      { status: 500 }
+    )
+  }
+}

@@ -157,3 +157,44 @@ export async function POST(req: NextRequest) {
     )
   }
 }
+
+export async function DELETE(req: NextRequest) {
+  try {
+    // Only admins can delete feedback
+    const token = req.cookies.get('auth-token')
+    if (!token || !verifyJWT(token.value)) {
+      return NextResponse.json(
+        { success: false, error: 'נדרשת הרשאת מנהל' },
+        { status: 401 }
+      )
+    }
+
+    const supabase = createClient()
+
+    // Delete all feedback
+    const { error } = await supabase
+      .from('anonymous_feedback')
+      .delete()
+      .neq('id', '00000000-0000-0000-0000-000000000000') // Delete all records
+
+    if (error) {
+      console.error('Feedback deletion error:', error)
+      return NextResponse.json(
+        { success: false, error: 'שגיאה במחיקת המשובים' },
+        { status: 500 }
+      )
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: 'כל המשובים נמחקו בהצלחה'
+    })
+
+  } catch (error) {
+    console.error('Feedback DELETE error:', error)
+    return NextResponse.json(
+      { success: false, error: 'שגיאה במחיקת המשובים' },
+      { status: 500 }
+    )
+  }
+}
