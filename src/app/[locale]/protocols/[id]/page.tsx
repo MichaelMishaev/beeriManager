@@ -11,6 +11,17 @@ import { createClient } from '@/lib/supabase/server'
 import { ShareProtocolButton } from '@/components/protocols/ShareProtocolButton'
 import { EditProtocolButton } from '@/components/protocols/EditProtocolButton'
 
+const categoryTranslations: Record<string, string> = {
+  'regular': 'ישיבה רגילה',
+  'special': 'ישיבה מיוחדת',
+  'annual': 'אסיפה שנתית',
+  'emergency': 'ישיבת חירום'
+}
+
+function translateCategory(category: string): string {
+  return categoryTranslations[category] || category
+}
+
 async function getProtocol(id: string) {
   const supabase = createClient()
 
@@ -167,7 +178,7 @@ async function ProtocolContent({ id }: { id: string }) {
                   <div className="flex flex-wrap gap-2">
                     {protocol.categories.map((category: string, index: number) => (
                       <Badge key={index} variant="secondary">
-                        {category}
+                        {translateCategory(category)}
                       </Badge>
                     ))}
                   </div>
