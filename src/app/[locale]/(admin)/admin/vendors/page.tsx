@@ -1,10 +1,11 @@
 import { Suspense } from 'react'
 import Link from 'next/link'
-import { Store, Phone, Mail, Star, Plus, Search, Filter } from 'lucide-react'
+import { Store, Phone, Mail, Star, Plus, Search, Filter, Eye } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { createClient } from '@/lib/supabase/server'
+import { ShareVendorButton } from '@/components/vendors/ShareVendorButton'
 
 const categoryLabels: Record<string, string> = {
   catering: 'קייטרינג',
@@ -127,7 +128,11 @@ async function VendorsList() {
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <CardTitle className="text-lg">{vendor.name}</CardTitle>
+                      <Link href={`/vendors/${vendor.id}`}>
+                        <CardTitle className="text-lg hover:text-primary transition-colors cursor-pointer">
+                          {vendor.name}
+                        </CardTitle>
+                      </Link>
                       {vendor.description && (
                         <CardDescription className="mt-2 line-clamp-2">
                           {vendor.description}
@@ -182,18 +187,24 @@ async function VendorsList() {
                     )}
                   </div>
 
-                  <div className="flex gap-2 mt-4">
-                    <Button variant="outline" asChild className="flex-1" size="sm">
-                      <Link href={`/admin/vendors/${vendor.id}/edit`}>
-                        ערוך
-                      </Link>
-                    </Button>
-                    <Button variant="default" asChild className="flex-1" size="sm">
-                      <a href={`tel:${vendor.phone}`}>
-                        <Phone className="h-4 w-4 ml-2" />
-                        התקשר
-                      </a>
-                    </Button>
+                  <div className="flex flex-col gap-2 mt-4">
+                    <div className="flex gap-2">
+                      <Button variant="outline" asChild className="flex-1" size="sm">
+                        <Link href={`/vendors/${vendor.id}`}>
+                          <Eye className="h-4 w-4 ml-2" />
+                          צפייה
+                        </Link>
+                      </Button>
+                      {vendor.phone && (
+                        <Button variant="default" asChild className="flex-1" size="sm">
+                          <a href={`tel:${vendor.phone}`}>
+                            <Phone className="h-4 w-4 ml-2" />
+                            התקשר
+                          </a>
+                        </Button>
+                      )}
+                    </div>
+                    <ShareVendorButton vendor={vendor} className="w-full" />
                   </div>
                 </CardContent>
               </Card>

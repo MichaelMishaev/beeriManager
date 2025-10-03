@@ -54,8 +54,7 @@ export async function middleware(request: NextRequest) {
     '/admin',
     '/tasks',
     '/finances',
-    '/issues',
-    '/vendors'
+    '/issues'
   ]
 
   const isProtectedRoute = protectedRoutes.some(route => pathnameWithoutLocale.startsWith(route))

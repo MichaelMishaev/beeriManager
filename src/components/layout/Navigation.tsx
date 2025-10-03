@@ -28,7 +28,7 @@ function useNavItems() {
       { href: '/finances', label: t('finances'), icon: DollarSign },
       { href: '/issues', label: t('issues'), icon: AlertCircle },
       { href: '/protocols', label: t('protocols'), icon: FileText },
-      { href: '/vendors', label: t('vendors'), icon: Building2 },
+      { href: '/admin/vendors', label: t('vendors'), icon: Building2 },
       { href: '/admin/feedback', label: t('feedback'), icon: MessageSquare },
     ]
   }
