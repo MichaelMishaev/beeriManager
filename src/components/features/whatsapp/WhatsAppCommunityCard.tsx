@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { MessageCircle, ChevronDown, ExternalLink } from 'lucide-react'
+import { MessageCircle, ChevronDown, ExternalLink, Share2 } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { WHATSAPP_COMMUNITY } from './WhatsAppCommunityLinks'
 import { useTranslations } from 'next-intl'
@@ -9,6 +9,37 @@ import { useTranslations } from 'next-intl'
 export function WhatsAppCommunityCard() {
   const [showGrades, setShowGrades] = useState(false)
   const t = useTranslations('whatsapp')
+
+  const handleShare = () => {
+    const message = `קבוצות WhatsApp לפי שכבות - בית ספר בארי
+
+הצטרפו לקבוצת WhatsApp של שכבת ילדכם!
+לחצו על הקישור המתאים:
+
+*שכבת א׳*
+${WHATSAPP_COMMUNITY.grades[0].url}
+
+*שכבת ב׳*
+${WHATSAPP_COMMUNITY.grades[1].url}
+
+*שכבת ג׳*
+${WHATSAPP_COMMUNITY.grades[2].url}
+
+*שכבת ד׳*
+${WHATSAPP_COMMUNITY.grades[3].url}
+
+*שכבת ה׳*
+${WHATSAPP_COMMUNITY.grades[4].url}
+
+*שכבת ו׳*
+${WHATSAPP_COMMUNITY.grades[5].url}
+
+לכל השאלות והעדכונים:
+https://beeri.online`
+
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`
+    window.open(whatsappUrl, '_blank')
+  }
 
   return (
     <Card className="shadow-md hover:shadow-lg transition-shadow border-0">
@@ -26,6 +57,17 @@ export function WhatsAppCommunityCard() {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
+        {/* Share Icon - Clean & Minimal */}
+        <div className="flex justify-center">
+          <button
+            onClick={handleShare}
+            className="p-3 rounded-full bg-green-50 hover:bg-green-100 transition-all duration-200 group"
+            title="שתף קישורים בוואטסאפ"
+          >
+            <Share2 className="h-5 w-5 text-green-600 group-hover:scale-110 transition-transform" />
+          </button>
+        </div>
+
         {/* Grades Toggle */}
         <div className="border border-gray-200 rounded-lg overflow-hidden">
           <button
