@@ -146,7 +146,7 @@ export function ShareNextClosureButton() {
       onClick={handleShare}
       variant="outline"
       size="sm"
-      className="gap-2 border-red-500 text-red-700 hover:bg-red-50 hover:text-red-800 font-medium"
+      className="w-full gap-2 bg-amber-50 border-amber-300 text-amber-900 hover:bg-amber-100 hover:border-amber-400 font-medium shadow-sm"
     >
       <Share2 className="h-4 w-4" />
       {buttonText}

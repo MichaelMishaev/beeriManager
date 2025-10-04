@@ -75,13 +75,18 @@ export function CollapsibleCalendarWidget({
       {/* Share Next Closure Button - At Very Top */}
       <ShareNextClosureButton />
 
-      {/* Action Buttons */}
+      {/* Next Holiday Widget */}
+      <div className="relative">
+        <NextHolidayWidget onClick={() => setHolidaysModalOpen(true)} />
+      </div>
+
+      {/* Action Buttons - Simplified */}
       <div className="flex gap-2">
         {/* Toggle Calendar Button */}
         <Button
           variant="outline"
           size="sm"
-          className="flex-1 text-sm transition-all hover:bg-primary/10 border-2 border-primary/20 hover:border-primary/40"
+          className="flex-1 text-sm transition-all hover:bg-muted"
           onClick={handleToggle}
         >
           <Calendar className="h-4 w-4 ml-2" />
@@ -102,21 +107,14 @@ export function CollapsibleCalendarWidget({
         <Button
           variant="outline"
           size="sm"
-          className="text-sm transition-all border-2 hover:bg-orange-50"
-          style={{
-            borderColor: '#FF8200',
-            color: '#FF8200'
-          }}
+          className="text-sm transition-all hover:bg-muted gap-1.5 px-3"
           onClick={() => setHolidaysModalOpen(true)}
           title={t('holidaysAndEvents')}
         >
           <Calendar className="h-4 w-4" />
+          <span className="hidden sm:inline">{t('holidaysAndEvents')}</span>
+          <span className="sm:hidden">🎉</span>
         </Button>
-      </div>
-
-      {/* Next Holiday Widget - Below Button */}
-      <div className="relative">
-        <NextHolidayWidget onClick={() => setHolidaysModalOpen(true)} />
       </div>
 
       {/* Collapsible Calendar with Smooth Animation */}

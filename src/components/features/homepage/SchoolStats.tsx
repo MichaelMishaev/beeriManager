@@ -23,16 +23,16 @@ export function SchoolStats({ variant = 'banner' }: SchoolStatsProps) {
 
   if (variant === 'banner') {
     return (
-      <div className="bg-gradient-to-br from-sky-50 to-blue-50 border border-sky-200 rounded-lg p-3 mb-4 shadow-sm">
-        <div className="grid grid-cols-2 gap-2">
-          {stats.map((stat) => (
-            <div key={stat.labelKey} className="text-center py-1">
-              <div className="text-2xl mb-0.5">{stat.icon}</div>
-              <div className="text-2xl font-bold text-sky-700">{stat.value}</div>
-              <div className="text-xs text-sky-600 mt-0.5">{t(stat.labelKey)}</div>
+      <div className="flex items-center justify-center gap-6 mb-6">
+        {stats.map((stat) => (
+          <div key={stat.labelKey} className="flex items-center gap-2">
+            <span className="text-xl">{stat.icon}</span>
+            <div>
+              <div className="text-xl font-bold text-foreground">{stat.value}</div>
+              <div className="text-xs text-muted-foreground">{t(stat.labelKey)}</div>
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
       </div>
     )
   }

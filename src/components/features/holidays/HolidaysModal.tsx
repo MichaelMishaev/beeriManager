@@ -209,13 +209,13 @@ export function HolidaysModal({ open, onOpenChange }: HolidaysModalProps) {
                           </div>
                           <div className="font-medium">
                             {locale === 'ru'
-                              ? format(parseISO(holiday.start_date), 'd MMMM', { locale: dateLocale })
-                              : format(parseISO(holiday.start_date), 'd בMMMM', { locale: dateLocale })
+                              ? format(parseISO(holiday.start_date), 'dd.MM.yyyy', { locale: dateLocale })
+                              : format(parseISO(holiday.start_date), 'dd.MM.yyyy', { locale: dateLocale })
                             }
                             {holiday.start_date !== holiday.end_date && (
                               <> - {locale === 'ru'
-                                ? format(parseISO(holiday.end_date), 'd MMMM', { locale: dateLocale })
-                                : format(parseISO(holiday.end_date), 'd בMMMM', { locale: dateLocale })
+                                ? format(parseISO(holiday.end_date), 'dd.MM.yyyy', { locale: dateLocale })
+                                : format(parseISO(holiday.end_date), 'dd.MM.yyyy', { locale: dateLocale })
                               }</>
                             )}
                           </div>

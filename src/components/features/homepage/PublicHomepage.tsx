@@ -24,33 +24,33 @@ function EventItem({ event, dateLocale }: { event: Event; dateLocale: typeof he 
 
   return (
     <Link href={`/events/${event.id}`}>
-      <div className="flex items-start gap-4 p-4 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer border">
+      <div className="flex items-start gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer border">
         <div className="flex-shrink-0 text-center">
-          <div className="bg-primary text-primary-foreground rounded-lg p-3">
-            <div className="text-2xl font-bold">
+          <div className="bg-primary text-primary-foreground rounded-md p-2">
+            <div className="text-lg font-bold leading-tight">
               {format(startDate, 'd', { locale: dateLocale })}
             </div>
-            <div className="text-xs uppercase">
+            <div className="text-[10px] uppercase leading-tight">
               {format(startDate, 'MMM', { locale: dateLocale })}
             </div>
           </div>
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="text-lg font-semibold mb-1">{event.title}</h3>
+          <h3 className="text-base font-semibold mb-1 leading-snug">{event.title}</h3>
           {event.description && (
-            <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
+            <p className="text-xs text-muted-foreground line-clamp-2 mb-1.5">
               {event.description}
             </p>
           )}
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <Calendar className="h-3 w-3" />
             <span>
-              {format(startDate, 'EEEE, d MMMM yyyy', { locale: dateLocale })}
+              {format(startDate, 'EEEE, d MMMM', { locale: dateLocale })}
             </span>
-            <span className="mr-2">• {format(startDate, 'HH:mm', { locale: dateLocale })}</span>
+            <span>• {format(startDate, 'HH:mm', { locale: dateLocale })}</span>
           </div>
         </div>
-        <ChevronLeft className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+        <ChevronLeft className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-1" />
       </div>
     </Link>
   )
