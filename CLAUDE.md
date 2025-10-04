@@ -12,9 +12,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Styling**: Tailwind CSS with RTL support
 - **Database**: Supabase (PostgreSQL)
 - **Calendar**: Google Calendar API v3 (two-way sync)
-- **Hosting**: Railway
+- **Hosting**: Vercel
 - **PWA**: next-pwa for offline support
 - **Domain**: https://beeri.online (primary production domain)
+- **Analytics**: Google Analytics (G-P1RGJY03D9)
 
 ## Commands (To be implemented)
 
