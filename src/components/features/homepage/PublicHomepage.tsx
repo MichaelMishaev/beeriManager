@@ -234,9 +234,6 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
         {/* Calendar & Holidays - Takes 1 column */}
         <div className="lg:col-span-1 order-1 lg:order-2">
           <div className="lg:sticky lg:top-20 space-y-4">
-            {/* WhatsApp Community Card */}
-            <WhatsAppCommunityCard />
-
             {/* Collapsible Calendar Widget */}
             <CollapsibleCalendarWidget
               calendarEvents={calendarEvents}
@@ -249,6 +246,9 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
               }}
               defaultExpanded={false}
             />
+
+            {/* WhatsApp Community Card */}
+            <WhatsAppCommunityCard />
           </div>
         </div>
       </div>
