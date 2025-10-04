@@ -3,7 +3,8 @@
 import Script from 'next/script'
 
 export function GoogleAnalytics() {
-  const measurementId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID
+  // Hardcode for testing - env vars don't work in client components the same way
+  const measurementId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || 'G-9RS38VPXEZ'
 
   if (!measurementId) {
     return null
