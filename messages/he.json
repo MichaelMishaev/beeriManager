@@ -72,6 +72,12 @@
     "sendWhatsApp": "שלחו הודעה בוואטסאפ",
     "committeeLoginInfo": "חברי ועד ההורים יכולים להתחבר למערכת הניהול באמצעות כפתור \"כניסת ועד\" בתפריט."
   },
+  "whatsapp": {
+    "title": "קהילת WhatsApp",
+    "subtitle": "📱 הורים - הצטרפו לשכבת ילדכם לקבלת עדכונים רשמיים",
+    "groupsByGrade": "קבוצות לפי שכבות",
+    "gradePrefix": "שכבת"
+  },
   "dashboard": {
     "welcome": "ברוכים הבאים לועד ההורים",
     "subtitle": "סקירה מהירה של הפעילות במערכת ניהול ועד ההורים",

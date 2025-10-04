@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { CommitteeCard } from './CommitteeCard'
 import { CollapsibleCalendarWidget } from '@/components/features/holidays/CollapsibleCalendarWidget'
 import { SchoolStats } from './SchoolStats'
+import { WhatsAppCommunityCard } from '@/components/features/whatsapp/WhatsAppCommunityCard'
 import type { Event, CalendarEvent } from '@/types'
 import Link from 'next/link'
 import { format } from 'date-fns'
@@ -217,8 +218,11 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
 
         {/* Calendar & Holidays - Takes 1 column */}
         <div className="lg:col-span-1 order-1 lg:order-2">
-          {/* Collapsible Calendar Widget */}
-          <div className="lg:sticky lg:top-20">
+          <div className="lg:sticky lg:top-20 space-y-4">
+            {/* WhatsApp Community Card */}
+            <WhatsAppCommunityCard />
+
+            {/* Collapsible Calendar Widget */}
             <CollapsibleCalendarWidget
               calendarEvents={calendarEvents}
               onEventClick={(event) => {
