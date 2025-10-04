@@ -17,6 +17,8 @@
     "test:performance": "playwright test tests/e2e/05-performance.spec.ts",
     "test:parallel": "playwright test --workers=4",
     "test:report": "playwright show-report",
+    "test:vendors": "playwright test tests/vendors-automation.spec.ts",
+    "test:vendors:headed": "playwright test tests/vendors-automation.spec.ts --headed",
     "automation:watch": "playwright test --watch",
     "automation:dev": "concurrently \"npm run dev\" \"npm run automation:watch\"",
     "db:start": "./scripts/db-commands.sh start",

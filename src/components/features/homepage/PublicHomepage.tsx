@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { CommitteeCard } from './CommitteeCard'
 import { CollapsibleCalendarWidget } from '@/components/features/holidays/CollapsibleCalendarWidget'
+import { SchoolStats } from './SchoolStats'
 import type { Event, CalendarEvent } from '@/types'
 import Link from 'next/link'
 import { format } from 'date-fns'
@@ -83,6 +84,9 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
           {t('subtitle')}
         </p>
       </div>
+
+      {/* School Stats Banner */}
+      <SchoolStats variant="banner" />
 
       {/* Photos Gallery Section */}
       {eventsWithPhotos.length > 0 && (

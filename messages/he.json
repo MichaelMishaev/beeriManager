@@ -45,7 +45,7 @@
     "loginRequired": "נדרשת התחברות"
   },
   "homepage": {
-    "welcome": "ברוכים הבאים להורים בית הספר",
+    "welcome": "ברוכים הבאים לפורטל בארי",
     "subtitle": "צפו באירועים הקרובים, לוח השנה, ושלחו משוב לועד ההורים",
     "description": "מערכת ניהול וועד הורים",
     "upcomingEvents": "אירועים קרובים",
@@ -112,5 +112,11 @@
     "share": "שיתוף",
     "print": "הדפסה",
     "download": "הורדה"
+  },
+  "schoolStats": {
+    "students": "תלמידים",
+    "classes": "כיתות",
+    "committees": "ועדות",
+    "teachers": "מורים"
   }
 }

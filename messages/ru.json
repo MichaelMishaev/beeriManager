@@ -112,5 +112,11 @@
     "share": "Поделиться",
     "print": "Печать",
     "download": "Скачать"
+  },
+  "schoolStats": {
+    "students": "Студентов",
+    "classes": "Классов",
+    "committees": "Комитетов",
+    "teachers": "Учителей"
   }
 }
