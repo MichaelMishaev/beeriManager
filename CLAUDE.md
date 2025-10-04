@@ -15,7 +15,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Hosting**: Vercel
 - **PWA**: next-pwa for offline support
 - **Domain**: https://beeri.online (primary production domain)
-- **Analytics**: Google Analytics (G-P1RGJY03D9)
+- **Analytics**: Google Analytics (G-9RS38VPXEZ)
 
 ## Commands (To be implemented)
 
