@@ -44,29 +44,28 @@ https://beeri.online`
   return (
     <Card className="shadow-md hover:shadow-lg transition-shadow border-0">
       <CardHeader className="pb-3">
-        <div className="flex items-center gap-3 mb-2">
-          <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-            <MessageCircle className="h-5 w-5 text-green-600" />
+        <div className="flex items-center justify-between gap-3 mb-2">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+              <MessageCircle className="h-5 w-5 text-green-600" />
+            </div>
+            <CardTitle className="text-xl text-[#003153]">
+              {t('title')}
+            </CardTitle>
           </div>
-          <CardTitle className="text-xl text-[#003153]">
-            {t('title')}
-          </CardTitle>
+          <button
+            onClick={handleShare}
+            className="p-2 rounded-full bg-green-50 hover:bg-green-100 transition-all duration-200 group flex-shrink-0"
+            title="שתף קישורים בוואטסאפ"
+          >
+            <Share2 className="h-4 w-4 text-green-600 group-hover:scale-110 transition-transform" />
+          </button>
         </div>
         <CardDescription className="text-sm text-gray-600">
           {t('subtitle')}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
-        {/* Share Icon - Clean & Minimal */}
-        <div className="flex justify-center">
-          <button
-            onClick={handleShare}
-            className="p-3 rounded-full bg-green-50 hover:bg-green-100 transition-all duration-200 group"
-            title="שתף קישורים בוואטסאפ"
-          >
-            <Share2 className="h-5 w-5 text-green-600 group-hover:scale-110 transition-transform" />
-          </button>
-        </div>
 
         {/* Grades Toggle */}
         <div className="border border-gray-200 rounded-lg overflow-hidden">
