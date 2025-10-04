@@ -23,22 +23,6 @@ async function getCommittees() {
   return committees || []
 }
 
-async function getCommitteeStats() {
-  const supabase = createClient()
-
-  const { data, count } = await supabase
-    .from('committees')
-    .select('*', { count: 'exact' })
-
-  const totalMembers = data?.reduce((sum, c) => sum + (c.members?.length || 0), 0) || 0
-  const totalResponsibilities = data?.reduce((sum, c) => sum + (c.responsibilities?.length || 0), 0) || 0
-
-  return {
-    total: count || 0,
-    totalMembers,
-    totalResponsibilities
-  }
-}
 
 function CommitteesListSkeleton() {
   return (
@@ -87,9 +71,15 @@ async function CommitteesList() {
           <CardHeader className="pt-6">
             <div className="flex items-start justify-between">
               <div className="flex-1">
-                <CardTitle className="text-xl flex items-center gap-2">
-                  {committee.name}
-                </CardTitle>
+                <div className="flex items-center gap-2 mb-1">
+                  <div
+                    className="w-3 h-3 rounded-full flex-shrink-0"
+                    style={{ backgroundColor: committee.color }}
+                  />
+                  <CardTitle className="text-xl">
+                    {committee.name}
+                  </CardTitle>
+                </div>
                 {committee.description && (
                   <CardDescription className="mt-2 line-clamp-2">
                     {committee.description}
@@ -101,17 +91,28 @@ async function CommitteesList() {
 
           <CardContent>
             <div className="space-y-4">
-              {/* Members */}
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium text-muted-foreground">
-                    חברי וועדה
-                  </span>
-                  <Badge variant="secondary">
+              {/* Summary Info */}
+              <div className="bg-muted/50 rounded-lg p-3 space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="font-medium">חברי וועדה:</span>
+                  <span className="font-bold" style={{ color: committee.color }}>
                     {committee.members?.length || 0}
-                  </Badge>
+                  </span>
                 </div>
-                {committee.members && committee.members.length > 0 && (
+                <div className="flex items-center justify-between text-sm">
+                  <span className="font-medium">תחומי אחריות:</span>
+                  <span className="font-bold" style={{ color: committee.color }}>
+                    {committee.responsibilities?.length || 0}
+                  </span>
+                </div>
+              </div>
+
+              {/* Members Preview */}
+              {committee.members && committee.members.length > 0 && (
+                <div>
+                  <div className="text-xs font-medium text-muted-foreground mb-2">
+                    חברי וועדה
+                  </div>
                   <div className="flex flex-wrap gap-1">
                     {committee.members.slice(0, 3).map((member: string, idx: number) => (
                       <Badge key={idx} variant="outline" className="text-xs">
@@ -120,24 +121,19 @@ async function CommitteesList() {
                     ))}
                     {committee.members.length > 3 && (
                       <Badge variant="outline" className="text-xs">
-                        +{committee.members.length - 3}
+                        +{committee.members.length - 3} נוספים
                       </Badge>
                     )}
                   </div>
-                )}
-              </div>
-
-              {/* Responsibilities */}
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium text-muted-foreground">
-                    תחומי אחריות
-                  </span>
-                  <Badge variant="secondary">
-                    {committee.responsibilities?.length || 0}
-                  </Badge>
                 </div>
-                {committee.responsibilities && committee.responsibilities.length > 0 && (
+              )}
+
+              {/* Responsibilities Preview */}
+              {committee.responsibilities && committee.responsibilities.length > 0 && (
+                <div>
+                  <div className="text-xs font-medium text-muted-foreground mb-2">
+                    תחומי אחריות
+                  </div>
                   <div className="flex flex-wrap gap-1">
                     {committee.responsibilities.slice(0, 3).map((resp: string, idx: number) => (
                       <Badge
@@ -161,12 +157,12 @@ async function CommitteesList() {
                           color: committee.color
                         }}
                       >
-                        +{committee.responsibilities.length - 3}
+                        +{committee.responsibilities.length - 3} נוספים
                       </Badge>
                     )}
                   </div>
-                )}
-              </div>
+                </div>
+              )}
 
               {/* Actions */}
               <div className="flex gap-2 pt-2">
@@ -193,34 +189,6 @@ async function CommitteesList() {
   )
 }
 
-async function StatsCards() {
-  const stats = await getCommitteeStats()
-
-  return (
-    <div className="grid gap-4 md:grid-cols-3 mb-6">
-      <Card>
-        <CardHeader className="pb-3">
-          <CardDescription>סך הכל וועדות</CardDescription>
-          <CardTitle className="text-3xl">{stats.total}</CardTitle>
-        </CardHeader>
-      </Card>
-
-      <Card>
-        <CardHeader className="pb-3">
-          <CardDescription>סך חברי וועדה</CardDescription>
-          <CardTitle className="text-3xl">{stats.totalMembers}</CardTitle>
-        </CardHeader>
-      </Card>
-
-      <Card>
-        <CardHeader className="pb-3">
-          <CardDescription>סך תחומי אחריות</CardDescription>
-          <CardTitle className="text-3xl">{stats.totalResponsibilities}</CardTitle>
-        </CardHeader>
-      </Card>
-    </div>
-  )
-}
 
 export default function CommitteesPage() {
   return (
@@ -243,11 +211,6 @@ export default function CommitteesPage() {
           </Link>
         </Button>
       </div>
-
-      {/* Stats */}
-      <Suspense fallback={<div className="h-24 bg-gray-100 rounded-lg animate-pulse" />}>
-        <StatsCards />
-      </Suspense>
 
       {/* Committees List */}
       <Suspense fallback={<CommitteesListSkeleton />}>
