@@ -93,7 +93,8 @@ npm run test:e2e     # Run E2E tests
 - Critical features: Calendar sync, responsibilities tracking, protocol links
 - while develop, always build automation tool in parallel using playwright tool
 - for design use '/Users/michaelmishayev/Desktop/Projects/beeriManager/Docs/design'
-- whe dev check if what you change can create egresion bugs in other places.
+- whe dev check if what you change can create regresion bugs in other places.
 - when i ask to push, push to git to connected repository but do not push files that should not be in git, like temp files etc
 - all code must follow strict typescript
 - always develop strict typescript
+- push to git only if i say so

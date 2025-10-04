@@ -1,6 +1,6 @@
 import { Suspense } from 'react'
 import Link from 'next/link'
-import { Users, Plus, Edit, Trash2 } from 'lucide-react'
+import { Users, Plus, Edit, Trash2, UserCheck, Briefcase } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -23,6 +23,32 @@ async function getCommittees() {
   return committees || []
 }
 
+async function getCommitteeStats() {
+  const supabase = createClient()
+
+  const { data, count } = await supabase
+    .from('committees')
+    .select('*', { count: 'exact' })
+
+  const totalMembers = data?.reduce((sum, c) => sum + (c.members?.length || 0), 0) || 0
+  const totalResponsibilities = data?.reduce((sum, c) => sum + (c.responsibilities?.length || 0), 0) || 0
+
+  // Get unique members and responsibilities for drill-down
+  const allMembers = data?.flatMap(c => c.members || []) || []
+  const uniqueMembers = [...new Set(allMembers)]
+
+  const allResponsibilities = data?.flatMap(c => c.responsibilities || []) || []
+  const uniqueResponsibilities = [...new Set(allResponsibilities)]
+
+  return {
+    total: count || 0,
+    totalMembers,
+    totalResponsibilities,
+    uniqueMembers,
+    uniqueResponsibilities,
+    committees: data || []
+  }
+}
 
 function CommitteesListSkeleton() {
   return (
@@ -189,6 +215,104 @@ async function CommitteesList() {
   )
 }
 
+async function StatsCards() {
+  const stats = await getCommitteeStats()
+
+  return (
+    <div className="grid gap-4 md:grid-cols-3 mb-6">
+      {/* Total Committees */}
+      <Card className="hover:shadow-md transition-shadow">
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <CardDescription>סך הכל וועדות</CardDescription>
+            <Users className="h-5 w-5 text-muted-foreground" />
+          </div>
+          <CardTitle className="text-4xl font-bold">{stats.total}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            {stats.committees.slice(0, 3).map((committee: any) => (
+              <div key={committee.id} className="flex items-center gap-2">
+                <div
+                  className="w-2 h-2 rounded-full flex-shrink-0"
+                  style={{ backgroundColor: committee.color }}
+                />
+                <span className="text-sm text-muted-foreground truncate">
+                  {committee.name}
+                </span>
+              </div>
+            ))}
+            {stats.committees.length > 3 && (
+              <p className="text-xs text-muted-foreground">
+                +{stats.committees.length - 3} נוספות
+              </p>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Total Members */}
+      <Card className="hover:shadow-md transition-shadow">
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <CardDescription>סך חברי וועדה</CardDescription>
+            <UserCheck className="h-5 w-5 text-muted-foreground" />
+          </div>
+          <CardTitle className="text-4xl font-bold">{stats.totalMembers}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            <p className="text-sm text-muted-foreground">
+              {stats.uniqueMembers.length} חברים ייחודיים
+            </p>
+            <div className="flex flex-wrap gap-1">
+              {stats.uniqueMembers.slice(0, 4).map((member: string, idx: number) => (
+                <Badge key={idx} variant="outline" className="text-xs">
+                  {member}
+                </Badge>
+              ))}
+              {stats.uniqueMembers.length > 4 && (
+                <Badge variant="outline" className="text-xs">
+                  +{stats.uniqueMembers.length - 4}
+                </Badge>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Total Responsibilities */}
+      <Card className="hover:shadow-md transition-shadow">
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <CardDescription>סך תחומי אחריות</CardDescription>
+            <Briefcase className="h-5 w-5 text-muted-foreground" />
+          </div>
+          <CardTitle className="text-4xl font-bold">{stats.totalResponsibilities}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            <p className="text-sm text-muted-foreground">
+              {stats.uniqueResponsibilities.length} תחומים ייחודיים
+            </p>
+            <div className="flex flex-wrap gap-1">
+              {stats.uniqueResponsibilities.slice(0, 3).map((resp: string, idx: number) => (
+                <Badge key={idx} variant="outline" className="text-xs">
+                  {resp}
+                </Badge>
+              ))}
+              {stats.uniqueResponsibilities.length > 3 && (
+                <Badge variant="outline" className="text-xs">
+                  +{stats.uniqueResponsibilities.length - 3}
+                </Badge>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
 
 export default function CommitteesPage() {
   return (
@@ -211,6 +335,11 @@ export default function CommitteesPage() {
           </Link>
         </Button>
       </div>
+
+      {/* Stats Cards */}
+      <Suspense fallback={<div className="h-32 bg-gray-100 rounded-lg animate-pulse" />}>
+        <StatsCards />
+      </Suspense>
 
       {/* Committees List */}
       <Suspense fallback={<CommitteesListSkeleton />}>
