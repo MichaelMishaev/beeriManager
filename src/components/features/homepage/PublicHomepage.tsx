@@ -24,34 +24,40 @@ function EventItem({ event, dateLocale }: { event: Event; dateLocale: typeof he 
   const startDate = new Date(event.start_datetime)
 
   return (
-    <Link href={`/events/${event.id}`}>
-      <div className="flex items-start gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer border">
-        <div className="flex-shrink-0 text-center">
-          <div className="bg-primary text-primary-foreground rounded-md p-2">
-            <div className="text-lg font-bold leading-tight">
+    <Link href={`/events/${event.id}`} className="block group">
+      <div className="flex items-start gap-4 p-4 rounded-xl hover:bg-gray-50 transition-all duration-200">
+        {/* Larger, More Prominent Date Box */}
+        <div className="flex-shrink-0">
+          <div className="w-16 h-16 bg-gradient-to-br from-[#0D98BA] to-[#003153] rounded-xl flex flex-col items-center justify-center text-white shadow-md group-hover:shadow-lg transition-shadow">
+            <div className="text-2xl font-bold leading-none">
               {format(startDate, 'd', { locale: dateLocale })}
             </div>
-            <div className="text-[10px] uppercase leading-tight">
+            <div className="text-xs uppercase mt-1 leading-none">
               {format(startDate, 'MMM', { locale: dateLocale })}
             </div>
           </div>
         </div>
+
+        {/* Event Info */}
         <div className="flex-1 min-w-0">
-          <h3 className="text-base font-semibold mb-1 leading-snug">{event.title}</h3>
+          <h3 className="text-lg font-semibold text-[#003153] mb-1 group-hover:text-[#0D98BA] transition-colors leading-snug">
+            {event.title}
+          </h3>
           {event.description && (
-            <p className="text-xs text-muted-foreground line-clamp-2 mb-1.5">
+            <p className="text-sm text-gray-600 line-clamp-2 mb-2">
               {event.description}
             </p>
           )}
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <Calendar className="h-3 w-3" />
+          <div className="flex items-center gap-2 text-sm text-gray-500">
+            <Calendar className="h-4 w-4" />
             <span>
               {format(startDate, 'EEEE, d MMMM', { locale: dateLocale })}
             </span>
             <span>• {format(startDate, 'HH:mm', { locale: dateLocale })}</span>
           </div>
         </div>
-        <ChevronLeft className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-1" />
+
+        <ChevronLeft className="h-5 w-5 text-gray-400 group-hover:text-[#0D98BA] transition-colors self-center flex-shrink-0" />
       </div>
     </Link>
   )
@@ -75,19 +81,22 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
 
   return (
     <>
-      <div className="container mx-auto px-4 py-8 max-w-6xl">
-      {/* Welcome Header */}
-      <div className="text-center space-y-3 mb-8">
-        <h1 className="text-4xl font-bold text-foreground">
-          {t('welcome')}
-        </h1>
-        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-          {t('subtitle')}
-        </p>
+      {/* Hero Section with Gradient */}
+      <div className="bg-gradient-to-br from-[#0D98BA]/10 via-white to-[#003153]/5 py-12 md:py-16">
+        <div className="container mx-auto px-4 text-center">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-[#003153] mb-4">
+            {t('welcome')}
+          </h1>
+          <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+            {t('subtitle')}
+          </p>
+        </div>
       </div>
 
-      {/* School Stats Banner */}
-      <SchoolStats variant="banner" />
+      {/* School Stats Cards - Overlapping Hero */}
+      <SchoolStats variant="cards" />
+
+      <div className="container mx-auto px-4 py-4 max-w-6xl">
 
       {/* Photos Gallery Section */}
       {eventsWithPhotos.length > 0 && (
@@ -150,19 +159,21 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
       {/* Main Content Grid */}
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Upcoming Events - Takes 2 columns */}
-        <div className="lg:col-span-2 space-y-6 order-2 lg:order-1">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Calendar className="h-5 w-5" />
-                {t('upcomingEvents')}
-              </CardTitle>
-              <CardDescription>
+        <div className="lg:col-span-2 space-y-8 order-2 lg:order-1">
+          <Card className="shadow-md hover:shadow-lg transition-shadow border-0">
+            <CardHeader className="pb-4">
+              <div className="flex items-center gap-2">
+                <Calendar className="h-6 w-6 text-[#0D98BA]" />
+                <CardTitle className="text-2xl text-[#003153]">
+                  {t('upcomingEvents')}
+                </CardTitle>
+              </div>
+              <CardDescription className="text-base mt-2">
                 {t('nextSchoolEvents')}
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {upcomingEvents.length > 0 ? (
                   <>
                     {upcomingEvents.slice(0, 5).map((event) => (
@@ -189,23 +200,27 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
           </Card>
 
           {/* Complaint CTA */}
-          <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
+          <Card className="bg-gradient-to-br from-[#0D98BA]/5 to-[#003153]/5 border-[#0D98BA]/20 shadow-md hover:shadow-lg transition-shadow">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <MessageSquare className="h-5 w-5 text-primary" />
-                {t('haveFeedback')}
-              </CardTitle>
-              <CardDescription>
+              <div className="flex items-center gap-2">
+                <div className="w-10 h-10 rounded-full bg-[#0D98BA]/10 flex items-center justify-center">
+                  <MessageSquare className="h-5 w-5 text-[#0D98BA]" />
+                </div>
+                <CardTitle className="text-xl text-[#003153]">
+                  {t('haveFeedback')}
+                </CardTitle>
+              </div>
+              <CardDescription className="text-base mt-2">
                 {t('shareOpinion')}
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-sm mb-4">
+              <p className="text-sm text-gray-600 mb-4">
                 {t('feedbackHelps')}
               </p>
-              <Button asChild className="w-full" size="lg">
+              <Button asChild className="w-full bg-[#0D98BA] hover:bg-[#0D98BA]/90" size="lg">
                 <Link href="/complaint">
-                  <MessageSquare className="h-4 w-4 ml-2" />
+                  <MessageSquare className="h-5 w-5 ml-2" />
                   {t('sendComplaint')}
                 </Link>
               </Button>

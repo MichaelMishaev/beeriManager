@@ -2,31 +2,64 @@
 
 import React from 'react'
 import { useTranslations } from 'next-intl'
+import { Card, CardContent } from '@/components/ui/card'
+import { Users, BookOpen } from 'lucide-react'
 
 interface SchoolStat {
   value: string
   labelKey: string
-  icon: string
+  icon: React.ElementType
+  color: string
 }
 
 interface SchoolStatsProps {
-  variant?: 'banner' | 'inline' | 'footer'
+  variant?: 'banner' | 'inline' | 'footer' | 'cards'
 }
 
-export function SchoolStats({ variant = 'banner' }: SchoolStatsProps) {
+export function SchoolStats({ variant = 'cards' }: SchoolStatsProps) {
   const t = useTranslations('schoolStats')
 
   const stats: SchoolStat[] = [
-    { value: '562', labelKey: 'students', icon: '👥' },
-    { value: '22', labelKey: 'classes', icon: '📚' }
+    { value: '562', labelKey: 'students', icon: Users, color: 'text-[#0D98BA]' },
+    { value: '22', labelKey: 'classes', icon: BookOpen, color: 'text-[#0D98BA]' }
   ]
+
+  if (variant === 'cards') {
+    return (
+      <div className="container mx-auto px-4 -mt-12 mb-12">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {stats.map((stat) => {
+            const Icon = stat.icon
+            return (
+              <Card
+                key={stat.labelKey}
+                className="bg-white shadow-lg hover:shadow-xl transition-shadow duration-300"
+              >
+                <CardContent className="pt-6 pb-6">
+                  <div className="text-center">
+                    <Icon className={`h-8 w-8 mx-auto mb-3 ${stat.color}`} />
+                    <div className="text-4xl font-bold text-gray-900 mb-1">
+                      {stat.value}
+                    </div>
+                    <div className="text-sm text-gray-600 font-medium">
+                      {t(stat.labelKey)}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )
+          })}
+        </div>
+      </div>
+    )
+  }
 
   if (variant === 'banner') {
     return (
       <div className="flex items-center justify-center gap-6 mb-6">
         {stats.map((stat) => (
           <div key={stat.labelKey} className="flex items-center gap-2">
-            <span className="text-xl">{stat.icon}</span>
+            <span className="text-xl">{stat.labelKey === 'students' ? '👥' : '📚'}</span>
             <div>
               <div className="text-xl font-bold text-foreground">{stat.value}</div>
               <div className="text-xs text-muted-foreground">{t(stat.labelKey)}</div>
@@ -40,12 +73,15 @@ export function SchoolStats({ variant = 'banner' }: SchoolStatsProps) {
   if (variant === 'inline') {
     return (
       <p className="text-sm text-muted-foreground text-center mb-4">
-        {stats.map((s, i) => (
-          <React.Fragment key={s.labelKey}>
-            {i > 0 && ' • '}
-            {s.icon} <strong>{s.value}</strong> {t(s.labelKey)}
-          </React.Fragment>
-        ))}
+        {stats.map((s, i) => {
+          const Icon = s.icon
+          return (
+            <React.Fragment key={s.labelKey}>
+              {i > 0 && ' • '}
+              <Icon className="inline h-4 w-4" /> <strong>{s.value}</strong> {t(s.labelKey)}
+            </React.Fragment>
+          )
+        })}
       </p>
     )
   }
@@ -53,11 +89,14 @@ export function SchoolStats({ variant = 'banner' }: SchoolStatsProps) {
   // footer variant
   return (
     <div className="flex items-center gap-4 text-xs text-muted-foreground justify-center flex-wrap">
-      {stats.map((s) => (
-        <span key={s.labelKey}>
-          {s.icon} {s.value} {t(s.labelKey)}
-        </span>
-      ))}
+      {stats.map((s) => {
+        const Icon = s.icon
+        return (
+          <span key={s.labelKey}>
+            <Icon className="inline h-3 w-3" /> {s.value} {t(s.labelKey)}
+          </span>
+        )
+      })}
     </div>
   )
 }

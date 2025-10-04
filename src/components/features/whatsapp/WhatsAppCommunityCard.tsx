@@ -11,40 +11,44 @@ export function WhatsAppCommunityCard() {
   const t = useTranslations('whatsapp')
 
   return (
-    <Card className="border-2 border-[#25D366]/20 bg-gradient-to-br from-green-50/50 to-emerald-50/50">
+    <Card className="shadow-md hover:shadow-lg transition-shadow border-0">
       <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-lg">
-          <MessageCircle className="h-5 w-5 text-[#25D366]" />
-          {t('title')}
-        </CardTitle>
-        <CardDescription className="text-xs">
+        <div className="flex items-center gap-3 mb-2">
+          <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+            <MessageCircle className="h-5 w-5 text-green-600" />
+          </div>
+          <CardTitle className="text-xl text-[#003153]">
+            {t('title')}
+          </CardTitle>
+        </div>
+        <CardDescription className="text-sm text-gray-600">
           {t('subtitle')}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
         {/* Grades Toggle */}
-        <div className="border rounded-lg overflow-hidden">
+        <div className="border border-gray-200 rounded-lg overflow-hidden">
           <button
             onClick={() => setShowGrades(!showGrades)}
-            className="w-full px-3 py-2 bg-muted hover:bg-muted/80 transition-colors flex items-center justify-between text-sm"
+            className="w-full px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors flex items-center justify-between text-sm font-medium text-[#003153]"
           >
-            <span className="font-medium">{t('groupsByGrade')}</span>
+            <span>{t('groupsByGrade')}</span>
             <ChevronDown className={`h-4 w-4 transition-transform ${showGrades ? 'rotate-180' : ''}`} />
           </button>
 
           {showGrades && (
-            <div className="p-2 space-y-1 bg-card">
+            <div className="p-3 space-y-2 bg-white">
               {WHATSAPP_COMMUNITY.grades.map((grade) => (
                 <a
                   key={grade.grade}
                   href={grade.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-3 py-2 rounded-md border hover:bg-muted/50 transition-colors group text-sm"
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-lg border border-gray-200 hover:border-green-300 hover:bg-green-50 transition-all group"
                 >
-                  <span className="text-lg">{grade.emoji}</span>
-                  <span className="font-medium flex-1">{t('gradePrefix')} {grade.grade}</span>
-                  <ExternalLink className="h-3 w-3 text-[#25D366] opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <span className="text-xl">{grade.emoji}</span>
+                  <span className="font-medium flex-1 text-gray-900">{t('gradePrefix')} {grade.grade}</span>
+                  <ExternalLink className="h-4 w-4 text-green-600 opacity-0 group-hover:opacity-100 transition-opacity" />
                 </a>
               ))}
             </div>
