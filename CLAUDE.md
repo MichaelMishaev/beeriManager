@@ -12,9 +12,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Styling**: Tailwind CSS with RTL support
 - **Database**: Supabase (PostgreSQL)
 - **Calendar**: Google Calendar API v3 (two-way sync)
-- **Hosting**: Railway (http://pipguru.club)
+- **Hosting**: Railway
 - **PWA**: next-pwa for offline support
-- **Domain**: pipguru.club (configured via Railway)
+- **Domain**: https://beeri.online (primary production domain)
 
 ## Commands (To be implemented)
 
