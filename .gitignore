@@ -151,3 +151,37 @@ ultra-modern-form.html
 *" 2."*
 Docs/.env
 public/uploads/
+
+# ============================================
+# Temporary Development Scripts & Files
+# ============================================
+# One-off test scripts
+scripts/test-*.ts
+scripts/test-*.js
+
+# One-off check/debug scripts  
+scripts/check-*.ts
+scripts/check-*.sql
+
+# One-off fix scripts
+scripts/fix-*.ts
+scripts/fix-*.sql
+
+# Discovery/inspection scripts
+scripts/discover-*.ts
+scripts/inspect-*.ts
+scripts/verify-*.sql
+
+# Temporary database fixes
+scripts/*-db-fix-and-test.ts
+
+# Summary documentation (usually temporary)
+*_SUMMARY.md
+*-SUMMARY.md
+
+# Vendor automation test files (keep in tests/)
+# (This is commented - vendors-automation.spec.ts is a real test)
+
+# Vendor-specific temporary files
+scripts/*vendor*.ts
+scripts/*vendor*.js
