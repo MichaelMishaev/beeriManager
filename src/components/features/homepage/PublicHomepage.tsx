@@ -271,6 +271,13 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
         </CardContent>
       </Card>
     </div>
+
+    {/* Footer Credit */}
+    <div className="text-center py-8 border-t mt-8">
+      <p className="text-sm text-muted-foreground">
+        נבנה באהבה על ידי ועד ההורים של בית ספר בארי 💙
+      </p>
+    </div>
     </>
   )
 }

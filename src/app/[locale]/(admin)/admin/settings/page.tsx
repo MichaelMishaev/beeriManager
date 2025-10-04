@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Settings, Save, Key, Bell, Globe, Calendar, Shield, Palette, Lock } from 'lucide-react'
+import { Settings, Save, Key, Shield, Palette, Lock } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -16,30 +16,25 @@ interface AppSettings {
   committee_name: string
   school_name: string
   academic_year: string
-  contact_email: string
-  contact_phone: string
+  committee_email: string | null
+  committee_phone: string | null
+  school_address: string | null
+  school_logo_url: string | null
 
   // Features
-  enable_google_calendar: boolean
-  enable_anonymous_feedback: boolean
-  enable_event_registrations: boolean
-  enable_whatsapp_share: boolean
-  require_approval_for_events: boolean
-  require_approval_for_tasks: boolean
+  registration_enabled: boolean
+  feedback_enabled: boolean
+  vendors_require_password: boolean
 
-  // Notifications
-  email_notifications: boolean
-  whatsapp_notifications: boolean
-  notification_email: string
-
-  // Google Calendar
-  google_calendar_id: string
-  google_calendar_sync_interval: number
+  // Integrations
+  google_drive_folder_id: string | null
+  whatsapp_group_link: string | null
 
   // UI/UX
-  theme_color: string
-  enable_dark_mode: boolean
-  items_per_page: number
+  primary_color: string
+  secondary_color: string
+  max_file_size_mb: number
+  session_timeout_minutes: number
 }
 
 export default function AdminSettingsPage() {
@@ -52,30 +47,25 @@ export default function AdminSettingsPage() {
     committee_name: 'ועד הורים',
     school_name: 'בית ספר יסודי',
     academic_year: '2024-2025',
-    contact_email: 'committee@school.org',
-    contact_phone: '050-1234567',
+    committee_email: null,
+    committee_phone: null,
+    school_address: null,
+    school_logo_url: null,
 
     // Features
-    enable_google_calendar: true,
-    enable_anonymous_feedback: true,
-    enable_event_registrations: true,
-    enable_whatsapp_share: true,
-    require_approval_for_events: false,
-    require_approval_for_tasks: false,
+    registration_enabled: true,
+    feedback_enabled: true,
+    vendors_require_password: true,
 
-    // Notifications
-    email_notifications: false,
-    whatsapp_notifications: false,
-    notification_email: '',
-
-    // Google Calendar
-    google_calendar_id: '',
-    google_calendar_sync_interval: 15,
+    // Integrations
+    google_drive_folder_id: null,
+    whatsapp_group_link: null,
 
     // UI/UX
-    theme_color: '#0D98BA',
-    enable_dark_mode: false,
-    items_per_page: 20,
+    primary_color: '#0D98BA',
+    secondary_color: '#FF8200',
+    max_file_size_mb: 10,
+    session_timeout_minutes: 1440,
   })
 
   const handlePasswordSubmit = async (e: React.FormEvent) => {
@@ -224,11 +214,9 @@ export default function AdminSettingsPage() {
       </div>
 
       <Tabs defaultValue="general" dir="rtl">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="general">כללי</TabsTrigger>
           <TabsTrigger value="features">תכונות</TabsTrigger>
-          <TabsTrigger value="notifications">התראות</TabsTrigger>
-          <TabsTrigger value="integrations">אינטגרציות</TabsTrigger>
           <TabsTrigger value="appearance">תצוגה</TabsTrigger>
         </TabsList>
 
@@ -271,20 +259,37 @@ export default function AdminSettingsPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="contact_email">אימייל ליצירת קשר</Label>
+                  <Label htmlFor="committee_email">אימייל הועד</Label>
                   <Input
-                    id="contact_email"
+                    id="committee_email"
                     type="email"
-                    value={settings.contact_email}
-                    onChange={(e) => setSettings({ ...settings, contact_email: e.target.value })}
+                    value={settings.committee_email || ''}
+                    onChange={(e) => setSettings({ ...settings, committee_email: e.target.value || null })}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="contact_phone">טלפון ליצירת קשר</Label>
+                  <Label htmlFor="committee_phone">טלפון הועד</Label>
                   <Input
-                    id="contact_phone"
-                    value={settings.contact_phone}
-                    onChange={(e) => setSettings({ ...settings, contact_phone: e.target.value })}
+                    id="committee_phone"
+                    value={settings.committee_phone || ''}
+                    onChange={(e) => setSettings({ ...settings, committee_phone: e.target.value || null })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="school_address">כתובת בית הספר</Label>
+                  <Input
+                    id="school_address"
+                    value={settings.school_address || ''}
+                    onChange={(e) => setSettings({ ...settings, school_address: e.target.value || null })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="whatsapp_group_link">קישור לקבוצת WhatsApp</Label>
+                  <Input
+                    id="whatsapp_group_link"
+                    value={settings.whatsapp_group_link || ''}
+                    onChange={(e) => setSettings({ ...settings, whatsapp_group_link: e.target.value || null })}
+                    placeholder="https://chat.whatsapp.com/..."
                   />
                 </div>
               </div>
@@ -307,15 +312,15 @@ export default function AdminSettingsPage() {
             <CardContent className="space-y-6">
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label>סנכרון עם Google Calendar</Label>
+                  <Label>הרשמה לאירועים</Label>
                   <p className="text-sm text-muted-foreground">
-                    סנכרון אוטומטי של אירועים עם לוח השנה של גוגל
+                    אפשר להורים להירשם לאירועים
                   </p>
                 </div>
                 <Switch
-                  checked={settings.enable_google_calendar}
+                  checked={settings.registration_enabled}
                   onCheckedChange={(checked) =>
-                    setSettings({ ...settings, enable_google_calendar: checked })
+                    setSettings({ ...settings, registration_enabled: checked })
                   }
                 />
               </div>
@@ -330,9 +335,9 @@ export default function AdminSettingsPage() {
                   </p>
                 </div>
                 <Switch
-                  checked={settings.enable_anonymous_feedback}
+                  checked={settings.feedback_enabled}
                   onCheckedChange={(checked) =>
-                    setSettings({ ...settings, enable_anonymous_feedback: checked })
+                    setSettings({ ...settings, feedback_enabled: checked })
                   }
                 />
               </div>
@@ -341,66 +346,15 @@ export default function AdminSettingsPage() {
 
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label>הרשמה לאירועים</Label>
+                  <Label>סיסמה לספקים</Label>
                   <p className="text-sm text-muted-foreground">
-                    אפשר הרשמה מקוונת לאירועים
+                    דרוש סיסמה לגישה לדף הספקים
                   </p>
                 </div>
                 <Switch
-                  checked={settings.enable_event_registrations}
+                  checked={settings.vendors_require_password}
                   onCheckedChange={(checked) =>
-                    setSettings({ ...settings, enable_event_registrations: checked })
-                  }
-                />
-              </div>
-
-              <Separator />
-
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label>שיתוף ב-WhatsApp</Label>
-                  <p className="text-sm text-muted-foreground">
-                    הצג כפתורי שיתוף מהיר ל-WhatsApp
-                  </p>
-                </div>
-                <Switch
-                  checked={settings.enable_whatsapp_share}
-                  onCheckedChange={(checked) =>
-                    setSettings({ ...settings, enable_whatsapp_share: checked })
-                  }
-                />
-              </div>
-
-              <Separator />
-
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label>אישור לאירועים</Label>
-                  <p className="text-sm text-muted-foreground">
-                    דרוש אישור מנהל לפני פרסום אירועים
-                  </p>
-                </div>
-                <Switch
-                  checked={settings.require_approval_for_events}
-                  onCheckedChange={(checked) =>
-                    setSettings({ ...settings, require_approval_for_events: checked })
-                  }
-                />
-              </div>
-
-              <Separator />
-
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label>אישור למשימות</Label>
-                  <p className="text-sm text-muted-foreground">
-                    דרוש אישור מנהל לפני פרסום משימות
-                  </p>
-                </div>
-                <Switch
-                  checked={settings.require_approval_for_tasks}
-                  onCheckedChange={(checked) =>
-                    setSettings({ ...settings, require_approval_for_tasks: checked })
+                    setSettings({ ...settings, vendors_require_password: checked })
                   }
                 />
               </div>
@@ -408,122 +362,6 @@ export default function AdminSettingsPage() {
           </Card>
         </TabsContent>
 
-        {/* Notifications Settings */}
-        <TabsContent value="notifications" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Bell className="h-5 w-5" />
-                הגדרות התראות
-              </CardTitle>
-              <CardDescription>
-                ניהול התראות ועדכונים אוטומטיים
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label>התראות מייל</Label>
-                  <p className="text-sm text-muted-foreground">
-                    שלח התראות במייל על פעילויות חשובות
-                  </p>
-                </div>
-                <Switch
-                  checked={settings.email_notifications}
-                  onCheckedChange={(checked) =>
-                    setSettings({ ...settings, email_notifications: checked })
-                  }
-                />
-              </div>
-
-              {settings.email_notifications && (
-                <div className="space-y-2 pr-4">
-                  <Label htmlFor="notification_email">כתובת מייל להתראות</Label>
-                  <Input
-                    id="notification_email"
-                    type="email"
-                    value={settings.notification_email}
-                    onChange={(e) => setSettings({ ...settings, notification_email: e.target.value })}
-                    placeholder="example@school.org"
-                  />
-                </div>
-              )}
-
-              <Separator />
-
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label>התראות WhatsApp</Label>
-                  <p className="text-sm text-muted-foreground">
-                    שלח התראות ב-WhatsApp (דורש אינטגרציה)
-                  </p>
-                </div>
-                <Switch
-                  checked={settings.whatsapp_notifications}
-                  onCheckedChange={(checked) =>
-                    setSettings({ ...settings, whatsapp_notifications: checked })
-                  }
-                  disabled
-                />
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Integrations Settings */}
-        <TabsContent value="integrations" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Globe className="h-5 w-5" />
-                אינטגרציות חיצוניות
-              </CardTitle>
-              <CardDescription>
-                חיבור לשירותים חיצוניים
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-4">
-                <div className="flex items-center gap-3 p-4 bg-blue-50 rounded-lg">
-                  <Calendar className="h-8 w-8 text-blue-600" />
-                  <div className="flex-1">
-                    <h3 className="font-semibold">Google Calendar</h3>
-                    <p className="text-sm text-muted-foreground">
-                      סנכרון דו-כיווני עם לוח שנה של גוגל
-                    </p>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="google_calendar_id">מזהה לוח שנה (Calendar ID)</Label>
-                  <Input
-                    id="google_calendar_id"
-                    value={settings.google_calendar_id}
-                    onChange={(e) => setSettings({ ...settings, google_calendar_id: e.target.value })}
-                    placeholder="example@group.calendar.google.com"
-                    disabled={!settings.enable_google_calendar}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    ניתן למצוא בהגדרות לוח השנה בגוגל
-                  </p>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="sync_interval">תדירות סנכרון (דקות)</Label>
-                  <Input
-                    id="sync_interval"
-                    type="number"
-                    min="5"
-                    max="60"
-                    value={settings.google_calendar_sync_interval}
-                    onChange={(e) => setSettings({ ...settings, google_calendar_sync_interval: parseInt(e.target.value) })}
-                    disabled={!settings.enable_google_calendar}
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
 
         {/* Appearance Settings */}
         <TabsContent value="appearance" className="space-y-4">
@@ -539,18 +377,18 @@ export default function AdminSettingsPage() {
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="theme_color">צבע ראשי</Label>
+                <Label htmlFor="primary_color">צבע ראשי</Label>
                 <div className="flex gap-2">
                   <Input
-                    id="theme_color"
+                    id="primary_color"
                     type="color"
-                    value={settings.theme_color}
-                    onChange={(e) => setSettings({ ...settings, theme_color: e.target.value })}
+                    value={settings.primary_color}
+                    onChange={(e) => setSettings({ ...settings, primary_color: e.target.value })}
                     className="w-20 h-10"
                   />
                   <Input
-                    value={settings.theme_color}
-                    onChange={(e) => setSettings({ ...settings, theme_color: e.target.value })}
+                    value={settings.primary_color}
+                    onChange={(e) => setSettings({ ...settings, primary_color: e.target.value })}
                     placeholder="#0D98BA"
                   />
                 </div>
@@ -558,35 +396,53 @@ export default function AdminSettingsPage() {
 
               <Separator />
 
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label>מצב כהה</Label>
-                  <p className="text-sm text-muted-foreground">
-                    הפעל מצב כהה (בפיתוח)
-                  </p>
+              <div className="space-y-2">
+                <Label htmlFor="secondary_color">צבע משני</Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="secondary_color"
+                    type="color"
+                    value={settings.secondary_color}
+                    onChange={(e) => setSettings({ ...settings, secondary_color: e.target.value })}
+                    className="w-20 h-10"
+                  />
+                  <Input
+                    value={settings.secondary_color}
+                    onChange={(e) => setSettings({ ...settings, secondary_color: e.target.value })}
+                    placeholder="#FF8200"
+                  />
                 </div>
-                <Switch
-                  checked={settings.enable_dark_mode}
-                  onCheckedChange={(checked) =>
-                    setSettings({ ...settings, enable_dark_mode: checked })
-                  }
-                  disabled
+              </div>
+
+              <Separator />
+
+              <div className="space-y-2">
+                <Label htmlFor="max_file_size_mb">גודל קובץ מקסימלי (MB)</Label>
+                <Input
+                  id="max_file_size_mb"
+                  type="number"
+                  min="1"
+                  max="100"
+                  value={settings.max_file_size_mb}
+                  onChange={(e) => setSettings({ ...settings, max_file_size_mb: parseInt(e.target.value) || 10 })}
                 />
               </div>
 
               <Separator />
 
               <div className="space-y-2">
-                <Label htmlFor="items_per_page">פריטים בעמוד</Label>
+                <Label htmlFor="session_timeout_minutes">זמן פג תוקף הפעלה (דקות)</Label>
                 <Input
-                  id="items_per_page"
+                  id="session_timeout_minutes"
                   type="number"
-                  min="10"
-                  max="100"
-                  step="10"
-                  value={settings.items_per_page}
-                  onChange={(e) => setSettings({ ...settings, items_per_page: parseInt(e.target.value) })}
+                  min="30"
+                  max="10080"
+                  value={settings.session_timeout_minutes}
+                  onChange={(e) => setSettings({ ...settings, session_timeout_minutes: parseInt(e.target.value) || 1440 })}
                 />
+                <p className="text-xs text-muted-foreground">
+                  1440 דקות = 24 שעות
+                </p>
               </div>
             </CardContent>
           </Card>
