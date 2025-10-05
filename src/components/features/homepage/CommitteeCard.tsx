@@ -4,6 +4,9 @@ import { useState } from 'react'
 import { Users, ChevronDown, ChevronUp, Share2 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { useTranslations } from 'next-intl'
+import { useParams } from 'next/navigation'
+import type { Locale } from '@/i18n/config'
 
 interface CommitteeMember {
   grade: string
@@ -51,13 +54,25 @@ const groupedMembers = committeeMembers.reduce((acc, member) => {
 }, {} as Record<string, CommitteeMember[]>)
 
 export function CommitteeCard() {
+  const t = useTranslations('homepage')
+  const params = useParams()
+  const locale = (params.locale || 'he') as Locale
   const [isExpanded, setIsExpanded] = useState(false)
 
   const handleShare = async () => {
     // RLM (Right-to-Left Mark) to force RTL direction
     const RLM = '\u200F'
 
-    const text = `נציגי ועד ההורים
+    const text = locale === 'ru'
+      ? `Представители родительского комитета
+
+${Object.entries(groupedMembers).map(([gradeLevel, members]) =>
+  `${gradeLevel} класс:\n${members.map(m => `${m.name} - ${m.grade}${RLM}`).join('\n')}`
+).join('\n\n')}
+
+По вопросам или предложениям - свяжитесь с нами
+https://beeri.online/`
+      : `נציגי ועד ההורים
 
 ${Object.entries(groupedMembers).map(([gradeLevel, members]) =>
   `${gradeLevel}׳:\n${members.map(m => `${m.name} - ${m.grade}${RLM}`).join('\n')}`
@@ -69,14 +84,14 @@ https://beeri.online/`
     if (navigator.share) {
       try {
         await navigator.share({
-          title: 'נציגי ועד ההורים',
+          title: t('committeeRepresentatives'),
           text
         })
       } catch (err) {
         if ((err as Error).name !== 'AbortError') {
           // Fallback to clipboard
           await navigator.clipboard.writeText(text)
-          alert('הועתק ללוח!')
+          alert(t('copiedToClipboard'))
         }
       }
     } else {
@@ -95,7 +110,7 @@ https://beeri.online/`
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2 text-blue-900">
             <Users className="h-5 w-5 text-blue-600" />
-            נציגי ועד ההורים
+            {t('committeeRepresentatives')}
           </CardTitle>
           {isExpanded ? (
             <ChevronDown className="h-5 w-5 text-blue-700" />
@@ -142,17 +157,19 @@ https://beeri.online/`
               className="w-full gap-2 bg-blue-50 border-blue-300 text-blue-900 hover:bg-blue-100 hover:border-blue-400"
             >
               <Share2 className="h-4 w-4" />
-              שתף את רשימת הנציגים
+              {t('shareRepresentativesList')}
             </Button>
             <p className="text-sm text-blue-900 text-center">
-              לשאלות והצעות:{' '}
+              {t('forQuestionsAndSuggestions')}{' '}
               <a
-                href="https://wa.me/972544345287?text=שלום,%20יש%20לי%20שאלה%20לועד%20ההורים"
+                href={locale === 'ru'
+                  ? "https://wa.me/972544345287?text=Здравствуйте,%20у%20меня%20вопрос%20к%20родительскому%20комитету"
+                  : "https://wa.me/972544345287?text=שלום,%20יש%20לי%20שאלה%20לועד%20ההורים"}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-blue-700 hover:text-blue-900 font-semibold hover:underline"
               >
-                שלחו הודעה בוואטסאפ
+                {t('sendWhatsAppMessage')}
               </a>
             </p>
           </div>

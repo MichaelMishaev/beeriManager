@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { AlertTriangle, CheckCircle, Send, Calendar, X, Home } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -12,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from 'sonner'
 
 export default function ComplaintPage() {
+  const t = useTranslations('pages')
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
@@ -55,7 +57,7 @@ export default function ComplaintPage() {
     e.preventDefault()
 
     if (!formData.title.trim()) {
-      toast.error('נא למלא את שדה הבעיה')
+      toast.error(t('נא_למלא_את_fw4z'))
       return
     }
 
@@ -82,13 +84,13 @@ export default function ComplaintPage() {
 
       if (result.success) {
         setIsSubmitted(true)
-        toast.success('התלונה נקלטה בהצלחה!')
+        toast.success(t('success_unlxpn'))
       } else {
-        toast.error(result.error || 'שגיאה בשליחת התלונה')
+        toast.error(result.error || t('error_7x6byn'))
       }
     } catch (error) {
       console.error('Error submitting complaint:', error)
-      toast.error('שגיאה בשליחת התלונה')
+      toast.error(t('error_7x6byn'))
     } finally {
       setIsSubmitting(false)
     }
@@ -107,9 +109,9 @@ export default function ComplaintPage() {
             </div>
 
             <div className="space-y-3">
-              <h1 className="text-3xl md:text-4xl font-bold text-green-600">התלונה נקלטה בהצלחה!</h1>
+              <h1 className="text-3xl md:text-4xl font-bold text-green-600">{t('complaint_success_title')}</h1>
               <p className="text-lg text-muted-foreground">
-                תודה על הפנייה. ועד ההורים יטפל בבעיה בהקדם האפשרי.
+                {t('complaint_success_message')}
               </p>
             </div>
 
@@ -120,7 +122,7 @@ export default function ComplaintPage() {
                 className="w-full h-14 text-lg"
               >
                 <Home className="h-5 w-5 ml-2" />
-                חזרה לדף הבית
+                {t('complaint_success_back')}
               </Button>
             </div>
           </CardContent>
@@ -140,56 +142,56 @@ export default function ComplaintPage() {
                 <AlertTriangle className="h-8 w-8 text-blue-600" />
               </div>
             </div>
-            <h1 className="text-2xl font-bold mb-2">דיווח על בעיה</h1>
+            <h1 className="text-2xl font-bold mb-2">{t('complaint_title')}</h1>
             <p className="text-sm text-muted-foreground">
-              שתפו אותנו בבעיה ונטפל בה בהקדם
+              {t('complaint_subtitle')}
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <Label htmlFor="title" className="text-base">מה הבעיה? *</Label>
+              <Label htmlFor="title" className="text-base">{t('complaint_field_label')}</Label>
               <Input
                 id="title"
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                placeholder="לדוגמה: תקלה בחצר בית הספר"
+                placeholder={t('complaint_field_placeholder')}
                 required
                 className="mt-1.5 text-base h-11"
               />
             </div>
 
             <div>
-              <Label htmlFor="description" className="text-base">פרטים נוספים (אופציונלי)</Label>
+              <Label htmlFor="description" className="text-base">{t('complaint_description_label')}</Label>
               <Textarea
                 id="description"
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="תארו את הבעיה בקצרה..."
+                placeholder={t('complaint_description_placeholder')}
                 rows={3}
                 className="mt-1.5 text-base"
               />
             </div>
 
             <div>
-              <Label htmlFor="reporter_name" className="text-base">שם מלא (אופציונלי)</Label>
+              <Label htmlFor="reporter_name" className="text-base">{t('complaint_name_label')}</Label>
               <Input
                 id="reporter_name"
                 value={formData.reporter_name}
                 onChange={(e) => setFormData({ ...formData, reporter_name: e.target.value })}
-                placeholder="שם ושם משפחה"
+                placeholder={t('complaint_name_placeholder')}
                 className="mt-1.5 text-base h-11"
               />
             </div>
 
             <div>
-              <Label htmlFor="reporter_contact" className="text-base">טלפון (אופציונלי)</Label>
+              <Label htmlFor="reporter_contact" className="text-base">{t('complaint_phone_label')}</Label>
               <Input
                 id="reporter_contact"
                 type="tel"
                 value={formData.reporter_contact}
                 onChange={(e) => setFormData({ ...formData, reporter_contact: e.target.value })}
-                placeholder="050-1234567"
+                placeholder={t('complaint_phone_placeholder')}
                 className="mt-1.5 text-base h-11"
                 dir="ltr"
               />
@@ -204,12 +206,12 @@ export default function ComplaintPage() {
                 className="w-full h-11"
               >
                 <Calendar className="h-4 w-4 ml-2" />
-                קשור לאירוע (אופציונלי)
+                {t('complaint_event_button')}
               </Button>
             ) : (
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label className="text-base">בחר אירוע</Label>
+                  <Label className="text-base">{t('complaint_event_select_label')}</Label>
                   <Button
                     type="button"
                     variant="ghost"
@@ -224,11 +226,11 @@ export default function ComplaintPage() {
                 </div>
                 <Select value={selectedEventId || undefined} onValueChange={setSelectedEventId}>
                   <SelectTrigger className="h-11">
-                    <SelectValue placeholder="בחר אירוע..." />
+                    <SelectValue placeholder={t('complaint_event_select_placeholder')} />
                   </SelectTrigger>
                   <SelectContent>
                     {events.length === 0 ? (
-                      <SelectItem value="none" disabled>אין אירועים זמינים</SelectItem>
+                      <SelectItem value="none" disabled>{t('complaint_event_none')}</SelectItem>
                     ) : (
                       events.map((event) => (
                         <SelectItem key={event.id} value={event.id}>
@@ -248,11 +250,11 @@ export default function ComplaintPage() {
               size="lg"
             >
               {isSubmitting ? (
-                <>שולח...</>
+                <>{t('complaint_submitting')}</>
               ) : (
                 <>
                   <Send className="h-5 w-5 ml-2" />
-                  שלח תלונה
+                  {t('complaint_submit')}
                 </>
               )}
             </Button>

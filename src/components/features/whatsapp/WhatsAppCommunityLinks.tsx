@@ -2,6 +2,7 @@
 
 export const WHATSAPP_COMMUNITY = {
   main: 'https://chat.whatsapp.com/LRHBQusuiG683mNvIovkAF',
+  russian: 'https://chat.whatsapp.com/G9bcGHURhgiLp8TgVLQomn',
   grades: [
     { grade: 'א', url: 'https://chat.whatsapp.com/E3t0BQwhj0PCT4YjI1EfKg', emoji: '👶' },
     { grade: 'ב', url: 'https://chat.whatsapp.com/J8OF6XOfESbG6icg5fcgbo', emoji: '🧸' },

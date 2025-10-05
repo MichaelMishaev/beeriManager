@@ -5,7 +5,7 @@ export const defaultLocale: Locale = 'he'
 
 export const localeNames: Record<Locale, string> = {
   he: 'עברית',
-  ru: 'Русский'
+  ru: 'ru'
 }
 
 export const localeDirections: Record<Locale, 'ltr' | 'rtl'> = {

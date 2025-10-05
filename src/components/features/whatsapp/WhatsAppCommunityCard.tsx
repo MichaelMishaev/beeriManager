@@ -5,10 +5,14 @@ import { MessageCircle, ChevronDown, ExternalLink, Share2 } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { WHATSAPP_COMMUNITY } from './WhatsAppCommunityLinks'
 import { useTranslations } from 'next-intl'
+import { useParams } from 'next/navigation'
+import type { Locale } from '@/i18n/config'
 
 export function WhatsAppCommunityCard() {
   const [showGrades, setShowGrades] = useState(false)
   const t = useTranslations('whatsapp')
+  const params = useParams()
+  const locale = (params.locale || 'he') as Locale
 
   const handleShare = () => {
     const message = `קבוצות WhatsApp לפי שכבות - בית ספר בארי
@@ -95,6 +99,27 @@ https://beeri.online`
             </div>
           )}
         </div>
+
+        {/* Russian Group - Only show when Russian locale is selected */}
+        {locale === 'ru' && (
+          <div className="border border-gray-200 rounded-lg overflow-hidden">
+            <a
+              href={WHATSAPP_COMMUNITY.russian}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors flex items-center gap-3 text-sm font-medium text-[#003153]"
+              dir="ltr"
+            >
+              <div className="flex items-center justify-center w-7 h-7 rounded-full bg-blue-100 text-blue-700 text-xs font-bold flex-shrink-0">
+                RU
+              </div>
+              <span className="flex-1 text-left">
+                Русская группа
+              </span>
+              <ExternalLink className="h-4 w-4 text-green-600" />
+            </a>
+          </div>
+        )}
       </CardContent>
     </Card>
   )
