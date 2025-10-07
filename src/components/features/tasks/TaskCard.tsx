@@ -27,9 +27,9 @@ export function TaskCard({
   onEdit,
   className = ''
 }: TaskCardProps) {
-  const dueDate = task.due_date ? new Date(task.due_date) : new Date()
-  const isOverdue = task.status !== 'completed' && task.due_date && dueDate < new Date()
-  const isToday = dueDate.toDateString() === new Date().toDateString()
+  const dueDate = task.due_date ? new Date(task.due_date) : null
+  const isOverdue = task.status !== 'completed' && task.due_date && dueDate && dueDate < new Date()
+  const isToday = dueDate ? dueDate.toDateString() === new Date().toDateString() : false
 
   const getStatusColor = (status: string, isOverdue: boolean) => {
     if (isOverdue) return 'bg-red-100 text-red-800 border-red-200'
@@ -76,10 +76,14 @@ export function TaskCard({
             </h4>
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <span>{task.owner_name}</span>
-              <span>•</span>
-              <span className={isOverdue ? 'text-red-600 font-medium' : ''}>
-                {getHebrewRelativeTime(dueDate)}
-              </span>
+              {dueDate && (
+                <>
+                  <span>•</span>
+                  <span className={isOverdue ? 'text-red-600 font-medium' : ''}>
+                    {getHebrewRelativeTime(dueDate)}
+                  </span>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -134,12 +138,14 @@ export function TaskCard({
                   <User className="h-4 w-4" />
                   <span>{task.owner_name}</span>
                 </div>
-                <div className={`flex items-center gap-1 ${
-                  isOverdue ? 'text-red-600' : isToday ? 'text-orange-600 font-medium' : ''
-                }`}>
-                  <Clock className="h-4 w-4" />
-                  <span>{formatHebrewDate(dueDate)}</span>
-                </div>
+                {dueDate && (
+                  <div className={`flex items-center gap-1 ${
+                    isOverdue ? 'text-red-600' : isToday ? 'text-orange-600 font-medium' : ''
+                  }`}>
+                    <Clock className="h-4 w-4" />
+                    <span>{formatHebrewDate(dueDate)}</span>
+                  </div>
+                )}
               </div>
 
               {task.description && (
@@ -214,14 +220,16 @@ export function TaskCard({
                   <span className="text-xs">({task.owner_phone})</span>
                 )}
               </div>
-              <div className={`flex items-center gap-1 ${
-                isOverdue ? 'text-red-600 font-medium' : isToday ? 'text-orange-600 font-medium' : ''
-              }`}>
-                <Calendar className="h-4 w-4" />
-                <span>יעד: {formatHebrewDate(dueDate)}</span>
-                {isOverdue && <AlertCircle className="h-4 w-4 text-red-600" />}
-                {isToday && <span className="text-xs bg-orange-100 text-orange-800 px-1 rounded">היום</span>}
-              </div>
+              {dueDate && (
+                <div className={`flex items-center gap-1 ${
+                  isOverdue ? 'text-red-600 font-medium' : isToday ? 'text-orange-600 font-medium' : ''
+                }`}>
+                  <Calendar className="h-4 w-4" />
+                  <span>יעד: {formatHebrewDate(dueDate)}</span>
+                  {isOverdue && <AlertCircle className="h-4 w-4 text-red-600" />}
+                  {isToday && <span className="text-xs bg-orange-100 text-orange-800 px-1 rounded">היום</span>}
+                </div>
+              )}
             </div>
           </div>
         </div>

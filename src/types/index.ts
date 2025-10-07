@@ -64,7 +64,7 @@ export interface Task {
   owner_phone?: string
 
   // Dates
-  due_date: string
+  due_date?: string
   reminder_date?: string
   completed_at?: string
 

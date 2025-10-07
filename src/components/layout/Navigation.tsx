@@ -7,6 +7,7 @@ import { useTranslations } from 'next-intl'
 import { Menu, X, Home, Calendar, CheckSquare, MessageSquare, DollarSign, AlertCircle, FileText, Building2, LogIn, LogOut } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { LanguageSwitcher } from '@/components/ui/language-switcher'
+import { InstallButton } from '@/components/pwa/InstallButton'
 import { cn } from '@/lib/utils'
 import { logger } from '@/lib/logger'
 
@@ -82,7 +83,7 @@ export function Navigation() {
     <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
-          {/* Logo/Title and Language Switcher */}
+          {/* Logo/Title, Language Switcher & Install Button */}
           <div className="flex items-center gap-3">
             <Link
               href={isAuthenticated ? "/admin" : "/"}
@@ -91,8 +92,11 @@ export function Navigation() {
             >
               <span className="text-lg md:text-xl font-bold">ועד הורים</span>
             </Link>
-            {/* Language Switcher - Always visible */}
-            <LanguageSwitcher />
+            {/* Language Switcher & PWA Install - Always visible */}
+            <div className="flex items-center gap-2">
+              <LanguageSwitcher />
+              <InstallButton />
+            </div>
           </div>
 
           {/* Desktop Navigation */}

@@ -6,6 +6,9 @@ import { TaskCard } from '@/components/features/tasks/TaskCard'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 // Fetch tasks from database
 async function getTasks() {
   const supabase = createClient()
@@ -85,41 +88,29 @@ async function TasksList() {
 
   return (
     <div className="space-y-6">
-      {/* Statistics Cards */}
-      <div className="grid gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">ממתינות</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-blue-600">{stats.pending}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">בביצוע</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-yellow-600">{stats.inProgress}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">הושלמו</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">{stats.completed}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">באיחור</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-red-600">{stats.overdue}</div>
-          </CardContent>
-        </Card>
-      </div>
+      {/* Statistics - Single Card */}
+      <Card>
+        <CardContent className="pt-6">
+          <div className="grid grid-cols-4 gap-4 text-center">
+            <div>
+              <div className="text-sm font-medium text-muted-foreground mb-1">ממתינות</div>
+              <div className="text-2xl font-bold text-blue-600">{stats.pending}</div>
+            </div>
+            <div>
+              <div className="text-sm font-medium text-muted-foreground mb-1">בביצוע</div>
+              <div className="text-2xl font-bold text-yellow-600">{stats.inProgress}</div>
+            </div>
+            <div>
+              <div className="text-sm font-medium text-muted-foreground mb-1">הושלמו</div>
+              <div className="text-2xl font-bold text-green-600">{stats.completed}</div>
+            </div>
+            <div>
+              <div className="text-sm font-medium text-muted-foreground mb-1">באיחור</div>
+              <div className="text-2xl font-bold text-red-600">{stats.overdue}</div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Urgent Tasks */}
       {tasksByStatus.urgent.length > 0 && (

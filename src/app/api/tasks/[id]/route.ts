@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { verifyJWT } from '@/lib/auth/jwt'
 import { z } from 'zod'
+import { revalidatePath } from 'next/cache'
 
 // Task validation schema
 const TaskSchema = z.object({
@@ -11,7 +12,7 @@ const TaskSchema = z.object({
   status: z.enum(['pending', 'in_progress', 'completed', 'cancelled']),
   owner_name: z.string().min(2, 'שם האחראי חייב להכיל לפחות 2 תווים'),
   owner_phone: z.string().optional().nullable(),
-  due_date: z.string(),
+  due_date: z.string().optional().nullable(), // Optional date string format
   reminder_date: z.string().optional().nullable(),
   event_id: z.string().optional().nullable(),
   parent_task_id: z.string().optional().nullable(),
@@ -111,6 +112,16 @@ export async function PUT(
         })
         .eq('id', params.id)
     }
+
+    // Revalidate tasks page to show updated task immediately
+    revalidatePath('/tasks')
+    revalidatePath('/he/tasks')
+    revalidatePath('/en/tasks')
+    revalidatePath('/ru/tasks')
+    revalidatePath(`/tasks/${params.id}`)
+    revalidatePath(`/he/tasks/${params.id}`)
+    revalidatePath(`/en/tasks/${params.id}`)
+    revalidatePath(`/ru/tasks/${params.id}`)
 
     return NextResponse.json({
       success: true,

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { verifyJWT } from '@/lib/auth/jwt'
 import { z } from 'zod'
+import { revalidatePath } from 'next/cache'
 
 // Task validation schema
 const TaskSchema = z.object({
@@ -11,7 +12,7 @@ const TaskSchema = z.object({
   status: z.enum(['pending', 'in_progress', 'completed', 'cancelled']).default('pending'),
   owner_name: z.string().min(2, 'שם האחראי חייב להכיל לפחות 2 תווים'),
   owner_phone: z.string().optional().nullable(),
-  due_date: z.string(), // Accept date string format
+  due_date: z.string().optional().nullable(), // Optional date string format
   reminder_date: z.string().optional().nullable(),
   event_id: z.string().optional().nullable(),
   parent_task_id: z.string().optional().nullable(),
@@ -60,10 +61,10 @@ export async function GET(req: NextRequest) {
         .lt('due_date', new Date().toISOString())
     }
 
-    // Order by priority and due date
+    // Order by priority and due date (nulls last)
     query = query
       .order('priority', { ascending: false })
-      .order('due_date', { ascending: true })
+      .order('due_date', { ascending: true, nullsFirst: false })
       .limit(Math.min(limit, 100))
 
     const { data, error } = await query
@@ -95,7 +96,10 @@ export async function POST(req: NextRequest) {
   try {
     // Verify admin authentication
     const token = req.cookies.get('auth-token')
+    console.log('Auth token present:', !!token)
+
     if (!token || !verifyJWT(token.value)) {
+      console.log('Auth failed - token:', !!token)
       return NextResponse.json(
         { success: false, error: 'נדרשת הרשאת מנהל' },
         { status: 401 }
@@ -103,19 +107,23 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json()
+    console.log('Received task data:', JSON.stringify(body, null, 2))
+
     const validation = TaskSchema.safeParse(body)
 
     if (!validation.success) {
+      console.error('Validation failed:', validation.error.errors)
       return NextResponse.json(
         {
           success: false,
           error: 'נתונים לא תקינים',
-          details: validation.error.errors.map(err => err.message)
+          details: validation.error.errors.map(err => `${err.path.join('.')}: ${err.message}`)
         },
         { status: 400 }
       )
     }
 
+    console.log('Validation passed, creating task...')
     const supabase = createClient()
 
     // Create task
@@ -123,7 +131,6 @@ export async function POST(req: NextRequest) {
       .from('tasks')
       .insert([{
         ...validation.data,
-        assigned_by: 'admin', // In a full system, this would come from JWT
         follow_up_count: 0,
         attachment_urls: validation.data.attachment_urls || []
       }])
@@ -132,11 +139,20 @@ export async function POST(req: NextRequest) {
 
     if (error) {
       console.error('Task creation error:', error)
+      console.error('Error details:', JSON.stringify(error, null, 2))
       return NextResponse.json(
-        { success: false, error: 'שגיאה ביצירת המשימה' },
+        { success: false, error: 'שגיאה ביצירת המשימה', details: error.message },
         { status: 500 }
       )
     }
+
+    console.log('Task created successfully:', data?.id)
+
+    // Revalidate tasks page to show new task immediately
+    revalidatePath('/tasks')
+    revalidatePath('/he/tasks')
+    revalidatePath('/en/tasks')
+    revalidatePath('/ru/tasks')
 
     // TODO: Send notification to task owner (implement later)
 
@@ -148,8 +164,9 @@ export async function POST(req: NextRequest) {
 
   } catch (error) {
     console.error('Tasks POST error:', error)
+    console.error('Error stack:', error instanceof Error ? error.stack : 'Unknown error')
     return NextResponse.json(
-      { success: false, error: 'שגיאה ביצירת המשימה' },
+      { success: false, error: 'שגיאה ביצירת המשימה', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     )
   }
