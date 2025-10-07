@@ -11,7 +11,11 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>
 }
 
-export function InstallButton() {
+interface InstallButtonProps {
+  variant?: 'compact' | 'full'
+}
+
+export function InstallButton({ variant = 'compact' }: InstallButtonProps) {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null)
   const [isInstallable, setIsInstallable] = useState(false)
   const t = useTranslations('common')
@@ -63,6 +67,22 @@ export function InstallButton() {
 
   if (!isInstallable) {
     return null
+  }
+
+  if (variant === 'compact') {
+    return (
+      <button
+        onClick={handleInstallClick}
+        className={cn(
+          'flex items-center justify-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-md transition-all duration-200',
+          'bg-primary/10 text-primary hover:bg-primary/20 border border-primary/20'
+        )}
+        title={t('installApp') || 'התקן אפליקציה'}
+      >
+        <Download className="h-3.5 w-3.5" />
+        <span className="hidden sm:inline">התקן</span>
+      </button>
+    )
   }
 
   return (

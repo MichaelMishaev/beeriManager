@@ -63,9 +63,9 @@ async function TaskDetail({ id }: { id: string }) {
     notFound()
   }
 
-  const dueDate = new Date(task.due_date)
-  const isOverdue = task.status !== 'completed' && dueDate < new Date()
-  const isToday = dueDate.toDateString() === new Date().toDateString()
+  const dueDate = task.due_date ? new Date(task.due_date) : null
+  const isOverdue = task.status !== 'completed' && dueDate && dueDate < new Date()
+  const isToday = dueDate ? dueDate.toDateString() === new Date().toDateString() : false
 
   const getStatusBadgeVariant = (status: string): "default" | "secondary" | "outline" | "destructive" => {
     switch(status) {
@@ -165,18 +165,20 @@ async function TaskDetail({ id }: { id: string }) {
               </div>
             </div>
 
-            <div className="flex items-start gap-3">
-              <Calendar className="h-5 w-5 text-muted-foreground mt-0.5" />
-              <div>
-                <p className="font-medium">תאריך יעד</p>
-                <p className="text-sm text-muted-foreground">
-                  {formatHebrewDate(dueDate)}
-                </p>
-                <p className={`text-xs mt-1 ${isOverdue ? 'text-red-600 font-medium' : 'text-muted-foreground'}`}>
-                  {getHebrewRelativeTime(dueDate)}
-                </p>
+            {dueDate && (
+              <div className="flex items-start gap-3">
+                <Calendar className="h-5 w-5 text-muted-foreground mt-0.5" />
+                <div>
+                  <p className="font-medium">תאריך יעד</p>
+                  <p className="text-sm text-muted-foreground">
+                    {formatHebrewDate(dueDate)}
+                  </p>
+                  <p className={`text-xs mt-1 ${isOverdue ? 'text-red-600 font-medium' : 'text-muted-foreground'}`}>
+                    {getHebrewRelativeTime(dueDate)}
+                  </p>
+                </div>
               </div>
-            </div>
+            )}
 
             {task.reminder_date && (
               <div className="flex items-start gap-3">

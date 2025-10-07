@@ -219,98 +219,96 @@ async function StatsCards() {
   const stats = await getCommitteeStats()
 
   return (
-    <div className="grid gap-4 md:grid-cols-3 mb-6">
-      {/* Total Committees */}
-      <Card className="hover:shadow-md transition-shadow">
-        <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
-            <CardDescription>סך הכל וועדות</CardDescription>
-            <Users className="h-5 w-5 text-muted-foreground" />
+    <Card className="hover:shadow-md transition-shadow mb-6">
+      <CardHeader>
+        <div className="flex items-center gap-2">
+          <Users className="h-5 w-5 text-muted-foreground" />
+          <CardTitle>סקירה כללית</CardTitle>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="grid gap-6 md:grid-cols-3">
+          {/* Total Committees */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <CardDescription>סך הכל וועדות</CardDescription>
+              <Users className="h-4 w-4 text-muted-foreground" />
+            </div>
+            <div className="text-4xl font-bold">{stats.total}</div>
+            <div className="space-y-2">
+              {stats.committees.slice(0, 3).map((committee: any) => (
+                <div key={committee.id} className="flex items-center gap-2">
+                  <div
+                    className="w-2 h-2 rounded-full flex-shrink-0"
+                    style={{ backgroundColor: committee.color }}
+                  />
+                  <span className="text-sm text-muted-foreground truncate">
+                    {committee.name}
+                  </span>
+                </div>
+              ))}
+              {stats.committees.length > 3 && (
+                <p className="text-xs text-muted-foreground">
+                  +{stats.committees.length - 3} נוספות
+                </p>
+              )}
+            </div>
           </div>
-          <CardTitle className="text-4xl font-bold">{stats.total}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            {stats.committees.slice(0, 3).map((committee: any) => (
-              <div key={committee.id} className="flex items-center gap-2">
-                <div
-                  className="w-2 h-2 rounded-full flex-shrink-0"
-                  style={{ backgroundColor: committee.color }}
-                />
-                <span className="text-sm text-muted-foreground truncate">
-                  {committee.name}
-                </span>
-              </div>
-            ))}
-            {stats.committees.length > 3 && (
-              <p className="text-xs text-muted-foreground">
-                +{stats.committees.length - 3} נוספות
+
+          {/* Total Members */}
+          <div className="space-y-3 border-r border-l border-border px-6">
+            <div className="flex items-center justify-between">
+              <CardDescription>סך חברי וועדה</CardDescription>
+              <UserCheck className="h-4 w-4 text-muted-foreground" />
+            </div>
+            <div className="text-4xl font-bold">{stats.totalMembers}</div>
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground">
+                {stats.uniqueMembers.length} חברים ייחודיים
               </p>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Total Members */}
-      <Card className="hover:shadow-md transition-shadow">
-        <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
-            <CardDescription>סך חברי וועדה</CardDescription>
-            <UserCheck className="h-5 w-5 text-muted-foreground" />
-          </div>
-          <CardTitle className="text-4xl font-bold">{stats.totalMembers}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            <p className="text-sm text-muted-foreground">
-              {stats.uniqueMembers.length} חברים ייחודיים
-            </p>
-            <div className="flex flex-wrap gap-1">
-              {stats.uniqueMembers.slice(0, 4).map((member: string, idx: number) => (
-                <Badge key={idx} variant="outline" className="text-xs">
-                  {member}
-                </Badge>
-              ))}
-              {stats.uniqueMembers.length > 4 && (
-                <Badge variant="outline" className="text-xs">
-                  +{stats.uniqueMembers.length - 4}
-                </Badge>
-              )}
+              <div className="flex flex-wrap gap-1">
+                {stats.uniqueMembers.slice(0, 4).map((member: string, idx: number) => (
+                  <Badge key={idx} variant="outline" className="text-xs">
+                    {member}
+                  </Badge>
+                ))}
+                {stats.uniqueMembers.length > 4 && (
+                  <Badge variant="outline" className="text-xs">
+                    +{stats.uniqueMembers.length - 4}
+                  </Badge>
+                )}
+              </div>
             </div>
           </div>
-        </CardContent>
-      </Card>
 
-      {/* Total Responsibilities */}
-      <Card className="hover:shadow-md transition-shadow">
-        <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
-            <CardDescription>סך תחומי אחריות</CardDescription>
-            <Briefcase className="h-5 w-5 text-muted-foreground" />
-          </div>
-          <CardTitle className="text-4xl font-bold">{stats.totalResponsibilities}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            <p className="text-sm text-muted-foreground">
-              {stats.uniqueResponsibilities.length} תחומים ייחודיים
-            </p>
-            <div className="flex flex-wrap gap-1">
-              {stats.uniqueResponsibilities.slice(0, 3).map((resp: string, idx: number) => (
-                <Badge key={idx} variant="outline" className="text-xs">
-                  {resp}
-                </Badge>
-              ))}
-              {stats.uniqueResponsibilities.length > 3 && (
-                <Badge variant="outline" className="text-xs">
-                  +{stats.uniqueResponsibilities.length - 3}
-                </Badge>
-              )}
+          {/* Total Responsibilities */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <CardDescription>סך תחומי אחריות</CardDescription>
+              <Briefcase className="h-4 w-4 text-muted-foreground" />
+            </div>
+            <div className="text-4xl font-bold">{stats.totalResponsibilities}</div>
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground">
+                {stats.uniqueResponsibilities.length} תחומים ייחודיים
+              </p>
+              <div className="flex flex-wrap gap-1">
+                {stats.uniqueResponsibilities.slice(0, 3).map((resp: string, idx: number) => (
+                  <Badge key={idx} variant="outline" className="text-xs">
+                    {resp}
+                  </Badge>
+                ))}
+                {stats.uniqueResponsibilities.length > 3 && (
+                  <Badge variant="outline" className="text-xs">
+                    +{stats.uniqueResponsibilities.length - 3}
+                  </Badge>
+                )}
+              </div>
             </div>
           </div>
-        </CardContent>
-      </Card>
-    </div>
+        </div>
+      </CardContent>
+    </Card>
   )
 }
 

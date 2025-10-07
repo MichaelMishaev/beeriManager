@@ -1,9 +1,14 @@
 import { Suspense } from 'react'
+import dynamicImport from 'next/dynamic'
 import { Plus, Filter } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { TasksPageClient } from '@/components/features/tasks/TasksPageClient'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
+
+const TasksPageClient = dynamicImport(
+  () => import('@/components/features/tasks/TasksPageClient').then(mod => ({ default: mod.TasksPageClient })),
+  { ssr: false }
+)
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0

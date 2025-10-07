@@ -98,6 +98,7 @@ export default function NewTaskPage() {
     try {
       const taskData = {
         ...data,
+        due_date: data.due_date || null,
         owner_phone: data.owner_phone || null,
         event_id: data.event_id || null,
         parent_task_id: data.parent_task_id || null,

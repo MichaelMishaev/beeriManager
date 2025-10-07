@@ -3,16 +3,17 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
-import { CheckSquare, Edit, Trash2 } from 'lucide-react'
+import { CheckSquare, Edit, Trash2, AlertTriangle, Loader2 } from 'lucide-react'
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction
+} from '@/components/ui/alert-dialog'
 import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'
 
@@ -81,6 +82,8 @@ export function TaskActions({ taskId, taskTitle, isCompleted }: TaskActionsProps
 
   const handleDelete = async () => {
     setIsDeleting(true)
+    setShowDeleteDialog(false)
+
     try {
       const response = await fetch(`/api/tasks/${taskId}`, {
         method: 'DELETE',
@@ -97,7 +100,6 @@ export function TaskActions({ taskId, taskTitle, isCompleted }: TaskActionsProps
         description: 'המשימה נמחקה בהצלחה',
       })
 
-      setShowDeleteDialog(false)
       router.push('/tasks')
       router.refresh()
     } catch (error) {
@@ -107,67 +109,94 @@ export function TaskActions({ taskId, taskTitle, isCompleted }: TaskActionsProps
         description: error instanceof Error ? error.message : 'שגיאה במחיקת המשימה',
         variant: 'destructive',
       })
+    } finally {
       setIsDeleting(false)
     }
   }
 
   return (
-    <div className="flex gap-2">
-      <Button variant="outline" size="sm" asChild>
-        <Link href={`/admin/tasks/${taskId}/edit`}>
-          <Edit className="h-4 w-4 ml-2" />
-          עריכה
-        </Link>
-      </Button>
-
-      {!isCompleted && (
-        <Button
-          variant="default"
-          size="sm"
-          onClick={handleComplete}
-          disabled={isCompleting}
-        >
-          <CheckSquare className="h-4 w-4 ml-2" />
-          {isCompleting ? 'מסמן...' : 'סמן כהושלם'}
+    <>
+      <div className="flex gap-2">
+        <Button variant="outline" size="sm" asChild>
+          <Link href={`/admin/tasks/${taskId}/edit`}>
+            <Edit className="h-4 w-4 ml-2" />
+            עריכה
+          </Link>
         </Button>
-      )}
 
-      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <DialogTrigger asChild>
+        {!isCompleted && (
           <Button
-            variant="destructive"
+            variant="default"
             size="sm"
-            disabled={isDeleting}
+            onClick={handleComplete}
+            disabled={isCompleting}
           >
-            <Trash2 className="h-4 w-4 ml-2" />
-            מחק
+            <CheckSquare className="h-4 w-4 ml-2" />
+            {isCompleting ? 'מסמן...' : 'סמן כהושלם'}
           </Button>
-        </DialogTrigger>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>האם למחוק את המשימה?</DialogTitle>
-            <DialogDescription>
-              פעולה זו תמחק את המשימה "{taskTitle}". לא ניתן לשחזר משימה שנמחקה.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="gap-2">
-            <Button
-              variant="outline"
-              onClick={() => setShowDeleteDialog(false)}
-              disabled={isDeleting}
-            >
+        )}
+
+        <Button
+          variant="destructive"
+          size="sm"
+          onClick={() => setShowDeleteDialog(true)}
+          disabled={isDeleting}
+        >
+          {isDeleting ? (
+            <>
+              <Loader2 className="h-4 w-4 ml-2 animate-spin" />
+              מוחק...
+            </>
+          ) : (
+            <>
+              <Trash2 className="h-4 w-4 ml-2" />
+              מחק
+            </>
+          )}
+        </Button>
+      </div>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="flex-shrink-0 w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
+                <AlertTriangle className="h-6 w-6 text-red-600" />
+              </div>
+              <AlertDialogTitle>מחיקת משימה</AlertDialogTitle>
+            </div>
+            <AlertDialogDescription>
+              האם אתה בטוח שברצונך למחוק את המשימה <strong>"{taskTitle}"</strong>?
+              <br />
+              <br />
+              פעולה זו תסמן את המשימה כמבוטלת ולא ניתן יהיה לשחזר אותה.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setShowDeleteDialog(false)}>
               ביטול
-            </Button>
-            <Button
-              variant="destructive"
+            </AlertDialogCancel>
+            <AlertDialogAction
               onClick={handleDelete}
               disabled={isDeleting}
+              variant="destructive"
             >
-              {isDeleting ? 'מוחק...' : 'מחק'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
+              {isDeleting ? (
+                <>
+                  <Loader2 className="h-4 w-4 ml-2 animate-spin" />
+                  מוחק...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="h-4 w-4 ml-2" />
+                  מחק משימה
+                </>
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   )
 }

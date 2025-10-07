@@ -84,7 +84,7 @@ export function Navigation() {
             {/* Language Switcher & PWA Install - Always visible */}
             <div className="flex items-center gap-2">
               <LanguageSwitcher />
-              <InstallButton />
+              <InstallButton variant="compact" />
             </div>
           </div>
 
@@ -175,7 +175,7 @@ export function Navigation() {
 
             {/* Install PWA Button - Prominent */}
             <div className="px-4 py-2">
-              <InstallButton />
+              <InstallButton variant="full" />
             </div>
 
             {/* Logout */}

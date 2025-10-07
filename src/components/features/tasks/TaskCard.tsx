@@ -28,7 +28,7 @@ export function TaskCard({
   className = ''
 }: TaskCardProps) {
   const dueDate = task.due_date ? new Date(task.due_date) : null
-  const isOverdue = task.status !== 'completed' && task.due_date && dueDate && dueDate < new Date()
+  const isOverdue = task.status !== 'completed' && dueDate && dueDate < new Date()
   const isToday = dueDate ? dueDate.toDateString() === new Date().toDateString() : false
 
   const getStatusColor = (status: string, isOverdue: boolean) => {

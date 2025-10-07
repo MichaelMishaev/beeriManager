@@ -95,12 +95,12 @@ export default function EditTaskPage({ params }: { params: { id: string } }) {
         })
       } else {
         toast.error('שגיאה בטעינת המשימה')
-        router.push('/admin/tasks')
+        router.push('/tasks')
       }
     } catch (error) {
       console.error('Error fetching task:', error)
       toast.error('שגיאה בטעינת המשימה')
-      router.push('/admin/tasks')
+      router.push('/tasks')
     } finally {
       setIsLoading(false)
     }
@@ -137,6 +137,7 @@ export default function EditTaskPage({ params }: { params: { id: string } }) {
     try {
       const taskData = {
         ...data,
+        due_date: data.due_date || null,
         owner_phone: data.owner_phone || null,
         event_id: data.event_id || null,
         parent_task_id: data.parent_task_id || null,
@@ -184,7 +185,8 @@ export default function EditTaskPage({ params }: { params: { id: string } }) {
 
       if (result.success) {
         toast.success('המשימה נמחקה בהצלחה')
-        router.push('/admin/tasks')
+        router.push('/tasks')
+        router.refresh()
       } else {
         toast.error(result.error || 'שגיאה במחיקת המשימה')
       }

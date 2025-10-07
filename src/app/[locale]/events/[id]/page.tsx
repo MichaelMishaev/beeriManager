@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { EventFeedbackForm } from '@/components/features/feedback/EventFeedbackForm'
+import { EventActions } from '@/components/events/event-actions'
 import Link from 'next/link'
 import type { Event } from '@/types'
 
@@ -37,10 +38,22 @@ export default function EventPage() {
   const id = params.id as string
   const [event, setEvent] = useState<Event | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [isAdmin, setIsAdmin] = useState(false)
 
   useEffect(() => {
     loadEvent()
+    checkAuth()
   }, [id])
+
+  async function checkAuth() {
+    try {
+      const response = await fetch('/api/auth/session')
+      const data = await response.json()
+      setIsAdmin(data.authenticated && data.user?.role === 'admin')
+    } catch (error) {
+      setIsAdmin(false)
+    }
+  }
 
   async function loadEvent() {
     try {
@@ -91,10 +104,18 @@ export default function EventPage() {
       <div className="mb-6">
         <div className="flex items-start justify-between mb-3">
           <h1 className="text-3xl font-bold text-foreground">{event.title}</h1>
-          <Badge className={getEventTypeColor(event.event_type)}>
-            {getEventTypeLabel(event.event_type)}
-          </Badge>
+          <div className="flex items-center gap-2">
+            <Badge className={getEventTypeColor(event.event_type)}>
+              {getEventTypeLabel(event.event_type)}
+            </Badge>
+          </div>
         </div>
+        {/* Admin Actions */}
+        {isAdmin && (
+          <div className="mt-4">
+            <EventActions eventId={event.id} eventTitle={event.title} />
+          </div>
+        )}
       </div>
 
       {/* Event Details Grid */}
@@ -225,9 +246,6 @@ export default function EventPage() {
 
       {/* Action Buttons */}
       <div className="flex flex-col sm:flex-row gap-2 mb-8">
-        <Button size="sm" className="flex-1">
-          הרשמה לאירוע
-        </Button>
         <Button variant="outline" asChild size="sm" className="flex-1">
           <Link href={`/calendar?event=${event.id}`}>
             הצג בלוח שנה
@@ -243,8 +261,10 @@ export default function EventPage() {
         )}
       </div>
 
-      {/* Event Feedback Form */}
-      <EventFeedbackForm eventId={event.id} eventTitle={event.title} />
+      {/* Event Feedback Form - Only show after event has ended */}
+      {event.end_datetime && new Date(event.end_datetime) < new Date() && (
+        <EventFeedbackForm eventId={event.id} eventTitle={event.title} />
+      )}
     </div>
   )
 }

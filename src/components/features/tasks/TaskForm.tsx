@@ -23,7 +23,7 @@ const taskSchema = z.object({
   status: z.enum(['pending', 'in_progress', 'completed', 'cancelled', 'overdue']).default('pending'),
   owner_name: z.string().min(2, 'שם האחראי חייב להכיל לפחות 2 תווים'),
   owner_phone: z.string().optional(),
-  due_date: z.string().min(1, 'יש להזין תאריך יעד')
+  due_date: z.union([z.string().min(1), z.literal(''), z.null(), z.undefined()]).optional()
 })
 
 type TaskFormData = z.infer<typeof taskSchema>

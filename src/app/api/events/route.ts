@@ -6,18 +6,19 @@ import { z } from 'zod'
 // Event validation schema
 const EventSchema = z.object({
   title: z.string().min(2, 'כותרת חייבת להכיל לפחות 2 תווים'),
-  description: z.string().optional(),
+  description: z.string().optional().nullable(),
   start_datetime: z.string().datetime('תאריך ושעה לא תקינים'),
-  end_datetime: z.string().datetime('תאריך ושעה לא תקינים').optional(),
-  location: z.string().optional(),
+  end_datetime: z.string().datetime('תאריך ושעה לא תקינים').optional().nullable(),
+  location: z.string().optional().nullable(),
   event_type: z.enum(['general', 'meeting', 'fundraiser', 'trip', 'workshop']),
   priority: z.enum(['low', 'normal', 'high', 'urgent']).default('normal'),
   registration_enabled: z.boolean().default(false),
-  max_attendees: z.number().min(1).optional(),
+  max_attendees: z.number().min(1).optional().nullable(),
+  registration_deadline: z.string().datetime().optional().nullable(),
   requires_payment: z.boolean().default(false),
-  payment_amount: z.number().min(0).optional(),
-  budget_allocated: z.number().min(0).optional(),
-  notes: z.string().optional(),
+  payment_amount: z.number().min(0).optional().nullable(),
+  budget_allocated: z.number().min(0).optional().nullable(),
+  notes: z.string().optional().nullable(),
   status: z.enum(['draft', 'published', 'ongoing', 'completed', 'cancelled']).default('draft')
 })
 

@@ -28,7 +28,7 @@ export function TasksPageClient({ initialTasks, initialStats }: TasksPageClientP
   const [tasks] = useState<Task[]>(initialTasks)
   const [stats] = useState(initialStats)
 
-  const statusFilter = searchParams.get('status') as TaskStatus | null
+  const statusFilter = (searchParams?.get('status') as TaskStatus) || null
 
   // Filter tasks based on URL param
   const filteredTasks = useMemo(() => {

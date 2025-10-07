@@ -23,7 +23,7 @@ const eventSchema = z.object({
   status: z.enum(['draft', 'published', 'cancelled']),
   location: z.string().optional(),
   start_date: z.string().min(1, 'תאריך התחלה נדרש'),
-  start_time: z.string().min(1, 'שעת התחלה נדרשת'),
+  start_time: z.string().optional(),
   end_date: z.string().optional(),
   end_time: z.string().optional(),
   registration_enabled: z.boolean(),
@@ -66,10 +66,18 @@ export default function NewEventPage() {
 
     try {
       // Combine date and time fields
-      const startDateTime = new Date(`${data.start_date}T${data.start_time}`).toISOString()
-      const endDateTime = data.end_date && data.end_time
-        ? new Date(`${data.end_date}T${data.end_time}`).toISOString()
-        : null
+      // If no time provided, use 00:00 (midnight) for all-day events
+      const startTime = data.start_time || '00:00'
+      const startDateTime = new Date(`${data.start_date}T${startTime}`).toISOString()
+
+      // If no end date, use start date for one-day events
+      let endDateTime = null
+      if (data.end_date || data.end_time) {
+        const endDate = data.end_date || data.start_date
+        const endTime = data.end_time || '23:59'
+        endDateTime = new Date(`${endDate}T${endTime}`).toISOString()
+      }
+
       const registrationDeadline = data.registration_deadline_date && data.registration_deadline_time
         ? new Date(`${data.registration_deadline_date}T${data.registration_deadline_time}`).toISOString()
         : null
@@ -105,7 +113,11 @@ export default function NewEventPage() {
         toast.success('האירוע נוצר בהצלחה!')
         router.push(`/events/${result.data.id}`)
       } else {
+        console.error('API Error:', result)
         toast.error(result.error || 'שגיאה ביצירת האירוע')
+        if (result.details) {
+          console.error('Validation errors:', result.details)
+        }
       }
     } catch (error) {
       console.error('Error creating event:', error)
@@ -205,11 +217,12 @@ export default function NewEventPage() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="draft">טיוטה</SelectItem>
-                  <SelectItem value="published">פורסם</SelectItem>
+                  <SelectItem value="draft">טיוטה (לא יופיע באתר)</SelectItem>
+                  <SelectItem value="published">פורסם (גלוי לכולם)</SelectItem>
                   <SelectItem value="cancelled">בוטל</SelectItem>
                 </SelectContent>
               </Select>
+              <p className="text-xs text-muted-foreground mt-1">רק אירועים "פורסם" גלויים למשתמשים רגילים</p>
             </div>
           </CardContent>
         </Card>
@@ -249,16 +262,18 @@ export default function NewEventPage() {
               </div>
 
               <div>
-                <Label htmlFor="start_time">שעת התחלה *</Label>
+                <Label htmlFor="start_time">שעת התחלה</Label>
                 <Input
                   id="start_time"
                   type="time"
                   {...register('start_time')}
+                  placeholder="השאר ריק לאירוע יום שלם"
                   className={errors.start_time ? 'border-red-500' : ''}
                 />
                 {errors.start_time && (
                   <p className="text-sm text-red-500 mt-1">{errors.start_time.message}</p>
                 )}
+                <p className="text-xs text-muted-foreground mt-1">אופציונלי - אם לא מצוין, האירוע יהיה לכל היום</p>
               </div>
             </div>
 
