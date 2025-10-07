@@ -14,6 +14,7 @@ import { toast } from 'sonner'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+import { SmartDatePicker } from '@/components/ui/smart-date-picker'
 
 const taskSchema = z.object({
   title: z.string().min(2, 'כותרת חייבת להכיל לפחות 2 תווים'),
@@ -21,11 +22,16 @@ const taskSchema = z.object({
   priority: z.enum(['low', 'normal', 'high', 'urgent']),
   status: z.enum(['pending', 'in_progress', 'completed', 'cancelled']),
   owner_name: z.string().min(2, 'שם האחראי נדרש'),
-  owner_phone: z.string().regex(/^05\d{8}$/, 'מספר טלפון לא תקין').optional().or(z.literal('')),
-  due_date: z.string().min(1, 'תאריך יעד נדרש'),
-  reminder_date: z.string().optional(),
-  event_id: z.string().optional(),
-  parent_task_id: z.string().optional(),
+  owner_phone: z.union([
+    z.string().regex(/^05\d{8}$/, 'מספר טלפון לא תקין'),
+    z.literal(''),
+    z.null(),
+    z.undefined()
+  ]).optional(),
+  due_date: z.union([z.string().min(1), z.literal(''), z.null(), z.undefined()]).optional(),
+  reminder_date: z.union([z.string(), z.literal(''), z.null(), z.undefined()]).optional(),
+  event_id: z.union([z.string(), z.literal(''), z.null(), z.undefined()]).optional(),
+  parent_task_id: z.union([z.string(), z.literal(''), z.null(), z.undefined()]).optional(),
   auto_remind: z.boolean()
 })
 
@@ -36,11 +42,14 @@ export default function NewTaskPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [events, setEvents] = useState<any[]>([])
   const [tasks, setTasks] = useState<any[]>([])
+  const [dueDate, setDueDate] = useState<string>('')
+  const [reminderDate, setReminderDate] = useState<string>('')
 
   const {
     register,
     handleSubmit,
     setValue,
+    watch,
     formState: { errors }
   } = useForm<TaskFormData>({
     resolver: zodResolver(taskSchema),
@@ -50,6 +59,8 @@ export default function NewTaskPage() {
       auto_remind: true
     }
   })
+
+  const watchDueDate = watch('due_date')
 
   // Fetch events and tasks for linking
   useEffect(() => {
@@ -106,6 +117,7 @@ export default function NewTaskPage() {
       if (result.success) {
         toast.success('המשימה נוצרה בהצלחה!')
         router.push('/tasks')
+        router.refresh() // Force refresh to show new task
       } else {
         toast.error(result.error || 'שגיאה ביצירת המשימה')
       }
@@ -246,44 +258,48 @@ export default function NewTaskPage() {
             <CardTitle>תאריכי יעד</CardTitle>
             <CardDescription>מתי המשימה צריכה להסתיים</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="due_date">תאריך יעד *</Label>
-              <Input
-                id="due_date"
-                type="date"
-                {...register('due_date')}
-                className={errors.due_date ? 'border-red-500' : ''}
-              />
-              {errors.due_date && (
-                <p className="text-sm text-red-500 mt-1">{errors.due_date.message}</p>
-              )}
-            </div>
+          <CardContent className="space-y-6">
+            <SmartDatePicker
+              label="תאריך יעד"
+              value={dueDate}
+              onChange={(date) => {
+                setDueDate(date || '')
+                setValue('due_date', date || '')
+              }}
+              helperText="בחר מתי המשימה צריכה להסתיים (אופציונלי)"
+              required={false}
+            />
 
-            <div>
-              <Label htmlFor="reminder_date">תאריך תזכורת</Label>
-              <Input
-                id="reminder_date"
-                type="date"
-                {...register('reminder_date')}
-              />
-              <p className="text-sm text-muted-foreground mt-1">
-                תישלח תזכורת לאחראי בתאריך זה
-              </p>
-            </div>
+            <SmartDatePicker
+              label="תאריך תזכורת"
+              value={reminderDate}
+              onChange={(date) => {
+                setReminderDate(date || '')
+                setValue('reminder_date', date || '')
+              }}
+              helperText="תישלח תזכורת לאחראי בתאריך זה"
+              comingSoon={true}
+              relativeTo={watchDueDate || undefined}
+            />
 
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
               <div>
                 <Label htmlFor="auto_remind">תזכורות אוטומטיות</Label>
                 <p className="text-sm text-muted-foreground">
                   שלח תזכורות אוטומטיות כשהמשימה מתקרבת לתאריך היעד
                 </p>
               </div>
-              <Switch
-                id="auto_remind"
-                {...register('auto_remind')}
-                defaultChecked
-              />
+              <div className="flex items-center gap-2">
+                <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full">
+                  בקרוב 🔔
+                </span>
+                <Switch
+                  id="auto_remind"
+                  {...register('auto_remind')}
+                  defaultChecked
+                  disabled
+                />
+              </div>
             </div>
           </CardContent>
         </Card>

@@ -21,7 +21,8 @@
     "error": "שגיאה",
     "warning": "אזהרה",
     "info": "מידע",
-    "committeeLogin": "כניסת ועד"
+    "committeeLogin": "כניסת ועד",
+    "installApp": "התקן אפליקציה"
   },
   "navigation": {
     "home": "בית",

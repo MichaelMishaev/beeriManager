@@ -27,8 +27,8 @@ export function TaskCard({
   onEdit,
   className = ''
 }: TaskCardProps) {
-  const dueDate = new Date(task.due_date)
-  const isOverdue = task.status !== 'completed' && dueDate < new Date()
+  const dueDate = task.due_date ? new Date(task.due_date) : new Date()
+  const isOverdue = task.status !== 'completed' && task.due_date && dueDate < new Date()
   const isToday = dueDate.toDateString() === new Date().toDateString()
 
   const getStatusColor = (status: string, isOverdue: boolean) => {
@@ -123,7 +123,7 @@ export function TaskCard({
                       {PRIORITY_LEVELS[task.priority as keyof typeof PRIORITY_LEVELS]}
                     </Badge>
                   )}
-                  <Badge className={getStatusColor(task.status, isOverdue)}>
+                  <Badge className={getStatusColor(task.status, !!isOverdue)}>
                     {isOverdue ? 'באיחור' : TASK_STATUSES[task.status as keyof typeof TASK_STATUSES]}
                   </Badge>
                 </div>
@@ -200,7 +200,7 @@ export function TaskCard({
                     {PRIORITY_LEVELS[task.priority as keyof typeof PRIORITY_LEVELS]}
                   </Badge>
                 )}
-                <Badge className={getStatusColor(task.status, isOverdue)}>
+                <Badge className={getStatusColor(task.status, !!isOverdue)}>
                   {isOverdue ? 'באיחור' : TASK_STATUSES[task.status as keyof typeof TASK_STATUSES]}
                 </Badge>
               </div>

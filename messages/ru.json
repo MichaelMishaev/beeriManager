@@ -21,7 +21,8 @@
     "error": "Ошибка",
     "warning": "Предупреждение",
     "info": "Информация",
-    "committeeLogin": "Вход для комитета"
+    "committeeLogin": "Вход для комитета",
+    "installApp": "Установить приложение"
   },
   "navigation": {
     "home": "Главная",
