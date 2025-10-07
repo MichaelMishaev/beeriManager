@@ -2,16 +2,29 @@ import { NextRequest, NextResponse } from 'next/server';
 import webpush from 'web-push';
 import { createClient } from '@/lib/supabase/server';
 
-// Configure web-push with VAPID keys
-const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!;
-const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY!;
-const vapidSubject = process.env.VAPID_SUBJECT || 'mailto:admin@beeri.online';
+// Configure web-push with VAPID keys (only if keys are available)
+function initializeVapid() {
+  const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+  const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY;
+  const vapidSubject = process.env.VAPID_SUBJECT || 'mailto:admin@beeri.online';
 
-webpush.setVapidDetails(
-  vapidSubject,
-  vapidPublicKey,
-  vapidPrivateKey
-);
+  if (vapidPublicKey && vapidPrivateKey) {
+    try {
+      webpush.setVapidDetails(
+        vapidSubject,
+        vapidPublicKey,
+        vapidPrivateKey
+      );
+    } catch (error) {
+      console.error('Failed to initialize VAPID keys:', error);
+    }
+  }
+}
+
+// Initialize VAPID only at runtime, not at build time
+if (typeof window === 'undefined' && process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY) {
+  initializeVapid();
+}
 
 export interface NotificationPayload {
   title: string;
@@ -35,6 +48,9 @@ export interface NotificationPayload {
  */
 export async function POST(req: NextRequest) {
   try {
+    // Ensure VAPID is initialized at runtime
+    initializeVapid();
+
     // Check authentication
     const supabase = await createClient();
     const { data: { session } } = await supabase.auth.getSession();
@@ -43,6 +59,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
         { status: 401 }
+      );
+    }
+
+    // Check if VAPID keys are configured
+    if (!process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || !process.env.VAPID_PRIVATE_KEY) {
+      return NextResponse.json(
+        { success: false, error: 'Push notifications not configured' },
+        { status: 503 }
       );
     }
 
