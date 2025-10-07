@@ -69,13 +69,13 @@ export function InstallButton() {
     <button
       onClick={handleInstallClick}
       className={cn(
-        'flex items-center gap-1.5 px-2.5 py-1 text-xs md:text-sm font-medium rounded-full transition-all duration-300',
-        'bg-sky-500 text-white hover:bg-sky-600 shadow-sm hover:shadow-md'
+        'flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-bold rounded-lg transition-all duration-300 w-full',
+        'bg-sky-500 text-white hover:bg-sky-600 shadow-md hover:shadow-lg'
       )}
       title={t('installApp') || 'התקן אפליקציה'}
     >
-      <Download className="h-3 w-3 md:h-3.5 md:w-3.5" />
-      <span className="hidden sm:inline">{t('installApp') || 'התקן'}</span>
+      <Download className="h-5 w-5" />
+      <span>{t('installApp') || 'התקן אפליקציה'}</span>
     </button>
   )
 }

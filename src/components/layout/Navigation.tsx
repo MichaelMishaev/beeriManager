@@ -4,33 +4,22 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { Menu, X, Home, Calendar, CheckSquare, MessageSquare, DollarSign, AlertCircle, FileText, Building2, LogIn, LogOut } from 'lucide-react'
+import { Menu, X, Home, Users, HelpCircle, LogOut, LogIn } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { LanguageSwitcher } from '@/components/ui/language-switcher'
 import { InstallButton } from '@/components/pwa/InstallButton'
 import { cn } from '@/lib/utils'
 import { logger } from '@/lib/logger'
 
-// Navigation items - now using translation keys
+// Navigation items - simplified menu
 function useNavItems() {
   const t = useTranslations('navigation')
 
   return {
-    public: [
-      { href: '/', label: t('home'), icon: Home },
-      { href: '/events', label: t('events'), icon: Calendar },
-      { href: '/calendar', label: t('calendar'), icon: Calendar },
-    ],
     committee: [
-      { href: '/admin', label: t('home'), icon: Home },
-      { href: '/events', label: t('events'), icon: Calendar },
-      { href: '/calendar', label: t('calendar'), icon: Calendar },
-      { href: '/tasks', label: t('tasks'), icon: CheckSquare },
-      { href: '/finances', label: t('finances'), icon: DollarSign },
-      { href: '/issues', label: t('issues'), icon: AlertCircle },
-      { href: '/protocols', label: t('protocols'), icon: FileText },
-      { href: '/admin/vendors', label: t('vendors'), icon: Building2 },
-      { href: '/admin/feedback', label: t('feedback'), icon: MessageSquare },
+      { href: '/admin', label: t('adminHome'), icon: Home },
+      { href: '/', label: t('parentsHome'), icon: Users },
+      { href: '/help', label: t('help'), icon: HelpCircle },
     ]
   }
 }
@@ -77,7 +66,7 @@ export function Navigation() {
     return pathname.startsWith(href)
   }
 
-  const items = isAuthenticated ? navItems.committee : navItems.public
+  const items = isAuthenticated ? navItems.committee : []
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -162,8 +151,8 @@ export function Navigation() {
         </div>
 
         {/* Mobile Navigation */}
-        {isOpen && (
-          <div className="md:hidden py-4 space-y-1">
+        {isOpen && isAuthenticated && (
+          <div className="md:hidden py-4 space-y-2">
             {items.map((item) => {
               const Icon = item.icon
               return (
@@ -184,26 +173,20 @@ export function Navigation() {
               )
             })}
 
-            {/* Mobile Login/Logout */}
+            {/* Install PWA Button - Prominent */}
+            <div className="px-4 py-2">
+              <InstallButton />
+            </div>
+
+            {/* Logout */}
             <div className="pt-2 border-t">
-              {isAuthenticated ? (
-                <button
-                  onClick={handleLogout}
-                  className="flex items-center gap-3 px-4 py-3 text-base font-medium rounded-md transition-colors text-muted-foreground hover:bg-accent hover:text-accent-foreground w-full"
-                >
-                  <LogOut className="h-5 w-5" />
-                  {tAuth('logout')}
-                </button>
-              ) : (
-                <Link
-                  href="/login"
-                  onClick={() => handleNavClick('/login', t('committeeLogin'))}
-                  className="flex items-center gap-3 px-4 py-3 text-base font-medium rounded-md transition-colors text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                >
-                  <LogIn className="h-5 w-5" />
-                  {t('committeeLogin')}
-                </Link>
-              )}
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-3 px-4 py-3 text-base font-medium rounded-md transition-colors text-muted-foreground hover:bg-accent hover:text-accent-foreground w-full"
+              >
+                <LogOut className="h-5 w-5" />
+                {tAuth('logout')}
+              </button>
             </div>
           </div>
         )}

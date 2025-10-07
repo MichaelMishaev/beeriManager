@@ -26,6 +26,9 @@
   },
   "navigation": {
     "home": "בית",
+    "adminHome": "בית - ועד",
+    "parentsHome": "בית - הורים",
+    "help": "עזרה",
     "events": "אירועים",
     "tasks": "משימות",
     "issues": "בעיות",

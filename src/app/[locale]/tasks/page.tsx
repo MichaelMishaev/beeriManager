@@ -1,8 +1,7 @@
 import { Suspense } from 'react'
-import { CheckSquare, Plus, Filter, UserCheck, Clock, AlertCircle } from 'lucide-react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Plus, Filter } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { TaskCard } from '@/components/features/tasks/TaskCard'
+import { TasksPageClient } from '@/components/features/tasks/TasksPageClient'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 
@@ -60,131 +59,7 @@ async function TasksList() {
   const tasks = await getTasks()
   const stats = await getTaskStats()
 
-  if (tasks.length === 0) {
-    return (
-      <div className="text-center py-12">
-        <CheckSquare className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-        <h3 className="text-xl font-semibold mb-2">אין משימות</h3>
-        <p className="text-muted-foreground mb-6">
-          עדיין לא נוספו משימות למערכת
-        </p>
-        <Button asChild size="sm">
-          <Link href="/admin/tasks/new">
-            <Plus className="h-4 w-4 ml-2" />
-            צור משימה חדשה
-          </Link>
-        </Button>
-      </div>
-    )
-  }
-
-  // Group tasks by status
-  const tasksByStatus = {
-    urgent: tasks.filter(t => t.priority === 'urgent' && t.status !== 'completed'),
-    pending: tasks.filter(t => t.status === 'pending'),
-    in_progress: tasks.filter(t => t.status === 'in_progress'),
-    completed: tasks.filter(t => t.status === 'completed').slice(0, 5) // Only show 5 recent completed
-  }
-
-  return (
-    <div className="space-y-6">
-      {/* Statistics - Single Card */}
-      <Card>
-        <CardContent className="pt-6">
-          <div className="grid grid-cols-4 gap-4 text-center">
-            <div>
-              <div className="text-sm font-medium text-muted-foreground mb-1">ממתינות</div>
-              <div className="text-2xl font-bold text-blue-600">{stats.pending}</div>
-            </div>
-            <div>
-              <div className="text-sm font-medium text-muted-foreground mb-1">בביצוע</div>
-              <div className="text-2xl font-bold text-yellow-600">{stats.inProgress}</div>
-            </div>
-            <div>
-              <div className="text-sm font-medium text-muted-foreground mb-1">הושלמו</div>
-              <div className="text-2xl font-bold text-green-600">{stats.completed}</div>
-            </div>
-            <div>
-              <div className="text-sm font-medium text-muted-foreground mb-1">באיחור</div>
-              <div className="text-2xl font-bold text-red-600">{stats.overdue}</div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Urgent Tasks */}
-      {tasksByStatus.urgent.length > 0 && (
-        <Card className="border-red-200 bg-red-50/50">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-red-700">
-              <AlertCircle className="h-5 w-5" />
-              משימות דחופות
-            </CardTitle>
-            <CardDescription>משימות שדורשות טיפול מיידי</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {tasksByStatus.urgent.map((task) => (
-              <TaskCard key={task.id} task={task} variant="compact" />
-            ))}
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Pending Tasks */}
-      {tasksByStatus.pending.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Clock className="h-5 w-5" />
-              משימות ממתינות
-            </CardTitle>
-            <CardDescription>משימות שטרם החלו</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {tasksByStatus.pending.map((task) => (
-              <TaskCard key={task.id} task={task} variant="compact" />
-            ))}
-          </CardContent>
-        </Card>
-      )}
-
-      {/* In Progress Tasks */}
-      {tasksByStatus.in_progress.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <UserCheck className="h-5 w-5" />
-              משימות בביצוע
-            </CardTitle>
-            <CardDescription>משימות שנמצאות כעת בטיפול</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {tasksByStatus.in_progress.map((task) => (
-              <TaskCard key={task.id} task={task} variant="compact" />
-            ))}
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Completed Tasks */}
-      {tasksByStatus.completed.length > 0 && (
-        <Card className="opacity-75">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-green-700">
-              <CheckSquare className="h-5 w-5" />
-              משימות שהושלמו לאחרונה
-            </CardTitle>
-            <CardDescription>5 המשימות האחרונות שהושלמו</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {tasksByStatus.completed.map((task) => (
-              <TaskCard key={task.id} task={task} variant="minimal" />
-            ))}
-          </CardContent>
-        </Card>
-      )}
-    </div>
-  )
+  return <TasksPageClient initialTasks={tasks} initialStats={stats} />
 }
 
 export default function TasksPage() {
