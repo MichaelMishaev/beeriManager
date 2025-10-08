@@ -6,20 +6,29 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Label } from '@/components/ui/label'
 import Link from 'next/link'
 import type { Event } from '@/types'
 
-function EventsList({ filter }: { filter: 'all' | 'upcoming' | 'past' | 'photos' }) {
+function EventsList({
+  filter,
+  showDrafts
+}: {
+  filter: 'all' | 'upcoming' | 'past' | 'photos'
+  showDrafts: boolean
+}) {
   const [allEvents, setAllEvents] = useState<Event[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     loadEvents()
-  }, [])
+  }, [showDrafts])
 
   async function loadEvents() {
     try {
-      const response = await fetch('/api/events?limit=100')
+      const statusParam = showDrafts ? 'all' : 'published'
+      const response = await fetch(`/api/events?limit=100&status=${statusParam}`)
       const data = await response.json()
       if (data.success) {
         setAllEvents(data.data || [])
@@ -77,9 +86,20 @@ function EventsList({ filter }: { filter: 'all' | 'upcoming' | 'past' | 'photos'
             <CardHeader>
               <div className="flex items-start justify-between gap-2">
                 <CardTitle className="text-lg flex-1">{event.title}</CardTitle>
-                {event.photos_url && (
-                  <Camera className="h-5 w-5 text-primary flex-shrink-0" />
-                )}
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  {event.status === 'draft' && (
+                    <Badge className="text-xs bg-yellow-100 text-yellow-800 border-yellow-300">טיוטה</Badge>
+                  )}
+                  {event.status === 'published' && (
+                    <Badge className="text-xs bg-green-100 text-green-800 border-green-300">פורסם</Badge>
+                  )}
+                  {event.status === 'cancelled' && (
+                    <Badge className="text-xs bg-red-100 text-red-800 border-red-300">בוטל</Badge>
+                  )}
+                  {event.photos_url && (
+                    <Camera className="h-5 w-5 text-primary" />
+                  )}
+                </div>
               </div>
               <div className="text-sm text-muted-foreground">
                 {new Date(event.start_datetime).toLocaleDateString('he-IL')}
@@ -115,6 +135,7 @@ function EventsList({ filter }: { filter: 'all' | 'upcoming' | 'past' | 'photos'
 
 export default function EventsPage() {
   const [activeTab, setActiveTab] = useState<'all' | 'upcoming' | 'past' | 'photos'>('all')
+  const [showDrafts, setShowDrafts] = useState(false)
 
   return (
     <div className="container mx-auto px-4 py-6 space-y-6">
@@ -146,6 +167,20 @@ export default function EventsPage() {
         </div>
       </div>
 
+      <div className="flex items-center gap-2 bg-muted/50 p-3 rounded-lg">
+        <Checkbox
+          id="show-drafts"
+          checked={showDrafts}
+          onCheckedChange={(checked) => setShowDrafts(checked as boolean)}
+        />
+        <Label
+          htmlFor="show-drafts"
+          className="text-sm cursor-pointer select-none"
+        >
+          הצג אירועים בטיוטה (מנהלים בלבד)
+        </Label>
+      </div>
+
       <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as any)} className="w-full">
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="all">הכל</TabsTrigger>
@@ -159,19 +194,19 @@ export default function EventsPage() {
         </TabsList>
 
         <TabsContent value="all" className="mt-6">
-          <EventsList filter="all" />
+          <EventsList filter="all" showDrafts={showDrafts} />
         </TabsContent>
 
         <TabsContent value="upcoming" className="mt-6">
-          <EventsList filter="upcoming" />
+          <EventsList filter="upcoming" showDrafts={showDrafts} />
         </TabsContent>
 
         <TabsContent value="past" className="mt-6">
-          <EventsList filter="past" />
+          <EventsList filter="past" showDrafts={showDrafts} />
         </TabsContent>
 
         <TabsContent value="photos" className="mt-6">
-          <EventsList filter="photos" />
+          <EventsList filter="photos" showDrafts={showDrafts} />
         </TabsContent>
       </Tabs>
     </div>
