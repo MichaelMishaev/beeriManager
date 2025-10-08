@@ -5,6 +5,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Calendar } from 'lucide-react'
 import { useState } from 'react'
+import { isValid as isValidDate, parseISO } from 'date-fns'
+import { toast } from 'sonner'
 
 interface SmartDatePickerProps {
   label: string
@@ -52,14 +54,35 @@ export function SmartDatePicker({
     let baseDate = new Date()
 
     if (relativeTo) {
-      // Calculate relative to the reference date (due date)
-      baseDate = new Date(relativeTo)
+      // Parse and validate the reference date
+      const parsed = parseISO(relativeTo)
+
+      if (!isValidDate(parsed)) {
+        console.error('[SmartDatePicker] Invalid relativeTo date:', relativeTo)
+        toast.error('תאריך היעד לא תקין. אנא בחר תאריך חוקי')
+        return ''
+      }
+
+      baseDate = parsed
     }
 
     const targetDate = new Date(baseDate)
     targetDate.setDate(targetDate.getDate() + days)
 
-    return targetDate.toISOString().split('T')[0]
+    // Validate the calculated date
+    if (!isValidDate(targetDate)) {
+      console.error('[SmartDatePicker] Date calculation resulted in invalid date')
+      toast.error('שגיאה בחישוב התאריך')
+      return ''
+    }
+
+    try {
+      return targetDate.toISOString().split('T')[0]
+    } catch (error) {
+      console.error('[SmartDatePicker] Failed to format date:', error)
+      toast.error('שגיאה בעיצוב התאריך')
+      return ''
+    }
   }
 
   const handleQuickSelect = (days: number) => {

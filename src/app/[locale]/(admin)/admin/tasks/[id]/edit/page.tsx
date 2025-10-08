@@ -152,19 +152,86 @@ export default function EditTaskPage({ params }: { params: { id: string } }) {
         body: JSON.stringify(taskData)
       })
 
+      // Handle HTTP errors
+      if (!response.ok) {
+        if (response.status === 404) {
+          toast.error('המשימה לא נמצאה. ייתכן שהיא נמחקה', {
+            action: {
+              label: 'חזור לרשימה',
+              onClick: () => router.push('/tasks')
+            }
+          })
+          return
+        }
+
+        if (response.status === 401) {
+          toast.error('אין הרשאה. נדרשת התחברות מחדש', {
+            action: {
+              label: 'התחבר',
+              onClick: () => router.push('/login')
+            }
+          })
+          return
+        }
+
+        if (response.status >= 500) {
+          toast.error('שגיאת שרת. אנא נסה שוב בעוד מספר רגעים', {
+            action: {
+              label: 'נסה שוב',
+              onClick: () => onSubmit(data)
+            }
+          })
+          return
+        }
+      }
+
       const result = await response.json()
 
       if (result.success) {
-        toast.success('המשימה עודכנה בהצלחה!')
+        toast.success('המשימה עודכנה בהצלחה!', { duration: 2000 })
+
+        // Wait for toast to be visible
+        await new Promise(resolve => setTimeout(resolve, 500))
+
+        // Refresh BEFORE navigation
+        await router.refresh()
+
+        // Then navigate
         router.push('/tasks')
-        router.refresh() // Force refresh to show updated task
+
+        // Don't set isSubmitting(false) - we're navigating away
       } else {
-        toast.error(result.error || 'שגיאה בעדכון המשימה')
+        // Handle validation errors
+        if (result.fieldErrors) {
+          const firstError = Object.values(result.fieldErrors)[0] as string
+          toast.error(firstError || result.error)
+        } else {
+          const errorOptions: any = {}
+          if (result.action && result.action.onClick === 'retry') {
+            errorOptions.action = {
+              label: result.action.label,
+              onClick: () => onSubmit(data)
+            }
+          }
+          toast.error(result.error || 'שגיאה בעדכון המשימה', errorOptions)
+        }
+        setIsSubmitting(false)
       }
     } catch (error) {
       console.error('Error updating task:', error)
-      toast.error('שגיאה בעדכון המשימה')
-    } finally {
+
+      if (!navigator.onLine) {
+        toast.error('אין חיבור לאינטרנט. בדוק את החיבור ונסה שוב', {
+          action: {
+            label: 'נסה שוב',
+            onClick: () => onSubmit(data)
+          }
+        })
+      } else if (error instanceof SyntaxError) {
+        toast.error('התקבל מידע שגוי מהשרת. נסה לרענן את הדף')
+      } else {
+        toast.error('שגיאה לא צפויה. נסה שוב או פנה לתמיכה')
+      }
       setIsSubmitting(false)
     }
   }
@@ -174,28 +241,53 @@ export default function EditTaskPage({ params }: { params: { id: string } }) {
       return
     }
 
+    // Lock ENTIRE form during delete (prevents double-action)
     setIsDeleting(true)
+    setIsSubmitting(true)
 
     try {
       const response = await fetch(`/api/tasks/${params.id}`, {
         method: 'DELETE'
       })
 
+      if (!response.ok) {
+        if (response.status === 404) {
+          toast.error('המשימה כבר נמחקה', {
+            action: {
+              label: 'חזור לרשימה',
+              onClick: () => router.push('/tasks')
+            }
+          })
+          return
+        }
+
+        throw new Error('Delete failed')
+      }
+
       const result = await response.json()
 
       if (result.success) {
-        toast.success('המשימה נמחקה בהצלחה')
+        toast.success('המשימה נמחקה בהצלחה', { duration: 1500 })
+
+        // Wait for user to see toast
+        await new Promise(resolve => setTimeout(resolve, 1000))
+
+        // Navigate (no need to unlock - we're leaving)
         router.push('/tasks')
-        router.refresh()
       } else {
         toast.error(result.error || 'שגיאה במחיקת המשימה')
+        // Unlock on error
+        setIsDeleting(false)
+        setIsSubmitting(false)
       }
     } catch (error) {
       console.error('Error deleting task:', error)
-      toast.error('שגיאה במחיקת המשימה')
-    } finally {
+      toast.error('שגיאה במחיקת המשימה. נסה שוב')
+      // Unlock on error
       setIsDeleting(false)
+      setIsSubmitting(false)
     }
+    // Don't unlock in finally - if successful, we're navigating away
   }
 
   if (isLoading) {

@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { verifyJWT } from '@/lib/auth/jwt'
 import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
+import { createErrorResponse, createSuccessResponse, zodErrorsToHebrew } from '@/lib/utils/api-errors'
 
 // Task validation schema
 const TaskSchema = z.object({
@@ -34,20 +35,29 @@ export async function GET(
 
     if (error || !data) {
       return NextResponse.json(
-        { success: false, error: 'המשימה לא נמצאה' },
+        createErrorResponse('המשימה לא נמצאה. ייתכן שהיא נמחקה', {
+          code: 'TASK_NOT_FOUND',
+          action: {
+            label: 'חזור לרשימה',
+            href: '/tasks'
+          }
+        }),
         { status: 404 }
       )
     }
 
-    return NextResponse.json({
-      success: true,
-      data
-    })
+    return NextResponse.json(createSuccessResponse(data))
 
   } catch (error) {
     console.error('Task GET error:', error)
     return NextResponse.json(
-      { success: false, error: 'שגיאה בטעינת המשימה' },
+      createErrorResponse('שגיאה בטעינת המשימה. נסה לרענן את הדף', {
+        code: 'INTERNAL_ERROR',
+        action: {
+          label: 'נסה שוב',
+          onClick: 'reload'
+        }
+      }),
       { status: 500 }
     )
   }
@@ -62,7 +72,13 @@ export async function PUT(
     const token = req.cookies.get('auth-token')
     if (!token || !verifyJWT(token.value)) {
       return NextResponse.json(
-        { success: false, error: 'נדרשת הרשאת מנהל' },
+        createErrorResponse('אין הרשאה. נדרשת התחברות מחדש', {
+          code: 'UNAUTHORIZED',
+          action: {
+            label: 'התחבר',
+            href: '/login'
+          }
+        }),
         { status: 401 }
       )
     }
@@ -72,11 +88,10 @@ export async function PUT(
 
     if (!validation.success) {
       return NextResponse.json(
-        {
-          success: false,
-          error: 'נתונים לא תקינים',
-          details: validation.error.errors.map(err => err.message)
-        },
+        createErrorResponse('אנא תקן את השדות המסומנים באדום', {
+          code: 'VALIDATION_ERROR',
+          fieldErrors: zodErrorsToHebrew(validation.error)
+        }),
         { status: 400 }
       )
     }
@@ -97,7 +112,13 @@ export async function PUT(
     if (error) {
       console.error('Task update error:', error)
       return NextResponse.json(
-        { success: false, error: 'שגיאה בעדכון המשימה' },
+        createErrorResponse('שגיאה בעדכון המשימה. נסה שוב', {
+          code: 'UPDATE_FAILED',
+          action: {
+            label: 'נסה שוב',
+            onClick: 'retry'
+          }
+        }),
         { status: 500 }
       )
     }
@@ -123,16 +144,28 @@ export async function PUT(
     revalidatePath(`/en/tasks/${params.id}`)
     revalidatePath(`/ru/tasks/${params.id}`)
 
-    return NextResponse.json({
-      success: true,
-      data,
-      message: 'המשימה עודכנה בהצלחה'
-    })
+    return NextResponse.json(createSuccessResponse(data, 'המשימה עודכנה בהצלחה'))
 
   } catch (error) {
     console.error('Task PUT error:', error)
+
+    if (error instanceof SyntaxError) {
+      return NextResponse.json(
+        createErrorResponse('נתונים שגויים נשלחו לשרת', {
+          code: 'INVALID_JSON'
+        }),
+        { status: 400 }
+      )
+    }
+
     return NextResponse.json(
-      { success: false, error: 'שגיאה בעדכון המשימה' },
+      createErrorResponse('שגיאת שרת פנימית. נסה שוב בעוד רגע', {
+        code: 'INTERNAL_ERROR',
+        action: {
+          label: 'נסה שוב',
+          onClick: 'retry'
+        }
+      }),
       { status: 500 }
     )
   }
