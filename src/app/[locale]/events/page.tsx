@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import type { Event } from '@/types'
 
 function EventsList({
@@ -134,8 +135,11 @@ function EventsList({
 }
 
 export default function EventsPage() {
+  const searchParams = useSearchParams()
+  const showDraftsParam = searchParams.get('showDrafts') === 'true'
+
   const [activeTab, setActiveTab] = useState<'all' | 'upcoming' | 'past' | 'photos'>('all')
-  const [showDrafts, setShowDrafts] = useState(false)
+  const [showDrafts, setShowDrafts] = useState(showDraftsParam)
 
   return (
     <div className="container mx-auto px-4 py-6 space-y-6">

@@ -210,11 +210,11 @@ function DashboardStats() {
 
       // Fetch all stats in parallel
       const [eventsData, tasksData, issuesData, registrationsData] = await Promise.all([
-        // Events this month
+        // Events this month (future only, until end of month)
         supabase
           .from('events')
           .select('id, status', { count: 'exact' })
-          .gte('start_datetime', firstDay.toISOString())
+          .gte('start_datetime', now.toISOString())
           .lte('start_datetime', lastDay.toISOString()),
 
         // Open tasks
@@ -236,9 +236,12 @@ function DashboardStats() {
           .gte('created_at', firstDay.toISOString())
       ])
 
+      const publishedEvents = eventsData.data?.filter(e => e.status === 'published').length || 0
+      const draftEvents = eventsData.data?.filter(e => e.status === 'draft').length || 0
+
       setStats({
-        eventsThisMonth: eventsData.count || 0,
-        draftEvents: eventsData.data?.filter(e => e.status === 'draft').length || 0,
+        eventsThisMonth: publishedEvents + draftEvents, // Only count published + draft (exclude cancelled)
+        draftEvents: draftEvents,
         openTasks: tasksData.count || 0,
         overdueTasks: tasksData.data?.filter(t => t.due_date && new Date(t.due_date) < now).length || 0,
         openIssues: issuesData.count || 0,
@@ -272,11 +275,11 @@ function DashboardStats() {
     <Card>
       <CardContent className="pt-6">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          <Link href="/events" className="text-center hover:bg-accent p-3 rounded-lg transition-colors">
+          <Link href={stats.draftEvents > 0 ? "/events?showDrafts=true" : "/events"} className="text-center hover:bg-accent p-3 rounded-lg transition-colors">
             <div className="text-2xl md:text-3xl font-bold">{stats.eventsThisMonth}</div>
             <div className="text-sm font-medium text-muted-foreground mt-1">אירועים החודש</div>
             <p className="text-xs text-muted-foreground mt-0.5">
-              {stats.draftEvents > 0 ? `${stats.draftEvents} ממתינים` : 'הכל מאושר'}
+              {stats.draftEvents > 0 ? `${stats.draftEvents} בטיוטה` : 'הכל פורסם'}
             </p>
           </Link>
 
