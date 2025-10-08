@@ -151,43 +151,64 @@ export function Navigation() {
         </div>
 
         {/* Mobile Navigation */}
-        {isOpen && isAuthenticated && (
+        {isOpen && (
           <div className="md:hidden py-4 space-y-2">
-            {items.map((item) => {
-              const Icon = item.icon
-              return (
+            {isAuthenticated ? (
+              <>
+                {items.map((item) => {
+                  const Icon = item.icon
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => handleNavClick(item.href, item.label)}
+                      className={cn(
+                        'flex items-center gap-3 px-4 py-3 text-base font-medium rounded-md transition-colors',
+                        isActive(item.href)
+                          ? 'bg-primary text-primary-foreground'
+                          : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                      )}
+                    >
+                      <Icon className="h-5 w-5" />
+                      {item.label}
+                    </Link>
+                  )
+                })}
+
+                {/* Install PWA Button - Prominent */}
+                <div className="px-4 py-2">
+                  <InstallButton variant="full" />
+                </div>
+
+                {/* Logout */}
+                <div className="pt-2 border-t">
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center gap-3 px-4 py-3 text-base font-medium rounded-md transition-colors text-muted-foreground hover:bg-accent hover:text-accent-foreground w-full"
+                  >
+                    <LogOut className="h-5 w-5" />
+                    {tAuth('logout')}
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                {/* Install PWA Button - Prominent */}
+                <div className="px-4 py-2">
+                  <InstallButton variant="full" />
+                </div>
+
+                {/* Login Button */}
                 <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={() => handleNavClick(item.href, item.label)}
-                  className={cn(
-                    'flex items-center gap-3 px-4 py-3 text-base font-medium rounded-md transition-colors',
-                    isActive(item.href)
-                      ? 'bg-primary text-primary-foreground'
-                      : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
-                  )}
+                  href="/login"
+                  onClick={() => handleNavClick('/login', t('committeeLogin'))}
+                  className="flex items-center gap-3 px-4 py-3 text-base font-medium rounded-md transition-colors text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                 >
-                  <Icon className="h-5 w-5" />
-                  {item.label}
+                  <LogIn className="h-5 w-5" />
+                  {t('committeeLogin')}
                 </Link>
-              )
-            })}
-
-            {/* Install PWA Button - Prominent */}
-            <div className="px-4 py-2">
-              <InstallButton variant="full" />
-            </div>
-
-            {/* Logout */}
-            <div className="pt-2 border-t">
-              <button
-                onClick={handleLogout}
-                className="flex items-center gap-3 px-4 py-3 text-base font-medium rounded-md transition-colors text-muted-foreground hover:bg-accent hover:text-accent-foreground w-full"
-              >
-                <LogOut className="h-5 w-5" />
-                {tAuth('logout')}
-              </button>
-            </div>
+              </>
+            )}
           </div>
         )}
       </div>
