@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
+import EventPopup from './EventPopup'
 
 interface Event {
   id: string
@@ -87,6 +88,8 @@ export default function BeeriCalendar({
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [currentView, setCurrentView] = useState(view)
   const [showHolidays] = useState(true)
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null)
+  const [eventPopupOpen, setEventPopupOpen] = useState(false)
 
   // Filter events to only show published ones
   const publishedEvents = events.filter(e => e.status === 'published')
@@ -143,9 +146,13 @@ export default function BeeriCalendar({
     setSelectedDate(date)
   }
 
-  const handleEventClick = (event: Event) => {
+  const handleEventClick = (event: Event, e?: React.MouseEvent) => {
+    e?.stopPropagation()
     if (onEventClick) {
       onEventClick(event)
+    } else {
+      setSelectedEvent(event)
+      setEventPopupOpen(true)
     }
   }
 
@@ -298,10 +305,7 @@ export default function BeeriCalendar({
                 {dayEvents.slice(0, hasHoliday ? 2 : 3).map((event) => (
                   <div
                     key={event.id}
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      handleEventClick(event)
-                    }}
+                    onClick={(e) => handleEventClick(event, e)}
                     className={cn(
                       'text-xs p-1 rounded cursor-pointer hover:opacity-80 transition-opacity truncate border',
                       eventTypeColors[event.event_type]
@@ -551,6 +555,13 @@ export default function BeeriCalendar({
 
       {/* Render Current View */}
       {currentView === 'month' ? renderMonthView() : renderListView()}
+
+      {/* Event Popup */}
+      <EventPopup
+        event={selectedEvent}
+        open={eventPopupOpen}
+        onOpenChange={setEventPopupOpen}
+      />
     </div>
   )
 }

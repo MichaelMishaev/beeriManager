@@ -8,19 +8,19 @@ const EventUpdateSchema = z.object({
   title: z.string().min(2).optional(),
   description: z.string().optional(),
   start_datetime: z.string().datetime().optional(),
-  end_datetime: z.string().datetime().optional(),
+  end_datetime: z.string().datetime().nullable().optional(),
   location: z.string().optional(),
   event_type: z.enum(['general', 'meeting', 'fundraiser', 'trip', 'workshop']).optional(),
   priority: z.enum(['low', 'normal', 'high', 'urgent']).optional(),
   status: z.enum(['draft', 'published', 'ongoing', 'completed', 'cancelled']).optional(),
   registration_enabled: z.boolean().optional(),
-  max_attendees: z.number().min(1).optional(),
+  max_attendees: z.number().min(1).nullable().optional(),
   requires_payment: z.boolean().optional(),
-  payment_amount: z.number().min(0).optional(),
-  budget_allocated: z.number().min(0).optional(),
-  budget_spent: z.number().min(0).optional(),
+  payment_amount: z.number().min(0).nullable().optional(),
+  budget_allocated: z.number().min(0).nullable().optional(),
+  budget_spent: z.number().min(0).nullable().optional(),
   notes: z.string().optional(),
-  registration_deadline: z.string().datetime().optional()
+  registration_deadline: z.string().datetime().nullable().optional()
 })
 
 // GET /api/events/[id] - Get single event

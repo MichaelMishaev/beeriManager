@@ -41,10 +41,11 @@ export async function GET(req: NextRequest) {
     // Apply filters
     if (status && status !== 'all') {
       query = query.eq('status', status)
-    } else {
-      // Default to published events for public access
+    } else if (!status) {
+      // Default to published events for public access when no status param provided
       query = query.eq('status', 'published')
     }
+    // If status === 'all', don't filter by status at all (show all statuses)
 
     if (type && type !== 'all') {
       query = query.eq('event_type', type)
