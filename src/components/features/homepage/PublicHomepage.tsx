@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { Calendar, MessageSquare, ChevronLeft, Camera, ArrowLeft } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -7,7 +8,8 @@ import { CommitteeCard } from './CommitteeCard'
 import { CollapsibleCalendarWidget } from '@/components/features/holidays/CollapsibleCalendarWidget'
 import { SchoolStats } from './SchoolStats'
 import { WhatsAppCommunityCard } from '@/components/features/whatsapp/WhatsAppCommunityCard'
-import type { Event, CalendarEvent } from '@/types'
+import { TicketsSection } from '@/components/features/tickets/TicketsSection'
+import type { Event, CalendarEvent, Ticket } from '@/types'
 import Link from 'next/link'
 import { format } from 'date-fns'
 import { he, ru } from 'date-fns/locale'
@@ -68,6 +70,24 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
   const params = useParams()
   const currentLocale = params.locale as Locale
   const dateLocale = currentLocale === 'ru' ? ru : he
+
+  const [tickets, setTickets] = useState<Ticket[]>([])
+
+  useEffect(() => {
+    // Load active tickets (all or featured)
+    async function loadTickets() {
+      try {
+        const response = await fetch('/api/tickets?limit=6')
+        const data = await response.json()
+        if (data.success) {
+          setTickets(data.data || [])
+        }
+      } catch (error) {
+        console.error('Error loading tickets:', error)
+      }
+    }
+    loadTickets()
+  }, [])
 
   // Get recent events with photos (past events only)
   const now = new Date()
@@ -198,6 +218,9 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
               </div>
             </CardContent>
           </Card>
+
+          {/* Tickets Section - Placed in main content */}
+          <TicketsSection tickets={tickets} />
 
           {/* Complaint CTA */}
           <Card className="bg-gradient-to-br from-[#0D98BA]/5 to-[#003153]/5 border-[#0D98BA]/20 shadow-md hover:shadow-lg transition-shadow">

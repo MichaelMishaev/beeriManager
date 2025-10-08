@@ -445,3 +445,38 @@ export interface SearchResult {
   url: string
   relevance: number
 }
+
+export interface Ticket {
+  id: string
+
+  // Basic info
+  title: string
+  description?: string
+
+  // Game/Event details
+  event_type: 'sport' | 'theater' | 'concert' | 'other'
+  sport_type?: string // 'soccer', 'basketball', 'volleyball', etc.
+  team_home?: string
+  team_away?: string
+  venue?: string
+  event_date?: string
+
+  // Ticket details
+  image_url?: string
+  purchase_url: string
+  quantity_available?: number // null = unlimited
+  quantity_sold: number
+  price_per_ticket?: number // null = free
+
+  // Status
+  status: 'active' | 'sold_out' | 'expired' | 'draft'
+
+  // Display settings
+  featured: boolean
+  display_order: number
+
+  // Metadata
+  created_at: string
+  updated_at: string
+  created_by?: string
+}

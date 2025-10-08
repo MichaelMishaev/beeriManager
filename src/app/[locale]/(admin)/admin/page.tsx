@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
-import { Calendar, CheckSquare, AlertTriangle, FileText, Users, DollarSign, MessageSquare, Settings, Plus, Edit, BarChart, GripVertical, HelpCircle } from 'lucide-react'
+import { Calendar, CheckSquare, AlertTriangle, FileText, Users, DollarSign, MessageSquare, Settings, Plus, Edit, BarChart, GripVertical, HelpCircle, Ticket } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
@@ -122,6 +122,19 @@ const defaultAdminSections = [
       { href: '/admin/feedback', label: 'צפייה במשובים', icon: MessageSquare },
       { href: '/admin/feedback/stats', label: 'סטטיסטיקות', icon: BarChart },
       { href: '/admin/feedback/export', label: 'ייצוא נתונים', icon: FileText }
+    ]
+  },
+  {
+    id: 'tickets',
+    title: 'כרטיסים',
+    description: 'כרטיסים למשחקי ספורט, הצגות ואירועים',
+    icon: Ticket,
+    color: 'text-orange-600',
+    bgColor: 'bg-orange-50',
+    links: [
+      { href: '/admin/tickets/new', label: 'כרטיס חדש', icon: Plus },
+      { href: '/admin/tickets', label: 'ניהול כרטיסים', icon: Edit },
+      { href: '/tickets', label: 'צפייה ציבורית', icon: Ticket }
     ]
   }
 ]
