@@ -18,18 +18,14 @@ import {
   ChevronUp,
   Send,
   Clock,
-  TrendingUp,
   Smile,
-  Zap,
   Globe,
   X,
   Menu,
   Music,
   Rocket,
   Trees,
-  Trophy,
   Target,
-  ArrowRight,
   Check
 } from 'lucide-react'
 
