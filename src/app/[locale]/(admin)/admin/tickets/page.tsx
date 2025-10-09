@@ -97,7 +97,25 @@ export default function TicketsAdminPage() {
         setTicketToFinish(null)
         loadTickets()
       } else {
-        toast.error(result.error || 'שגיאה בעדכון הכרטיס')
+        console.error('Ticket update failed:', result)
+        console.error('Validation details:', result.details)
+        console.error('Sent data:', { ...ticketData, status: 'finished' })
+
+        // Check if error is due to 'finished' status not being supported yet
+        const isFinishedStatusError = result.details?.some((msg: string) =>
+          msg.includes('status') || msg.includes('Invalid enum value')
+        )
+
+        if (isFinishedStatusError) {
+          toast.error('הפיצ\'ר עדיין לא פרוס לפרודקשן. נסה שוב בעוד דקה.')
+          console.error('⏳ Waiting for Vercel deployment to complete...')
+        } else {
+          toast.error(result.error || 'שגיאה בעדכון הכרטיס')
+        }
+
+        if (result.details) {
+          console.error('Detailed errors:', result.details)
+        }
       }
     } catch (error) {
       console.error('Error finishing ticket:', error)
