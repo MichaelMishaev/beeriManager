@@ -1,10 +1,20 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Ticket as TicketIcon, Plus, Loader2, Edit, Trash2, CheckCircle } from 'lucide-react'
+import { Ticket as TicketIcon, Plus, Loader2, Edit, Trash2, CheckCircle, AlertCircle } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from '@/components/ui/alert-dialog'
 import Link from 'next/link'
 import type { Ticket } from '@/types'
 import { toast } from 'sonner'
@@ -12,6 +22,8 @@ import { toast } from 'sonner'
 export default function TicketsAdminPage() {
   const [tickets, setTickets] = useState<Ticket[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [finishDialogOpen, setFinishDialogOpen] = useState(false)
+  const [ticketToFinish, setTicketToFinish] = useState<Ticket | null>(null)
 
   useEffect(() => {
     loadTickets()
@@ -56,17 +68,20 @@ export default function TicketsAdminPage() {
     }
   }
 
-  async function handleFinish(ticket: Ticket) {
-    if (!confirm('האם לסיים את האירוע? הוא לא יוצג יותר למשתמשים רגילים.')) {
-      return
-    }
+  function openFinishDialog(ticket: Ticket) {
+    setTicketToFinish(ticket)
+    setFinishDialogOpen(true)
+  }
+
+  async function confirmFinish() {
+    if (!ticketToFinish) return
 
     try {
-      const response = await fetch(`/api/tickets/${ticket.id}`, {
+      const response = await fetch(`/api/tickets/${ticketToFinish.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          ...ticket,
+          ...ticketToFinish,
           status: 'finished'
         })
       })
@@ -75,6 +90,8 @@ export default function TicketsAdminPage() {
 
       if (result.success) {
         toast.success('האירוע הסתיים והוסר מהתצוגה הציבורית')
+        setFinishDialogOpen(false)
+        setTicketToFinish(null)
         loadTickets()
       } else {
         toast.error(result.error || 'שגיאה בעדכון הכרטיס')
@@ -208,7 +225,7 @@ export default function TicketsAdminPage() {
                     variant="outline"
                     size="sm"
                     className="w-full bg-purple-50 hover:bg-purple-100 text-purple-700 border-purple-300"
-                    onClick={() => handleFinish(ticket)}
+                    onClick={() => openFinishDialog(ticket)}
                   >
                     <CheckCircle className="h-4 w-4 ml-2" />
                     סיים אירוע
@@ -234,6 +251,52 @@ export default function TicketsAdminPage() {
           </Card>
         )}
       </div>
+
+      {/* Finish Event Confirmation Dialog */}
+      <AlertDialog open={finishDialogOpen} onOpenChange={setFinishDialogOpen}>
+        <AlertDialogContent className="bg-gradient-to-br from-purple-50 to-white border-2 border-purple-200">
+          <AlertDialogHeader>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-3 bg-purple-100 rounded-full">
+                <AlertCircle className="h-6 w-6 text-purple-600" />
+              </div>
+              <AlertDialogTitle className="text-xl text-purple-900">
+                סיום אירוע
+              </AlertDialogTitle>
+            </div>
+            <AlertDialogDescription className="text-base text-gray-700 leading-relaxed">
+              {ticketToFinish && (
+                <div className="space-y-3 mt-4">
+                  <p className="font-semibold text-purple-900">
+                    {ticketToFinish.title}
+                  </p>
+                  <p>
+                    האם לסיים את האירוע?
+                  </p>
+                  <div className="bg-purple-100/50 rounded-lg p-3 border border-purple-200">
+                    <p className="text-sm text-purple-800">
+                      ℹ️ האירוע יוסר מהתצוגה הציבורית ולא יוצג יותר למשתמשים רגילים.
+                      תוכל לראות אותו כאן בפאנל הניהול עם סטטוס "הסתיים".
+                    </p>
+                  </div>
+                </div>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setFinishDialogOpen(false)}>
+              ביטול
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmFinish}
+              variant="default"
+            >
+              <CheckCircle className="h-4 w-4 ml-2" />
+              סיים אירוע
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
