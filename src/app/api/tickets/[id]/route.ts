@@ -26,7 +26,7 @@ const TicketSchema = z.object({
 
 // GET /api/tickets/[id] - Get single ticket
 export async function GET(
-  req: NextRequest,
+  _req: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {

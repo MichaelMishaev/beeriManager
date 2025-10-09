@@ -170,7 +170,7 @@ export default function TicketsPage() {
                   <div className="flex-1" />
 
                   {/* Availability */}
-                  {ticket.quantity_available !== null && ticket.status !== 'sold_out' && (
+                  {ticket.quantity_available !== null && ticket.quantity_available !== undefined && ticket.status !== 'sold_out' && (
                     <div className="mb-4 bg-gradient-to-r from-[#FF8200]/10 to-[#FFBA00]/10 rounded-lg p-3 text-center border border-[#FF8200]/20">
                       <p className="text-sm text-muted-foreground">נותרו רק</p>
                       <p className="text-3xl font-bold text-[#FF8200]">
@@ -182,7 +182,7 @@ export default function TicketsPage() {
 
                   {/* Price */}
                   <div className="mb-4 text-center">
-                    {ticket.price_per_ticket !== null && ticket.price_per_ticket > 0 ? (
+                    {ticket.price_per_ticket !== null && ticket.price_per_ticket !== undefined && ticket.price_per_ticket > 0 ? (
                       <>
                         <div className="text-3xl font-bold text-[#003153]">
                           ₪{ticket.price_per_ticket}

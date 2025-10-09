@@ -8,10 +8,8 @@ import { Badge } from '@/components/ui/badge'
 import Link from 'next/link'
 import type { Ticket } from '@/types'
 import { toast } from 'sonner'
-import { useRouter } from 'next/navigation'
 
 export default function TicketsAdminPage() {
-  const router = useRouter()
   const [tickets, setTickets] = useState<Ticket[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
@@ -131,7 +129,7 @@ export default function TicketsAdminPage() {
               <div className="flex items-center justify-between text-sm mb-3">
                 <span className="text-muted-foreground">כמות זמינה:</span>
                 <span className="font-medium">
-                  {ticket.quantity_available === null
+                  {ticket.quantity_available === null || ticket.quantity_available === undefined
                     ? 'ללא הגבלה'
                     : `${ticket.quantity_available - ticket.quantity_sold} מתוך ${ticket.quantity_available}`}
                 </span>

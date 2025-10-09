@@ -89,8 +89,8 @@ test.describe('Tickets Feature', () => {
     await page.goto('http://localhost:4500')
     await page.waitForLoadState('networkidle')
 
-    // Calendar should be visible
-    const calendar = page.locator('[role="application"]').or(page.locator('.calendar'))
+    // Calendar should be visible - we don't need to use the variable
+    page.locator('[role="application"]').or(page.locator('.calendar'))
 
     // Give it time to render
     await page.waitForTimeout(1000)
