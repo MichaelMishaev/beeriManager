@@ -19,7 +19,7 @@ const TicketSchema = z.object({
   quantity_available: z.number().int().min(0).optional().nullable(),
   quantity_sold: z.number().int().min(0).default(0),
   price_per_ticket: z.number().min(0).optional().nullable(),
-  status: z.enum(['active', 'sold_out', 'expired', 'draft']),
+  status: z.enum(['active', 'sold_out', 'expired', 'draft', 'finished']),
   featured: z.boolean().default(false),
   display_order: z.number().int().default(0)
 })

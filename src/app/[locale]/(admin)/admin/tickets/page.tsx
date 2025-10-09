@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Ticket as TicketIcon, Plus, Loader2, Edit, Trash2 } from 'lucide-react'
+import { Ticket as TicketIcon, Plus, Loader2, Edit, Trash2, CheckCircle } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -56,6 +56,35 @@ export default function TicketsAdminPage() {
     }
   }
 
+  async function handleFinish(ticket: Ticket) {
+    if (!confirm('האם לסיים את האירוע? הוא לא יוצג יותר למשתמשים רגילים.')) {
+      return
+    }
+
+    try {
+      const response = await fetch(`/api/tickets/${ticket.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...ticket,
+          status: 'finished'
+        })
+      })
+
+      const result = await response.json()
+
+      if (result.success) {
+        toast.success('האירוע הסתיים והוסר מהתצוגה הציבורית')
+        loadTickets()
+      } else {
+        toast.error(result.error || 'שגיאה בעדכון הכרטיס')
+      }
+    } catch (error) {
+      console.error('Error finishing ticket:', error)
+      toast.error('שגיאה בעדכון הכרטיס')
+    }
+  }
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -103,6 +132,9 @@ export default function TicketsAdminPage() {
                   {ticket.status === 'draft' && (
                     <Badge className="bg-yellow-100 text-yellow-800 border-yellow-300">טיוטה</Badge>
                   )}
+                  {ticket.status === 'finished' && (
+                    <Badge className="bg-purple-100 text-purple-800 border-purple-300">הסתיים</Badge>
+                  )}
                   {ticket.featured && (
                     <Badge className="bg-blue-100 text-blue-800 border-blue-300">מומלץ</Badge>
                   )}
@@ -148,27 +180,40 @@ export default function TicketsAdminPage() {
                 </div>
               )}
 
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="flex-1"
-                  asChild
-                >
-                  <Link href={`/admin/tickets/${ticket.id}/edit`}>
-                    <Edit className="h-4 w-4 ml-2" />
-                    ערוך
-                  </Link>
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="flex-1 text-destructive hover:bg-destructive/10"
-                  onClick={() => handleDelete(ticket.id)}
-                >
-                  <Trash2 className="h-4 w-4 ml-2" />
-                  מחק
-                </Button>
+              <div className="flex flex-col gap-2">
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-1"
+                    asChild
+                  >
+                    <Link href={`/admin/tickets/${ticket.id}/edit`}>
+                      <Edit className="h-4 w-4 ml-2" />
+                      ערוך
+                    </Link>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-1 text-destructive hover:bg-destructive/10"
+                    onClick={() => handleDelete(ticket.id)}
+                  >
+                    <Trash2 className="h-4 w-4 ml-2" />
+                    מחק
+                  </Button>
+                </div>
+                {ticket.status !== 'finished' && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full bg-purple-50 hover:bg-purple-100 text-purple-700 border-purple-300"
+                    onClick={() => handleFinish(ticket)}
+                  >
+                    <CheckCircle className="h-4 w-4 ml-2" />
+                    סיים אירוע
+                  </Button>
+                )}
               </div>
             </CardContent>
           </Card>

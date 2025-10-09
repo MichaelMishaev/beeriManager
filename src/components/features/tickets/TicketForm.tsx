@@ -185,7 +185,7 @@ export function TicketForm({ ticket, onSubmit, isSubmitting }: TicketFormProps) 
                 <SelectItem value="active">פעיל</SelectItem>
                 <SelectItem value="sold_out">אזל מהמלאי</SelectItem>
                 <SelectItem value="expired">פג תוקף</SelectItem>
-                <SelectItem value="finished">אזל מהתקף</SelectItem>
+                <SelectItem value="finished">הסתיים</SelectItem>
               </SelectContent>
             </Select>
           </div>
