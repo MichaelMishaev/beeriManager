@@ -77,11 +77,14 @@ export default function TicketsAdminPage() {
     if (!ticketToFinish) return
 
     try {
+      // Only send fields that are in the API schema, exclude metadata fields
+      const { id, created_at, updated_at, created_by, ...ticketData } = ticketToFinish as any
+
       const response = await fetch(`/api/tickets/${ticketToFinish.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          ...ticketToFinish,
+          ...ticketData,
           status: 'finished'
         })
       })
