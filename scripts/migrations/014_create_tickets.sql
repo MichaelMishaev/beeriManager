@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS public.tickets (
   price_per_ticket DECIMAL(10,2), -- Price per ticket (null = free)
 
   -- Status
-  status TEXT NOT NULL DEFAULT 'active', -- 'active', 'sold_out', 'expired', 'draft'
+  status TEXT NOT NULL DEFAULT 'active', -- 'active', 'sold_out', 'expired', 'draft', 'finished'
 
   -- Display settings
   featured BOOLEAN DEFAULT false, -- Show prominently on homepage
@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS public.tickets (
   created_by TEXT,
 
   -- Constraints
-  CONSTRAINT valid_status CHECK (status IN ('active', 'sold_out', 'expired', 'draft')),
+  CONSTRAINT valid_status CHECK (status IN ('active', 'sold_out', 'expired', 'draft', 'finished')),
   CONSTRAINT valid_event_type CHECK (event_type IN ('sport', 'theater', 'concert', 'other')),
   CONSTRAINT valid_quantity CHECK (quantity_available IS NULL OR quantity_available >= 0),
   CONSTRAINT valid_sold CHECK (quantity_sold >= 0)

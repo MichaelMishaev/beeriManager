@@ -18,7 +18,7 @@ const TicketSchema = z.object({
   purchase_url: z.string().url('כתובת קניה לא תקינה'),
   quantity_available: z.number().int().min(0).optional().nullable(),
   price_per_ticket: z.number().min(0).optional().nullable(),
-  status: z.enum(['active', 'sold_out', 'expired', 'draft']),
+  status: z.enum(['active', 'sold_out', 'expired', 'draft', 'finished']),
   featured: z.boolean().default(false),
   display_order: z.number().int().default(0)
 })
@@ -49,7 +49,7 @@ export async function GET(req: NextRequest) {
         query = query.eq('status', status)
       }
     } else {
-      // Default: only active and sold_out for public
+      // Default: only active and sold_out for public (NOT finished - games are over)
       query = query.in('status', ['active', 'sold_out'])
     }
 

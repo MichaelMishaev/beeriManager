@@ -469,7 +469,7 @@ export interface Ticket {
   price_per_ticket?: number // null = free
 
   // Status
-  status: 'active' | 'sold_out' | 'expired' | 'draft'
+  status: 'active' | 'sold_out' | 'expired' | 'draft' | 'finished'
 
   // Display settings
   featured: boolean
