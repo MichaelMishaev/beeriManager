@@ -82,38 +82,31 @@ export function CollapsibleCalendarWidget({
 
       {/* Action Buttons - Simplified */}
       <div className="flex gap-2">
-        {/* Toggle Calendar Button */}
+        {/* Holidays List Button - Now larger and more prominent */}
         <Button
           variant="outline"
           size="sm"
           className="flex-1 text-sm transition-all hover:bg-muted"
-          onClick={handleToggle}
+          onClick={() => setHolidaysModalOpen(true)}
         >
           <Calendar className="h-4 w-4 ml-2" />
-          {isExpanded ? (
-            <>
-              {t('hideCalendar')}
-              <ChevronUp className="h-4 w-4 mr-2 transition-transform" />
-            </>
-          ) : (
-            <>
-              {t('showCalendar')}
-              <ChevronDown className="h-4 w-4 mr-2 transition-transform" />
-            </>
-          )}
+          {t('holidaysAndEvents')}
         </Button>
 
-        {/* Holidays List Button */}
+        {/* Toggle Calendar Button - Now smaller */}
         <Button
           variant="outline"
           size="sm"
           className="text-sm transition-all hover:bg-muted gap-1.5 px-3"
-          onClick={() => setHolidaysModalOpen(true)}
-          title={t('holidaysAndEvents')}
+          onClick={handleToggle}
+          title={isExpanded ? t('hideCalendar') : t('showCalendar')}
         >
           <Calendar className="h-4 w-4" />
-          <span className="hidden sm:inline">{t('holidaysAndEvents')}</span>
-          <span className="sm:hidden">🎉</span>
+          {isExpanded ? (
+            <ChevronUp className="h-4 w-4 transition-transform" />
+          ) : (
+            <ChevronDown className="h-4 w-4 transition-transform" />
+          )}
         </Button>
       </div>
 
