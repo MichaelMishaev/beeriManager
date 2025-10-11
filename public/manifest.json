@@ -1,7 +1,7 @@
 {
-  "name": "ועד הורים - BeeriManager",
-  "short_name": "ועד הורים",
-  "description": "מערכת ניהול ועד הורים - אירועים, משימות, הוצאות ועוד",
+  "name": "פורטל בארי - BeeriManager",
+  "short_name": "פורטל בארי",
+  "description": "פורטל בית הספר בארי - אירועים, משימות, הוצאות ועוד",
   "start_url": "/",
   "display": "standalone",
   "orientation": "portrait-primary",

@@ -79,7 +79,7 @@ export function Navigation() {
               className="flex items-center space-x-2 space-x-reverse"
               onClick={() => handleNavClick(isAuthenticated ? '/admin' : '/', 'בית')}
             >
-              <span className="text-lg md:text-xl font-bold">ועד הורים</span>
+              <span className="text-lg md:text-xl font-bold">פורטל בארי</span>
             </Link>
             {/* Language Switcher & PWA Install - Always visible */}
             <div className="flex items-center gap-2">

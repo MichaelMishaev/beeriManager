@@ -26,11 +26,11 @@ const roboto = Roboto({
 
 export const metadata: Metadata = {
   title: {
-    default: 'ועד הורים - BeeriManager',
-    template: '%s | ועד הורים'
+    default: 'פורטל בארי - BeeriManager',
+    template: '%s | פורטל בארי'
   },
-  description: 'מערכת ניהול ועד הורים - אירועים, משימות, הוצאות ועוד',
-  keywords: ['ועד הורים', 'בית ספר', 'אירועים', 'משימות', 'PWA'],
+  description: 'פורטל בית הספר בארי - אירועים, משימות, הוצאות ועוד',
+  keywords: ['פורטל בארי', 'בית ספר בארי', 'אירועים', 'משימות', 'PWA'],
   authors: [{ name: 'BeeriManager Team' }],
   creator: 'BeeriManager',
   publisher: 'BeeriManager',
@@ -43,7 +43,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'ועד הורים',
+    title: 'פורטל בארי',
   },
   other: {
     'mobile-web-app-capable': 'yes',

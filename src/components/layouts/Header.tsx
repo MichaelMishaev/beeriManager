@@ -55,7 +55,7 @@ export function Header({ isAdmin = false, onLogout, className }: HeaderProps) {
             </div>
             <div className="hidden sm:block">
               <h1 className="text-xl font-bold text-gray-900">BeeriManager</h1>
-              <p className="text-sm text-gray-500 -mt-1">ועד הורים</p>
+              <p className="text-sm text-gray-500 -mt-1">פורטל בארי</p>
             </div>
           </Link>
 
