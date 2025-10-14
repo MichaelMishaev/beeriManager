@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { createClient } from '@/lib/supabase/server'
 import { WhatsAppShareButton } from '@/components/committees/WhatsAppShareButton'
+import { CommitteesHeader } from '@/components/committees/CommitteesHeader'
 
 async function getCommittees() {
   const supabase = createClient()
@@ -312,27 +313,13 @@ async function StatsCards() {
   )
 }
 
-export default function CommitteesPage() {
+export default async function CommitteesPage() {
+  const committees = await getCommittees()
+
   return (
     <div className="max-w-7xl mx-auto space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold flex items-center gap-3">
-            <Users className="h-8 w-8" />
-            וועדות
-          </h1>
-          <p className="text-muted-foreground mt-2">
-            ניהול וועדות תחומיות ותחומי אחריות
-          </p>
-        </div>
-        <Button asChild>
-          <Link href="/admin/committees/new">
-            <Plus className="h-4 w-4 ml-2" />
-            וועדה חדשה
-          </Link>
-        </Button>
-      </div>
+      <CommitteesHeader committees={committees} />
 
       {/* Stats Cards */}
       <Suspense fallback={<div className="h-32 bg-gray-100 rounded-lg animate-pulse" />}>
