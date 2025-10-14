@@ -7,8 +7,10 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { formatHebrewDate, getHebrewRelativeTime } from '@/lib/utils/date'
 import { TASK_STATUSES, PRIORITY_LEVELS } from '@/lib/utils/constants'
-import type { Task } from '@/types'
+import type { Task, Tag } from '@/types'
 import Link from 'next/link'
+import { QuickTagEditor } from './QuickTagEditor'
+import { ShareTaskButton } from './ShareTaskButton'
 
 interface TaskCardProps {
   task: Task
@@ -16,6 +18,8 @@ interface TaskCardProps {
   showActions?: boolean
   onComplete?: () => void
   onEdit?: () => void
+  onTagsUpdated?: (updatedTask: Task) => void
+  availableTags?: Tag[]
   className?: string
 }
 
@@ -25,6 +29,8 @@ export function TaskCard({
   showActions = true,
   onComplete,
   onEdit,
+  onTagsUpdated,
+  availableTags = [],
   className = ''
 }: TaskCardProps) {
   const dueDate = task.due_date ? new Date(task.due_date) : null
@@ -85,12 +91,34 @@ export function TaskCard({
                 </>
               )}
             </div>
+            {/* Tags for minimal */}
+            {task.tags && task.tags.length > 0 && (
+              <div className="flex flex-wrap gap-1 mt-1">
+                {task.tags.slice(0, 3).map((tag) => (
+                  <Badge
+                    key={tag.id}
+                    variant="outline"
+                    style={{
+                      backgroundColor: `${tag.color}15`,
+                      borderColor: tag.color,
+                      color: tag.color
+                    }}
+                    className="text-xs font-normal px-1 py-0"
+                  >
+                    {tag.emoji}
+                  </Badge>
+                ))}
+              </div>
+            )}
           </div>
         </div>
         {showActions && (
-          <Button variant="ghost" asChild size="sm">
-            <Link href={`/tasks/${task.id}`}>פרטים</Link>
-          </Button>
+          <div className="flex gap-1">
+            <Button variant="ghost" asChild size="sm">
+              <Link href={`/tasks/${task.id}`}>פרטים</Link>
+            </Button>
+            <ShareTaskButton task={task} variant="ghost" size="sm" />
+          </div>
         )}
       </div>
     )
@@ -154,8 +182,29 @@ export function TaskCard({
                 </p>
               )}
 
+              {/* Tags */}
+              {task.tags && task.tags.length > 0 && (
+                <div className="flex flex-wrap gap-1 mb-2">
+                  {task.tags.map((tag) => (
+                    <Badge
+                      key={tag.id}
+                      variant="outline"
+                      style={{
+                        backgroundColor: `${tag.color}15`,
+                        borderColor: tag.color,
+                        color: tag.color
+                      }}
+                      className="text-xs font-normal"
+                    >
+                      {tag.emoji && <span className="ml-1">{tag.emoji}</span>}
+                      {tag.name_he}
+                    </Badge>
+                  ))}
+                </div>
+              )}
+
               {showActions && (
-                <div className="flex gap-2">
+                <div className="flex gap-2 flex-wrap">
                   <Button size="sm" asChild>
                     <Link href={`/tasks/${task.id}`}>פרטים</Link>
                   </Button>
@@ -164,6 +213,14 @@ export function TaskCard({
                       {task.status === 'pending' ? 'התחל עבודה' : 'סיים משימה'}
                     </Button>
                   )}
+                  {availableTags.length > 0 && (
+                    <QuickTagEditor
+                      task={task}
+                      availableTags={availableTags}
+                      onTagsUpdated={onTagsUpdated}
+                    />
+                  )}
+                  <ShareTaskButton task={task} variant="ghost" size="sm" />
                 </div>
               )}
             </div>
@@ -236,6 +293,30 @@ export function TaskCard({
       </CardHeader>
 
       <CardContent className="space-y-4">
+        {/* Tags for full variant */}
+        {task.tags && task.tags.length > 0 && (
+          <div>
+            <h4 className="font-medium text-sm mb-2">תגיות</h4>
+            <div className="flex flex-wrap gap-2">
+              {task.tags.map((tag) => (
+                <Badge
+                  key={tag.id}
+                  variant="outline"
+                  style={{
+                    backgroundColor: `${tag.color}15`,
+                    borderColor: tag.color,
+                    color: tag.color
+                  }}
+                  className="text-sm font-normal"
+                >
+                  {tag.emoji && <span className="ml-1">{tag.emoji}</span>}
+                  {tag.name_he}
+                </Badge>
+              ))}
+            </div>
+          </div>
+        )}
+
         {task.description && (
           <div>
             <h4 className="font-medium text-sm mb-2">תיאור המשימה</h4>
@@ -311,6 +392,16 @@ export function TaskCard({
                 {task.status === 'pending' ? 'התחל עבודה' : 'סיים משימה'}
               </Button>
             )}
+
+            {availableTags.length > 0 && (
+              <QuickTagEditor
+                task={task}
+                availableTags={availableTags}
+                onTagsUpdated={onTagsUpdated}
+              />
+            )}
+
+            <ShareTaskButton task={task} variant="ghost" size="sm" />
 
             {task.owner_phone && (
               <Button variant="ghost" asChild size="sm">

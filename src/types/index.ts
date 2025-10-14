@@ -76,6 +76,9 @@ export interface Task {
   event_id?: string
   parent_task_id?: string
 
+  // Tags (multi-tag categorization)
+  tags?: Tag[]
+
   // Attachments
   attachment_urls?: string[]
 
@@ -478,5 +481,33 @@ export interface Ticket {
   // Metadata
   created_at: string
   updated_at: string
+  created_by?: string
+}
+
+// Tag types for task categorization
+export interface Tag {
+  id: string
+  name: string // English identifier (e.g., 'maintenance')
+  name_he: string // Hebrew display name (e.g., 'תחזוקה')
+  emoji?: string // Optional emoji (e.g., '🔧')
+  color: string // Hex color code (e.g., '#FF8200')
+  description?: string
+  display_order: number
+  task_count: number // Number of tasks using this tag
+  is_system: boolean // System tags cannot be deleted
+  is_active: boolean
+
+  // Audit
+  created_at: string
+  updated_at: string
+  created_by?: string
+  version: number
+}
+
+export interface TaskTag {
+  id: string
+  task_id: string
+  tag_id: string
+  created_at: string
   created_by?: string
 }

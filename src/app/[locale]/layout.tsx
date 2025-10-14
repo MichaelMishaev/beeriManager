@@ -8,6 +8,7 @@ import { Providers } from '@/components/providers'
 import { Toaster } from '@/components/ui/toaster'
 import { Navigation } from '@/components/layout/Navigation'
 import { GoogleAnalytics } from '@/components/analytics/GoogleAnalytics'
+import { HtmlAttributes } from '@/components/HtmlAttributes'
 import { locales, localeDirections, type Locale } from '@/i18n/config'
 
 const heebo = Heebo({
@@ -86,11 +87,10 @@ export default async function LocaleLayout({
     : 'var(--font-russian), system-ui, sans-serif'
 
   return (
-    <html lang={locale} dir={direction} className={fontClass}>
-      <head>
-        <GoogleAnalytics />
-      </head>
-      <body className="min-h-screen bg-background font-sans antialiased" style={{ fontFamily }}>
+    <>
+      <GoogleAnalytics />
+      <HtmlAttributes lang={locale} dir={direction} className={fontClass} />
+      <div className="min-h-screen bg-background font-sans antialiased" style={{ fontFamily }}>
         <NextIntlClientProvider messages={messages}>
           <Providers>
             <Navigation />
@@ -98,7 +98,7 @@ export default async function LocaleLayout({
           </Providers>
           <Toaster />
         </NextIntlClientProvider>
-      </body>
-    </html>
+      </div>
+    </>
   )
 }

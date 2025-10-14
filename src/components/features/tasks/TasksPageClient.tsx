@@ -2,13 +2,21 @@
 
 import { useState, useMemo } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { CheckSquare, Plus, X, AlertCircle, Clock, UserCheck } from 'lucide-react'
+import { CheckSquare, Plus, X, AlertCircle, Clock, UserCheck, Tags as TagsIcon } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { TaskCard } from '@/components/features/tasks/TaskCard'
 import Link from 'next/link'
-import type { Task } from '@/types'
+import type { Task, Tag } from '@/types'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuCheckboxItem,
+  DropdownMenuTrigger,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu'
 
 interface TasksPageClientProps {
   initialTasks: Task[]
@@ -18,32 +26,51 @@ interface TasksPageClientProps {
     completed: number
     overdue: number
   }
+  availableTags: Tag[]
 }
 
 type TaskStatus = 'pending' | 'in_progress' | 'completed' | 'overdue'
 
-export function TasksPageClient({ initialTasks, initialStats }: TasksPageClientProps) {
+export function TasksPageClient({ initialTasks, initialStats, availableTags }: TasksPageClientProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const [tasks] = useState<Task[]>(initialTasks)
+  const [tasks, setTasks] = useState<Task[]>(initialTasks)
   const [stats] = useState(initialStats)
+  const [selectedTagIds, setSelectedTagIds] = useState<string[]>([])
+
+  const handleTaskTagsUpdated = (updatedTask: Task) => {
+    setTasks(prev => prev.map(t => t.id === updatedTask.id ? updatedTask : t))
+  }
 
   const statusFilter = (searchParams?.get('status') as TaskStatus) || null
 
-  // Filter tasks based on URL param
+  // Filter tasks based on status and tags
   const filteredTasks = useMemo(() => {
-    if (!statusFilter) return tasks
+    let filtered = tasks
 
-    if (statusFilter === 'overdue') {
-      return tasks.filter(t => {
-        if (t.status === 'completed' || !t.due_date) return false
-        const dueDate = new Date(t.due_date)
-        return dueDate < new Date()
+    // Apply status filter
+    if (statusFilter) {
+      if (statusFilter === 'overdue') {
+        filtered = filtered.filter(t => {
+          if (t.status === 'completed' || !t.due_date) return false
+          const dueDate = new Date(t.due_date)
+          return dueDate < new Date()
+        })
+      } else {
+        filtered = filtered.filter(t => t.status === statusFilter)
+      }
+    }
+
+    // Apply tag filter
+    if (selectedTagIds.length > 0) {
+      filtered = filtered.filter(task => {
+        // Task must have at least one of the selected tags
+        return task.tags?.some(tag => selectedTagIds.includes(tag.id))
       })
     }
 
-    return tasks.filter(t => t.status === statusFilter)
-  }, [tasks, statusFilter])
+    return filtered
+  }, [tasks, statusFilter, selectedTagIds])
 
   // Group filtered tasks
   const tasksByStatus = useMemo(() => ({
@@ -59,6 +86,21 @@ export function TasksPageClient({ initialTasks, initialStats }: TasksPageClientP
 
   const handleClearFilter = () => {
     router.push('/tasks', { scroll: false })
+    setSelectedTagIds([])
+  }
+
+  const handleToggleTag = (tagId: string) => {
+    setSelectedTagIds(prev => {
+      if (prev.includes(tagId)) {
+        return prev.filter(id => id !== tagId)
+      } else {
+        return [...prev, tagId]
+      }
+    })
+  }
+
+  const handleClearTags = () => {
+    setSelectedTagIds([])
   }
 
   if (tasks.length === 0) {
@@ -128,17 +170,90 @@ export function TasksPageClient({ initialTasks, initialStats }: TasksPageClientP
         </CardContent>
       </Card>
 
+      {/* Tag Filter Dropdown */}
+      <div className="flex items-center gap-2 flex-wrap">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="sm">
+              <TagsIcon className="h-4 w-4 ml-2" />
+              סינון לפי תגיות
+              {selectedTagIds.length > 0 && (
+                <Badge variant="secondary" className="mr-2">
+                  {selectedTagIds.length}
+                </Badge>
+              )}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="w-64">
+            <DropdownMenuLabel>בחר תגיות לסינון</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            {availableTags.map((tag) => (
+              <DropdownMenuCheckboxItem
+                key={tag.id}
+                checked={selectedTagIds.includes(tag.id)}
+                onCheckedChange={() => handleToggleTag(tag.id)}
+              >
+                <div className="flex items-center gap-2">
+                  {tag.emoji && <span>{tag.emoji}</span>}
+                  <span>{tag.name_he}</span>
+                </div>
+              </DropdownMenuCheckboxItem>
+            ))}
+            {selectedTagIds.length > 0 && (
+              <>
+                <DropdownMenuSeparator />
+                <button
+                  onClick={handleClearTags}
+                  className="w-full text-sm text-center py-2 text-muted-foreground hover:text-foreground"
+                >
+                  נקה סינון תגיות
+                </button>
+              </>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        {/* Active Tag Filters */}
+        {selectedTagIds.length > 0 && (
+          <div className="flex items-center gap-2 flex-wrap">
+            {selectedTagIds.map(tagId => {
+              const tag = availableTags.find(t => t.id === tagId)
+              if (!tag) return null
+              return (
+                <Badge
+                  key={tag.id}
+                  variant="outline"
+                  style={{
+                    backgroundColor: `${tag.color}15`,
+                    borderColor: tag.color,
+                    color: tag.color
+                  }}
+                  className="cursor-pointer hover:opacity-75"
+                  onClick={() => handleToggleTag(tag.id)}
+                >
+                  {tag.emoji && <span className="ml-1">{tag.emoji}</span>}
+                  {tag.name_he}
+                  <X className="h-3 w-3 mr-1" />
+                </Badge>
+              )
+            })}
+          </div>
+        )}
+      </div>
+
       {/* Active Filter Badge with Clear Button */}
-      {statusFilter && (
+      {(statusFilter || selectedTagIds.length > 0) && (
         <div className="flex items-center gap-2">
-          <Badge variant="secondary" className="text-base py-2 px-4">
-            מסנן פעיל: {
-              statusFilter === 'pending' ? 'ממתינות' :
-              statusFilter === 'in_progress' ? 'בביצוע' :
-              statusFilter === 'completed' ? 'הושלמו' :
-              'באיחור'
-            }
-          </Badge>
+          {statusFilter && (
+            <Badge variant="secondary" className="text-base py-2 px-4">
+              סטטוס: {
+                statusFilter === 'pending' ? 'ממתינות' :
+                statusFilter === 'in_progress' ? 'בביצוע' :
+                statusFilter === 'completed' ? 'הושלמו' :
+                'באיחור'
+              }
+            </Badge>
+          )}
           <Button
             variant="ghost"
             size="sm"
@@ -146,7 +261,7 @@ export function TasksPageClient({ initialTasks, initialStats }: TasksPageClientP
             className="h-auto py-2"
           >
             <X className="h-4 w-4 ml-1" />
-            נקה סינון
+            נקה כל הסינונים
           </Button>
           <span className="text-sm text-muted-foreground">
             ({filteredTasks.length} משימות)
@@ -182,7 +297,13 @@ export function TasksPageClient({ initialTasks, initialStats }: TasksPageClientP
           </CardHeader>
           <CardContent className="space-y-3">
             {tasksByStatus.urgent.map((task) => (
-              <TaskCard key={task.id} task={task} variant="compact" />
+              <TaskCard
+                key={task.id}
+                task={task}
+                variant="compact"
+                availableTags={availableTags}
+                onTagsUpdated={handleTaskTagsUpdated}
+              />
             ))}
           </CardContent>
         </Card>
@@ -200,7 +321,13 @@ export function TasksPageClient({ initialTasks, initialStats }: TasksPageClientP
           </CardHeader>
           <CardContent className="space-y-3">
             {tasksByStatus.pending.map((task) => (
-              <TaskCard key={task.id} task={task} variant="compact" />
+              <TaskCard
+                key={task.id}
+                task={task}
+                variant="compact"
+                availableTags={availableTags}
+                onTagsUpdated={handleTaskTagsUpdated}
+              />
             ))}
           </CardContent>
         </Card>
@@ -218,7 +345,13 @@ export function TasksPageClient({ initialTasks, initialStats }: TasksPageClientP
           </CardHeader>
           <CardContent className="space-y-3">
             {tasksByStatus.in_progress.map((task) => (
-              <TaskCard key={task.id} task={task} variant="compact" />
+              <TaskCard
+                key={task.id}
+                task={task}
+                variant="compact"
+                availableTags={availableTags}
+                onTagsUpdated={handleTaskTagsUpdated}
+              />
             ))}
           </CardContent>
         </Card>
@@ -236,7 +369,13 @@ export function TasksPageClient({ initialTasks, initialStats }: TasksPageClientP
           </CardHeader>
           <CardContent className="space-y-3">
             {tasksByStatus.completed.map((task) => (
-              <TaskCard key={task.id} task={task} variant="minimal" />
+              <TaskCard
+                key={task.id}
+                task={task}
+                variant="minimal"
+                availableTags={availableTags}
+                onTagsUpdated={handleTaskTagsUpdated}
+              />
             ))}
           </CardContent>
         </Card>

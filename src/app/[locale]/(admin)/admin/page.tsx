@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
-import { Calendar, CheckSquare, AlertTriangle, FileText, Users, DollarSign, MessageSquare, Settings, Plus, Edit, BarChart, GripVertical, HelpCircle, Ticket } from 'lucide-react'
+import { Calendar, CheckSquare, AlertTriangle, FileText, Users, DollarSign, MessageSquare, Settings, Plus, Edit, BarChart, GripVertical, HelpCircle, Ticket, Tags } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
@@ -57,7 +57,8 @@ const defaultAdminSections = [
     links: [
       { href: '/admin/tasks/new', label: 'צור משימה חדשה', icon: Plus },
       { href: '/tasks', label: 'רשימת משימות', icon: Edit },
-      { href: '/admin/tasks/assign', label: 'הקצאת משימות', icon: Users }
+      { href: '/admin/tasks/assign', label: 'הקצאת משימות', icon: Users },
+      { href: '/admin/tags', label: 'ניהול תגיות', icon: Tags }
     ]
   },
   {

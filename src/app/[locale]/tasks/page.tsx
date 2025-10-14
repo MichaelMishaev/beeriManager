@@ -13,13 +13,26 @@ const TasksPageClient = dynamicImport(
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
-// Fetch tasks from database
+// Fetch tasks from database with tags
 async function getTasks() {
   const supabase = createClient()
 
   const { data: tasks, error } = await supabase
     .from('tasks')
-    .select('*')
+    .select(`
+      *,
+      task_tags (
+        tag_id,
+        tags (
+          id,
+          name,
+          name_he,
+          emoji,
+          color,
+          is_system
+        )
+      )
+    `)
     .order('due_date', { ascending: true })
     .limit(50)
 
@@ -28,7 +41,32 @@ async function getTasks() {
     return []
   }
 
-  return tasks || []
+  // Transform the nested tags structure into a flat array
+  const transformedTasks = tasks?.map(task => ({
+    ...task,
+    tags: task.task_tags?.map((tt: any) => tt.tags).filter(Boolean) || []
+  })) || []
+
+  return transformedTasks
+}
+
+// Fetch all available tags for filtering
+async function getAllTags() {
+  const supabase = createClient()
+
+  const { data: tags, error } = await supabase
+    .from('tags')
+    .select('*')
+    .eq('is_active', true)
+    .order('display_order', { ascending: true })
+    .order('name_he', { ascending: true })
+
+  if (error) {
+    console.error('Error fetching tags:', error)
+    return []
+  }
+
+  return tags || []
 }
 
 // Get task statistics
@@ -61,10 +99,13 @@ function TasksListSkeleton() {
 }
 
 async function TasksList() {
-  const tasks = await getTasks()
-  const stats = await getTaskStats()
+  const [tasks, stats, tags] = await Promise.all([
+    getTasks(),
+    getTaskStats(),
+    getAllTags()
+  ])
 
-  return <TasksPageClient initialTasks={tasks} initialStats={stats} />
+  return <TasksPageClient initialTasks={tasks} initialStats={stats} availableTags={tags} />
 }
 
 export default function TasksPage() {

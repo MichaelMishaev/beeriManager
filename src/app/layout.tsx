@@ -1,8 +1,8 @@
 import './globals.css'
 
 /**
- * Root Layout - Minimal wrapper for locale-specific layouts
- * Language, direction, and fonts are configured in [locale]/layout.tsx
+ * Root Layout - Only renders html/body wrapper
+ * All locale-specific content is in [locale]/layout.tsx
  */
 export default function RootLayout({
   children,
@@ -11,7 +11,7 @@ export default function RootLayout({
 }) {
   return (
     <html suppressHydrationWarning>
-      <body>{children}</body>
+      <body suppressHydrationWarning>{children}</body>
     </html>
   )
 }
