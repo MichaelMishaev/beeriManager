@@ -110,7 +110,7 @@ const categoryIcons: Record<string, string> = {
 export default async function FinancesPage() {
   const { totals, categoryBreakdown, recentTransactions, upcomingEvents, currentMonth } = await getFinancialData()
 
-  const maxCategoryExpense = Math.max(...Object.values(categoryBreakdown).map(c => c.expenses))
+  const maxCategoryExpense = Math.max(...(Object.values(categoryBreakdown) as Array<{ income: number; expenses: number; count: number }>).map(c => c.expenses))
 
   return (
     <div className="container mx-auto px-4 py-8 space-y-8">
@@ -196,7 +196,7 @@ export default async function FinancesPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {Object.entries(categoryBreakdown)
+          {(Object.entries(categoryBreakdown) as Array<[string, { income: number; expenses: number; count: number }]>)
             .filter(([_, data]) => data.expenses > 0)
             .sort((a, b) => b[1].expenses - a[1].expenses)
             .map(([category, data]) => {

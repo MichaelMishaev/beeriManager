@@ -458,8 +458,8 @@ export function MeetingAgendaForm({
         </Card>
 
         <div className="flex gap-4 justify-end">
-          <Button type="submit" loading={isLoading} className="min-w-[120px]">
-            {mode === 'create' ? 'צור סדר יום' : 'עדכן סדר יום'}
+          <Button type="submit" disabled={isLoading} className="min-w-[120px]">
+            {isLoading ? 'שומר...' : mode === 'create' ? 'צור סדר יום' : 'עדכן סדר יום'}
           </Button>
           <Button type="button" variant="outline">
             ביטול

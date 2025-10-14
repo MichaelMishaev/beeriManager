@@ -438,14 +438,14 @@ export function TagManager({ tags, onRefresh }: TagManagerProps) {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isSubmitting}>
+            <AlertDialogCancel onClick={() => setDeletingTag(null)}>
               ביטול
             </AlertDialogCancel>
             {!deletingTag?.is_system && (
               <AlertDialogAction
                 onClick={handleDelete}
                 disabled={isSubmitting}
-                className="bg-red-600 hover:bg-red-700"
+                variant="destructive"
               >
                 {isSubmitting ? 'מוחק...' : 'מחק'}
               </AlertDialogAction>

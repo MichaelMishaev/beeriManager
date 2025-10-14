@@ -462,8 +462,8 @@ export function ExpenseForm({
         </Card>
 
         <div className="flex gap-4 justify-end">
-          <Button type="submit" loading={isLoading} className="min-w-[120px]">
-            {mode === 'create' ? 'צור הוצאה' : 'עדכן הוצאה'}
+          <Button type="submit" disabled={isLoading} className="min-w-[120px]">
+            {isLoading ? 'שומר...' : mode === 'create' ? 'צור הוצאה' : 'עדכן הוצאה'}
           </Button>
           <Button type="button" variant="outline">
             ביטול

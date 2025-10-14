@@ -19,7 +19,7 @@ const feedbackSchema = z.object({
   category: z.enum(['general', 'event', 'task', 'suggestion', 'complaint', 'other']),
   subject: z.string().min(2, 'נושא חייב להכיל לפחות 2 תווים').max(100),
   message: z.string().min(10, 'הודעה חייבת להכיל לפחות 10 תווים').max(1000),
-  rating: z.string().optional().transform(val => val ? parseInt(val) : undefined),
+  rating: z.string().optional(),
   parent_name: z.string().optional(),
   contact_email: z.string().email('כתובת אימייל לא תקינה').optional().or(z.literal('')),
   is_anonymous: z.boolean()
