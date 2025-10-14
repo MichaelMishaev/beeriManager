@@ -57,8 +57,7 @@ const defaultAdminSections = [
     links: [
       { href: '/admin/tasks/new', label: 'צור משימה חדשה', icon: Plus },
       { href: '/tasks', label: 'רשימת משימות', icon: Edit },
-      { href: '/admin/tasks/assign', label: 'הקצאת משימות', icon: Users },
-      { href: '/admin/tags', label: 'ניהול תגיות', icon: Tags }
+      { href: '/admin/tasks/assign', label: 'הקצאת משימות', icon: Users }
     ]
   },
   {
@@ -136,6 +135,18 @@ const defaultAdminSections = [
       { href: '/admin/tickets/new', label: 'כרטיס חדש', icon: Plus },
       { href: '/admin/tickets', label: 'ניהול כרטיסים', icon: Edit },
       { href: '/tickets', label: 'צפייה ציבורית', icon: Ticket }
+    ]
+  },
+  {
+    id: 'settings',
+    title: 'הגדרות',
+    description: 'הגדרות מערכת וניהול תצורה',
+    icon: Settings,
+    color: 'text-gray-600',
+    bgColor: 'bg-gray-50',
+    links: [
+      { href: '/admin/tags', label: 'ניהול תגיות', icon: Tags },
+      { href: '/admin/settings', label: 'הגדרות כלליות', icon: Settings }
     ]
   }
 ]
@@ -518,6 +529,23 @@ export default function AdminDashboard() {
                     <li>• <strong>סטטיסטיקות</strong> - ראו מגמות במשובים</li>
                     <li>• <strong>ייצוא נתונים</strong> - הורידו את כל המשובים לקובץ</li>
                     <li className="text-muted-foreground mt-2">💡 טיפ: משוב הוא אנונימי לחלוטין - עודדו הורים לשתף</li>
+                  </ul>
+                </div>
+
+                {/* הגדרות ותגיות */}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <div className="bg-gray-50 p-2 rounded-lg">
+                      <Settings className="h-5 w-5 text-gray-600" />
+                    </div>
+                    <h3 className="font-bold text-lg">הגדרות ⚙️</h3>
+                  </div>
+                  <ul className="space-y-1 text-sm mr-9">
+                    <li>• <strong>ניהול תגיות</strong> - צרו תגיות לקטגוריזציה של משימות (תחזוקה, אירועים, תקציב וכו')</li>
+                    <li>• <strong>התאמה אישית</strong> - שנו צבעים ואימוג'י לכל תגית</li>
+                    <li>• <strong>סינון חכם</strong> - השתמשו בתגיות כדי למצוא משימות במהירות</li>
+                    <li>• <strong>הגדרות כלליות</strong> - נהלו הרשאות והגדרות מערכת</li>
+                    <li className="text-muted-foreground mt-2">💡 טיפ: תגיות עוזרות לארגן ולמצוא משימות בקלות - השתמשו בהן!</li>
                   </ul>
                 </div>
 

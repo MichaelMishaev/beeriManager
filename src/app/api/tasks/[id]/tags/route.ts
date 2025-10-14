@@ -20,7 +20,7 @@ const RemoveTagSchema = z.object({
  * Get all tags for a specific task
  */
 export async function GET(
-  req: NextRequest,
+  _req: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {

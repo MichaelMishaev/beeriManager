@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Tags, Plus, X } from 'lucide-react'
+import { Tags, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import type { Tag, Task } from '@/types'
@@ -45,7 +45,7 @@ export function QuickTagEditor({ task, availableTags, onTagsUpdated }: QuickTagE
           throw new Error(errorData.error || 'Failed to remove tag')
         }
 
-        const result = await response.json()
+        await response.json()
 
         toast({
           title: 'תגית הוסרה',
@@ -73,7 +73,7 @@ export function QuickTagEditor({ task, availableTags, onTagsUpdated }: QuickTagE
           throw new Error(errorData.error || 'Failed to add tag')
         }
 
-        const result = await response.json()
+        await response.json()
 
         toast({
           title: 'תגית נוספה',

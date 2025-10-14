@@ -23,7 +23,7 @@ const TagUpdateSchema = z.object({
  * Get a specific tag by ID
  */
 export async function GET(
-  req: NextRequest,
+  _req: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
