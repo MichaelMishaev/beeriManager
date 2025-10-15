@@ -37,6 +37,7 @@ function getEventTypeColor(type: string): string {
 export default function EventPage() {
   const params = useParams()
   const id = params.id as string
+  const locale = (params.locale as string) || 'he'
   const [event, setEvent] = useState<Event | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isAdmin, setIsAdmin] = useState(false)
@@ -87,17 +88,18 @@ export default function EventPage() {
 
   const startDate = new Date(event.start_datetime)
   const endDate = event.end_datetime ? new Date(event.end_datetime) : null
+  const localeCode = locale === 'ru' ? 'ru-RU' : 'he-IL'
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-4xl">
       {/* Breadcrumb */}
       <div className="mb-6">
         <Link
-          href="/events"
+          href={`/${locale}/events`}
           className="flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowRight className="h-4 w-4 ml-1 rotate-180" />
-          חזרה לאירועים
+          {locale === 'ru' ? 'Назад к событиям' : 'חזרה לאירועים'}
         </Link>
       </div>
 
@@ -126,14 +128,14 @@ export default function EventPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
               <Calendar className="h-5 w-5" />
-              תאריך ושעה
+              {locale === 'ru' ? 'Дата и время' : 'תאריך ושעה'}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
             <div className="flex items-center gap-2">
               <Clock className="h-4 w-4 text-muted-foreground" />
               <span className="text-sm">
-                {startDate.toLocaleDateString('he-IL', {
+                {startDate.toLocaleDateString(localeCode, {
                   weekday: 'long',
                   year: 'numeric',
                   month: 'long',
@@ -143,14 +145,14 @@ export default function EventPage() {
             </div>
             <div className="flex items-center gap-2 mr-6">
               <span className="text-sm text-muted-foreground">
-                {startDate.toLocaleTimeString('he-IL', {
+                {startDate.toLocaleTimeString(localeCode, {
                   hour: '2-digit',
                   minute: '2-digit'
                 })}
                 {endDate && (
                   <>
                     {' - '}
-                    {endDate.toLocaleTimeString('he-IL', {
+                    {endDate.toLocaleTimeString(localeCode, {
                       hour: '2-digit',
                       minute: '2-digit'
                     })}
@@ -167,7 +169,7 @@ export default function EventPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg">
                 <MapPin className="h-5 w-5" />
-                מיקום
+                {locale === 'ru' ? 'Место' : 'מיקום'}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -182,13 +184,15 @@ export default function EventPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg">
                 <Users className="h-5 w-5" />
-                משתתפים
+                {locale === 'ru' ? 'Участники' : 'משתתפים'}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">נרשמו:</span>
+                  <span className="text-muted-foreground">
+                    {locale === 'ru' ? 'Записано:' : 'נרשמו:'}
+                  </span>
                   <span className="font-medium">
                     {event.current_attendees || 0} / {event.max_attendees}
                   </span>
@@ -213,7 +217,9 @@ export default function EventPage() {
       {/* Description Card */}
       <Card className="mb-6">
         <CardHeader>
-          <CardTitle className="text-lg">תיאור</CardTitle>
+          <CardTitle className="text-lg">
+            {locale === 'ru' ? 'Описание' : 'תיאור'}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-sm leading-relaxed whitespace-pre-wrap">
@@ -249,15 +255,15 @@ export default function EventPage() {
       <div className="flex flex-col sm:flex-row gap-2 mb-8">
         <ShareEventButton event={event} />
         <Button variant="outline" asChild size="sm" className="flex-1">
-          <Link href={`/calendar?event=${event.id}`}>
-            הצג בלוח שנה
+          <Link href={`/${locale}/calendar?event=${event.id}`}>
+            {locale === 'ru' ? 'Показать в календаре' : 'הצג בלוח שנה'}
           </Link>
         </Button>
         {event.photos_url && (
           <Button variant="outline" asChild size="sm" className="flex-1">
             <a href={event.photos_url} target="_blank" rel="noopener noreferrer">
               <Camera className="h-4 w-4 ml-2" />
-              תמונות
+              {locale === 'ru' ? 'Фото' : 'תמונות'}
             </a>
           </Button>
         )}
