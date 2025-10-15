@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { EventFeedbackForm } from '@/components/features/feedback/EventFeedbackForm'
 import { EventActions } from '@/components/events/event-actions'
+import { ShareEventButton } from '@/components/events/ShareEventButton'
 import Link from 'next/link'
 import type { Event } from '@/types'
 
@@ -246,6 +247,7 @@ export default function EventPage() {
 
       {/* Action Buttons */}
       <div className="flex flex-col sm:flex-row gap-2 mb-8">
+        <ShareEventButton event={event} />
         <Button variant="outline" asChild size="sm" className="flex-1">
           <Link href={`/calendar?event=${event.id}`}>
             הצג בלוח שנה
