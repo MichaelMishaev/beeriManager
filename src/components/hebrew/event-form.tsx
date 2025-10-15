@@ -27,10 +27,13 @@ import {
 
 const eventFormSchema = z.object({
   title: z.string().min(2, "כותרת חייבת להכיל לפחות 2 תווים"),
+  title_ru: z.string().optional(),
   description: z.string().optional(),
+  description_ru: z.string().optional(),
   start_datetime: z.string().min(1, "תאריך התחלה נדרש"),
   end_datetime: z.string().optional(),
   location: z.string().optional(),
+  location_ru: z.string().optional(),
   event_type: z.enum(['general', 'meeting', 'fundraiser', 'trip', 'workshop']),
   priority: z.enum(['low', 'normal', 'high', 'urgent']),
   registration_enabled: z.boolean(),
@@ -76,10 +79,13 @@ export function EventForm({
     resolver: zodResolver(eventFormSchema),
     defaultValues: {
       title: '',
+      title_ru: '',
       description: '',
+      description_ru: '',
       start_datetime: '',
       end_datetime: '',
       location: '',
+      location_ru: '',
       event_type: 'general',
       priority: 'normal',
       registration_enabled: false,
@@ -113,40 +119,80 @@ export function EventForm({
             <CardTitle className="text-right">פרטי האירוע</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <FormField
-              control={form.control}
-              name="title"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>כותרת האירוע *</FormLabel>
-                  <FormControl>
-                    <Input placeholder="הזן כותרת לאירוע..." {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="title"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>כותרת האירוע (עברית) *</FormLabel>
+                    <FormControl>
+                      <Input placeholder="הזן כותרת לאירוע..." {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>תיאור</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="תיאור האירוע..."
-                      className="min-h-[100px] resize-y"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    תיאור מפורט של האירוע שיוצג למשתתפים
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="title_ru"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>כותרת האירוע (רוסית)</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Введите название..." {...field} dir="ltr" />
+                    </FormControl>
+                    <FormDescription className="text-xs">
+                      אופציונלי - למשתמשי רוסית
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>תיאור (עברית)</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="תיאור האירוע..."
+                        className="min-h-[100px] resize-y"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="description_ru"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>תיאור (רוסית)</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Описание..."
+                        className="min-h-[100px] resize-y"
+                        {...field}
+                        dir="ltr"
+                      />
+                    </FormControl>
+                    <FormDescription className="text-xs">
+                      אופציונלי - למשתמשי רוסית
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
@@ -249,22 +295,44 @@ export function EventForm({
               />
             </div>
 
-            <FormField
-              control={form.control}
-              name="location"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="flex items-center gap-2">
-                    <MapPin className="h-4 w-4" />
-                    מיקום
-                  </FormLabel>
-                  <FormControl>
-                    <Input placeholder="מיקום האירוע..." {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="location"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center gap-2">
+                      <MapPin className="h-4 w-4" />
+                      מיקום (עברית)
+                    </FormLabel>
+                    <FormControl>
+                      <Input placeholder="מיקום האירוע..." {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="location_ru"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center gap-2">
+                      <MapPin className="h-4 w-4" />
+                      מיקום (רוסית)
+                    </FormLabel>
+                    <FormControl>
+                      <Input placeholder="Место..." {...field} dir="ltr" />
+                    </FormControl>
+                    <FormDescription className="text-xs">
+                      אופציונלי - למשתמשי רוסית
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
           </CardContent>
         </Card>
 

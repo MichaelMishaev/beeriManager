@@ -2,10 +2,13 @@
 export interface Event {
   id: string
   title: string
+  title_ru?: string
   description?: string
+  description_ru?: string
   start_datetime: string
   end_datetime?: string
   location?: string
+  location_ru?: string
 
   // Recurring events
   recurrence_rule?: string

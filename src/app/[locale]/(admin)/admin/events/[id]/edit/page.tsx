@@ -18,11 +18,14 @@ import { format } from 'date-fns'
 
 const eventSchema = z.object({
   title: z.string().min(2, 'כותרת חייבת להכיל לפחות 2 תווים'),
+  title_ru: z.string().optional(),
   description: z.string().optional(),
+  description_ru: z.string().optional(),
   event_type: z.enum(['general', 'meeting', 'fundraiser', 'trip', 'workshop']),
   priority: z.enum(['low', 'normal', 'high', 'urgent']),
   status: z.enum(['draft', 'published', 'cancelled']),
   location: z.string().optional(),
+  location_ru: z.string().optional(),
   start_date: z.string().min(1, 'תאריך התחלה נדרש'),
   start_time: z.string().min(1, 'שעת התחלה נדרשת'),
   end_date: z.string().optional(),
@@ -77,11 +80,14 @@ export default function EditEventPage({ params }: { params: { id: string } }) {
 
         reset({
           title: event.title,
+          title_ru: event.title_ru || '',
           description: event.description || '',
+          description_ru: event.description_ru || '',
           event_type: event.event_type,
           priority: event.priority,
           status: event.status,
           location: event.location || '',
+          location_ru: event.location_ru || '',
           start_date: format(startDate, 'yyyy-MM-dd'),
           start_time: format(startDate, 'HH:mm'),
           end_date: endDate ? format(endDate, 'yyyy-MM-dd') : '',
@@ -122,11 +128,14 @@ export default function EditEventPage({ params }: { params: { id: string } }) {
 
       const eventData = {
         title: data.title,
+        title_ru: data.title_ru || null,
         description: data.description,
+        description_ru: data.description_ru || null,
         event_type: data.event_type,
         priority: data.priority,
         status: data.status,
         location: data.location,
+        location_ru: data.location_ru || null,
         start_datetime: startDateTime,
         end_datetime: endDateTime,
         registration_enabled: data.registration_enabled,
@@ -218,27 +227,54 @@ export default function EditEventPage({ params }: { params: { id: string } }) {
             <CardDescription>מידע בסיסי על האירוע</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="title">כותרת האירוע *</Label>
-              <Input
-                id="title"
-                {...register('title')}
-                placeholder="לדוגמה: ישיבת ועד חודשית"
-                className={errors.title ? 'border-red-500' : ''}
-              />
-              {errors.title && (
-                <p className="text-sm text-red-500 mt-1">{errors.title.message}</p>
-              )}
+            <div className="grid gap-4 md:grid-cols-2">
+              <div>
+                <Label htmlFor="title">כותרת האירוע (עברית) *</Label>
+                <Input
+                  id="title"
+                  {...register('title')}
+                  placeholder="לדוגמה: ישיבת ועד חודשית"
+                  className={errors.title ? 'border-red-500' : ''}
+                />
+                {errors.title && (
+                  <p className="text-sm text-red-500 mt-1">{errors.title.message}</p>
+                )}
+              </div>
+
+              <div>
+                <Label htmlFor="title_ru">כותרת האירוע (רוסית)</Label>
+                <Input
+                  id="title_ru"
+                  {...register('title_ru')}
+                  placeholder="Введите название..."
+                  dir="ltr"
+                />
+                <p className="text-xs text-muted-foreground mt-1">אופציונלי - למשתמשי רוסית</p>
+              </div>
             </div>
 
-            <div>
-              <Label htmlFor="description">תיאור</Label>
-              <Textarea
-                id="description"
-                {...register('description')}
-                placeholder="תיאור מפורט של האירוע..."
-                rows={4}
-              />
+            <div className="grid gap-4 md:grid-cols-2">
+              <div>
+                <Label htmlFor="description">תיאור (עברית)</Label>
+                <Textarea
+                  id="description"
+                  {...register('description')}
+                  placeholder="תיאור מפורט של האירוע..."
+                  rows={4}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="description_ru">תיאור (רוסית)</Label>
+                <Textarea
+                  id="description_ru"
+                  {...register('description_ru')}
+                  placeholder="Описание..."
+                  rows={4}
+                  dir="ltr"
+                />
+                <p className="text-xs text-muted-foreground mt-1">אופציונלי - למשתמשי רוסית</p>
+              </div>
             </div>
 
             <div className="grid gap-4 md:grid-cols-3">
@@ -306,16 +342,31 @@ export default function EditEventPage({ params }: { params: { id: string } }) {
             <CardDescription>מתי ואיפה האירוע מתקיים</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="location">מיקום</Label>
-              <div className="relative">
-                <MapPin className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
+            <div className="grid gap-4 md:grid-cols-2">
+              <div>
+                <Label htmlFor="location" className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4" />
+                  מיקום (עברית)
+                </Label>
                 <Input
                   id="location"
                   {...register('location')}
                   placeholder="כתובת או שם המקום"
-                  className="pr-10"
                 />
+              </div>
+
+              <div>
+                <Label htmlFor="location_ru" className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4" />
+                  מיקום (רוסית)
+                </Label>
+                <Input
+                  id="location_ru"
+                  {...register('location_ru')}
+                  placeholder="Место..."
+                  dir="ltr"
+                />
+                <p className="text-xs text-muted-foreground mt-1">אופציונלי - למשתמשי רוסית</p>
               </div>
             </div>
 

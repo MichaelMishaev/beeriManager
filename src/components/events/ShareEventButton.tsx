@@ -60,6 +60,11 @@ export function ShareEventButton({ event, variant = 'outline', size = 'sm' }: Sh
     const t = translations[locale]
     const eventType = eventTypeLabels[locale][event.event_type] || event.event_type
 
+    // Get localized content - fallback to Hebrew if Russian not available
+    const title = (locale === 'ru' && event.title_ru) ? event.title_ru : event.title
+    const description = (locale === 'ru' && event.description_ru) ? event.description_ru : event.description
+    const location = (locale === 'ru' && event.location_ru) ? event.location_ru : event.location
+
     // Get locale code for date formatting
     const localeCode = locale === 'ru' ? 'ru-RU' : 'he-IL'
 
@@ -88,16 +93,16 @@ export function ShareEventButton({ event, variant = 'outline', size = 'sm' }: Sh
     }
 
     // Build location text
-    const locationText = event.location
-      ? `\n📍 ${t.location}: ${event.location}`
+    const locationText = location
+      ? `\n📍 ${t.location}: ${location}`
       : ''
 
     // Build description text
-    const descriptionText = event.description
-      ? `\n\n${event.description.slice(0, 150)}${event.description.length > 150 ? '...' : ''}`
+    const descriptionText = description
+      ? `\n\n${description.slice(0, 150)}${description.length > 150 ? '...' : ''}`
       : ''
 
-    const text = `📅 *${event.title}*\n\n🏷️ ${t.type}: ${eventType}\n📆 ${dateStr}\n${timeDisplay}${locationText}${descriptionText}\n\n🔗 ${t.viewFull}:\n${url}`
+    const text = `📅 *${title}*\n\n🏷️ ${t.type}: ${eventType}\n📆 ${dateStr}\n${timeDisplay}${locationText}${descriptionText}\n\n🔗 ${t.viewFull}:\n${url}`
 
     if (navigator.share) {
       try {

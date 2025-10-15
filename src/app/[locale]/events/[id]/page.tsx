@@ -90,6 +90,11 @@ export default function EventPage() {
   const endDate = event.end_datetime ? new Date(event.end_datetime) : null
   const localeCode = locale === 'ru' ? 'ru-RU' : 'he-IL'
 
+  // Get localized content - fallback to Hebrew if Russian not available
+  const title = (locale === 'ru' && event.title_ru) ? event.title_ru : event.title
+  const description = (locale === 'ru' && event.description_ru) ? event.description_ru : event.description
+  const location = (locale === 'ru' && event.location_ru) ? event.location_ru : event.location
+
   return (
     <div className="container mx-auto px-4 py-6 max-w-4xl">
       {/* Breadcrumb */}
@@ -106,7 +111,7 @@ export default function EventPage() {
       {/* Event Header */}
       <div className="mb-6">
         <div className="flex items-start justify-between mb-3">
-          <h1 className="text-3xl font-bold text-foreground">{event.title}</h1>
+          <h1 className="text-3xl font-bold text-foreground">{title}</h1>
           <div className="flex items-center gap-2">
             <Badge className={getEventTypeColor(event.event_type)}>
               {getEventTypeLabel(event.event_type)}
@@ -164,7 +169,7 @@ export default function EventPage() {
         </Card>
 
         {/* Location Card */}
-        {event.location && (
+        {location && (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg">
@@ -173,7 +178,7 @@ export default function EventPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm">{event.location}</p>
+              <p className="text-sm">{location}</p>
             </CardContent>
           </Card>
         )}
@@ -223,7 +228,7 @@ export default function EventPage() {
         </CardHeader>
         <CardContent>
           <p className="text-sm leading-relaxed whitespace-pre-wrap">
-            {event.description}
+            {description}
           </p>
         </CardContent>
       </Card>

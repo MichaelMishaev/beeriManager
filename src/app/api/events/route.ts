@@ -6,10 +6,13 @@ import { z } from 'zod'
 // Event validation schema
 const EventSchema = z.object({
   title: z.string().min(2, 'כותרת חייבת להכיל לפחות 2 תווים'),
+  title_ru: z.string().optional().nullable(),
   description: z.string().optional().nullable(),
+  description_ru: z.string().optional().nullable(),
   start_datetime: z.string().datetime('תאריך ושעה לא תקינים'),
   end_datetime: z.string().datetime('תאריך ושעה לא תקינים').optional().nullable(),
   location: z.string().optional().nullable(),
+  location_ru: z.string().optional().nullable(),
   event_type: z.enum(['general', 'meeting', 'fundraiser', 'trip', 'workshop']),
   priority: z.enum(['low', 'normal', 'high', 'urgent']).default('normal'),
   registration_enabled: z.boolean().default(false),

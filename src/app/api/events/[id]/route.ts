@@ -6,10 +6,13 @@ import { z } from 'zod'
 // Event update schema (all fields optional)
 const EventUpdateSchema = z.object({
   title: z.string().min(2).optional(),
+  title_ru: z.string().nullable().optional(),
   description: z.string().optional(),
+  description_ru: z.string().nullable().optional(),
   start_datetime: z.string().datetime().optional(),
   end_datetime: z.string().datetime().nullable().optional(),
   location: z.string().optional(),
+  location_ru: z.string().nullable().optional(),
   event_type: z.enum(['general', 'meeting', 'fundraiser', 'trip', 'workshop']).optional(),
   priority: z.enum(['low', 'normal', 'high', 'urgent']).optional(),
   status: z.enum(['draft', 'published', 'ongoing', 'completed', 'cancelled']).optional(),

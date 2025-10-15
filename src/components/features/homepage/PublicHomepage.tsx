@@ -22,8 +22,12 @@ interface PublicHomepageProps {
   calendarEvents: CalendarEvent[]
 }
 
-function EventItem({ event, dateLocale }: { event: Event; dateLocale: typeof he | typeof ru }) {
+function EventItem({ event, dateLocale, locale }: { event: Event; dateLocale: typeof he | typeof ru; locale: Locale }) {
   const startDate = new Date(event.start_datetime)
+
+  // Get localized content - fallback to Hebrew if Russian not available
+  const title = (locale === 'ru' && event.title_ru) ? event.title_ru : event.title
+  const description = (locale === 'ru' && event.description_ru) ? event.description_ru : event.description
 
   return (
     <Link href={`/events/${event.id}`} className="block group">
@@ -43,11 +47,11 @@ function EventItem({ event, dateLocale }: { event: Event; dateLocale: typeof he 
         {/* Event Info */}
         <div className="flex-1 min-w-0">
           <h3 className="text-lg font-semibold text-[#003153] mb-1 group-hover:text-[#0D98BA] transition-colors leading-snug">
-            {event.title}
+            {title}
           </h3>
-          {event.description && (
+          {description && (
             <p className="text-sm text-gray-600 line-clamp-2 mb-2">
-              {event.description}
+              {description}
             </p>
           )}
           <div className="flex items-center gap-2 text-sm text-gray-500">
@@ -139,6 +143,10 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
             <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
               {eventsWithPhotos.map((event) => {
                 const eventDate = new Date(event.start_datetime)
+                // Get localized content - fallback to Hebrew if Russian not available
+                const title = (currentLocale === 'ru' && event.title_ru) ? event.title_ru : event.title
+                const location = (currentLocale === 'ru' && event.location_ru) ? event.location_ru : event.location
+
                 return (
                   <Card
                     key={event.id}
@@ -153,13 +161,13 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
                           </div>
                         </div>
                         <CardTitle className="text-base leading-tight line-clamp-2">
-                          {event.title}
+                          {title}
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="pt-0">
-                        {event.location && (
+                        {location && (
                           <p className="text-xs text-muted-foreground mb-3 line-clamp-1">
-                            📍 {event.location}
+                            📍 {location}
                           </p>
                         )}
                         <Button size="sm" variant="outline" className="w-full gap-2">
@@ -197,7 +205,7 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
                 {upcomingEvents.length > 0 ? (
                   <>
                     {upcomingEvents.slice(0, 5).map((event) => (
-                      <EventItem key={event.id} event={event} dateLocale={dateLocale} />
+                      <EventItem key={event.id} event={event} dateLocale={dateLocale} locale={currentLocale} />
                     ))}
                     {upcomingEvents.length > 5 && (
                       <div className="text-center pt-4">
