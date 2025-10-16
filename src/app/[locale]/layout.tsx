@@ -9,6 +9,7 @@ import { Toaster } from '@/components/ui/toaster'
 import { Navigation } from '@/components/layout/Navigation'
 import { GoogleAnalytics } from '@/components/analytics/GoogleAnalytics'
 import { HtmlAttributes } from '@/components/HtmlAttributes'
+import { IOSInstallPrompt } from '@/components/pwa/IOSInstallPrompt'
 import { locales, localeDirections, type Locale } from '@/i18n/config'
 
 const heebo = Heebo({
@@ -45,6 +46,37 @@ export const metadata: Metadata = {
     capable: true,
     statusBarStyle: 'default',
     title: 'פורטל בארי',
+    startupImage: [
+      {
+        url: '/icons/apple-splash-2048-2732.png',
+        media: '(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2)',
+      },
+      {
+        url: '/icons/apple-splash-1668-2388.png',
+        media: '(device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2)',
+      },
+      {
+        url: '/icons/apple-splash-1536-2048.png',
+        media: '(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2)',
+      },
+      {
+        url: '/icons/apple-splash-1170-2532.png',
+        media: '(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3)',
+      },
+      {
+        url: '/icons/apple-splash-1125-2436.png',
+        media: '(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3)',
+      },
+    ],
+  },
+  icons: {
+    icon: [
+      { url: '/icons/icon-192x192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/icons/icon-512x512.png', sizes: '512x512', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/icons/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+    ],
   },
   other: {
     'mobile-web-app-capable': 'yes',
@@ -95,6 +127,7 @@ export default async function LocaleLayout({
           <Providers>
             <Navigation />
             {children}
+            <IOSInstallPrompt />
           </Providers>
           <Toaster />
         </NextIntlClientProvider>
