@@ -228,5 +228,15 @@
     "saveFailed": "השמירה נכשלה",
     "saveFailedDescription": "אנא נסה שנית",
     "helpText": "תוכן משותף יישמר ויהיה זמין למנהלים לעיון"
+  },
+  "whiteShirtBanner": {
+    "tomorrowTitle": "👕 תזכורת: מחר יום שישי - חולצה לבנה!",
+    "todayTitle": "👕 תזכורת: היום חולצה לבנה!",
+    "description": "כל תלמידי בית הספר",
+    "dismiss": "סגור",
+    "share": "שתף תזכורת",
+    "shareSuccess": "הועתק ללוח!",
+    "shareTitle": "תזכורת חולצה לבנה - בית ספר בארי",
+    "shareText": "👕 תזכורת: יום שישי - חולצה לבנה!\n\nכל תלמידי בית הספר בארי 💙"
   }
 }
