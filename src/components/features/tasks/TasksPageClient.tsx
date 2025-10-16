@@ -51,8 +51,15 @@ export function TasksPageClient({ initialTasks, initialStats, availableTags }: T
   }
 
   const handleShareTasks = async () => {
-    // Filter out completed tasks
-    const tasksToShare = filteredTasks.filter(task => task.status !== 'completed')
+    // IMPORTANT: Filter out completed tasks - only share active tasks
+    const tasksToShare = filteredTasks.filter(task => {
+      // Defensive check: ensure task and status exist
+      if (!task || !task.status) return false
+
+      // Exclude completed tasks (case-insensitive and trimmed)
+      const status = task.status.toString().toLowerCase().trim()
+      return status !== 'completed'
+    })
 
     if (tasksToShare.length === 0) {
       toast({
@@ -68,13 +75,18 @@ export function TasksPageClient({ initialTasks, initialStats, availableTags }: T
     // Format as WhatsApp table
     let shareText = '📋 *רשימת משימות - פורטל בארי*\n\n'
 
-    tasksToShare.forEach((task, index) => {
+    let taskCounter = 0
+    tasksToShare.forEach((task) => {
+      // Double-check: skip if somehow a completed task got through
+      if (task.status === 'completed') return
+
+      taskCounter++
       const taskUrl = `${baseUrl}/${task.id}`
       const status = task.status === 'pending' ? '⏳' :
                      task.status === 'in_progress' ? '🔄' : '❓'
 
       // Add task title and status
-      shareText += `${index + 1}. ${status} ${task.title}\n`
+      shareText += `${taskCounter}. ${status} ${task.title}\n`
 
       // Add tags if present
       if (task.tags && task.tags.length > 0) {
@@ -88,7 +100,7 @@ export function TasksPageClient({ initialTasks, initialStats, availableTags }: T
       shareText += `${taskUrl}\n\n`
     })
 
-    shareText += `סה"כ: ${tasksToShare.length} משימות`
+    shareText += `סה"כ: ${taskCounter} משימות`
 
     // Try native share API first (mobile)
     if (navigator.share) {
