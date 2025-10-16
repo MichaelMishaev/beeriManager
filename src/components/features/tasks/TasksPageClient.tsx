@@ -176,8 +176,7 @@ export function TasksPageClient({ initialTasks, initialStats, availableTags }: T
         if (task.owner_name?.toLowerCase().includes(query)) return true
         // Search in tags
         if (task.tags?.some(tag =>
-          tag.name_he.toLowerCase().includes(query) ||
-          tag.name_en?.toLowerCase().includes(query)
+          tag.name_he.toLowerCase().includes(query)
         )) return true
         return false
       })
