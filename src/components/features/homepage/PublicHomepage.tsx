@@ -24,17 +24,56 @@ interface PublicHomepageProps {
 
 function EventItem({ event, dateLocale, locale }: { event: Event; dateLocale: typeof he | typeof ru; locale: Locale }) {
   const startDate = new Date(event.start_datetime)
+  const now = new Date()
 
   // Get localized content - fallback to Hebrew if Russian not available
   const title = (locale === 'ru' && event.title_ru) ? event.title_ru : event.title
   const description = (locale === 'ru' && event.description_ru) ? event.description_ru : event.description
+
+  // Calculate end time: use end_datetime if available, otherwise start + 2 hours
+  const endDate = event.end_datetime
+    ? new Date(event.end_datetime)
+    : new Date(startDate.getTime() + 2 * 60 * 60 * 1000) // Add 2 hours
+
+  // Determine event status
+  const isHappeningNow = now >= startDate && now <= endDate
+  const isStartingSoon = !isHappeningNow && (startDate.getTime() - now.getTime()) <= 60 * 60 * 1000 // Within 1 hour
+  const hasEnded = now > endDate
+
+  // Status badge configuration
+  const statusConfig = isHappeningNow
+    ? {
+        text: locale === 'ru' ? 'Сейчас' : 'מתקיים כעת',
+        bgColor: 'bg-red-500',
+        textColor: 'text-white',
+        showPulse: true
+      }
+    : isStartingSoon
+    ? {
+        text: locale === 'ru' ? 'Скоро' : 'בקרוב',
+        bgColor: 'bg-orange-500',
+        textColor: 'text-white',
+        showPulse: false
+      }
+    : hasEnded
+    ? {
+        text: locale === 'ru' ? 'Завершено' : 'הסתיים',
+        bgColor: 'bg-gray-400',
+        textColor: 'text-white',
+        showPulse: false
+      }
+    : null
 
   return (
     <Link href={`/events/${event.id}`} className="block group">
       <div className="flex items-start gap-4 p-4 rounded-xl hover:bg-gray-50 transition-all duration-200">
         {/* Larger, More Prominent Date Box */}
         <div className="flex-shrink-0">
-          <div className="w-16 h-16 bg-gradient-to-br from-[#0D98BA] to-[#003153] rounded-xl flex flex-col items-center justify-center text-white shadow-md group-hover:shadow-lg transition-shadow">
+          <div className={`w-16 h-16 rounded-xl flex flex-col items-center justify-center text-white shadow-md group-hover:shadow-lg transition-shadow ${
+            isHappeningNow
+              ? 'bg-gradient-to-br from-red-500 to-red-700'
+              : 'bg-gradient-to-br from-[#0D98BA] to-[#003153]'
+          }`}>
             <div className="text-2xl font-bold leading-none">
               {format(startDate, 'd', { locale: dateLocale })}
             </div>
@@ -46,9 +85,21 @@ function EventItem({ event, dateLocale, locale }: { event: Event; dateLocale: ty
 
         {/* Event Info */}
         <div className="flex-1 min-w-0">
-          <h3 className="text-lg font-semibold text-[#003153] mb-1 group-hover:text-[#0D98BA] transition-colors leading-snug">
-            {title}
-          </h3>
+          <div className="flex items-center gap-2 mb-1">
+            <h3 className="text-lg font-semibold text-[#003153] group-hover:text-[#0D98BA] transition-colors leading-snug">
+              {title}
+            </h3>
+            {statusConfig && (
+              <div className="relative">
+                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${statusConfig.bgColor} ${statusConfig.textColor}`}>
+                  {statusConfig.showPulse && (
+                    <span className="absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75 animate-ping"></span>
+                  )}
+                  <span className="relative">{statusConfig.text}</span>
+                </span>
+              </div>
+            )}
+          </div>
           {description && (
             <p className="text-sm text-gray-600 line-clamp-2 mb-2">
               {description}
