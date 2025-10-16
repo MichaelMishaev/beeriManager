@@ -37,7 +37,8 @@ function EventItem({ event, dateLocale, locale }: { event: Event; dateLocale: ty
 
   // Determine event status
   const isHappeningNow = now >= startDate && now <= endDate
-  const isStartingSoon = !isHappeningNow && (startDate.getTime() - now.getTime()) <= 60 * 60 * 1000 // Within 1 hour
+  const timeDiff = startDate.getTime() - now.getTime()
+  const isStartingSoon = !isHappeningNow && timeDiff > 0 && timeDiff <= 60 * 60 * 1000 // Within 1 hour (future only)
   const hasEnded = now > endDate
 
   // Status badge configuration
