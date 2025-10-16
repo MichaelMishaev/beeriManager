@@ -67,6 +67,9 @@ export function IOSInstallPrompt() {
       }, 5000)
       return () => clearTimeout(timer)
     }
+
+    // Return undefined for other cases (TypeScript requirement)
+    return undefined
   }, [])
 
   const handleClose = () => {
