@@ -1,14 +1,16 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
-import { CheckSquare, Plus, X, AlertCircle, Clock, UserCheck, Tags as TagsIcon } from 'lucide-react'
+import { useRouter, useSearchParams, useParams } from 'next/navigation'
+import { CheckSquare, Plus, X, AlertCircle, Clock, UserCheck, Tags as TagsIcon, Share2, Search } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
 import { TaskCard } from '@/components/features/tasks/TaskCard'
 import Link from 'next/link'
 import type { Task, Tag } from '@/types'
+import type { Locale } from '@/i18n/config'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,6 +19,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu'
+import { useToast } from '@/hooks/use-toast'
 
 interface TasksPageClientProps {
   initialTasks: Task[]
@@ -34,17 +37,109 @@ type TaskStatus = 'pending' | 'in_progress' | 'completed' | 'overdue'
 export function TasksPageClient({ initialTasks, initialStats, availableTags }: TasksPageClientProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const params = useParams()
+  const { toast } = useToast()
   const [tasks, setTasks] = useState<Task[]>(initialTasks)
   const [stats] = useState(initialStats)
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([])
+  const [searchQuery, setSearchQuery] = useState<string>('')
+
+  const locale = (params?.locale || 'he') as Locale
 
   const handleTaskTagsUpdated = (updatedTask: Task) => {
     setTasks(prev => prev.map(t => t.id === updatedTask.id ? updatedTask : t))
   }
 
+  const handleShareTasks = async () => {
+    // Filter out completed tasks
+    const tasksToShare = filteredTasks.filter(task => task.status !== 'completed')
+
+    if (tasksToShare.length === 0) {
+      toast({
+        title: 'אין משימות לשיתוף',
+        description: 'לא נמצאו משימות פעילות להצגה',
+        variant: 'destructive'
+      })
+      return
+    }
+
+    const baseUrl = `https://beeri.online/${locale}/tasks`
+
+    // Format as WhatsApp table
+    let shareText = '📋 *רשימת משימות - פורטל בארי*\n\n'
+
+    tasksToShare.forEach((task, index) => {
+      const taskUrl = `${baseUrl}/${task.id}`
+      const status = task.status === 'pending' ? '⏳' :
+                     task.status === 'in_progress' ? '🔄' : '❓'
+
+      // Add task title and status
+      shareText += `${index + 1}. ${status} ${task.title}\n`
+
+      // Add tags if present
+      if (task.tags && task.tags.length > 0) {
+        const tagsList = task.tags
+          .map(tag => `${tag.emoji || ''} ${tag.name_he}`.trim())
+          .join(', ')
+        shareText += `תגיות: ${tagsList}\n`
+      }
+
+      // Add URL
+      shareText += `${taskUrl}\n\n`
+    })
+
+    shareText += `סה"כ: ${tasksToShare.length} משימות`
+
+    // Try native share API first (mobile)
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'רשימת משימות - פורטל בארי',
+          text: shareText
+        })
+        // Share succeeded - do nothing, no toast
+        return
+      } catch (err) {
+        const error = err as Error
+        // User cancelled the share - do nothing
+        if (error.name === 'AbortError') {
+          return
+        }
+        // Share failed for other reason - fall through to clipboard
+        console.error('Share failed:', err)
+      }
+    }
+
+    // Fallback: Copy to clipboard (desktop only)
+    try {
+      await navigator.clipboard.writeText(shareText)
+      // No toast - silent copy
+    } catch (err) {
+      // Final fallback with textarea
+      const textArea = document.createElement('textarea')
+      textArea.value = shareText
+      textArea.style.position = 'fixed'
+      textArea.style.left = '-999999px'
+      document.body.appendChild(textArea)
+      textArea.select()
+      try {
+        document.execCommand('copy')
+        // No toast - silent copy
+      } catch (err2) {
+        // Only show error toast if everything failed
+        toast({
+          title: 'שגיאה',
+          description: 'לא ניתן לשתף משימות',
+          variant: 'destructive'
+        })
+      }
+      document.body.removeChild(textArea)
+    }
+  }
+
   const statusFilter = (searchParams?.get('status') as TaskStatus) || null
 
-  // Filter tasks based on status and tags
+  // Filter tasks based on status, tags, and search query
   const filteredTasks = useMemo(() => {
     let filtered = tasks
 
@@ -69,8 +164,27 @@ export function TasksPageClient({ initialTasks, initialStats, availableTags }: T
       })
     }
 
+    // Apply search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim()
+      filtered = filtered.filter(task => {
+        // Search in title
+        if (task.title.toLowerCase().includes(query)) return true
+        // Search in description
+        if (task.description?.toLowerCase().includes(query)) return true
+        // Search in owner name
+        if (task.owner_name?.toLowerCase().includes(query)) return true
+        // Search in tags
+        if (task.tags?.some(tag =>
+          tag.name_he.toLowerCase().includes(query) ||
+          tag.name_en?.toLowerCase().includes(query)
+        )) return true
+        return false
+      })
+    }
+
     return filtered
-  }, [tasks, statusFilter, selectedTagIds])
+  }, [tasks, statusFilter, selectedTagIds, searchQuery])
 
   // Group filtered tasks
   const tasksByStatus = useMemo(() => ({
@@ -87,6 +201,7 @@ export function TasksPageClient({ initialTasks, initialStats, availableTags }: T
   const handleClearFilter = () => {
     router.push('/tasks', { scroll: false })
     setSelectedTagIds([])
+    setSearchQuery('')
   }
 
   const handleToggleTag = (tagId: string) => {
@@ -170,7 +285,27 @@ export function TasksPageClient({ initialTasks, initialStats, availableTags }: T
         </CardContent>
       </Card>
 
-      {/* Tag Filter Dropdown */}
+      {/* Search Bar */}
+      <div className="relative">
+        <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          type="text"
+          placeholder="חיפוש לפי כותרת, תיאור, אחראי או תגיות..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pr-10"
+        />
+        {searchQuery && (
+          <button
+            onClick={() => setSearchQuery('')}
+            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        )}
+      </div>
+
+      {/* Tag Filter Dropdown and Share Button */}
       <div className="flex items-center gap-2 flex-wrap">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -213,6 +348,16 @@ export function TasksPageClient({ initialTasks, initialStats, availableTags }: T
           </DropdownMenuContent>
         </DropdownMenu>
 
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleShareTasks}
+          disabled={filteredTasks.filter(t => t.status !== 'completed').length === 0}
+        >
+          <Share2 className="h-4 w-4 ml-2" />
+          שתף משימות
+        </Button>
+
         {/* Active Tag Filters */}
         {selectedTagIds.length > 0 && (
           <div className="flex items-center gap-2 flex-wrap">
@@ -242,8 +387,8 @@ export function TasksPageClient({ initialTasks, initialStats, availableTags }: T
       </div>
 
       {/* Active Filter Badge with Clear Button */}
-      {(statusFilter || selectedTagIds.length > 0) && (
-        <div className="flex items-center gap-2">
+      {(statusFilter || selectedTagIds.length > 0 || searchQuery) && (
+        <div className="flex items-center gap-2 flex-wrap">
           {statusFilter && (
             <Badge variant="secondary" className="text-base py-2 px-4">
               סטטוס: {
@@ -252,6 +397,11 @@ export function TasksPageClient({ initialTasks, initialStats, availableTags }: T
                 statusFilter === 'completed' ? 'הושלמו' :
                 'באיחור'
               }
+            </Badge>
+          )}
+          {searchQuery && (
+            <Badge variant="secondary" className="text-base py-2 px-4">
+              חיפוש: "{searchQuery}"
             </Badge>
           )}
           <Button
@@ -270,13 +420,15 @@ export function TasksPageClient({ initialTasks, initialStats, availableTags }: T
       )}
 
       {/* No Results */}
-      {filteredTasks.length === 0 && statusFilter && (
+      {filteredTasks.length === 0 && (statusFilter || searchQuery || selectedTagIds.length > 0) && (
         <Card>
           <CardContent className="py-12 text-center">
             <AlertCircle className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
             <h3 className="text-lg font-semibold mb-2">לא נמצאו משימות</h3>
             <p className="text-muted-foreground mb-4">
-              אין משימות בסטטוס זה
+              {searchQuery ? `לא נמצאו תוצאות עבור "${searchQuery}"` :
+               statusFilter ? 'אין משימות בסטטוס זה' :
+               'אין משימות התואמות את הסינון'}
             </p>
             <Button variant="outline" size="sm" onClick={handleClearFilter}>
               הצג את כל המשימות
