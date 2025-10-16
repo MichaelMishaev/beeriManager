@@ -247,14 +247,14 @@ export function MobileCalendar({
                 {dayEvents.length > 0 && (
                   <div className="absolute bottom-1 flex space-x-0.5 flex-wrap justify-center">
                     {dayEvents.slice(0, 3).map((event, index) => (
-                      <button
+                      <div
                         key={`${event.id}-${index}`}
                         onClick={(e) => {
                           e.stopPropagation()
                           handleEventClick(event)
                         }}
                         className={`
-                          w-1.5 h-1.5 rounded-full transition-all touch-manipulation
+                          w-1.5 h-1.5 rounded-full transition-all touch-manipulation cursor-pointer
                           ${EVENT_CONFIG[event.type].color}
                           hover:scale-125 active:scale-150
                         `}

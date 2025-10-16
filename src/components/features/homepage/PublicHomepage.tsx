@@ -31,9 +31,15 @@ function EventItem({ event, dateLocale, locale }: { event: Event; dateLocale: ty
   const description = (locale === 'ru' && event.description_ru) ? event.description_ru : event.description
 
   // Calculate end time: use end_datetime if available, otherwise start + 2 hours
-  const endDate = event.end_datetime
-    ? new Date(event.end_datetime)
-    : new Date(startDate.getTime() + 2 * 60 * 60 * 1000) // Add 2 hours
+  // Only use end_datetime if it's valid and after start time
+  const endDateTime = event.end_datetime ? new Date(event.end_datetime) : null
+  const isValidEndDate = endDateTime &&
+                         !isNaN(endDateTime.getTime()) &&
+                         endDateTime.getTime() > startDate.getTime()
+
+  const endDate = isValidEndDate
+    ? endDateTime!
+    : new Date(startDate.getTime() + 2 * 60 * 60 * 1000) // Fallback: start + 2 hours
 
   // Determine event status
   const isHappeningNow = now >= startDate && now <= endDate
