@@ -7,6 +7,6 @@
     </linearGradient>
   </defs>
   <rect width="512" height="512" fill="url(#grad)" rx="51.2"/>
-  <text x="50%" y="45%" font-family="Arial, sans-serif" font-size="72" font-weight="bold" fill="white" text-anchor="middle" dominant-baseline="middle" direction="rtl">פורטל</text>
-  <text x="50%" y="58%" font-family="Arial, sans-serif" font-size="85" font-weight="bold" fill="#FFBA00" text-anchor="middle" dominant-baseline="middle" direction="rtl">בארי</text>
+  <text x="50%" y="45%" font-family="Arial, sans-serif" font-size="72" font-weight="bold" fill="white" text-anchor="middle" dominant-baseline="middle" unicode-bidi="bidi-override" direction="rtl">לטרופ</text>
+  <text x="50%" y="58%" font-family="Arial, sans-serif" font-size="85" font-weight="bold" fill="#FFBA00" text-anchor="middle" dominant-baseline="middle" unicode-bidi="bidi-override" direction="rtl">יראב</text>
 </svg>

@@ -46,7 +46,7 @@ export const metadata: Metadata = {
     locale: 'he_IL',
     url: 'https://beeri.online',
     siteName: 'פורטל בארי',
-    title: 'פורטל בארי - BeeriManager',
+    title: 'פורטל בארי',
     description: 'פורטל בית הספר בארי - אירועים, משימות, הוצאות ועוד',
     images: [
       {
@@ -59,7 +59,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary',
-    title: 'פורטל בארי - BeeriManager',
+    title: 'פורטל בארי',
     description: 'פורטל בית הספר בארי - אירועים, משימות, הוצאות ועוד',
     images: ['/icons/icon-512x512.png'],
   },
