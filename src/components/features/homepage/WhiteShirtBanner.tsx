@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { X, Shirt, Share2 } from 'lucide-react'
+import { X, Shirt } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useParams } from 'next/navigation'
 import type { Locale } from '@/i18n/config'
