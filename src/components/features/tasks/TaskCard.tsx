@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { CheckSquare, Square, Clock, User, AlertCircle, Calendar } from 'lucide-react'
+import { CheckSquare, Square, Clock, AlertCircle, Calendar } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -163,7 +163,6 @@ export function TaskCard({
 
               <div className="flex items-center gap-4 text-sm text-muted-foreground mb-2">
                 <div className="flex items-center gap-1">
-                  <User className="h-4 w-4" />
                   <span>{task.owner_name}</span>
                 </div>
                 {dueDate && (
@@ -271,7 +270,6 @@ export function TaskCard({
 
             <div className="flex items-center gap-4 text-sm text-muted-foreground">
               <div className="flex items-center gap-1">
-                <User className="h-4 w-4" />
                 <span>{task.owner_name}</span>
                 {task.owner_phone && (
                   <span className="text-xs">({task.owner_phone})</span>
