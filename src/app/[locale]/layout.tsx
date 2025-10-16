@@ -41,6 +41,28 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
+  openGraph: {
+    type: 'website',
+    locale: 'he_IL',
+    url: 'https://beeri.online',
+    siteName: 'פורטל בארי',
+    title: 'פורטל בארי - BeeriManager',
+    description: 'פורטל בית הספר בארי - אירועים, משימות, הוצאות ועוד',
+    images: [
+      {
+        url: '/icons/icon-512x512.png',
+        width: 512,
+        height: 512,
+        alt: 'פורטל בארי',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary',
+    title: 'פורטל בארי - BeeriManager',
+    description: 'פורטל בית הספר בארי - אירועים, משימות, הוצאות ועוד',
+    images: ['/icons/icon-512x512.png'],
+  },
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,

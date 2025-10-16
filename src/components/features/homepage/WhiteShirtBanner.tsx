@@ -68,14 +68,15 @@ export function WhiteShirtBanner() {
   const handleShare = async () => {
     const shareUrl = `https://beeri.online/${locale}`
     const shareTitle = t('shareTitle')
-    const shareText = `${t('shareText')}\n\n${shareUrl}`
+    const shareTextOnly = t('shareText')
+    const shareTextWithUrl = `${shareTextOnly}\n\n${shareUrl}`
 
     // Try native share API first (mobile)
     if (navigator.share) {
       try {
         await navigator.share({
           title: shareTitle,
-          text: shareText,
+          text: shareTextOnly,
           url: shareUrl
         })
         return
@@ -87,16 +88,16 @@ export function WhiteShirtBanner() {
       }
     }
 
-    // Fallback: Copy to clipboard
+    // Fallback: Copy to clipboard (include URL in text)
     try {
-      await navigator.clipboard.writeText(shareText)
+      await navigator.clipboard.writeText(shareTextWithUrl)
       setShowShareSuccess(true)
       setTimeout(() => setShowShareSuccess(false), 3000)
     } catch (err) {
       console.error('Copy to clipboard failed:', err)
       // Final fallback: Create text area and copy
       const textArea = document.createElement('textarea')
-      textArea.value = shareText
+      textArea.value = shareTextWithUrl
       textArea.style.position = 'fixed'
       textArea.style.left = '-999999px'
       document.body.appendChild(textArea)
