@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Bell, Plus, Trash2, Edit2, Save, X, Calendar, AlertTriangle, Info, ShirtIcon as Tshirt } from 'lucide-react'
+import { Bell, Plus, Trash2, Edit2, Save, X, Calendar, ShirtIcon as Tshirt } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
