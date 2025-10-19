@@ -1,9 +1,10 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Phone, Mail, Search, Loader2, User } from 'lucide-react'
+import { Phone, Mail, Search, Loader2, User, Share2 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useParams } from 'next/navigation'
+import { toast } from 'sonner'
 import {
   Dialog,
   DialogContent,
@@ -150,6 +151,33 @@ export function ContactsDialog({ children }: ContactsDialogProps) {
     }
   }
 
+  const handleShare = async () => {
+    const url = `${window.location.origin}/${currentLocale}`
+    const shareData = {
+      title: t('shareTitle'),
+      text: t('shareText'),
+      url: url
+    }
+
+    try {
+      // Try Web Share API first (mobile)
+      if (navigator.share) {
+        await navigator.share(shareData)
+        logger.userAction('Share contacts via Web Share API', { locale: currentLocale })
+      } else {
+        // Fallback: copy to clipboard
+        await navigator.clipboard.writeText(`${shareData.text}\n${url}`)
+        toast.success(t('copied'))
+        logger.userAction('Copy contacts link to clipboard', { locale: currentLocale })
+      }
+    } catch (error) {
+      // User cancelled or error occurred
+      if ((error as Error).name !== 'AbortError') {
+        logger.error('Share contacts failed', { error })
+      }
+    }
+  }
+
   // Group contacts by category
   const groupedContacts = filteredContacts.reduce((acc, contact) => {
     if (!acc[contact.category]) {
@@ -171,13 +199,26 @@ export function ContactsDialog({ children }: ContactsDialogProps) {
       </DialogTrigger>
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-2xl flex items-center gap-2">
-            <Phone className="h-6 w-6" />
-            {t('title')}
-          </DialogTitle>
-          <DialogDescription>
-            {t('description')}
-          </DialogDescription>
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex-1">
+              <DialogTitle className="text-2xl flex items-center gap-2">
+                <Phone className="h-6 w-6" />
+                {t('title')}
+              </DialogTitle>
+              <DialogDescription className="mt-2">
+                {t('description')}
+              </DialogDescription>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleShare}
+              className="flex items-center gap-2 flex-shrink-0"
+            >
+              <Share2 className="h-4 w-4" />
+              <span className="hidden sm:inline">{t('share')}</span>
+            </Button>
+          </div>
         </DialogHeader>
 
         {/* Search Bar */}

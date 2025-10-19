@@ -245,6 +245,10 @@
     "searchPlaceholder": "חיפוש לפי שם, תפקיד או קטגוריה...",
     "noResults": "לא נמצאו תוצאות",
     "noContacts": "אין אנשי קשר",
+    "share": "שתף אנשי קשר",
+    "shareTitle": "אנשי קשר חשובים - פורטל בארי",
+    "shareText": "📞 אנשי קשר חשובים של בית ספר בארי\n\nצפו בכל אנשי הקשר באפליקציה:",
+    "copied": "הקישור הועתק!",
     "categories": {
       "nurse": "אחות",
       "admin": "הנהלה",
