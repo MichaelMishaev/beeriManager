@@ -1,0 +1,24 @@
+[
+  {
+    "id": "1",
+    "name": "דניאלה",
+    "name_ru": "Даниэла",
+    "role": "אחות",
+    "role_ru": "Медсестра",
+    "phone": "050-973-7398",
+    "category": "nurse",
+    "sort_order": 1,
+    "is_public": true
+  },
+  {
+    "id": "2",
+    "name": "מזכירות",
+    "name_ru": "Секретариат",
+    "role": "מזכירות בית הספר",
+    "role_ru": "Секретариат школы",
+    "phone": "09-8330681",
+    "category": "admin",
+    "sort_order": 2,
+    "is_public": true
+  }
+]
