@@ -1,36 +1,44 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { readFile } from 'fs/promises'
-import { join } from 'path'
-import type { UrgentMessage } from '@/types'
+import { createClient } from '@/lib/supabase/server'
+
+export const dynamic = 'force-dynamic'
 
 export async function GET(req: NextRequest) {
   try {
-    const filePath = join(process.cwd(), 'src/data/urgent-messages.json')
-    const fileContents = await readFile(filePath, 'utf-8')
-    const messages: UrgentMessage[] = JSON.parse(fileContents)
+    const supabase = createClient()
+    const { searchParams } = new URL(req.url)
 
     // Check if admin wants all messages (for admin panel)
-    const showAll = req.nextUrl.searchParams.get('all') === 'true'
+    const showAll = searchParams.get('all') === 'true'
 
-    if (showAll) {
-      return NextResponse.json({
-        success: true,
-        data: messages
-      })
+    let query = supabase
+      .from('urgent_messages')
+      .select('*')
+      .order('start_date', { ascending: false })
+
+    if (!showAll) {
+      // Filter only active messages within date range (for public view)
+      const today = new Date().toISOString().split('T')[0]
+
+      query = query
+        .eq('is_active', true)
+        .lte('start_date', today)
+        .gte('end_date', today)
     }
 
-    // Filter only active messages within date range (for public view)
-    const now = new Date()
-    const activeMessages = messages.filter(msg => {
-      if (!msg.is_active) return false
-      const startDate = new Date(msg.start_date)
-      const endDate = new Date(msg.end_date)
-      return now >= startDate && now <= endDate
-    })
+    const { data, error } = await query
+
+    if (error) {
+      console.error('Failed to load urgent messages', error)
+      return NextResponse.json(
+        { success: false, error: 'Failed to load urgent messages' },
+        { status: 500 }
+      )
+    }
 
     return NextResponse.json({
       success: true,
-      data: activeMessages
+      data: data || []
     })
   } catch (error) {
     console.error('Failed to load urgent messages', error)
