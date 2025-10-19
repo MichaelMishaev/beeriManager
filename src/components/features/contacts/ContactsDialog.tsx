@@ -153,22 +153,56 @@ export function ContactsDialog({ children }: ContactsDialogProps) {
 
   const handleShare = async () => {
     const url = `${window.location.origin}/${currentLocale}`
+
+    // Build contacts text with all phone numbers
+    let contactsText = t('shareText') + '\n\n'
+
+    // Group and format contacts
+    const grouped = contacts.reduce((acc, contact) => {
+      if (!acc[contact.category]) {
+        acc[contact.category] = []
+      }
+      acc[contact.category].push(contact)
+      return acc
+    }, {} as Record<string, typeof contacts>)
+
+    // Add contacts by category
+    Object.entries(grouped).forEach(([category, categoryContacts]) => {
+      const categoryName = getCategoryName(category as Contact['category'])
+      contactsText += `${categoryName}:\n`
+
+      categoryContacts.forEach(contact => {
+        const name = (currentLocale === 'ru' && contact.name_ru) ? contact.name_ru : contact.name
+        const role = (currentLocale === 'ru' && contact.role_ru) ? contact.role_ru : contact.role
+        contactsText += `  • ${name}`
+        if (role && role !== name) {
+          contactsText += ` (${role})`
+        }
+        if (contact.phone) {
+          contactsText += ` - ${contact.phone}`
+        }
+        contactsText += '\n'
+      })
+      contactsText += '\n'
+    })
+
+    contactsText += `🌐 ${url}`
+
     const shareData = {
       title: t('shareTitle'),
-      text: t('shareText'),
-      url: url
+      text: contactsText
     }
 
     try {
       // Try Web Share API first (mobile)
       if (navigator.share) {
         await navigator.share(shareData)
-        logger.userAction('Share contacts via Web Share API', { locale: currentLocale })
+        logger.userAction('Share contacts via Web Share API', { locale: currentLocale, contactCount: contacts.length })
       } else {
         // Fallback: copy to clipboard
-        await navigator.clipboard.writeText(`${shareData.text}\n${url}`)
+        await navigator.clipboard.writeText(contactsText)
         toast.success(t('copied'))
-        logger.userAction('Copy contacts link to clipboard', { locale: currentLocale })
+        logger.userAction('Copy contacts to clipboard', { locale: currentLocale, contactCount: contacts.length })
       }
     } catch (error) {
       // User cancelled or error occurred
