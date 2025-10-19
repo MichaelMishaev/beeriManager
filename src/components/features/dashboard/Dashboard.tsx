@@ -8,6 +8,7 @@ import { EventCard } from '@/components/features/events/EventCard'
 import { TaskCard } from '@/components/features/tasks/TaskCard'
 import { CollapsibleCalendarWidget } from '@/components/features/holidays/CollapsibleCalendarWidget'
 import { WhiteShirtBanner } from '@/components/features/homepage/WhiteShirtBanner'
+import { UrgentMessagesBanner } from '@/components/features/urgent/UrgentMessagesBanner'
 import type { DashboardStats, Event, Task, CalendarEvent } from '@/types'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
@@ -234,6 +235,9 @@ export function Dashboard({ stats, upcomingEvents, pendingTasks, calendarEvents 
           {t('subtitle')}
         </p>
       </div>
+
+      {/* Urgent Messages Banner */}
+      <UrgentMessagesBanner />
 
       {/* White Shirt Friday Reminder - Shows Thu 9:00 AM - Fri 9:00 AM */}
       <WhiteShirtBanner />

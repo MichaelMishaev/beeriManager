@@ -10,6 +10,7 @@ import { SchoolStats } from './SchoolStats'
 import { WhatsAppCommunityCard } from '@/components/features/whatsapp/WhatsAppCommunityCard'
 import { TicketsSection } from '@/components/features/tickets/TicketsSection'
 import { WhiteShirtBanner } from './WhiteShirtBanner'
+import { UrgentMessagesBanner } from '@/components/features/urgent/UrgentMessagesBanner'
 import type { Event, CalendarEvent, Ticket } from '@/types'
 import Link from 'next/link'
 import { format } from 'date-fns'
@@ -180,6 +181,9 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
       <SchoolStats variant="cards" />
 
       <div className="container mx-auto px-4 py-4 max-w-6xl">
+        {/* Urgent Messages Banner */}
+        <UrgentMessagesBanner />
+
         {/* White Shirt Friday Reminder - Shows Thu 9:00 AM - Fri 9:00 AM */}
         <WhiteShirtBanner />
 

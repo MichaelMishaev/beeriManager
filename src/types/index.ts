@@ -532,3 +532,30 @@ export interface Contact {
   updated_at: string
   created_by?: string
 }
+
+export interface UrgentMessage {
+  id: string
+  type: 'white_shirt' | 'urgent' | 'info' | 'warning'
+  title_he: string
+  title_ru: string
+  description_he?: string
+  description_ru?: string
+
+  // Display settings
+  is_active: boolean
+  start_date: string // ISO date
+  end_date: string // ISO date
+
+  // Visual
+  icon?: string // emoji
+  color: string // CSS color class (e.g., 'bg-yellow-50')
+
+  // Sharing
+  share_text_he?: string
+  share_text_ru?: string
+
+  // Audit
+  created_at: string
+  updated_at: string
+  created_by?: string
+}

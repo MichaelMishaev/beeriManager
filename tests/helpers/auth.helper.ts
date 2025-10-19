@@ -4,13 +4,18 @@ export class AuthHelper {
   constructor(private page: Page) {}
 
   async loginAsAdmin(password: string = process.env.ADMIN_PASSWORD || 'test-password') {
-    await this.page.goto('/login');
-    await this.page.waitForSelector('#password');
+    await this.page.goto('/he/login');
+    await this.page.waitForSelector('#password', { timeout: 10000 });
     await this.page.fill('#password', password);
 
-    // Click submit and wait for navigation
-    await this.page.click('button[type="submit"]');
-    await this.page.waitForURL(/.*\/admin/, { timeout: 10000 });
+    // Click submit and wait for navigation to admin page
+    await Promise.all([
+      this.page.waitForURL(/.*\/admin/, { timeout: 15000 }),
+      this.page.click('button[type="submit"]')
+    ]);
+
+    // Wait for page to fully load
+    await this.page.waitForLoadState('networkidle', { timeout: 15000 });
   }
 
   async logout() {

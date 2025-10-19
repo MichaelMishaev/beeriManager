@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
-import { Calendar, CheckSquare, AlertTriangle, FileText, Users, DollarSign, MessageSquare, Settings, Plus, Edit, BarChart, GripVertical, HelpCircle, Ticket, Tags } from 'lucide-react'
+import { Calendar, CheckSquare, AlertTriangle, FileText, Users, DollarSign, MessageSquare, Settings, Plus, Edit, BarChart, GripVertical, HelpCircle, Ticket, Tags, Phone, Bell } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
@@ -135,6 +135,28 @@ const defaultAdminSections = [
       { href: '/admin/tickets/new', label: 'כרטיס חדש', icon: Plus },
       { href: '/admin/tickets', label: 'ניהול כרטיסים', icon: Edit },
       { href: '/tickets', label: 'צפייה ציבורית', icon: Ticket }
+    ]
+  },
+  {
+    id: 'contacts',
+    title: 'אנשי קשר',
+    description: 'ניהול אנשי קשר חשובים בבית הספר',
+    icon: Phone,
+    color: 'text-cyan-600',
+    bgColor: 'bg-cyan-50',
+    links: [
+      { href: '/admin/contacts', label: 'ניהול אנשי קשר', icon: Edit }
+    ]
+  },
+  {
+    id: 'urgent',
+    title: 'הודעות דחופות',
+    description: 'ניהול הודעות דחופות ותזכורות (כולל חולצה לבנה)',
+    icon: Bell,
+    color: 'text-red-600',
+    bgColor: 'bg-red-50',
+    links: [
+      { href: '/admin/urgent', label: 'ניהול הודעות דחופות', icon: Edit }
     ]
   },
   {
