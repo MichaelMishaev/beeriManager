@@ -4,10 +4,11 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { Menu, X, Home, Users, HelpCircle, LogOut, LogIn } from 'lucide-react'
+import { Menu, X, Home, Users, HelpCircle, LogOut, LogIn, Phone } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { LanguageSwitcher } from '@/components/ui/language-switcher'
 import { InstallButton } from '@/components/pwa/InstallButton'
+import { ContactsDialog } from '@/components/features/contacts/ContactsDialog'
 import { cn } from '@/lib/utils'
 import { logger } from '@/lib/logger'
 
@@ -110,6 +111,18 @@ export function Navigation() {
               )
             })}
 
+            {/* Contacts Button */}
+            <ContactsDialog>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="flex items-center gap-2"
+              >
+                <Phone className="h-4 w-4" />
+                <span className="hidden lg:inline">אנשי קשר</span>
+              </Button>
+            </ContactsDialog>
+
             {/* Login/Logout Button */}
             {isAuthenticated ? (
               <Button
@@ -175,6 +188,19 @@ export function Navigation() {
                   )
                 })}
 
+                {/* Contacts Button */}
+                <div className="px-4">
+                  <ContactsDialog>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start gap-3 px-0 py-3 text-base font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                    >
+                      <Phone className="h-5 w-5" />
+                      אנשי קשר
+                    </Button>
+                  </ContactsDialog>
+                </div>
+
                 {/* Install PWA Button - Prominent */}
                 <div className="px-4 py-2">
                   <InstallButton variant="full" />
@@ -193,6 +219,19 @@ export function Navigation() {
               </>
             ) : (
               <>
+                {/* Contacts Button - Available to everyone */}
+                <div className="px-4">
+                  <ContactsDialog>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start gap-3 px-0 py-3 text-base font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                    >
+                      <Phone className="h-5 w-5" />
+                      אנשי קשר
+                    </Button>
+                  </ContactsDialog>
+                </div>
+
                 {/* Install PWA Button - Prominent */}
                 <div className="px-4 py-2">
                   <InstallButton variant="full" />

@@ -514,3 +514,19 @@ export interface TaskTag {
   created_at: string
   created_by?: string
 }
+
+export interface Contact {
+  id: string
+  name: string
+  role: string
+  phone?: string
+  email?: string
+  category: 'nurse' | 'admin' | 'teacher' | 'committee' | 'service'
+  sort_order: number
+  is_public: boolean
+
+  // Audit
+  created_at: string
+  updated_at: string
+  created_by?: string
+}
