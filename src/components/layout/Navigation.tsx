@@ -149,18 +149,30 @@ export function Navigation() {
             )}
           </div>
 
-          {/* Mobile Menu Button */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="md:hidden"
-            onClick={() => {
-              setIsOpen(!isOpen)
-              logger.userAction('Toggle mobile menu', { isOpen: !isOpen })
-            }}
-          >
-            {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-          </Button>
+          {/* Mobile - Contacts Button & Menu Button */}
+          <div className="flex items-center gap-2 md:hidden">
+            {/* Contacts Button - Always visible on mobile */}
+            <ContactsDialog>
+              <Button
+                variant="ghost"
+                size="icon"
+              >
+                <Phone className="h-5 w-5" />
+              </Button>
+            </ContactsDialog>
+
+            {/* Hamburger Menu Button */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => {
+                setIsOpen(!isOpen)
+                logger.userAction('Toggle mobile menu', { isOpen: !isOpen })
+              }}
+            >
+              {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </Button>
+          </div>
         </div>
 
         {/* Mobile Navigation */}
@@ -188,19 +200,6 @@ export function Navigation() {
                   )
                 })}
 
-                {/* Contacts Button */}
-                <div className="px-4">
-                  <ContactsDialog>
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start gap-3 px-0 py-3 text-base font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                    >
-                      <Phone className="h-5 w-5" />
-                      אנשי קשר
-                    </Button>
-                  </ContactsDialog>
-                </div>
-
                 {/* Install PWA Button - Prominent */}
                 <div className="px-4 py-2">
                   <InstallButton variant="full" />
@@ -219,19 +218,6 @@ export function Navigation() {
               </>
             ) : (
               <>
-                {/* Contacts Button - Available to everyone */}
-                <div className="px-4">
-                  <ContactsDialog>
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start gap-3 px-0 py-3 text-base font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                    >
-                      <Phone className="h-5 w-5" />
-                      אנשי קשר
-                    </Button>
-                  </ContactsDialog>
-                </div>
-
                 {/* Install PWA Button - Prominent */}
                 <div className="px-4 py-2">
                   <InstallButton variant="full" />
