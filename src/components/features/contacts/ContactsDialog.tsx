@@ -154,8 +154,8 @@ export function ContactsDialog({ children }: ContactsDialogProps) {
   const handleShare = async () => {
     const url = `${window.location.origin}/${currentLocale}`
 
-    // Build contacts text with all phone numbers
-    let contactsText = t('shareText') + '\n\n'
+    // Build contacts text with all phone numbers (no title - it's in shareData.title)
+    let contactsText = ''
 
     // Group and format contacts
     const grouped = contacts.reduce((acc, contact) => {
