@@ -518,7 +518,9 @@ export interface TaskTag {
 export interface Contact {
   id: string
   name: string
+  name_ru?: string
   role: string
+  role_ru?: string
   phone?: string
   email?: string
   category: 'nurse' | 'admin' | 'teacher' | 'committee' | 'service'

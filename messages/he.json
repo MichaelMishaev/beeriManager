@@ -238,5 +238,19 @@
     "shareSuccess": "הועתק ללוח!",
     "shareTitle": "תזכורת חולצה לבנה - בית ספר בארי",
     "shareText": "👕 תזכורת: יום שישי - חולצה לבנה!\n\nכל תלמידי בית הספר בארי 💙"
+  },
+  "contacts": {
+    "title": "אנשי קשר חשובים",
+    "description": "טלפונים וכתובות מייל של צוות בית הספר",
+    "searchPlaceholder": "חיפוש לפי שם, תפקיד או קטגוריה...",
+    "noResults": "לא נמצאו תוצאות",
+    "noContacts": "אין אנשי קשר",
+    "categories": {
+      "nurse": "אחות",
+      "admin": "הנהלה",
+      "teacher": "מורה",
+      "committee": "ועד",
+      "service": "שירות"
+    }
   }
 }

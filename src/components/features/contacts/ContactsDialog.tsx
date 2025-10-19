@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { Phone, Mail, Search, Loader2, User } from 'lucide-react'
+import { useTranslations } from 'next-intl'
+import { useParams } from 'next/navigation'
 import {
   Dialog,
   DialogContent,
@@ -14,18 +16,11 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import type { Contact } from '@/types'
+import type { Locale } from '@/i18n/config'
 import { logger } from '@/lib/logger'
 
 interface ContactsDialogProps {
   children?: React.ReactNode
-}
-
-const categoryNames: Record<Contact['category'], string> = {
-  nurse: 'אחות',
-  admin: 'הנהלה',
-  teacher: 'מורה',
-  committee: 'ועד',
-  service: 'שירות',
 }
 
 const categoryColors: Record<Contact['category'], string> = {
@@ -36,7 +31,7 @@ const categoryColors: Record<Contact['category'], string> = {
   service: 'bg-orange-100 text-orange-800 border-orange-200',
 }
 
-function ContactCard({ contact }: { contact: Contact }) {
+function ContactCard({ contact, locale, categoryName }: { contact: Contact; locale: Locale; categoryName: string }) {
   const handlePhoneClick = (phone: string) => {
     logger.userAction('Click phone number', { phone, name: contact.name })
     window.location.href = `tel:${phone}`
@@ -47,20 +42,24 @@ function ContactCard({ contact }: { contact: Contact }) {
     window.location.href = `mailto:${email}`
   }
 
+  // Get localized content - fallback to Hebrew if Russian not available
+  const name = (locale === 'ru' && contact.name_ru) ? contact.name_ru : contact.name
+  const role = (locale === 'ru' && contact.role_ru) ? contact.role_ru : contact.role
+
   return (
     <div className="p-4 border rounded-lg hover:bg-gray-50 transition-colors">
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
           {/* Name and Role */}
           <div className="flex items-center gap-2 mb-2">
-            <h3 className="font-semibold text-lg">{contact.name}</h3>
+            <h3 className="font-semibold text-lg">{name}</h3>
             <Badge variant="outline" className={categoryColors[contact.category]}>
-              {categoryNames[contact.category]}
+              {categoryName}
             </Badge>
           </div>
 
-          {contact.role && (
-            <p className="text-sm text-muted-foreground mb-3">{contact.role}</p>
+          {role && (
+            <p className="text-sm text-muted-foreground mb-3">{role}</p>
           )}
 
           {/* Contact Actions */}
@@ -100,6 +99,14 @@ export function ContactsDialog({ children }: ContactsDialogProps) {
   const [filteredContacts, setFilteredContacts] = useState<Contact[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
+  const t = useTranslations('contacts')
+  const params = useParams()
+  const currentLocale = (params.locale as Locale) || 'he'
+
+  // Get category names from translations
+  const getCategoryName = (category: Contact['category']) => {
+    return t(`categories.${category}`)
+  }
 
   useEffect(() => {
     if (open) {
@@ -113,14 +120,19 @@ export function ContactsDialog({ children }: ContactsDialogProps) {
     } else {
       const query = searchQuery.toLowerCase()
       const filtered = contacts.filter(
-        (contact) =>
-          contact.name.toLowerCase().includes(query) ||
-          contact.role.toLowerCase().includes(query) ||
-          categoryNames[contact.category].toLowerCase().includes(query)
+        (contact) => {
+          const name = (currentLocale === 'ru' && contact.name_ru) ? contact.name_ru : contact.name
+          const role = (currentLocale === 'ru' && contact.role_ru) ? contact.role_ru : contact.role
+          const categoryName = getCategoryName(contact.category)
+
+          return name.toLowerCase().includes(query) ||
+                 role.toLowerCase().includes(query) ||
+                 categoryName.toLowerCase().includes(query)
+        }
       )
       setFilteredContacts(filtered)
     }
-  }, [searchQuery, contacts])
+  }, [searchQuery, contacts, currentLocale])
 
   async function loadContacts() {
     setIsLoading(true)
@@ -153,7 +165,7 @@ export function ContactsDialog({ children }: ContactsDialogProps) {
         {children || (
           <Button variant="outline" className="gap-2">
             <Phone className="h-4 w-4" />
-            אנשי קשר
+            {t('title')}
           </Button>
         )}
       </DialogTrigger>
@@ -161,10 +173,10 @@ export function ContactsDialog({ children }: ContactsDialogProps) {
         <DialogHeader>
           <DialogTitle className="text-2xl flex items-center gap-2">
             <Phone className="h-6 w-6" />
-            אנשי קשר חשובים
+            {t('title')}
           </DialogTitle>
           <DialogDescription>
-            טלפונים וכתובות מייל של צוות בית הספר
+            {t('description')}
           </DialogDescription>
         </DialogHeader>
 
@@ -173,7 +185,7 @@ export function ContactsDialog({ children }: ContactsDialogProps) {
           <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             type="text"
-            placeholder="חיפוש לפי שם, תפקיד או קטגוריה..."
+            placeholder={t('searchPlaceholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pr-10"
@@ -189,28 +201,36 @@ export function ContactsDialog({ children }: ContactsDialogProps) {
           <div className="text-center py-12">
             <User className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
             <p className="text-muted-foreground">
-              {searchQuery ? 'לא נמצאו תוצאות' : 'אין אנשי קשר'}
+              {searchQuery ? t('noResults') : t('noContacts')}
             </p>
           </div>
         ) : (
           <div className="space-y-6">
-            {Object.entries(groupedContacts).map(([category, categoryContacts]) => (
-              <div key={category}>
-                <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-                  <Badge className={categoryColors[category as Contact['category']]}>
-                    {categoryNames[category as Contact['category']]}
-                  </Badge>
-                  <span className="text-sm text-muted-foreground">
-                    ({categoryContacts.length})
-                  </span>
-                </h3>
-                <div className="space-y-2">
-                  {categoryContacts.map((contact) => (
-                    <ContactCard key={contact.id} contact={contact} />
-                  ))}
+            {Object.entries(groupedContacts).map(([category, categoryContacts]) => {
+              const categoryName = getCategoryName(category as Contact['category'])
+              return (
+                <div key={category}>
+                  <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                    <Badge className={categoryColors[category as Contact['category']]}>
+                      {categoryName}
+                    </Badge>
+                    <span className="text-sm text-muted-foreground">
+                      ({categoryContacts.length})
+                    </span>
+                  </h3>
+                  <div className="space-y-2">
+                    {categoryContacts.map((contact) => (
+                      <ContactCard
+                        key={contact.id}
+                        contact={contact}
+                        locale={currentLocale}
+                        categoryName={categoryName}
+                      />
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         )}
       </DialogContent>
