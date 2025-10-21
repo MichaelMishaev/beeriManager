@@ -382,7 +382,7 @@ export function TaskForm({
                       <SelectValue placeholder="בחר אירוע קשור (אופציונלי)" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="" className="text-right">ללא אירוע קשור</SelectItem>
+                      <SelectItem value="none" className="text-right">ללא אירוע קשור</SelectItem>
                       {relatedEvents.map((event) => (
                         <SelectItem key={event.id} value={event.id} className="text-right">
                           <div className="flex flex-col items-end">

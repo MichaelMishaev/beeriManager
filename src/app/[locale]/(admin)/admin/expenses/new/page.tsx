@@ -106,7 +106,7 @@ export default function NewExpensePage() {
         ...data,
         amount: parseFloat(data.amount),
         receipt_url: receiptUrl || null,
-        event_id: data.event_id || null,
+        event_id: (data.event_id && data.event_id !== 'none') ? data.event_id : null,
         vendor_name: data.vendor_name || null,
         notes: data.notes || null
       }
@@ -344,7 +344,7 @@ export default function NewExpensePage() {
                     <SelectValue placeholder="בחר אירוע..." />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">ללא</SelectItem>
+                    <SelectItem value="none">ללא</SelectItem>
                     {events.map((event) => (
                       <SelectItem key={event.id} value={event.id}>
                         {event.title}

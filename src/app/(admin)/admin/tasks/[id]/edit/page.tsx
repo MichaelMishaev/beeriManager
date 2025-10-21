@@ -123,8 +123,8 @@ export default function EditTaskPage({ params }: { params: { id: string } }) {
       const taskData = {
         ...data,
         owner_phone: data.owner_phone || null,
-        event_id: data.event_id || null,
-        parent_task_id: data.parent_task_id || null,
+        event_id: (data.event_id && data.event_id !== 'none') ? data.event_id : null,
+        parent_task_id: (data.parent_task_id && data.parent_task_id !== 'none') ? data.parent_task_id : null,
         reminder_date: data.reminder_date || null
       }
 
@@ -380,7 +380,7 @@ export default function EditTaskPage({ params }: { params: { id: string } }) {
                     <SelectValue placeholder="בחר אירוע..." />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">ללא</SelectItem>
+                    <SelectItem value="none">ללא</SelectItem>
                     {events.map((event) => (
                       <SelectItem key={event.id} value={event.id}>
                         {event.title}
@@ -402,7 +402,7 @@ export default function EditTaskPage({ params }: { params: { id: string } }) {
                     <SelectValue placeholder="בחר משימת אב..." />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">ללא</SelectItem>
+                    <SelectItem value="none">ללא</SelectItem>
                     {tasks.map((task) => (
                       <SelectItem key={task.id} value={task.id}>
                         {task.title}
