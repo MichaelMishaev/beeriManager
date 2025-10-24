@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Save, Plus, X } from 'lucide-react'
+import { Save, Plus, X, ClipboardList } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -15,6 +15,8 @@ import { toast } from 'sonner'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+import TaskDrawer from '@/components/protocols/TaskDrawer'
+import TaskMentionTextarea from '@/components/protocols/TaskMentionTextarea'
 
 const protocolSchema = z.object({
   title: z.string().min(2, 'כותרת חייבת להכיל לפחות 2 תווים'),
@@ -45,6 +47,7 @@ export default function NewProtocolPage() {
   const [attendeeInput, setAttendeeInput] = useState('')
   const [attendees, setAttendees] = useState<string[]>([])
   const [formattedHTML, setFormattedHTML] = useState('')
+  const [taskDrawerOpen, setTaskDrawerOpen] = useState(false)
 
   const {
     register,
@@ -280,34 +283,76 @@ export default function NewProtocolPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <Label htmlFor="agenda">סדר יום</Label>
-              <Textarea
+              <div className="flex items-center justify-between mb-2">
+                <Label htmlFor="agenda">סדר יום</Label>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setTaskDrawerOpen(true)}
+                  className="gap-2"
+                >
+                  <ClipboardList className="h-4 w-4" />
+                  צפה במשימות
+                </Button>
+              </div>
+              <TaskMentionTextarea
                 id="agenda"
-                {...register('agenda')}
-                placeholder="נושאים שנדונו בישיבה..."
+                value={watch('agenda') || ''}
+                onChange={(value) => setValue('agenda', value)}
+                placeholder="נושאים שנדונו בישיבה... (הקלד @ כדי לקשר משימה)"
                 rows={4}
               />
             </div>
 
             <div>
-              <Label htmlFor="decisions">החלטות</Label>
-              <Textarea
+              <div className="flex items-center justify-between mb-2">
+                <Label htmlFor="decisions">החלטות</Label>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setTaskDrawerOpen(true)}
+                  className="gap-2"
+                >
+                  <ClipboardList className="h-4 w-4" />
+                  צפה במשימות
+                </Button>
+              </div>
+              <TaskMentionTextarea
                 id="decisions"
-                {...register('decisions')}
-                placeholder="החלטות שהתקבלו בישיבה..."
+                value={watch('decisions') || ''}
+                onChange={(value) => setValue('decisions', value)}
+                placeholder="החלטות שהתקבלו בישיבה... (הקלד @ כדי לקשר משימה)"
                 rows={4}
               />
             </div>
 
             <div>
-              <Label htmlFor="action_items">משימות לביצוע</Label>
-              <Textarea
+              <div className="flex items-center justify-between mb-2">
+                <Label htmlFor="action_items">משימות לביצוע</Label>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setTaskDrawerOpen(true)}
+                  className="gap-2"
+                >
+                  <ClipboardList className="h-4 w-4" />
+                  צפה במשימות
+                </Button>
+              </div>
+              <TaskMentionTextarea
                 id="action_items"
-                {...register('action_items')}
-                placeholder="משימות שנקבעו בישיבה..."
+                value={watch('action_items') || ''}
+                onChange={(value) => setValue('action_items', value)}
+                placeholder="משימות שנקבעו בישיבה... (הקלד @ כדי לקשר משימה)"
                 rows={4}
               />
             </div>
+            <p className="text-xs text-muted-foreground">
+              לחץ על &quot;צפה במשימות&quot; לראות את כל המשימות בפרויקט
+            </p>
           </CardContent>
         </Card>
 
@@ -375,6 +420,12 @@ export default function NewProtocolPage() {
           </Button>
         </div>
       </form>
+
+      {/* Task Drawer */}
+      <TaskDrawer
+        isOpen={taskDrawerOpen}
+        onClose={() => setTaskDrawerOpen(false)}
+      />
     </div>
   )
 }
