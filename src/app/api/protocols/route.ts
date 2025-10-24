@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { verifyJWT } from '@/lib/auth/jwt'
 import { z } from 'zod'
@@ -158,6 +159,11 @@ export async function POST(req: NextRequest) {
         { status: 500 }
       )
     }
+
+    // Revalidate the protocols page to show the new protocol immediately
+    revalidatePath('/protocols')
+    revalidatePath('/he/protocols')
+    revalidatePath('/ru/protocols')
 
     return NextResponse.json({
       success: true,

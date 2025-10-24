@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { verifyJWT } from '@/lib/auth/jwt'
 import { z } from 'zod'
@@ -107,6 +108,14 @@ export async function PUT(
       )
     }
 
+    // Revalidate the protocols page to show updated data
+    revalidatePath('/protocols')
+    revalidatePath('/he/protocols')
+    revalidatePath('/ru/protocols')
+    revalidatePath(`/protocols/${params.id}`)
+    revalidatePath(`/he/protocols/${params.id}`)
+    revalidatePath(`/ru/protocols/${params.id}`)
+
     return NextResponse.json({
       success: true,
       data,
@@ -150,6 +159,11 @@ export async function DELETE(
         { status: 500 }
       )
     }
+
+    // Revalidate the protocols page after deletion
+    revalidatePath('/protocols')
+    revalidatePath('/he/protocols')
+    revalidatePath('/ru/protocols')
 
     return NextResponse.json({
       success: true,

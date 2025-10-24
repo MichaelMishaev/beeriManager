@@ -10,6 +10,7 @@ import { formatHebrewDate } from '@/lib/utils/date'
 import { createClient } from '@/lib/supabase/server'
 import { ShareProtocolButton } from '@/components/protocols/ShareProtocolButton'
 import { EditProtocolButton } from '@/components/protocols/EditProtocolButton'
+import { DeleteProtocolButton } from '@/components/protocols/DeleteProtocolButton'
 
 const categoryTranslations: Record<string, string> = {
   'regular': 'ישיבה רגילה',
@@ -143,6 +144,10 @@ async function ProtocolContent({ id }: { id: string }) {
               )}
               <EditProtocolButton protocolId={protocol.id} />
               <ShareProtocolButton protocol={protocol} />
+              <DeleteProtocolButton
+                protocolId={protocol.id}
+                protocolTitle={protocol.title}
+              />
             </CardContent>
           </Card>
 

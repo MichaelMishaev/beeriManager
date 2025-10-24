@@ -7,6 +7,10 @@ import { formatHebrewDate } from '@/lib/utils/date'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 
+// Disable static generation for this page to always fetch fresh data
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 // Fetch protocols from database
 async function getProtocols() {
   const supabase = createClient()
