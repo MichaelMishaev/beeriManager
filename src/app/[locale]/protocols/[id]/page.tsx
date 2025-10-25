@@ -191,23 +191,8 @@ async function ProtocolContent({ id }: { id: string }) {
             </Card>
           )}
 
-          {/* ChatGPT Formatted Content (Legacy) */}
-          {protocol.extracted_text && (
-            <Card>
-              <CardHeader>
-                <CardTitle>תוכן מעוצב</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div
-                  className="prose prose-sm max-w-none prose-headings:text-primary prose-h2:text-xl prose-h3:text-lg"
-                  dangerouslySetInnerHTML={{ __html: protocol.extracted_text }}
-                />
-              </CardContent>
-            </Card>
-          )}
-
           {/* No Content Message */}
-          {!protocol.agenda && !protocol.decisions && !protocol.action_items && !protocol.extracted_text && (
+          {!protocol.agenda && !protocol.decisions && !protocol.action_items && (
             <Card>
               <CardContent className="py-12 text-center text-muted-foreground">
                 <FileText className="h-12 w-12 mx-auto mb-3 opacity-50" />
