@@ -1,7 +1,7 @@
 import { Suspense } from 'react'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { FileText, ExternalLink, Calendar, ArrowRight } from 'lucide-react'
+import { FileText, ExternalLink, Calendar, ArrowRight, CheckCircle2 } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -21,6 +21,45 @@ const categoryTranslations: Record<string, string> = {
 
 function translateCategory(category: string): string {
   return categoryTranslations[category] || category
+}
+
+// Helper function to render text with task mentions highlighted
+function renderTextWithTaskMentions(text: string) {
+  // Pattern: @TaskTitle[task:id]
+  const taskMentionPattern = /@([^[]+)\[task:([^\]]+)\]/g
+  const parts: React.ReactNode[] = []
+  let lastIndex = 0
+  let match
+
+  while ((match = taskMentionPattern.exec(text)) !== null) {
+    // Add text before the mention
+    if (match.index > lastIndex) {
+      parts.push(text.substring(lastIndex, match.index))
+    }
+
+    // Add the task mention as a badge
+    const taskTitle = match[1]
+    const taskId = match[2]
+    parts.push(
+      <Badge
+        key={`task-${taskId}-${match.index}`}
+        variant="secondary"
+        className="mx-1 my-0.5 inline-flex items-center gap-1"
+      >
+        <CheckCircle2 className="h-3 w-3" />
+        {taskTitle}
+      </Badge>
+    )
+
+    lastIndex = match.index + match[0].length
+  }
+
+  // Add remaining text
+  if (lastIndex < text.length) {
+    parts.push(text.substring(lastIndex))
+  }
+
+  return parts.length > 0 ? parts : text
 }
 
 async function getProtocol(id: string) {
@@ -110,17 +149,69 @@ async function ProtocolContent({ id }: { id: string }) {
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Left Column - Main Content */}
         <div className="lg:col-span-2 space-y-6">
-          {/* ChatGPT Formatted Content */}
+          {/* Agenda */}
+          {protocol.agenda && (
+            <Card>
+              <CardHeader>
+                <CardTitle>סדר יום</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="whitespace-pre-wrap text-sm leading-relaxed">
+                  {renderTextWithTaskMentions(protocol.agenda)}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Decisions */}
+          {protocol.decisions && (
+            <Card>
+              <CardHeader>
+                <CardTitle>החלטות</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="whitespace-pre-wrap text-sm leading-relaxed">
+                  {renderTextWithTaskMentions(protocol.decisions)}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Action Items */}
+          {protocol.action_items && (
+            <Card>
+              <CardHeader>
+                <CardTitle>משימות לביצוע</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="whitespace-pre-wrap text-sm leading-relaxed">
+                  {renderTextWithTaskMentions(protocol.action_items)}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* ChatGPT Formatted Content (Legacy) */}
           {protocol.extracted_text && (
             <Card>
               <CardHeader>
-                <CardTitle>תוכן הפרוטוקול</CardTitle>
+                <CardTitle>תוכן מעוצב</CardTitle>
               </CardHeader>
               <CardContent>
                 <div
                   className="prose prose-sm max-w-none prose-headings:text-primary prose-h2:text-xl prose-h3:text-lg"
                   dangerouslySetInnerHTML={{ __html: protocol.extracted_text }}
                 />
+              </CardContent>
+            </Card>
+          )}
+
+          {/* No Content Message */}
+          {!protocol.agenda && !protocol.decisions && !protocol.action_items && !protocol.extracted_text && (
+            <Card>
+              <CardContent className="py-12 text-center text-muted-foreground">
+                <FileText className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                <p>אין תוכן זמין לפרוטוקול זה</p>
               </CardContent>
             </Card>
           )}
