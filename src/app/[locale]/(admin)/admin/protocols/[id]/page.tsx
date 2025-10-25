@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
-import { Save, Trash2, ClipboardList } from 'lucide-react'
+import { Save, Trash2, ClipboardList, Plus, X } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -32,6 +32,7 @@ const protocolSchema = z.object({
   title: z.string().min(2, 'כותרת חייבת להכיל לפחות 2 תווים'),
   protocol_date: z.string().min(1, 'תאריך ישיבה נדרש'),
   categories: z.array(z.string()),
+  attendees: z.array(z.string()).min(1, 'חייב להיות לפחות משתתף אחד'),
   is_public: z.boolean(),
   extracted_text: z.string().optional(),
   agenda: z.string().optional(),
@@ -58,6 +59,8 @@ export default function EditProtocolPage() {
   const [protocolTitle, setProtocolTitle] = useState('')
   const [taskDrawerOpen, setTaskDrawerOpen] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [attendeeInput, setAttendeeInput] = useState('')
+  const [attendees, setAttendees] = useState<string[]>([])
 
   const {
     register,
@@ -69,12 +72,28 @@ export default function EditProtocolPage() {
     resolver: zodResolver(protocolSchema),
     defaultValues: {
       categories: ['regular'],
+      attendees: [],
       is_public: true
     }
   })
 
   const isPublic = watch('is_public')
   const selectedCategory = watch('categories')?.[0] || 'regular'
+
+  const addAttendee = () => {
+    if (attendeeInput.trim() && !attendees.includes(attendeeInput.trim())) {
+      const newAttendees = [...attendees, attendeeInput.trim()]
+      setAttendees(newAttendees)
+      setValue('attendees', newAttendees)
+      setAttendeeInput('')
+    }
+  }
+
+  const removeAttendee = (index: number) => {
+    const newAttendees = attendees.filter((_, i) => i !== index)
+    setAttendees(newAttendees)
+    setValue('attendees', newAttendees)
+  }
 
   useEffect(() => {
     loadProtocol()
@@ -107,6 +126,11 @@ export default function EditProtocolPage() {
       setValue('agenda', protocol.agenda || '')
       setValue('decisions', protocol.decisions || '')
       setValue('action_items', protocol.action_items || '')
+
+      // Set attendees
+      const attendeesList = protocol.attendees || []
+      setAttendees(attendeesList)
+      setValue('attendees', attendeesList)
     } catch (error) {
       console.error('Error loading protocol:', error)
       toast.error('שגיאה בטעינת הפרוטוקול')
@@ -141,6 +165,11 @@ export default function EditProtocolPage() {
   }
 
   async function onSubmit(data: ProtocolFormData) {
+    if (attendees.length === 0) {
+      toast.error('יש להוסיף לפחות משתתף אחד')
+      return
+    }
+
     setIsSubmitting(true)
 
     try {
@@ -153,6 +182,7 @@ export default function EditProtocolPage() {
         },
         body: JSON.stringify({
           ...data,
+          attendees,
           year
         })
       })
@@ -262,6 +292,61 @@ export default function EditProtocolPage() {
                 onCheckedChange={(checked) => setValue('is_public', checked)}
               />
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Attendees */}
+        <Card>
+          <CardHeader>
+            <CardTitle>משתתפים *</CardTitle>
+            <CardDescription>רשימת המשתתפים בישיבה</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex gap-2">
+              <Input
+                placeholder="שם המשתתף"
+                value={attendeeInput}
+                onChange={(e) => setAttendeeInput(e.target.value)}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault()
+                    addAttendee()
+                  }
+                }}
+              />
+              <Button
+                type="button"
+                onClick={addAttendee}
+                variant="outline"
+              >
+                <Plus className="h-4 w-4" />
+                הוסף
+              </Button>
+            </div>
+
+            {attendees.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {attendees.map((attendee, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center gap-1 px-3 py-1 bg-secondary rounded-lg"
+                  >
+                    <span className="text-sm">{attendee}</span>
+                    <button
+                      type="button"
+                      onClick={() => removeAttendee(index)}
+                      className="hover:text-destructive"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {errors.attendees && (
+              <p className="text-sm text-red-500">{errors.attendees.message}</p>
+            )}
           </CardContent>
         </Card>
 

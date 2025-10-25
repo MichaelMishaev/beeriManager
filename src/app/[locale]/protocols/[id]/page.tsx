@@ -268,13 +268,13 @@ async function ProtocolContent({ id }: { id: string }) {
 
               <Separator />
 
-              {/* Participants */}
-              {protocol.participants && protocol.participants.length > 0 && (
+              {/* Attendees */}
+              {protocol.attendees && protocol.attendees.length > 0 && (
                 <div className="space-y-2">
                   <p className="text-sm text-muted-foreground">משתתפים:</p>
                   <div className="space-y-1">
-                    {protocol.participants.map((participant: string, index: number) => (
-                      <p key={index} className="text-sm">• {participant}</p>
+                    {protocol.attendees.map((attendee: string, index: number) => (
+                      <p key={index} className="text-sm">• {attendee}</p>
                     ))}
                   </div>
                 </div>
