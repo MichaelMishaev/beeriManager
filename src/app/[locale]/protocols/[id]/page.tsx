@@ -11,7 +11,7 @@ import { createClient } from '@/lib/supabase/server'
 import { ShareProtocolButton } from '@/components/protocols/ShareProtocolButton'
 import { EditProtocolButton } from '@/components/protocols/EditProtocolButton'
 import { DeleteProtocolButton } from '@/components/protocols/DeleteProtocolButton'
-import TaskMentionBadge from '@/components/protocols/TaskMentionBadge'
+import TextWithTaskMentions from '@/components/protocols/TextWithTaskMentions'
 
 const categoryTranslations: Record<string, string> = {
   'regular': 'ישיבה רגילה',
@@ -22,42 +22,6 @@ const categoryTranslations: Record<string, string> = {
 
 function translateCategory(category: string): string {
   return categoryTranslations[category] || category
-}
-
-// Helper function to render text with task mentions highlighted
-function renderTextWithTaskMentions(text: string) {
-  // Pattern: @TaskTitle[task:id]
-  const taskMentionPattern = /@([^[]+)\[task:([^\]]+)\]/g
-  const parts: React.ReactNode[] = []
-  let lastIndex = 0
-  let match
-
-  while ((match = taskMentionPattern.exec(text)) !== null) {
-    // Add text before the mention
-    if (match.index > lastIndex) {
-      parts.push(text.substring(lastIndex, match.index))
-    }
-
-    // Add the task mention as an interactive badge
-    const taskTitle = match[1]
-    const taskId = match[2]
-    parts.push(
-      <TaskMentionBadge
-        key={`task-${taskId}-${match.index}`}
-        taskId={taskId}
-        taskTitle={taskTitle}
-      />
-    )
-
-    lastIndex = match.index + match[0].length
-  }
-
-  // Add remaining text
-  if (lastIndex < text.length) {
-    parts.push(text.substring(lastIndex))
-  }
-
-  return parts.length > 0 ? parts : text
 }
 
 async function getProtocol(id: string) {
@@ -155,7 +119,7 @@ async function ProtocolContent({ id }: { id: string }) {
               </CardHeader>
               <CardContent>
                 <div className="whitespace-pre-wrap text-sm leading-relaxed">
-                  {renderTextWithTaskMentions(protocol.agenda)}
+                  <TextWithTaskMentions text={protocol.agenda} />
                 </div>
               </CardContent>
             </Card>
@@ -169,7 +133,7 @@ async function ProtocolContent({ id }: { id: string }) {
               </CardHeader>
               <CardContent>
                 <div className="whitespace-pre-wrap text-sm leading-relaxed">
-                  {renderTextWithTaskMentions(protocol.decisions)}
+                  <TextWithTaskMentions text={protocol.decisions} />
                 </div>
               </CardContent>
             </Card>
@@ -183,7 +147,7 @@ async function ProtocolContent({ id }: { id: string }) {
               </CardHeader>
               <CardContent>
                 <div className="whitespace-pre-wrap text-sm leading-relaxed">
-                  {renderTextWithTaskMentions(protocol.action_items)}
+                  <TextWithTaskMentions text={protocol.action_items} />
                 </div>
               </CardContent>
             </Card>
