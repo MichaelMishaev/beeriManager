@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
   Dialog,
   DialogContent,
@@ -25,7 +26,9 @@ import {
   CheckCircle,
   ArrowLeft,
   Search,
-  MessageSquare
+  MessageSquare,
+  Filter,
+  ArrowUpDown
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
@@ -56,6 +59,8 @@ interface TaskDrawerProps {
   onClose: () => void
 }
 
+type SortOption = 'priority' | 'dueDate' | 'status' | 'createdAt'
+
 export default function TaskDrawer({ isOpen, onClose }: TaskDrawerProps) {
   const [tasks, setTasks] = useState<Task[]>([])
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
@@ -64,6 +69,8 @@ export default function TaskDrawer({ isOpen, onClose }: TaskDrawerProps) {
   const [showCompletionDialog, setShowCompletionDialog] = useState(false)
   const [completionComment, setCompletionComment] = useState('')
   const [taskToComplete, setTaskToComplete] = useState<string | null>(null)
+  const [hideCompleted, setHideCompleted] = useState(true)
+  const [sortBy, setSortBy] = useState<SortOption>('priority')
 
   // Fetch tasks when drawer opens
   useEffect(() => {
@@ -72,23 +79,54 @@ export default function TaskDrawer({ isOpen, onClose }: TaskDrawerProps) {
     }
   }, [isOpen])
 
-  // Filter tasks: exclude cancelled and apply search
-  const filteredTasks = tasks.filter(task => {
-    // Exclude cancelled tasks
-    if (task.status === 'cancelled') return false
+  // Filter and sort tasks
+  const filteredAndSortedTasks = tasks
+    .filter(task => {
+      // Exclude cancelled tasks
+      if (task.status === 'cancelled') return false
 
-    // Apply search filter
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase()
-      return (
-        task.title.toLowerCase().includes(query) ||
-        task.owner_name.toLowerCase().includes(query) ||
-        task.description?.toLowerCase().includes(query)
-      )
-    }
+      // Exclude completed tasks if filter is enabled
+      if (hideCompleted && task.status === 'completed') return false
 
-    return true
-  })
+      // Apply search filter
+      if (searchQuery.trim()) {
+        const query = searchQuery.toLowerCase()
+        return (
+          task.title.toLowerCase().includes(query) ||
+          task.owner_name.toLowerCase().includes(query) ||
+          task.description?.toLowerCase().includes(query)
+        )
+      }
+
+      return true
+    })
+    .sort((a, b) => {
+      // Sort by selected option
+      switch (sortBy) {
+        case 'priority': {
+          const priorityOrder = { urgent: 0, high: 1, normal: 2, low: 3 }
+          return priorityOrder[a.priority] - priorityOrder[b.priority]
+        }
+        case 'dueDate': {
+          if (!a.due_date && !b.due_date) return 0
+          if (!a.due_date) return 1
+          if (!b.due_date) return -1
+          return new Date(a.due_date).getTime() - new Date(b.due_date).getTime()
+        }
+        case 'status': {
+          const statusOrder = { in_progress: 0, pending: 1, completed: 2, cancelled: 3 }
+          return statusOrder[a.status] - statusOrder[b.status]
+        }
+        case 'createdAt': {
+          if (!a.created_at && !b.created_at) return 0
+          if (!a.created_at) return 1
+          if (!b.created_at) return -1
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        }
+        default:
+          return 0
+      }
+    })
 
   async function fetchTasks() {
     setIsLoading(true)
@@ -235,25 +273,58 @@ export default function TaskDrawer({ isOpen, onClose }: TaskDrawerProps) {
                 )}
               </div>
 
+              {/* Filter and Sort Controls */}
+              <div className="flex gap-2">
+                {/* Hide Completed Toggle */}
+                <Button
+                  type="button"
+                  variant={hideCompleted ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setHideCompleted(!hideCompleted)}
+                  className="flex-1 gap-2"
+                >
+                  <Filter className="h-4 w-4" />
+                  {hideCompleted ? 'הצג הכל' : 'הסתר מושלמות'}
+                </Button>
+
+                {/* Sort Dropdown */}
+                <Select value={sortBy} onValueChange={(value) => setSortBy(value as SortOption)}>
+                  <SelectTrigger className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <ArrowUpDown className="h-4 w-4" />
+                      <SelectValue />
+                    </div>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="priority">לפי עדיפות</SelectItem>
+                    <SelectItem value="dueDate">לפי תאריך יעד</SelectItem>
+                    <SelectItem value="status">לפי סטטוס</SelectItem>
+                    <SelectItem value="createdAt">לפי תאריך יצירה</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
               {/* Tasks Count */}
               {tasks.length > 0 && (
                 <p className="text-xs text-muted-foreground">
-                  מציג {filteredTasks.length} מתוך {tasks.length} משימות
-                  {searchQuery && ' (מסננות)'}
+                  מציג {filteredAndSortedTasks.length} מתוך {tasks.length} משימות
+                  {(searchQuery || hideCompleted) && ' (מסוננות)'}
                 </p>
               )}
 
-              {filteredTasks.length === 0 ? (
+              {filteredAndSortedTasks.length === 0 ? (
                 <div className="py-8 text-center text-muted-foreground">
                   <ClipboardList className="h-12 w-12 mx-auto mb-2 opacity-50" />
                   {searchQuery ? (
                     <p>לא נמצאו משימות התואמות לחיפוש</p>
+                  ) : hideCompleted ? (
+                    <p>אין משימות פעילות להצגה</p>
                   ) : (
                     <p>אין משימות להצגה</p>
                   )}
                 </div>
               ) : (
-                <TaskList tasks={filteredTasks} onTaskClick={handleTaskClick} />
+                <TaskList tasks={filteredAndSortedTasks} onTaskClick={handleTaskClick} />
               )}
 
               {/* Quick Add Button */}
