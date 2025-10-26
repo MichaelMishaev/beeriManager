@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
+import { Input } from '@/components/ui/input'
 import {
   ClipboardList,
   X,
@@ -13,7 +14,8 @@ import {
   Calendar,
   AlertCircle,
   CheckCircle,
-  ArrowLeft
+  ArrowLeft,
+  Search
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
@@ -47,6 +49,7 @@ export default function TaskDrawer({ isOpen, onClose }: TaskDrawerProps) {
   const [tasks, setTasks] = useState<Task[]>([])
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
 
   // Fetch tasks when drawer opens
   useEffect(() => {
@@ -54,6 +57,24 @@ export default function TaskDrawer({ isOpen, onClose }: TaskDrawerProps) {
       fetchTasks()
     }
   }, [isOpen])
+
+  // Filter tasks: exclude cancelled and apply search
+  const filteredTasks = tasks.filter(task => {
+    // Exclude cancelled tasks
+    if (task.status === 'cancelled') return false
+
+    // Apply search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase()
+      return (
+        task.title.toLowerCase().includes(query) ||
+        task.owner_name.toLowerCase().includes(query) ||
+        task.description?.toLowerCase().includes(query)
+      )
+    }
+
+    return true
+  })
 
   async function fetchTasks() {
     setIsLoading(true)
@@ -165,13 +186,45 @@ export default function TaskDrawer({ isOpen, onClose }: TaskDrawerProps) {
             />
           ) : (
             <>
-              {tasks.length === 0 ? (
+              {/* Search Input */}
+              <div className="relative">
+                <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  type="text"
+                  placeholder="חיפוש משימה..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pr-10"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
+
+              {/* Tasks Count */}
+              {tasks.length > 0 && (
+                <p className="text-xs text-muted-foreground">
+                  מציג {filteredTasks.length} מתוך {tasks.length} משימות
+                  {searchQuery && ' (מסננות)'}
+                </p>
+              )}
+
+              {filteredTasks.length === 0 ? (
                 <div className="py-8 text-center text-muted-foreground">
                   <ClipboardList className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                  <p>אין משימות להצגה</p>
+                  {searchQuery ? (
+                    <p>לא נמצאו משימות התואמות לחיפוש</p>
+                  ) : (
+                    <p>אין משימות להצגה</p>
+                  )}
                 </div>
               ) : (
-                <TaskList tasks={tasks} onTaskClick={handleTaskClick} />
+                <TaskList tasks={filteredTasks} onTaskClick={handleTaskClick} />
               )}
 
               {/* Quick Add Button */}

@@ -84,7 +84,8 @@ export async function PUT(
     }
 
     const body = await req.json()
-    const validation = TaskSchema.safeParse(body)
+    // Support partial updates - only validate fields that are provided
+    const validation = TaskSchema.partial().safeParse(body)
 
     if (!validation.success) {
       return NextResponse.json(
