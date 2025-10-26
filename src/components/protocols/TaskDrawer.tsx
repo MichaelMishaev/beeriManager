@@ -4,6 +4,15 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from '@/components/ui/dialog'
 import {
   ClipboardList,
   X,
@@ -15,7 +24,8 @@ import {
   AlertCircle,
   CheckCircle,
   ArrowLeft,
-  Search
+  Search,
+  MessageSquare
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
@@ -38,6 +48,7 @@ type Task = {
   follow_up_count?: number
   created_at?: string
   updated_at?: string
+  completion_comment?: string | null
 }
 
 interface TaskDrawerProps {
@@ -50,6 +61,9 @@ export default function TaskDrawer({ isOpen, onClose }: TaskDrawerProps) {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
+  const [showCompletionDialog, setShowCompletionDialog] = useState(false)
+  const [completionComment, setCompletionComment] = useState('')
+  const [taskToComplete, setTaskToComplete] = useState<string | null>(null)
 
   // Fetch tasks when drawer opens
   useEffect(() => {
@@ -95,12 +109,23 @@ export default function TaskDrawer({ isOpen, onClose }: TaskDrawerProps) {
     }
   }
 
-  async function handleMarkComplete(taskId: string) {
+  function showCompletionCommentDialog(taskId: string) {
+    setTaskToComplete(taskId)
+    setCompletionComment('')
+    setShowCompletionDialog(true)
+  }
+
+  async function handleMarkComplete(comment?: string) {
+    if (!taskToComplete) return
+
     try {
-      const response = await fetch(`/api/tasks/${taskId}`, {
+      const response = await fetch(`/api/tasks/${taskToComplete}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: 'completed' })
+        body: JSON.stringify({
+          status: 'completed',
+          completion_comment: comment || null
+        })
       })
 
       const result = await response.json()
@@ -110,13 +135,17 @@ export default function TaskDrawer({ isOpen, onClose }: TaskDrawerProps) {
         // Update local state
         setTasks(prevTasks =>
           prevTasks.map(task =>
-            task.id === taskId ? { ...task, status: 'completed' as const } : task
+            task.id === taskToComplete ? { ...task, status: 'completed' as const, completion_comment: comment || null } : task
           )
         )
         // Refresh tasks from server
         fetchTasks()
         // Go back to list
         setSelectedTask(null)
+        // Close dialog
+        setShowCompletionDialog(false)
+        setTaskToComplete(null)
+        setCompletionComment('')
       } else {
         toast.error('שגיאה בעדכון המשימה')
       }
@@ -182,7 +211,7 @@ export default function TaskDrawer({ isOpen, onClose }: TaskDrawerProps) {
             <TaskDetails
               task={selectedTask}
               onBack={handleBack}
-              onMarkComplete={handleMarkComplete}
+              onShowCompletionDialog={showCompletionCommentDialog}
             />
           ) : (
             <>
@@ -241,6 +270,54 @@ export default function TaskDrawer({ isOpen, onClose }: TaskDrawerProps) {
           )}
         </div>
       </div>
+
+      {/* Completion Comment Dialog */}
+      <Dialog open={showCompletionDialog} onOpenChange={setShowCompletionDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>סיום משימה</DialogTitle>
+            <DialogDescription>
+              ניתן להוסיף הערה המסבירה מדוע המשימה הושלמה (לא חובה)
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="completion-comment">הערה</Label>
+              <Textarea
+                id="completion-comment"
+                placeholder="למשל: הושלם לאחר פגישה עם הספק..."
+                value={completionComment}
+                onChange={(e) => setCompletionComment(e.target.value)}
+                rows={4}
+                className="resize-none"
+              />
+              <p className="text-xs text-muted-foreground">
+                ההערה תוצג ליד סטטוס המשימה
+              </p>
+            </div>
+          </div>
+          <DialogFooter className="flex-row gap-2 sm:gap-0">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setShowCompletionDialog(false)
+                setCompletionComment('')
+                setTaskToComplete(null)
+              }}
+            >
+              ביטול
+            </Button>
+            <Button
+              type="button"
+              onClick={() => handleMarkComplete(completionComment || undefined)}
+            >
+              <CheckCircle className="h-4 w-4 ml-2" />
+              סמן כהושלם
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   )
 }
@@ -249,11 +326,11 @@ export default function TaskDrawer({ isOpen, onClose }: TaskDrawerProps) {
 function TaskDetails({
   task,
   onBack,
-  onMarkComplete
+  onShowCompletionDialog
 }: {
   task: Task
   onBack: () => void
-  onMarkComplete: (taskId: string) => void
+  onShowCompletionDialog: (taskId: string) => void
 }) {
   const priorityColors = {
     low: 'bg-gray-100 text-gray-700',
@@ -357,6 +434,19 @@ function TaskDetails({
         </div>
       </div>
 
+      {/* Completion Comment */}
+      {task.completion_comment && (task.status === 'completed' || task.status === 'cancelled') && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 space-y-1">
+          <div className="flex items-center gap-2 text-sm font-semibold text-blue-900">
+            <MessageSquare className="h-4 w-4" />
+            <span>הערת סיום</span>
+          </div>
+          <p className="text-sm text-blue-800 leading-relaxed pr-6">
+            {task.completion_comment}
+          </p>
+        </div>
+      )}
+
       {/* Description */}
       {task.description && (
         <div className="space-y-2">
@@ -371,7 +461,7 @@ function TaskDetails({
       <div className="flex gap-2 pt-4">
         {task.status !== 'completed' && task.status !== 'cancelled' && (
           <Button
-            onClick={() => onMarkComplete(task.id)}
+            onClick={() => onShowCompletionDialog(task.id)}
             className="flex-1"
             variant="default"
           >

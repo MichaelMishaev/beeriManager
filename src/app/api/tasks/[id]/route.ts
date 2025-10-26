@@ -17,7 +17,8 @@ const TaskSchema = z.object({
   reminder_date: z.string().optional().nullable(),
   event_id: z.string().optional().nullable(),
   parent_task_id: z.string().optional().nullable(),
-  auto_remind: z.boolean().optional()
+  auto_remind: z.boolean().optional(),
+  completion_comment: z.string().optional().nullable() // Optional comment when completing/cancelling task
 })
 
 export async function GET(

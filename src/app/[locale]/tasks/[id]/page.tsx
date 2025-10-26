@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 import { Suspense } from 'react'
-import { CheckSquare, User, Clock, Calendar, Phone, AlertCircle, ChevronRight } from 'lucide-react'
+import { CheckSquare, User, Clock, Calendar, Phone, AlertCircle, ChevronRight, MessageSquare } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { formatHebrewDate, getHebrewRelativeTime } from '@/lib/utils/date'
@@ -199,6 +199,19 @@ async function TaskDetail({ id }: { id: string }) {
               <h3 className="font-semibold mb-2">תיאור המשימה</h3>
               <p className="text-muted-foreground whitespace-pre-wrap">
                 {task.description}
+              </p>
+            </div>
+          )}
+
+          {/* Completion Comment */}
+          {task.completion_comment && (task.status === 'completed' || task.status === 'cancelled') && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-2">
+              <div className="flex items-center gap-2 text-sm font-semibold text-blue-900">
+                <MessageSquare className="h-4 w-4" />
+                <span>הערת סיום</span>
+              </div>
+              <p className="text-sm text-blue-800 leading-relaxed">
+                {task.completion_comment}
               </p>
             </div>
           )}
