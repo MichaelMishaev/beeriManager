@@ -6,7 +6,6 @@ import { Save, Trash2, ClipboardList, Plus, X } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
@@ -26,7 +25,8 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import TaskDrawer from '@/components/protocols/TaskDrawer'
-import TaskMentionTextarea from '@/components/protocols/TaskMentionTextarea'
+import ExpandableTaskMentionTextarea from '@/components/protocols/ExpandableTaskMentionTextarea'
+import { ExpandableTextarea } from '@/components/ui/expandable-textarea'
 
 const protocolSchema = z.object({
   title: z.string().min(2, 'כותרת חייבת להכיל לפחות 2 תווים'),
@@ -371,8 +371,9 @@ export default function EditProtocolPage() {
                   צפה במשימות
                 </Button>
               </div>
-              <TaskMentionTextarea
+              <ExpandableTaskMentionTextarea
                 id="agenda"
+                label="סדר יום"
                 value={watch('agenda') || ''}
                 onChange={(value) => setValue('agenda', value)}
                 placeholder="נושאים שנדונו בישיבה... (הקלד @ כדי לקשר משימה)"
@@ -394,8 +395,9 @@ export default function EditProtocolPage() {
                   צפה במשימות
                 </Button>
               </div>
-              <TaskMentionTextarea
+              <ExpandableTaskMentionTextarea
                 id="decisions"
+                label="החלטות"
                 value={watch('decisions') || ''}
                 onChange={(value) => setValue('decisions', value)}
                 placeholder="החלטות שהתקבלו בישיבה... (הקלד @ כדי לקשר משימה)"
@@ -417,8 +419,9 @@ export default function EditProtocolPage() {
                   צפה במשימות
                 </Button>
               </div>
-              <TaskMentionTextarea
+              <ExpandableTaskMentionTextarea
                 id="action_items"
+                label="משימות לביצוע"
                 value={watch('action_items') || ''}
                 onChange={(value) => setValue('action_items', value)}
                 placeholder="משימות שנקבעו בישיבה... (הקלד @ כדי לקשר משימה)"
@@ -431,11 +434,14 @@ export default function EditProtocolPage() {
 
             <div>
               <Label htmlFor="extracted_text">תוכן מעוצב (HTML)</Label>
-              <Textarea
+              <ExpandableTextarea
                 id="extracted_text"
-                {...register('extracted_text')}
+                label="תוכן מעוצב (HTML)"
+                value={watch('extracted_text') || ''}
+                onChange={(e) => setValue('extracted_text', e.target.value)}
                 placeholder="תוכן HTML מעוצב..."
-                rows={8}
+                minRows={8}
+                maxRows={30}
                 className="font-mono text-sm"
               />
               <p className="text-xs text-muted-foreground mt-1">
