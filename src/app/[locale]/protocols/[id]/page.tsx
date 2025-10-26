@@ -1,7 +1,7 @@
 import { Suspense } from 'react'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { FileText, ExternalLink, Calendar, ArrowRight, CheckCircle2 } from 'lucide-react'
+import { FileText, ExternalLink, Calendar, ArrowRight } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -11,6 +11,7 @@ import { createClient } from '@/lib/supabase/server'
 import { ShareProtocolButton } from '@/components/protocols/ShareProtocolButton'
 import { EditProtocolButton } from '@/components/protocols/EditProtocolButton'
 import { DeleteProtocolButton } from '@/components/protocols/DeleteProtocolButton'
+import TaskMentionBadge from '@/components/protocols/TaskMentionBadge'
 
 const categoryTranslations: Record<string, string> = {
   'regular': 'ישיבה רגילה',
@@ -37,18 +38,15 @@ function renderTextWithTaskMentions(text: string) {
       parts.push(text.substring(lastIndex, match.index))
     }
 
-    // Add the task mention as a badge
+    // Add the task mention as an interactive badge
     const taskTitle = match[1]
     const taskId = match[2]
     parts.push(
-      <Badge
+      <TaskMentionBadge
         key={`task-${taskId}-${match.index}`}
-        variant="secondary"
-        className="mx-1 my-0.5 inline-flex items-center gap-1"
-      >
-        <CheckCircle2 className="h-3 w-3" />
-        {taskTitle}
-      </Badge>
+        taskId={taskId}
+        taskTitle={taskTitle}
+      />
     )
 
     lastIndex = match.index + match[0].length
