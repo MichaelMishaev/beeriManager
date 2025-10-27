@@ -51,14 +51,19 @@ export function TasksPageClient({ initialTasks, initialStats, availableTags }: T
   }
 
   const handleShareTasks = async () => {
-    // IMPORTANT: Filter out completed tasks - only share active tasks
+    // IMPORTANT: Only share tasks that are actually displayed in the UI
+    // This includes: urgent (not completed), pending, and in_progress
     const tasksToShare = filteredTasks.filter(task => {
       // Defensive check: ensure task and status exist
       if (!task || !task.status) return false
 
-      // Exclude completed tasks (case-insensitive and trimmed)
       const status = task.status.toString().toLowerCase().trim()
-      return status !== 'completed'
+
+      // Only include tasks with valid statuses that are displayed in UI
+      const isValidStatus = status === 'pending' || status === 'in_progress'
+      const isUrgentAndNotCompleted = task.priority === 'urgent' && status !== 'completed'
+
+      return isValidStatus || isUrgentAndNotCompleted
     })
 
     if (tasksToShare.length === 0) {
