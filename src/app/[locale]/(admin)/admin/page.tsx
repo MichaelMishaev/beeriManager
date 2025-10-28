@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
-import { Calendar, CheckSquare, AlertTriangle, FileText, Users, DollarSign, MessageSquare, Settings, Plus, Edit, BarChart, GripVertical, HelpCircle, Ticket, Tags, Phone, Bell } from 'lucide-react'
+import { Calendar, CheckSquare, AlertTriangle, FileText, Users, DollarSign, MessageSquare, Settings, Plus, Edit, BarChart, GripVertical, HelpCircle, Ticket, Tags, Phone, Bell, Lightbulb } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
@@ -122,6 +122,18 @@ const defaultAdminSections = [
       { href: '/admin/feedback', label: 'צפייה במשובים', icon: MessageSquare },
       { href: '/admin/feedback/stats', label: 'סטטיסטיקות', icon: BarChart },
       { href: '/admin/feedback/export', label: 'ייצוא נתונים', icon: FileText }
+    ]
+  },
+  {
+    id: 'ideas',
+    title: 'רעיונות',
+    description: 'רעיונות לשיפור ותכונות חדשות',
+    icon: Lightbulb,
+    color: 'text-amber-600',
+    bgColor: 'bg-amber-50',
+    links: [
+      { href: '/admin/ideas', label: 'צפייה ברעיונות', icon: Lightbulb },
+      { href: '/ideas', label: 'שליחת רעיון', icon: Plus }
     ]
   },
   {
@@ -554,6 +566,96 @@ export default function AdminDashboard() {
                   </ul>
                 </div>
 
+                {/* רעיונות */}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <div className="bg-amber-50 p-2 rounded-lg">
+                      <Lightbulb className="h-5 w-5 text-amber-600" />
+                    </div>
+                    <h3 className="font-bold text-lg">רעיונות והצעות 💡</h3>
+                  </div>
+                  <ul className="space-y-1 text-sm mr-9">
+                    <li>• <strong>צפייה ברעיונות</strong> - ראו רעיונות והצעות שהורים שלחו</li>
+                    <li>• <strong>ניהול סטטוס</strong> - סמנו רעיונות כ"נבדק", "מאושר", "יושם" או "נדחה"</li>
+                    <li>• <strong>תגובות</strong> - שלחו תגובה למשלח הרעיון (אם לא אנונימי)</li>
+                    <li>• <strong>הערות פנימיות</strong> - כתבו הערות שרק מנהלים יראו</li>
+                    <li>• <strong>סינון</strong> - סננו לפי קטגוריה (שיפור, תכונה, תהליך) וסטטוס</li>
+                    <li className="text-muted-foreground mt-2">💡 טיפ: רעיונות חדשים מסומנים במסגרת צהובה - תנו עדיפות לאלו!</li>
+                  </ul>
+                </div>
+
+                {/* כרטיסים */}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <div className="bg-orange-50 p-2 rounded-lg">
+                      <Ticket className="h-5 w-5 text-orange-600" />
+                    </div>
+                    <h3 className="font-bold text-lg">כרטיסים 🎟️</h3>
+                  </div>
+                  <ul className="space-y-1 text-sm mr-9">
+                    <li>• <strong>כרטיס חדש</strong> - צרו כרטיס למשחק ספורט, הצגה או אירוע</li>
+                    <li>• <strong>ניהול מלאי</strong> - עקבו אחרי כמות הכרטיסים הזמינים</li>
+                    <li>• <strong>מחירים</strong> - הגדירו מחיר לכרטיס או השאירו בחינם</li>
+                    <li>• <strong>סטטוסים</strong> - פעיל, אזל, פג תוקף, טיוטה או הסתיים</li>
+                    <li>• <strong>סיום אירוע</strong> - סמנו אירוע כ"הסתיים" כדי להסיר מהתצוגה הציבורית</li>
+                    <li className="text-muted-foreground mt-2">💡 טיפ: השתמשו ב"מומלץ" כדי להציג כרטיסים חשובים בראש העמוד!</li>
+                  </ul>
+                </div>
+
+                {/* אנשי קשר */}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <div className="bg-cyan-50 p-2 rounded-lg">
+                      <Phone className="h-5 w-5 text-cyan-600" />
+                    </div>
+                    <h3 className="font-bold text-lg">אנשי קשר 📞</h3>
+                  </div>
+                  <ul className="space-y-1 text-sm mr-9">
+                    <li>• <strong>ניהול אנשי קשר</strong> - הוסיפו אנשי קשר חשובים בבית הספר</li>
+                    <li>• <strong>דו-לשוני</strong> - תמיכה בעברית ורוסית לשם ותפקיד</li>
+                    <li>• <strong>קטגוריות</strong> - אחות, הנהלה, מורה, ועד, שירות</li>
+                    <li>• <strong>מיון</strong> - שנו את הסדר בעזרת החצים למעלה/למטה</li>
+                    <li>• <strong>פרטים</strong> - שם, תפקיד, טלפון ואימייל</li>
+                    <li className="text-muted-foreground mt-2">💡 טיפ: סמנו אנשי קשר כ"ציבורי" כדי שכולם יוכלו לראות אותם!</li>
+                  </ul>
+                </div>
+
+                {/* הודעות דחופות */}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <div className="bg-red-50 p-2 rounded-lg">
+                      <Bell className="h-5 w-5 text-red-600" />
+                    </div>
+                    <h3 className="font-bold text-lg">הודעות דחופות 🔔</h3>
+                  </div>
+                  <ul className="space-y-1 text-sm mr-9">
+                    <li>• <strong>ניהול הודעות</strong> - צרו הודעות דחופות שיופיעו בדף הבית</li>
+                    <li>• <strong>חולצה לבנה</strong> - כפתורים מהירים לתזכורת חולצה לבנה (1 יום, שבוע, חודש וכו')</li>
+                    <li>• <strong>סוגי הודעות</strong> - דחוף, מידע, אזהרה, חולצה לבנה</li>
+                    <li>• <strong>טווח תאריכים</strong> - הגדירו מתי ההודעה תופיע (תאריך התחלה וסיום)</li>
+                    <li>• <strong>דו-לשוני</strong> - כותרת ותיאור בעברית ורוסית</li>
+                    <li className="text-muted-foreground mt-2">💡 טיפ: הודעות פעילות מסומנות במסגרת ירוקה - הן יופיעו בדף הבית!</li>
+                  </ul>
+                </div>
+
+                {/* פעמון התראות */}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <div className="bg-blue-50 p-2 rounded-lg">
+                      <Bell className="h-5 w-5 text-blue-600" />
+                    </div>
+                    <h3 className="font-bold text-lg">פעמון התראות 🔔</h3>
+                  </div>
+                  <ul className="space-y-1 text-sm mr-9">
+                    <li>• <strong>התראות אוטומטיות</strong> - הפעמון בראש העמוד מציג התראות חדשות</li>
+                    <li>• <strong>משימות חדשות</strong> - קבלו התראה על משימות שנוצרו</li>
+                    <li>• <strong>רעיונות חדשים</strong> - קבלו התראה כשהורים שולחים רעיון</li>
+                    <li>• <strong>משוב חדש</strong> - קבלו התראה על משוב חדש מהורים</li>
+                    <li>• <strong>עדכון כל 30 שניות</strong> - המערכת בודקת התראות חדשות אוטומטית</li>
+                    <li className="text-muted-foreground mt-2">💡 טיפ: פתיחת הפעמון מסמנת את כל ההתראות כנצפו!</li>
+                  </ul>
+                </div>
+
                 {/* הגדרות ותגיות */}
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
@@ -577,6 +679,7 @@ export default function AdminDashboard() {
                   <ul className="space-y-1 text-sm">
                     <li>✨ <strong>גררו כרטיסים</strong> - לחצו על <GripVertical className="inline h-4 w-4" /> וגררו כדי לסדר את הלוח לפי העדפתכם</li>
                     <li>✨ <strong>הסטטיסטיקות למעלה</strong> - לחצו עליהן כדי לעבור ישירות למקטע המתאים</li>
+                    <li>✨ <strong>פעמון ההתראות</strong> - שימו לב לפעמון בראש העמוד - הוא יתריע על פעילות חדשה!</li>
                     <li>✨ <strong>שתפו קישורים</strong> - כל עמוד במערכת יכול להישלח בווטסאפ</li>
                     <li>✨ <strong>גרסת מובייל</strong> - כל המערכת מותאמת לסלולר - עובדת גם ללא אינטרנט!</li>
                   </ul>

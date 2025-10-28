@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Calendar, MessageSquare, ChevronLeft, Camera, ArrowLeft } from 'lucide-react'
+import { Calendar, MessageSquare, ChevronLeft, Camera, ArrowLeft, Lightbulb } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { CommitteeCard } from './CommitteeCard'
@@ -11,6 +11,7 @@ import { WhatsAppCommunityCard } from '@/components/features/whatsapp/WhatsAppCo
 import { TicketsSection } from '@/components/features/tickets/TicketsSection'
 import { WhiteShirtBanner } from './WhiteShirtBanner'
 import { UrgentMessagesBanner } from '@/components/features/urgent/UrgentMessagesBanner'
+import { ShareIdeaButton } from '@/components/features/ideas/ShareIdeaButton'
 import type { Event, CalendarEvent, Ticket } from '@/types'
 import Link from 'next/link'
 import { format } from 'date-fns'
@@ -318,6 +319,41 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
                 <Link href="/complaint">
                   <MessageSquare className="h-5 w-5 ml-2" />
                   {t('sendComplaint')}
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Ideas Card */}
+          <Card className="shadow-sm hover:shadow-md transition-shadow relative">
+            <CardHeader>
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 flex-1">
+                  <div className="w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center">
+                    <Lightbulb className="h-5 w-5 text-amber-500" />
+                  </div>
+                  <CardTitle className="text-xl text-[#003153]">
+                    יש לכם רעיון?
+                  </CardTitle>
+                </div>
+                <ShareIdeaButton
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 w-8 p-0 hover:bg-primary/10"
+                />
+              </div>
+              <CardDescription className="text-base mt-2">
+                שתפו אותנו ברעיונות לשיפור ותכונות חדשות
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-gray-600 mb-4">
+                הרעיונות שלכם עוזרים לנו לשפר ולהתפתח. כל רעיון נבדק ונשקל!
+              </p>
+              <Button asChild className="w-full bg-amber-500 hover:bg-amber-600" size="lg">
+                <Link href="/ideas">
+                  <Lightbulb className="h-5 w-5 ml-2" />
+                  שלחו רעיון
                 </Link>
               </Button>
             </CardContent>

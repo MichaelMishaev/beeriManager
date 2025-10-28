@@ -80,22 +80,23 @@ export function AlertDialogFooter({ children, className }: { children: React.Rea
   )
 }
 
-export function AlertDialogCancel({ onClick, children }: { onClick: () => void; children: React.ReactNode }) {
+export function AlertDialogCancel({ onClick, children, disabled }: { onClick?: () => void; children: React.ReactNode; disabled?: boolean }) {
   return (
-    <Button variant="outline" onClick={onClick} className="w-full sm:w-auto">
+    <Button variant="outline" onClick={onClick} disabled={disabled} className="w-full sm:w-auto">
       {children}
     </Button>
   )
 }
 
-export function AlertDialogAction({ onClick, children, disabled, variant = 'default' }: {
+export function AlertDialogAction({ onClick, children, disabled, variant = 'default', className }: {
   onClick: () => void
   children: React.ReactNode
   disabled?: boolean
   variant?: 'default' | 'destructive'
+  className?: string
 }) {
   return (
-    <Button variant={variant} onClick={onClick} disabled={disabled} className="w-full sm:w-auto">
+    <Button variant={variant} onClick={onClick} disabled={disabled} className={cn("w-full sm:w-auto", className)}>
       {children}
     </Button>
   )

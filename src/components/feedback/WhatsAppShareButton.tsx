@@ -1,14 +1,7 @@
 'use client'
 
-import { MessageCircle, Copy, Check } from 'lucide-react'
+import { Share2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { useState } from 'react'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
 import { format } from 'date-fns'
 import { useParams } from 'next/navigation'
 import type { Locale } from '@/i18n/config'
@@ -56,7 +49,6 @@ const categoryEmojis: Record<string, string> = {
 export function WhatsAppShareButton({ feedback }: WhatsAppShareButtonProps) {
   const params = useParams()
   const locale = (params.locale || 'he') as Locale
-  const [copied, setCopied] = useState(false)
 
   const formatFeedbackForWhatsApp = () => {
     const emoji = categoryEmojis[feedback.category] || '📝'
@@ -84,46 +76,40 @@ export function WhatsAppShareButton({ feedback }: WhatsAppShareButtonProps) {
     return message
   }
 
-  const handleCopy = async () => {
+  const handleShare = async () => {
     const text = formatFeedbackForWhatsApp()
-    await navigator.clipboard.writeText(text)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
+    const feedbackTitle = locale === 'ru' ? 'Отзыв от родителей' : 'משוב מהורים'
 
-  const handleWhatsAppShare = () => {
-    const text = formatFeedbackForWhatsApp()
-    const encodedText = encodeURIComponent(text)
-    const whatsappUrl = `https://wa.me/?text=${encodedText}`
-    window.open(whatsappUrl, '_blank')
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: feedbackTitle,
+          text
+        })
+      } catch (err) {
+        if ((err as Error).name !== 'AbortError') {
+          // Fallback to clipboard
+          await navigator.clipboard.writeText(text)
+          alert(locale === 'ru' ? 'Скопировано!' : 'הועתק!')
+        }
+      }
+    } else {
+      // Fallback to WhatsApp
+      const encodedText = encodeURIComponent(text)
+      window.open(`https://wa.me/?text=${encodedText}`, '_blank')
+    }
   }
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          size="sm"
-          variant="outline"
-          className="gap-1"
-        >
-          <MessageCircle className="h-3 w-3" />
-          שתף
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-48">
-        <DropdownMenuItem onClick={handleWhatsAppShare} className="gap-2">
-          <MessageCircle className="h-4 w-4 text-green-600" />
-          <span>שתף בווצאפ</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={handleCopy} className="gap-2">
-          {copied ? (
-            <Check className="h-4 w-4 text-green-600" />
-          ) : (
-            <Copy className="h-4 w-4" />
-          )}
-          <span>{copied ? 'הועתק!' : 'העתק טקסט'}</span>
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <Button
+      size="sm"
+      variant="outline"
+      className="gap-1"
+      onClick={handleShare}
+      title={locale === 'ru' ? 'Поделиться' : 'שיתוף'}
+    >
+      <Share2 className="h-3 w-3 ml-1" />
+      שתף
+    </Button>
   )
 }

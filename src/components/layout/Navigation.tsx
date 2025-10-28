@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import { LanguageSwitcher } from '@/components/ui/language-switcher'
 import { InstallButton } from '@/components/pwa/InstallButton'
 import { ContactsDialog } from '@/components/features/contacts/ContactsDialog'
+import { NotificationBell } from '@/components/layout/NotificationBell'
 import { cn } from '@/lib/utils'
 import { logger } from '@/lib/logger'
 
@@ -111,6 +112,9 @@ export function Navigation() {
               )
             })}
 
+            {/* Notification Bell - Admin Only */}
+            {isAuthenticated && <NotificationBell />}
+
             {/* Contacts Button */}
             <ContactsDialog>
               <Button
@@ -149,8 +153,11 @@ export function Navigation() {
             )}
           </div>
 
-          {/* Mobile - Contacts Button & Menu Button */}
+          {/* Mobile - Notification Bell, Contacts Button & Menu Button */}
           <div className="flex items-center gap-2 md:hidden">
+            {/* Notification Bell - Admin Only */}
+            {isAuthenticated && <NotificationBell />}
+
             {/* Contacts Button - Always visible on mobile */}
             <ContactsDialog>
               <Button
