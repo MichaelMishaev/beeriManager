@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { Send, Lightbulb, Check } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { Send, Lightbulb } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
@@ -10,7 +11,6 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Checkbox } from '@/components/ui/checkbox'
 import { toast } from 'sonner'
-import { ShareIdeaButton } from './ShareIdeaButton'
 
 const CATEGORIES = [
   { value: 'improvement', label: 'שיפור קיים' },
@@ -20,6 +20,7 @@ const CATEGORIES = [
 ]
 
 export function IdeaSubmissionForm() {
+  const router = useRouter()
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [category, setCategory] = useState<string>('')
@@ -27,18 +28,28 @@ export function IdeaSubmissionForm() {
   const [submitterName, setSubmitterName] = useState('')
   const [contactEmail, setContactEmail] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isSubmitted, setIsSubmitted] = useState(false)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
 
+    // Client-side validation
     if (!title.trim()) {
       toast.error('נא להזין כותרת לרעיון')
       return
     }
 
+    if (title.trim().length < 2) {
+      toast.error('כותרת חייבת להכיל לפחות 2 תווים')
+      return
+    }
+
     if (!description.trim()) {
       toast.error('נא להזין תיאור מפורט')
+      return
+    }
+
+    if (description.trim().length < 10) {
+      toast.error('תיאור חייב להכיל לפחות 10 תווים')
       return
     }
 
@@ -68,61 +79,33 @@ export function IdeaSubmissionForm() {
       const result = await response.json()
 
       if (result.success) {
-        setIsSubmitted(true)
-        toast.success('הרעיון נשלח בהצלחה!')
-        // Reset form after 3 seconds
+        toast.success('הרעיון נשלח בהצלחה! תודה על השיתוף 💡')
+        // Reset form
+        setTitle('')
+        setDescription('')
+        setCategory('')
+        setIsAnonymous(true)
+        setSubmitterName('')
+        setContactEmail('')
+        // Redirect to home after a short delay
         setTimeout(() => {
-          setTitle('')
-          setDescription('')
-          setCategory('')
-          setIsAnonymous(true)
-          setSubmitterName('')
-          setContactEmail('')
-          setIsSubmitted(false)
-        }, 3000)
+          router.push('/')
+        }, 1500)
       } else {
-        toast.error(result.error || 'שגיאה בשליחת הרעיון')
+        // Show validation errors if available
+        if (result.details && Array.isArray(result.details)) {
+          result.details.forEach((detail: string) => {
+            toast.error(detail)
+          })
+        } else {
+          toast.error(result.error || 'שגיאה בשליחת הרעיון')
+        }
       }
     } catch (error) {
       toast.error('שגיאה בשליחת הרעיון')
     } finally {
       setIsSubmitting(false)
     }
-  }
-
-  if (isSubmitted) {
-    return (
-      <Card className="bg-amber-50 border-amber-200">
-        <CardContent className="py-8 text-center space-y-4">
-          <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-amber-100 mb-2">
-            <Check className="h-8 w-8 text-amber-600" />
-          </div>
-          <div>
-            <h3 className="text-lg font-semibold text-amber-900 mb-2">
-              תודה רבה על שיתוף הרעיון!
-            </h3>
-            <p className="text-sm text-amber-700">
-              הרעיון שלכם התקבל ונבדק על ידי הנהלת הוועד
-            </p>
-          </div>
-
-          <div className="pt-4 border-t border-amber-200">
-            <p className="text-sm font-medium text-amber-900 mb-2">
-              מכירים עוד אנשים עם רעיונות?
-            </p>
-            <p className="text-xs text-amber-700 mb-4">
-              שתפו את האפשרות לשליחת רעיונות עם הורים אחרים
-            </p>
-            <ShareIdeaButton
-              variant="outline"
-              size="default"
-              className="border-amber-500 text-amber-600 hover:bg-amber-100"
-              showLabel={true}
-            />
-          </div>
-        </CardContent>
-      </Card>
-    )
   }
 
   return (
@@ -140,17 +123,17 @@ export function IdeaSubmissionForm() {
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Title */}
           <div>
-            <Label htmlFor="title" className="text-sm">כותרת הרעיון *</Label>
+            <Label htmlFor="title" className="text-sm">כותרת הרעיון * <span className="text-muted-foreground font-normal">(מינימום 2 תווים)</span></Label>
             <Input
               id="title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="לדוגמה: תזכורות אוטומטיות למשימות"
-              className="mt-1.5"
+              className={`mt-1.5 ${title.length > 0 && title.length < 2 ? 'border-red-500' : ''}`}
               maxLength={100}
             />
-            <p className="text-xs text-muted-foreground mt-1">
-              {title.length} / 100 תווים
+            <p className={`text-xs mt-1 ${title.length > 0 && title.length < 2 ? 'text-red-500' : 'text-muted-foreground'}`}>
+              {title.length} / 100 תווים {title.length > 0 && title.length < 2 && '(נדרשים לפחות 2 תווים)'}
             </p>
           </div>
 
@@ -173,18 +156,18 @@ export function IdeaSubmissionForm() {
 
           {/* Description */}
           <div>
-            <Label htmlFor="description" className="text-sm">תיאור מפורט *</Label>
+            <Label htmlFor="description" className="text-sm">תיאור מפורט * <span className="text-muted-foreground font-normal">(מינימום 10 תווים)</span></Label>
             <Textarea
               id="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="תארו את הרעיון בפירוט - מה הבעיה שהוא פותר? איך זה יעזור?"
               rows={5}
-              className="mt-1.5 text-sm"
+              className={`mt-1.5 text-sm ${description.length > 0 && description.length < 10 ? 'border-red-500' : ''}`}
               maxLength={2000}
             />
-            <p className="text-xs text-muted-foreground mt-1">
-              {description.length} / 2000 תווים
+            <p className={`text-xs mt-1 ${description.length > 0 && description.length < 10 ? 'text-red-500' : 'text-muted-foreground'}`}>
+              {description.length} / 2000 תווים {description.length > 0 && description.length < 10 && '(נדרשים לפחות 10 תווים)'}
             </p>
           </div>
 

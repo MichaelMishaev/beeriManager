@@ -54,14 +54,14 @@ function EventItem({ event, dateLocale, locale }: { event: Event; dateLocale: ty
   const statusConfig = isHappeningNow
     ? {
         text: locale === 'ru' ? 'Сейчас' : 'מתקיים כעת',
-        bgColor: 'bg-red-500',
+        bgColor: 'bg-[#FF8200]',
         textColor: 'text-white',
         showPulse: true
       }
     : isStartingSoon
     ? {
         text: locale === 'ru' ? 'Скоро' : 'בקרוב',
-        bgColor: 'bg-orange-500',
+        bgColor: 'bg-[#FFBA00]',
         textColor: 'text-white',
         showPulse: false
       }
@@ -81,7 +81,7 @@ function EventItem({ event, dateLocale, locale }: { event: Event; dateLocale: ty
         <div className="flex-shrink-0">
           <div className={`w-16 h-16 rounded-xl flex flex-col items-center justify-center text-white shadow-md group-hover:shadow-lg transition-shadow ${
             isHappeningNow
-              ? 'bg-gradient-to-br from-red-500 to-red-700'
+              ? 'bg-gradient-to-br from-[#FF8200] to-[#FF8200]/80'
               : 'bg-gradient-to-br from-[#0D98BA] to-[#003153]'
           }`}>
             <div className="text-2xl font-bold leading-none">
@@ -103,7 +103,7 @@ function EventItem({ event, dateLocale, locale }: { event: Event; dateLocale: ty
               <div className="relative">
                 <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${statusConfig.bgColor} ${statusConfig.textColor}`}>
                   {statusConfig.showPulse && (
-                    <span className="absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75 animate-ping"></span>
+                    <span className="absolute inline-flex h-full w-full rounded-full bg-[#FF8200] opacity-75 animate-ping"></span>
                   )}
                   <span className="relative">{statusConfig.text}</span>
                 </span>
@@ -329,8 +329,8 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
             <CardHeader>
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2 flex-1">
-                  <div className="w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center">
-                    <Lightbulb className="h-5 w-5 text-amber-500" />
+                  <div className="w-10 h-10 rounded-full bg-[#FFBA00]/10 flex items-center justify-center">
+                    <Lightbulb className="h-5 w-5 text-[#FFBA00]" />
                   </div>
                   <CardTitle className="text-xl text-[#003153]">
                     יש לכם רעיון?
@@ -350,7 +350,7 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
               <p className="text-sm text-gray-600 mb-4">
                 הרעיונות שלכם עוזרים לנו לשפר ולהתפתח. כל רעיון נבדק ונשקל!
               </p>
-              <Button asChild className="w-full bg-amber-500 hover:bg-amber-600" size="lg">
+              <Button asChild className="w-full bg-[#FFBA00] hover:bg-[#FFBA00]/90 text-[#003153]" size="lg">
                 <Link href="/ideas">
                   <Lightbulb className="h-5 w-5 ml-2" />
                   שלחו רעיון

@@ -112,8 +112,8 @@ export function Navigation() {
               )
             })}
 
-            {/* Notification Bell - Admin Only */}
-            {isAuthenticated && <NotificationBell />}
+            {/* Notification Bell - Admin Panel Only */}
+            {isAuthenticated && pathname.includes('/admin') && <NotificationBell />}
 
             {/* Contacts Button */}
             <ContactsDialog>
@@ -155,8 +155,8 @@ export function Navigation() {
 
           {/* Mobile - Notification Bell, Contacts Button & Menu Button */}
           <div className="flex items-center gap-2 md:hidden">
-            {/* Notification Bell - Admin Only */}
-            {isAuthenticated && <NotificationBell />}
+            {/* Notification Bell - Admin Panel Only */}
+            {isAuthenticated && pathname.includes('/admin') && <NotificationBell />}
 
             {/* Contacts Button - Always visible on mobile */}
             <ContactsDialog>

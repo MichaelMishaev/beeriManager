@@ -24,7 +24,7 @@ interface NotificationCounts {
   }
 }
 
-const STORAGE_KEY = 'admin_notifications_last_viewed'
+const STORAGE_KEY = 'admin_notifications_last_viewed_v2' // v2: only mark as viewed when clicking notifications
 const POLLING_INTERVAL = 30000 // 30 seconds
 
 export function NotificationBell() {
@@ -39,6 +39,9 @@ export function NotificationBell() {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
+    // Clean up old localStorage key from previous version
+    localStorage.removeItem('admin_notifications_last_viewed')
+
     // Initial fetch
     fetchNotifications()
 
@@ -72,10 +75,8 @@ export function NotificationBell() {
   function handleOpenChange(open: boolean) {
     setIsOpen(open)
 
-    // When opening the popover, mark all current notifications as viewed
-    if (open) {
-      markAsViewed()
-    }
+    // Don't mark as viewed just by opening the bell
+    // Items will be marked as viewed when user actually navigates to the pages
   }
 
   function markAsViewed() {
@@ -94,6 +95,9 @@ export function NotificationBell() {
   }
 
   function handleNavigation() {
+    // Mark notifications as viewed when user actually navigates to a page
+    markAsViewed()
+
     // Close the popover when navigating
     setIsOpen(false)
   }
