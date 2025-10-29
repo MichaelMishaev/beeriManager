@@ -7,6 +7,7 @@ import { formatHebrewDate, getHebrewRelativeTime } from '@/lib/utils/date'
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { TaskActions } from '@/components/tasks/task-actions'
+import { FeedbackDisplay } from '@/components/tasks/FeedbackDisplay'
 
 async function getTask(id: string) {
   const supabase = createClient()
@@ -41,6 +42,17 @@ async function getTask(id: string) {
       .single()
 
     task.parent_task = parentTask
+  }
+
+  // Get linked feedback if exists
+  if (task.feedback_id) {
+    const { data: feedback } = await supabase
+      .from('anonymous_feedback')
+      .select('id, message, category, created_at')
+      .eq('id', task.feedback_id)
+      .single()
+
+    task.feedback = feedback
   }
 
   return task
@@ -248,6 +260,11 @@ async function TaskDetail({ id }: { id: string }) {
                 </Link>
               </CardContent>
             </Card>
+          )}
+
+          {/* Linked Feedback */}
+          {task.feedback && (
+            <FeedbackDisplay feedback={task.feedback} />
           )}
 
           {/* Follow-up Information */}

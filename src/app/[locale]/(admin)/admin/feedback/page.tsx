@@ -1,14 +1,27 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { MessageSquare, Star, Calendar, User, Mail, CheckCircle } from 'lucide-react'
+import { MessageSquare, Star, Calendar, User, Mail, CheckCircle, Trash2, Plus, ListTodo } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { toast } from 'sonner'
 import { format } from 'date-fns'
 import { cn } from '@/lib/utils'
 import { WhatsAppShareButton } from '@/components/feedback/WhatsAppShareButton'
+import Link from 'next/link'
+
+interface Task {
+  id: string
+  title: string
+  status: string
+  owner_name: string
+  due_date?: string
+}
 
 interface Feedback {
   id: string
@@ -19,7 +32,10 @@ interface Feedback {
   parent_name?: string
   contact_email?: string
   is_anonymous: boolean
-  status: 'new' | 'read' | 'responded'
+  status: 'new' | 'read' | 'responded' | 'done' | 'in_progress' | 'other'
+  status_comment?: string
+  task_id?: string
+  task?: Task | null
   response?: string
   responded_at?: string
   created_at: string
@@ -31,7 +47,7 @@ const categoryLabels = {
   event: 'אירוע',
   task: 'משימה',
   suggestion: 'הצעה',
-  complaint: 'תלונה',
+  complaint: 'פניה',
   other: 'אחר'
 }
 
@@ -47,13 +63,19 @@ const categoryColors = {
 const statusColors = {
   new: 'bg-blue-100 text-blue-800',
   read: 'bg-gray-100 text-gray-800',
-  responded: 'bg-green-100 text-green-800'
+  responded: 'bg-green-100 text-green-800',
+  done: 'bg-green-500 text-white',
+  in_progress: 'bg-amber-100 text-amber-800',
+  other: 'bg-purple-100 text-purple-800'
 }
 
 const statusLabels = {
   new: 'חדש',
   read: 'נקרא',
-  responded: 'נענה'
+  responded: 'נענה',
+  done: 'בוצע',
+  in_progress: 'בטיפול',
+  other: 'אחר'
 }
 
 export default function AdminFeedbackPage() {
@@ -61,6 +83,15 @@ export default function AdminFeedbackPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [selectedStatus, setSelectedStatus] = useState('all')
+  const [createTaskDialogOpen, setCreateTaskDialogOpen] = useState(false)
+  const [selectedFeedbackForTask, setSelectedFeedbackForTask] = useState<Feedback | null>(null)
+  const [taskForm, setTaskForm] = useState({
+    title: '',
+    owner_name: '',
+    owner_phone: '',
+    priority: 'normal' as 'low' | 'normal' | 'high' | 'urgent',
+    due_date: ''
+  })
 
   useEffect(() => {
     fetchFeedbacks()
@@ -109,6 +140,101 @@ export default function AdminFeedbackPage() {
     }
   }
 
+  async function updateStatus(id: string, status: Feedback['status'], statusComment?: string) {
+    try {
+      const response = await fetch(`/api/feedback/${id}/status`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ status, status_comment: statusComment })
+      })
+
+      const result = await response.json()
+
+      if (result.success) {
+        setFeedbacks(prev => prev.map(f =>
+          f.id === id ? { ...f, status, status_comment: statusComment } : f
+        ))
+        toast.success('הסטטוס עודכן בהצלחה')
+      } else {
+        toast.error('שגיאה בעדכון הסטטוס')
+      }
+    } catch (error) {
+      console.error('Error updating status:', error)
+      toast.error('שגיאה בעדכון הסטטוס')
+    }
+  }
+
+  async function deleteFeedback(id: string) {
+    if (!confirm('האם אתה בטוח שברצונך למחוק משוב זה?')) {
+      return
+    }
+
+    try {
+      const response = await fetch(`/api/feedback/${id}`, {
+        method: 'DELETE'
+      })
+
+      const result = await response.json()
+
+      if (result.success) {
+        setFeedbacks(prev => prev.filter(f => f.id !== id))
+        toast.success('המשוב נמחק בהצלחה')
+      } else {
+        toast.error('שגיאה במחיקת המשוב')
+      }
+    } catch (error) {
+      console.error('Error deleting feedback:', error)
+      toast.error('שגיאה במחיקת המשוב')
+    }
+  }
+
+  async function createTaskFromFeedback() {
+    if (!selectedFeedbackForTask) return
+
+    try {
+      const response = await fetch(`/api/feedback/${selectedFeedbackForTask.id}/create-task`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(taskForm)
+      })
+
+      const result = await response.json()
+
+      if (result.success) {
+        toast.success('המשימה נוצרה בהצלחה!')
+        setCreateTaskDialogOpen(false)
+        setSelectedFeedbackForTask(null)
+        setTaskForm({
+          title: '',
+          owner_name: '',
+          owner_phone: '',
+          priority: 'normal',
+          due_date: ''
+        })
+        // Refresh feedbacks to show updated task_id
+        fetchFeedbacks()
+      } else {
+        toast.error(result.error || 'שגיאה ביצירת המשימה')
+      }
+    } catch (error) {
+      console.error('Error creating task:', error)
+      toast.error('שגיאה ביצירת המשימה')
+    }
+  }
+
+  function openCreateTaskDialog(feedback: Feedback) {
+    setSelectedFeedbackForTask(feedback)
+    setTaskForm({
+      ...taskForm,
+      title: feedback.subject || 'משימה ממשוב הורים'
+    })
+    setCreateTaskDialogOpen(true)
+  }
+
   const stats = {
     total: feedbacks.length,
     new: feedbacks.filter(f => f.status === 'new').length,
@@ -154,7 +280,7 @@ export default function AdminFeedbackPage() {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">תלונות</CardTitle>
+            <CardTitle className="text-sm font-medium">פניות</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.complaints}</div>
@@ -300,10 +426,113 @@ export default function AdminFeedbackPage() {
               <CardContent>
                 <p className="text-sm whitespace-pre-wrap">{feedback.message}</p>
 
-                {/* Actions - Share button at the bottom like committees */}
-                <div className="flex gap-2 pt-4" onClick={(e) => e.stopPropagation()}>
-                  <WhatsAppShareButton feedback={feedback} />
+                {/* Status Management Section */}
+                <div className="mt-4 p-4 bg-muted/50 rounded-lg space-y-3" onClick={(e) => e.stopPropagation()}>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Label className="text-sm font-medium">סטטוס:</Label>
+                    <Select
+                      value={feedback.status}
+                      onValueChange={(value) => {
+                        if (value === 'other') {
+                          // For 'other', we'll need to show the comment input
+                          updateStatus(feedback.id, value as Feedback['status'])
+                        } else {
+                          updateStatus(feedback.id, value as Feedback['status'])
+                        }
+                      }}
+                    >
+                      <SelectTrigger className="w-[160px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Object.entries(statusLabels).map(([value, label]) => (
+                          <SelectItem key={value} value={value}>
+                            {label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+
+                    {/* Custom comment for 'other' status */}
+                    {feedback.status === 'other' && (
+                      <Input
+                        placeholder="הערה מותאמת אישית..."
+                        defaultValue={feedback.status_comment || ''}
+                        onBlur={(e) => updateStatus(feedback.id, 'other', e.target.value)}
+                        className="flex-1 min-w-[200px]"
+                      />
+                    )}
+                  </div>
+
+                  {/* Linked Task Display */}
+                  {feedback.task && (
+                    <div className="p-3 bg-green-50 border border-green-200 rounded-lg space-y-2">
+                      <div className="flex items-center gap-2">
+                        <ListTodo className="h-4 w-4 text-green-600" />
+                        <span className="text-green-800 font-medium text-sm">מקושר למשימה</span>
+                      </div>
+                      <div className="pr-6 space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-medium">{feedback.task.title}</span>
+                          <Badge variant="outline" className="text-xs">
+                            {feedback.task.status === 'pending' ? 'ממתין'
+                              : feedback.task.status === 'in_progress' ? 'בביצוע'
+                              : feedback.task.status === 'completed' ? 'הושלם'
+                              : 'בוטל'}
+                          </Badge>
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          אחראי: {feedback.task.owner_name}
+                          {feedback.task.due_date && (
+                            <> • יעד: {format(new Date(feedback.task.due_date), 'dd/MM/yyyy')}</>
+                          )}
+                        </div>
+                        <Link
+                          href={`/admin/tasks`}
+                          className="text-xs text-blue-600 hover:underline inline-block"
+                        >
+                          צפה במשימה ←
+                        </Link>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Status comment display */}
+                  {feedback.status === 'other' && feedback.status_comment && (
+                    <div className="text-sm text-muted-foreground">
+                      <span className="font-medium">הערה: </span>
+                      {feedback.status_comment}
+                    </div>
+                  )}
                 </div>
+
+                {/* Actions - Buttons */}
+                <div className="flex gap-2 pt-4 flex-wrap" onClick={(e) => e.stopPropagation()}>
+                  <WhatsAppShareButton feedback={feedback} />
+
+                  {!feedback.task && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="gap-1"
+                      onClick={() => openCreateTaskDialog(feedback)}
+                    >
+                      <Plus className="h-3 w-3" />
+                      צור משימה
+                    </Button>
+                  )}
+
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="gap-1 text-red-600 hover:text-red-700 hover:bg-red-50"
+                    onClick={() => deleteFeedback(feedback.id)}
+                  >
+                    <Trash2 className="h-3 w-3" />
+                    מחק
+                  </Button>
+                </div>
+
                 {feedback.response && (
                   <div className="mt-4 p-3 bg-muted rounded-lg">
                     <div className="flex items-center gap-2 mb-2">
@@ -323,6 +552,112 @@ export default function AdminFeedbackPage() {
           ))
         )}
       </div>
+
+      {/* Create Task Dialog */}
+      <Dialog open={createTaskDialogOpen} onOpenChange={setCreateTaskDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>יצירת משימה ממשוב</DialogTitle>
+            <DialogDescription>
+              צור משימה חדשה המקושרת למשוב זה. המשוב יעודכן אוטומטית לסטטוס "בטיפול".
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            {/* Task Title */}
+            <div className="space-y-2">
+              <Label htmlFor="task_title">כותרת המשימה *</Label>
+              <Input
+                id="task_title"
+                value={taskForm.title}
+                onChange={(e) => setTaskForm({ ...taskForm, title: e.target.value })}
+                placeholder="כותרת המשימה"
+              />
+            </div>
+
+            {/* Owner Name */}
+            <div className="space-y-2">
+              <Label htmlFor="owner_name">שם האחראי *</Label>
+              <Input
+                id="owner_name"
+                value={taskForm.owner_name}
+                onChange={(e) => setTaskForm({ ...taskForm, owner_name: e.target.value })}
+                placeholder="שם האחראי לביצוע המשימה"
+              />
+            </div>
+
+            {/* Owner Phone */}
+            <div className="space-y-2">
+              <Label htmlFor="owner_phone">טלפון האחראי</Label>
+              <Input
+                id="owner_phone"
+                value={taskForm.owner_phone}
+                onChange={(e) => setTaskForm({ ...taskForm, owner_phone: e.target.value })}
+                placeholder="050-1234567"
+              />
+            </div>
+
+            {/* Priority */}
+            <div className="space-y-2">
+              <Label htmlFor="priority">עדיפות</Label>
+              <Select
+                value={taskForm.priority}
+                onValueChange={(value) => setTaskForm({ ...taskForm, priority: value as 'low' | 'normal' | 'high' | 'urgent' })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="low">נמוכה</SelectItem>
+                  <SelectItem value="normal">רגילה</SelectItem>
+                  <SelectItem value="high">גבוהה</SelectItem>
+                  <SelectItem value="urgent">דחופה</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Due Date */}
+            <div className="space-y-2">
+              <Label htmlFor="due_date">תאריך יעד</Label>
+              <Input
+                id="due_date"
+                type="date"
+                value={taskForm.due_date}
+                onChange={(e) => setTaskForm({ ...taskForm, due_date: e.target.value })}
+              />
+            </div>
+
+            {/* Feedback Preview */}
+            {selectedFeedbackForTask && (
+              <div className="p-3 bg-muted rounded-lg">
+                <p className="text-sm font-medium mb-1">תוכן המשוב:</p>
+                <p className="text-sm text-muted-foreground line-clamp-3">
+                  {selectedFeedbackForTask.message}
+                </p>
+              </div>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setCreateTaskDialogOpen(false)
+                setSelectedFeedbackForTask(null)
+              }}
+            >
+              ביטול
+            </Button>
+            <Button
+              onClick={createTaskFromFeedback}
+              disabled={!taskForm.title || !taskForm.owner_name}
+            >
+              <Plus className="h-4 w-4 ml-2" />
+              צור משימה
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

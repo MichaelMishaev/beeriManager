@@ -30,7 +30,7 @@ const categoryLabels = {
   event: 'אירוע',
   task: 'משימה',
   suggestion: 'הצעה',
-  complaint: 'תלונה',
+  complaint: 'פניה',
   other: 'אחר'
 }
 

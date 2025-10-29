@@ -34,7 +34,10 @@ export async function GET(req: NextRequest) {
 
     let query = supabase
       .from('anonymous_feedback')
-      .select('*')
+      .select(`
+        *,
+        task:task_id(id, title, status, owner_name, due_date)
+      `)
 
     // Apply filters
     if (category && category !== 'all') {

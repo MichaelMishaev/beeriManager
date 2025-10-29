@@ -69,8 +69,8 @@
     "noUpcomingEvents": "אין אירועים קרובים כרגע",
     "haveFeedback": "יש לכם משוב?",
     "shareOpinion": "שתפו את דעתכם על האירועים שהשתתפתם בהם",
-    "feedbackHelps": "המשוב שלכם עוזר לנו לשפר ולארגן אירועים טובים יותר עבור כולם. תוכלו לשלוח תלונה או משוב אנונימי על כל נושא.",
-    "sendComplaint": "שלחו תלונה או משוב",
+    "feedbackHelps": "המשוב שלכם עוזר לנו לשפר ולארגן אירועים טובים יותר עבור כולם. תוכלו לשלוח פניה או משוב אנונימי על כל נושא.",
+    "sendComplaint": "שלחו פניה או משוב",
     "questionsOrSuggestions": "שאלות או הצעות?",
     "hereForYou": "אנחנו כאן בשבילכם! לכל שאלה, הצעה או בקשה - נשמח לשמוע.",
     "sendWhatsApp": "שלחו הודעה בוואטסאפ",
@@ -153,13 +153,13 @@
     "complaint_event_select_placeholder": "בחר אירוע...",
     "complaint_event_none": "אין אירועים זמינים",
     "complaint_submitting": "שולח...",
-    "complaint_submit": "שלח תלונה",
-    "complaint_success_title": "התלונה נקלטה בהצלחה!",
+    "complaint_submit": "שלח פניה",
+    "complaint_success_title": "הפניה נקלטה בהצלחה!",
     "complaint_success_message": "תודה על הפנייה. ועד ההורים יטפל בבעיה בהקדם האפשרי.",
     "complaint_success_back": "חזרה לדף הבית",
     "נא_למלא_את_fw4z": "נא למלא את שדה הבעיה",
-    "success_unlxpn": "התלונה נקלטה בהצלחה!",
-    "error_7x6byn": "שגיאה בשליחת התלונה"
+    "success_unlxpn": "הפניה נקלטה בהצלחה!",
+    "error_7x6byn": "שגיאה בשליחת הפניה"
   },
   "notifications": {
     "title": "התראות Push",

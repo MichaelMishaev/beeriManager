@@ -33,7 +33,7 @@ const categoryOptions = [
   { value: 'event', label: 'אירוע' },
   { value: 'task', label: 'משימה' },
   { value: 'suggestion', label: 'הצעה' },
-  { value: 'complaint', label: 'תלונה' },
+  { value: 'complaint', label: 'פניה' },
   { value: 'other', label: 'אחר' }
 ]
 
@@ -140,7 +140,7 @@ export default function FeedbackPage() {
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">משוב והצעות</h1>
         <p className="text-muted-foreground">
-          שתפו אותנו במחשבות, הצעות או תלונות. המשוב שלכם חשוב לנו!
+          שתפו אותנו במחשבות, הצעות או פניות. המשוב שלכם חשוב לנו!
         </p>
       </div>
 

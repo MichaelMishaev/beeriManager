@@ -4,7 +4,8 @@ import { verifyJWT } from '@/lib/auth/jwt'
 import { z } from 'zod'
 
 const StatusUpdateSchema = z.object({
-  status: z.enum(['new', 'read', 'responded'])
+  status: z.enum(['new', 'read', 'responded', 'done', 'in_progress', 'other']),
+  status_comment: z.string().optional().nullable()
 })
 
 export async function PUT(
@@ -32,9 +33,20 @@ export async function PUT(
     }
 
     const supabase = createClient()
+
+    // Prepare update data
+    const updateData: any = { status: validation.data.status }
+
+    // Add status_comment if provided, or clear it if status is not 'other'
+    if (validation.data.status === 'other' && validation.data.status_comment) {
+      updateData.status_comment = validation.data.status_comment
+    } else if (validation.data.status !== 'other') {
+      updateData.status_comment = null
+    }
+
     const { data, error } = await supabase
       .from('anonymous_feedback')
-      .update({ status: validation.data.status })
+      .update(updateData)
       .eq('id', params.id)
       .select()
       .single()

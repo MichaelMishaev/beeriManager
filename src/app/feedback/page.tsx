@@ -32,7 +32,7 @@ const categoryOptions = [
   { value: 'event', label: 'אירוע' },
   { value: 'task', label: 'משימה' },
   { value: 'suggestion', label: 'הצעה' },
-  { value: 'complaint', label: 'תלונה' },
+  { value: 'complaint', label: 'פניה' },
   { value: 'other', label: 'אחר' }
 ]
 

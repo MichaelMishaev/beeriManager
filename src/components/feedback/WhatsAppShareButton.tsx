@@ -24,7 +24,7 @@ const categoryLabels: Record<string, Record<string, string>> = {
     event: 'אירוע',
     task: 'משימה',
     suggestion: 'הצעה',
-    complaint: 'תלונה',
+    complaint: 'פניה',
     other: 'אחר'
   },
   ru: {
@@ -32,7 +32,7 @@ const categoryLabels: Record<string, Record<string, string>> = {
     event: 'Событие',
     task: 'Задача',
     suggestion: 'Предложение',
-    complaint: 'Жалоба',
+    complaint: 'Обращение',
     other: 'Другое'
   }
 }
