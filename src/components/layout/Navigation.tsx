@@ -78,10 +78,11 @@ export function Navigation() {
           <div className="flex items-center gap-3">
             <Link
               href={isAuthenticated ? "/admin" : "/"}
-              className="flex items-center space-x-2 space-x-reverse"
+              className="flex flex-col items-start"
               onClick={() => handleNavClick(isAuthenticated ? '/admin' : '/', 'בית')}
             >
               <span className="text-lg md:text-xl font-bold">פורטל בארי</span>
+              <span className="text-[9px] md:text-[10px] text-muted-foreground leading-tight">מופעל על ידי ועד הורים בית ספר בארי</span>
             </Link>
             {/* Language Switcher & PWA Install - Always visible */}
             <div className="flex items-center gap-2">
