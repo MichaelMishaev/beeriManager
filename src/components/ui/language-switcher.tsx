@@ -21,13 +21,13 @@ export function LanguageSwitcher() {
   }
 
   return (
-    <div className="flex items-center gap-1.5">
+    <div className="flex flex-col items-center gap-1">
       {locales.map((locale) => (
         <button
           key={locale}
           onClick={() => switchLanguage(locale)}
           className={cn(
-            'px-2.5 py-1 text-xs md:text-sm font-medium rounded-full transition-all duration-300',
+            'px-2.5 py-1 text-xs md:text-sm font-medium rounded-full transition-all duration-300 min-w-[40px]',
             currentLocale === locale
               ? 'bg-primary text-primary-foreground shadow-sm'
               : 'bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground'
