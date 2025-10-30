@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import { useRouter, useSearchParams, useParams } from 'next/navigation'
-import { CheckSquare, Plus, X, AlertCircle, Clock, UserCheck, Tags as TagsIcon, Share2, Search } from 'lucide-react'
+import { CheckSquare, Plus, X, AlertCircle, Clock, UserCheck, Tags as TagsIcon, Share2, Search, ArrowUpDown } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -15,6 +15,8 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuCheckboxItem,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuTrigger,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -34,6 +36,8 @@ interface TasksPageClientProps {
 
 type TaskStatus = 'pending' | 'in_progress' | 'completed' | 'overdue'
 
+type SortOption = 'due_date' | 'created_at' | 'updated_at'
+
 export function TasksPageClient({ initialTasks, initialStats, availableTags }: TasksPageClientProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -43,6 +47,7 @@ export function TasksPageClient({ initialTasks, initialStats, availableTags }: T
   const [stats] = useState(initialStats)
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([])
   const [searchQuery, setSearchQuery] = useState<string>('')
+  const [sortBy, setSortBy] = useState<SortOption>('due_date')
 
   const locale = (params?.locale || 'he') as Locale
 
@@ -156,7 +161,7 @@ export function TasksPageClient({ initialTasks, initialStats, availableTags }: T
 
   const statusFilter = (searchParams?.get('status') as TaskStatus) || null
 
-  // Filter tasks based on status, tags, and search query
+  // Filter and sort tasks based on status, tags, search query, and sort option
   const filteredTasks = useMemo(() => {
     let filtered = tasks
 
@@ -199,8 +204,34 @@ export function TasksPageClient({ initialTasks, initialStats, availableTags }: T
       })
     }
 
-    return filtered
-  }, [tasks, statusFilter, selectedTagIds, searchQuery])
+    // Apply sorting
+    const sorted = [...filtered].sort((a, b) => {
+      let dateA: Date | null = null
+      let dateB: Date | null = null
+
+      if (sortBy === 'due_date') {
+        dateA = a.due_date ? new Date(a.due_date) : null
+        dateB = b.due_date ? new Date(b.due_date) : null
+        // Tasks without due date should appear last
+        if (!dateA && !dateB) return 0
+        if (!dateA) return 1
+        if (!dateB) return -1
+      } else if (sortBy === 'created_at') {
+        dateA = new Date(a.created_at)
+        dateB = new Date(b.created_at)
+      } else if (sortBy === 'updated_at') {
+        dateA = a.updated_at ? new Date(a.updated_at) : new Date(a.created_at)
+        dateB = b.updated_at ? new Date(b.updated_at) : new Date(b.created_at)
+      }
+
+      if (dateA && dateB) {
+        return dateA.getTime() - dateB.getTime()
+      }
+      return 0
+    })
+
+    return sorted
+  }, [tasks, statusFilter, selectedTagIds, searchQuery, sortBy])
 
   // Group filtered tasks
   const tasksByStatus = useMemo(() => ({
@@ -321,7 +352,7 @@ export function TasksPageClient({ initialTasks, initialStats, availableTags }: T
         )}
       </div>
 
-      {/* Tag Filter Dropdown and Share Button */}
+      {/* Tag Filter, Sort, and Share Buttons */}
       <div className="flex items-center gap-2 flex-wrap">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -361,6 +392,30 @@ export function TasksPageClient({ initialTasks, initialStats, availableTags }: T
                 </button>
               </>
             )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="sm">
+              <ArrowUpDown className="h-4 w-4 ml-2" />
+              מיון לפי תאריך
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="w-56">
+            <DropdownMenuLabel>בחר סדר מיון</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuRadioGroup value={sortBy} onValueChange={(value) => setSortBy(value as SortOption)}>
+              <DropdownMenuRadioItem value="due_date">
+                תאריך יעד
+              </DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="created_at">
+                תאריך יצירה
+              </DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="updated_at">
+                תאריך עדכון אחרון
+              </DropdownMenuRadioItem>
+            </DropdownMenuRadioGroup>
           </DropdownMenuContent>
         </DropdownMenu>
 
