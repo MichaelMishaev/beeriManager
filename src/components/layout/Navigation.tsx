@@ -10,6 +10,7 @@ import { LanguageSwitcher } from '@/components/ui/language-switcher'
 import { InstallButton } from '@/components/pwa/InstallButton'
 import { ContactsDialog } from '@/components/features/contacts/ContactsDialog'
 import { NotificationBell } from '@/components/layout/NotificationBell'
+import { NotificationSubscription } from '@/components/pwa/NotificationSubscription'
 import { cn } from '@/lib/utils'
 import { logger } from '@/lib/logger'
 
@@ -78,11 +79,11 @@ export function Navigation() {
           <div className="flex items-center gap-3">
             <Link
               href={isAuthenticated ? "/admin" : "/"}
-              className="flex flex-col items-start"
+              className="flex flex-col items-start min-w-0 flex-shrink"
               onClick={() => handleNavClick(isAuthenticated ? '/admin' : '/', 'בית')}
             >
               <span className="text-lg md:text-xl font-bold">פורטל בארי</span>
-              <span className="text-[9px] md:text-[10px] text-muted-foreground leading-tight">מופעל על ידי ועד הורים בית ספר בארי</span>
+              <span className="text-[8px] md:text-[10px] text-muted-foreground leading-tight truncate max-w-[140px] sm:max-w-[200px] md:max-w-none">מופעל על ידי ועד הורים בית ספר בארי</span>
             </Link>
             {/* Language Switcher & PWA Install - Always visible */}
             <div className="flex items-center gap-2">
@@ -113,8 +114,11 @@ export function Navigation() {
               )
             })}
 
-            {/* Notification Bell - Admin Panel Only */}
+            {/* Notification Bell - Admin Panel Only (shows counts) */}
             {isAuthenticated && pathname.includes('/admin') && <NotificationBell />}
+
+            {/* Notification Subscription - For All Users */}
+            <NotificationSubscription />
 
             {/* Contacts Button */}
             <ContactsDialog>
@@ -154,10 +158,13 @@ export function Navigation() {
             )}
           </div>
 
-          {/* Mobile - Notification Bell, Contacts Button & Menu Button */}
+          {/* Mobile - Notification Bell, Notification Subscribe, Contacts Button & Menu Button */}
           <div className="flex items-center gap-2 md:hidden">
-            {/* Notification Bell - Admin Panel Only */}
+            {/* Notification Bell - Admin Panel Only (shows counts) */}
             {isAuthenticated && pathname.includes('/admin') && <NotificationBell />}
+
+            {/* Notification Subscription - For All Users */}
+            <NotificationSubscription />
 
             {/* Contacts Button - Always visible on mobile */}
             <ContactsDialog>
