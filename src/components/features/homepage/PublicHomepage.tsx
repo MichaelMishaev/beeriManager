@@ -137,6 +137,7 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
   const dateLocale = currentLocale === 'ru' ? ru : he
 
   const [tickets, setTickets] = useState<Ticket[]>([])
+  const [settings, setSettings] = useState<{ committee_name?: string; school_name?: string } | null>(null)
 
   useEffect(() => {
     // Load active tickets (all or featured)
@@ -151,7 +152,22 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
         console.error('Error loading tickets:', error)
       }
     }
+
+    // Load settings
+    async function fetchSettings() {
+      try {
+        const response = await fetch('/api/settings')
+        const data = await response.json()
+        if (data.success && data.data) {
+          setSettings(data.data)
+        }
+      } catch (error) {
+        console.error('Error fetching settings:', error)
+      }
+    }
+
     loadTickets()
+    fetchSettings()
   }, [])
 
   // Get recent events with photos (past events only)
@@ -366,7 +382,9 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
     {/* Footer Credit */}
     <div className="text-center py-8 border-t mt-8">
       <p className="text-sm text-muted-foreground">
-        נבנה באהבה על ידי ועד ההורים של בית ספר בארי 💙
+        {settings?.committee_name && settings?.school_name
+          ? `נבנה באהבה על ידי ${settings.committee_name} ${settings.school_name} 💙`
+          : 'נבנה באהבה על ידי ועד ההורים של בית ספר בארי 💙'}
       </p>
     </div>
     </>

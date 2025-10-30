@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Heart, Github, Mail } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
@@ -9,8 +9,31 @@ interface FooterProps {
   className?: string
 }
 
+interface AppSettings {
+  committee_name?: string
+  school_name?: string
+  committee_email?: string
+  school_address?: string
+}
+
 export function Footer({ className }: FooterProps) {
   const currentYear = new Date().getFullYear()
+  const [settings, setSettings] = useState<AppSettings | null>(null)
+
+  useEffect(() => {
+    async function fetchSettings() {
+      try {
+        const response = await fetch('/api/settings')
+        const data = await response.json()
+        if (data.success && data.data) {
+          setSettings(data.data)
+        }
+      } catch (error) {
+        console.error('Error fetching settings:', error)
+      }
+    }
+    fetchSettings()
+  }, [])
 
   return (
     <footer className={cn(
@@ -22,10 +45,13 @@ export function Footer({ className }: FooterProps) {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* About */}
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">אודות BeeriManager</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              {settings?.school_name ? `אודות ${settings.school_name}` : 'אודות BeeriManager'}
+            </h3>
             <p className="text-sm text-gray-600 leading-relaxed">
-              מערכת ניהול ועד הורים מתקדמת הבנויה במיוחד עבור בתי ספר יסודיים בישראל.
-              מאפשרת ניהול אירועים, משימות, הוצאות ותקשורת יעילה.
+              {settings?.committee_name && settings?.school_name
+                ? `מערכת ניהול ${settings.committee_name} ${settings.school_name}. מאפשרת ניהול אירועים, משימות, הוצאות ותקשורת יעילה.`
+                : 'מערכת ניהול ועד הורים מתקדמת הבנויה במיוחד עבור בתי ספר יסודיים בישראל. מאפשרת ניהול אירועים, משימות, הוצאות ותקשורת יעילה.'}
             </p>
           </div>
 
@@ -55,13 +81,30 @@ export function Footer({ className }: FooterProps) {
           <div>
             <h3 className="text-lg font-semibold text-gray-900 mb-4">יצירת קשר</h3>
             <div className="space-y-2">
-              <a
-                href="mailto:committee@school.edu"
-                className="flex items-center gap-2 text-sm text-gray-600 hover:text-primary transition-colors"
-              >
-                <Mail className="w-4 h-4" />
-                committee@school.edu
-              </a>
+              {settings?.committee_email && (
+                <a
+                  href={`mailto:${settings.committee_email}`}
+                  className="flex items-center gap-2 text-sm text-gray-600 hover:text-primary transition-colors"
+                >
+                  <Mail className="w-4 h-4" />
+                  {settings.committee_email}
+                </a>
+              )}
+              {!settings?.committee_email && (
+                <a
+                  href="mailto:committee@school.edu"
+                  className="flex items-center gap-2 text-sm text-gray-600 hover:text-primary transition-colors"
+                >
+                  <Mail className="w-4 h-4" />
+                  committee@school.edu
+                </a>
+              )}
+              {settings?.school_address && (
+                <div className="flex items-start gap-2 text-sm text-gray-600">
+                  <span>📍</span>
+                  <span>{settings.school_address}</span>
+                </div>
+              )}
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <span>שעות פעילות: א'-ה', 8:00-16:00</span>
               </div>
@@ -88,11 +131,11 @@ export function Footer({ className }: FooterProps) {
             <div className="flex items-center gap-1 text-sm text-gray-500">
               <span>נבנה באהבה</span>
               <Heart className="w-4 h-4 text-red-500" />
-              <span>עבור ועד ההורים</span>
+              <span>{settings?.committee_name ? `עבור ${settings.committee_name}` : 'עבור ועד ההורים'}</span>
             </div>
 
             <div className="flex flex-col md:flex-row items-center gap-4 text-sm text-gray-500">
-              <span>© {currentYear} BeeriManager. כל הזכויות שמורות.</span>
+              <span>© {currentYear} {settings?.school_name || 'BeeriManager'}. כל הזכויות שמורות.</span>
               <div className="flex gap-4">
                 <Link href="/privacy" className="hover:text-primary transition-colors">
                   מדיניות פרטיות

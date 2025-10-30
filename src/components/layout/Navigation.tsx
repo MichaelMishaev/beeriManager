@@ -30,6 +30,7 @@ function useNavItems() {
 export function Navigation() {
   const [isOpen, setIsOpen] = useState(false)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [settings, setSettings] = useState<{ committee_name?: string; school_name?: string } | null>(null)
   const pathname = usePathname()
   const t = useTranslations('common')
   const tAuth = useTranslations('auth')
@@ -37,7 +38,20 @@ export function Navigation() {
 
   useEffect(() => {
     checkAuth()
+    fetchSettings()
   }, [])
+
+  async function fetchSettings() {
+    try {
+      const response = await fetch('/api/settings')
+      const data = await response.json()
+      if (data.success && data.data) {
+        setSettings(data.data)
+      }
+    } catch (error) {
+      console.error('Error fetching settings:', error)
+    }
+  }
 
   async function checkAuth() {
     try {
@@ -82,8 +96,14 @@ export function Navigation() {
               className="flex flex-col items-start min-w-0 flex-shrink"
               onClick={() => handleNavClick(isAuthenticated ? '/admin' : '/', 'בית')}
             >
-              <span className="text-lg md:text-xl font-bold">פורטל בארי</span>
-              <span className="text-[8px] md:text-[10px] text-muted-foreground leading-tight truncate max-w-[140px] sm:max-w-[200px] md:max-w-none">מופעל על ידי ועד הורים בית ספר בארי</span>
+              <span className="text-lg md:text-xl font-bold">
+                {settings?.school_name ? `פורטל ${settings.school_name}` : 'פורטל בארי'}
+              </span>
+              <span className="text-[8px] md:text-[10px] text-muted-foreground leading-tight truncate max-w-[140px] sm:max-w-[200px] md:max-w-none">
+                {settings?.committee_name && settings?.school_name
+                  ? `מופעל על ידי ${settings.committee_name} ${settings.school_name}`
+                  : 'מופעל על ידי ועד הורים בית ספר בארי'}
+              </span>
             </Link>
             {/* Language Switcher & PWA Install - Always visible */}
             <div className="flex items-center gap-2">
@@ -114,11 +134,12 @@ export function Navigation() {
               )
             })}
 
-            {/* Notification Bell - Admin Panel Only (shows counts) */}
-            {isAuthenticated && pathname.includes('/admin') && <NotificationBell />}
-
-            {/* Notification Subscription - For All Users */}
-            <NotificationSubscription />
+            {/* Notifications: Show bell with counts for admins, subscription button for public */}
+            {isAuthenticated && pathname.includes('/admin') ? (
+              <NotificationBell />
+            ) : (
+              <NotificationSubscription />
+            )}
 
             {/* Contacts Button */}
             <ContactsDialog>
