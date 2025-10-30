@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import webpush from 'web-push';
 import { createClient } from '@/lib/supabase/server';
+import { cookies } from 'next/headers';
+import { verifyJWT } from '@/lib/auth/jwt-edge';
 
 // Configure web-push with VAPID keys (only if keys are available)
 function initializeVapid() {
@@ -51,16 +53,28 @@ export async function POST(req: NextRequest) {
     // Ensure VAPID is initialized at runtime
     initializeVapid();
 
-    // Check authentication
-    const supabase = await createClient();
-    const { data: { session } } = await supabase.auth.getSession();
+    // Check authentication using JWT token
+    const cookieStore = cookies();
+    const token = cookieStore.get('auth-token');
 
-    if (!session) {
+    if (!token?.value) {
       return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
+        { success: false, error: 'Unauthorized - No token' },
         { status: 401 }
       );
     }
+
+    const payload = await verifyJWT(token.value);
+
+    if (!payload || payload.role !== 'admin') {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized - Invalid token or not admin' },
+        { status: 401 }
+      );
+    }
+
+    // Get Supabase client for database operations
+    const supabase = await createClient();
 
     // Check if VAPID keys are configured
     if (!process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || !process.env.VAPID_PRIVATE_KEY) {
