@@ -172,6 +172,17 @@ const defaultAdminSections = [
     ]
   },
   {
+    id: 'notifications',
+    title: 'התראות Push',
+    description: 'שלח התראות למנויים (כולל תזכורות חולצה לבנה)',
+    icon: Bell,
+    color: 'text-purple-600',
+    bgColor: 'bg-purple-50',
+    links: [
+      { href: '/admin/notifications', label: 'שלח התראות', icon: Bell }
+    ]
+  },
+  {
     id: 'settings',
     title: 'הגדרות',
     description: 'הגדרות מערכת וניהול תצורה',
