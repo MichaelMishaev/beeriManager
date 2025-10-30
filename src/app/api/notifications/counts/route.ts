@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { verifyJWT } from '@/lib/auth/jwt'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(req: NextRequest) {
   try {
     // Only admins can view notification counts
@@ -13,7 +15,7 @@ export async function GET(req: NextRequest) {
       )
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { searchParams } = new URL(req.url)
 
     // Get last viewed timestamp from query param (ISO string)
