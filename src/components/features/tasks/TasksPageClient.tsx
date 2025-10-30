@@ -15,8 +15,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuCheckboxItem,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
   DropdownMenuTrigger,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -48,13 +46,17 @@ export function TasksPageClient({ initialTasks, initialStats, availableTags }: T
   const [stats] = useState(initialStats)
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([])
   const [searchQuery, setSearchQuery] = useState<string>('')
-  const [sortBy, setSortBy] = useState<SortOption>('due_date')
-  const [sortDirection, setSortDirection] = useState<SortDirection>('asc')
+  const [sortBy] = useState<SortOption>('created_at') // Always sort by created date
+  const [sortDirection, setSortDirection] = useState<SortDirection>('desc') // Default: newest first
 
   const locale = (params?.locale || 'he') as Locale
 
   const handleTaskTagsUpdated = (updatedTask: Task) => {
     setTasks(prev => prev.map(t => t.id === updatedTask.id ? updatedTask : t))
+  }
+
+  const handleToggleSortDirection = () => {
+    setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc')
   }
 
   const handleTaskComplete = async (taskId: string, comment?: string) => {
@@ -249,35 +251,16 @@ export function TasksPageClient({ initialTasks, initialStats, availableTags }: T
       })
     }
 
-    // Apply sorting
+    // Apply sorting by created date
     const sorted = [...filtered].sort((a, b) => {
-      let dateA: Date | null = null
-      let dateB: Date | null = null
-
-      if (sortBy === 'due_date') {
-        dateA = a.due_date ? new Date(a.due_date) : null
-        dateB = b.due_date ? new Date(b.due_date) : null
-        // Tasks without due date should appear last
-        if (!dateA && !dateB) return 0
-        if (!dateA) return 1
-        if (!dateB) return -1
-      } else if (sortBy === 'created_at') {
-        dateA = new Date(a.created_at)
-        dateB = new Date(b.created_at)
-      } else if (sortBy === 'updated_at') {
-        dateA = a.updated_at ? new Date(a.updated_at) : new Date(a.created_at)
-        dateB = b.updated_at ? new Date(b.updated_at) : new Date(b.created_at)
-      }
-
-      if (dateA && dateB) {
-        const diff = dateA.getTime() - dateB.getTime()
-        return sortDirection === 'asc' ? diff : -diff
-      }
-      return 0
+      const dateA = new Date(a.created_at)
+      const dateB = new Date(b.created_at)
+      const diff = dateA.getTime() - dateB.getTime()
+      return sortDirection === 'asc' ? diff : -diff
     })
 
     return sorted
-  }, [tasks, statusFilter, selectedTagIds, searchQuery, sortBy, sortDirection])
+  }, [tasks, statusFilter, selectedTagIds, searchQuery, sortDirection])
 
   // Group filtered tasks
   const tasksByStatus = useMemo(() => ({
@@ -441,40 +424,14 @@ export function TasksPageClient({ initialTasks, initialStats, availableTags }: T
           </DropdownMenuContent>
         </DropdownMenu>
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm">
-              <ArrowUpDown className="h-4 w-4 ml-2" />
-              מיון לפי תאריך
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-56">
-            <DropdownMenuLabel>בחר שדה למיון</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuRadioGroup value={sortBy} onValueChange={(value) => setSortBy(value as SortOption)}>
-              <DropdownMenuRadioItem value="due_date">
-                תאריך יעד
-              </DropdownMenuRadioItem>
-              <DropdownMenuRadioItem value="created_at">
-                תאריך יצירה
-              </DropdownMenuRadioItem>
-              <DropdownMenuRadioItem value="updated_at">
-                תאריך עדכון אחרון
-              </DropdownMenuRadioItem>
-            </DropdownMenuRadioGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuLabel>סדר המיון</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuRadioGroup value={sortDirection} onValueChange={(value) => setSortDirection(value as SortDirection)}>
-              <DropdownMenuRadioItem value="asc">
-                עולה (מוקדם לאוחר)
-              </DropdownMenuRadioItem>
-              <DropdownMenuRadioItem value="desc">
-                יורד (אוחר למוקדם)
-              </DropdownMenuRadioItem>
-            </DropdownMenuRadioGroup>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleToggleSortDirection}
+        >
+          <ArrowUpDown className="h-4 w-4 ml-2" />
+          {sortDirection === 'desc' ? 'חדש לישן' : 'ישן לחדש'}
+        </Button>
 
         <Button
           variant="outline"
