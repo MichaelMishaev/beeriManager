@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { verifyJWT } from '@/lib/auth/jwt'
+import { verifyJWT } from '@/lib/auth/jwt-edge'
 
 export const dynamic = 'force-dynamic'
 
@@ -8,7 +8,15 @@ export async function GET(req: NextRequest) {
   try {
     // Only admins can view notification counts
     const token = req.cookies.get('auth-token')
-    if (!token || !verifyJWT(token.value)) {
+    if (!token) {
+      return NextResponse.json(
+        { success: false, error: 'נדרשת הרשאת מנהל' },
+        { status: 401 }
+      )
+    }
+
+    const payload = await verifyJWT(token.value)
+    if (!payload || payload.role !== 'admin') {
       return NextResponse.json(
         { success: false, error: 'נדרשת הרשאת מנהל' },
         { status: 401 }
