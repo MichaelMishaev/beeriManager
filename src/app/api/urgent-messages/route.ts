@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic'
 
 export async function GET(req: NextRequest) {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { searchParams } = new URL(req.url)
 
     // Check if admin wants all messages (for admin panel)
@@ -14,7 +14,6 @@ export async function GET(req: NextRequest) {
     let query = supabase
       .from('urgent_messages')
       .select('*')
-      .order('start_date', { ascending: false })
 
     if (!showAll) {
       // Filter only active messages within date range (for public view)
@@ -26,22 +25,26 @@ export async function GET(req: NextRequest) {
         .gte('end_date', today)
     }
 
+    // Add ordering - must be after filters
+    query = query.order('created_at', { ascending: false })
+
     const { data, error } = await query
 
     if (error) {
-      console.error('Failed to load urgent messages', error)
+      console.error('[Urgent GET] ❌ Failed to load urgent messages', error)
       return NextResponse.json(
         { success: false, error: 'Failed to load urgent messages' },
         { status: 500 }
       )
     }
 
+    console.log('[Urgent GET] ✅ Returning', data?.length || 0, 'messages')
     return NextResponse.json({
       success: true,
       data: data || []
     })
   } catch (error) {
-    console.error('Failed to load urgent messages', error)
+    console.error('[Urgent GET] ❌ Exception:', error)
     return NextResponse.json(
       { success: false, error: 'Failed to load urgent messages' },
       { status: 500 }

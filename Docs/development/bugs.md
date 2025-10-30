@@ -161,3 +161,140 @@ curl -X POST http://localhost:4500/api/auth/login -H "Content-Type: application/
 - Added note in `.env.example` about escaping special characters
 - Consider using `.env.local` validator script to check for common issues
 - Add integration test for login with actual password (not mocked)
+
+---
+
+## Urgent Messages Feature
+
+### Bug #3: Urgent messages not appearing on public homepage after creation
+
+**Date**: 2025-10-30
+
+**Symptoms**:
+- Admin creates urgent message in `/admin/urgent` panel
+- Message appears in admin panel (shows as active with correct dates)
+- Message is successfully saved to database (confirmed via API)
+- **BUT**: Message does not appear on public homepage at `/he`
+- Parents cannot see the urgent message banner
+
+**Root Cause**:
+- **Browser fetch cache** was preventing fresh data from loading
+- The `UrgentMessagesBanner` component was using default fetch behavior
+- Browser cached the API response from `/api/urgent-messages`
+- Even after creating new messages, the cached response (with 0 messages) was being returned
+- `loadMessages()` function had no cache-busting mechanism
+
+**Initial Investigation**:
+1. Created messages via admin panel - verified in database ✓
+2. Checked API endpoint directly - returned correct data ✓
+3. Checked public homepage - no banner visible ✗
+4. Suspected caching issue in browser
+
+**Debugging Process**:
+1. Created comprehensive Playwright tests to verify end-to-end flow
+2. Tests revealed messages were in database but not appearing on frontend
+3. Added cache-busting timestamp to admin panel `loadMessages()` - worked for admin
+4. Discovered public `UrgentMessagesBanner` component also needed cache-busting
+5. Console logs showed API calls were returning stale cached data
+
+**Solution**:
+
+**Part 1: Admin Panel Cache-Busting** (`src/app/[locale]/(admin)/admin/urgent/page.tsx`)
+```typescript
+async function loadMessages() {
+  try {
+    console.log('[LoadMessages] Fetching messages...')
+    // Add cache-busting timestamp
+    const response = await fetch(`/api/urgent-messages?all=true&_t=${Date.now()}`, {
+      cache: 'no-store',
+      headers: {
+        'Cache-Control': 'no-cache'
+      }
+    })
+    const data = await response.json()
+    if (data.success) {
+      setMessages(data.data || [])
+    }
+  } catch (error) {
+    logger.error('Failed to load urgent messages', { error })
+  }
+}
+```
+
+**Part 2: Public Banner Cache-Busting** (`src/components/features/urgent/UrgentMessagesBanner.tsx`)
+```typescript
+async function loadMessages() {
+  try {
+    // Add cache-busting timestamp to ensure fresh data
+    const response = await fetch(`/api/urgent-messages?_t=${Date.now()}`, {
+      cache: 'no-store',
+      headers: {
+        'Cache-Control': 'no-cache'
+      }
+    })
+    const data = await response.json()
+    if (data.success) {
+      setMessages(data.data || [])
+    }
+  } catch (error) {
+    logger.error('Failed to load urgent messages', { error })
+  }
+}
+```
+
+**Files Modified**:
+- `src/app/[locale]/(admin)/admin/urgent/page.tsx` - Added cache-busting to loadMessages()
+- `src/components/features/urgent/UrgentMessagesBanner.tsx` - Added cache-busting to loadMessages()
+
+**Testing**:
+Created comprehensive Playwright tests:
+```bash
+# Test full workflow: create → save → verify display
+npx playwright test urgent-create-and-verify.spec.ts --project=chromium
+
+# Test public display
+npx playwright test urgent-public-display-test.spec.ts --project=chromium
+```
+
+**Test Coverage**:
+1. **urgent-delete-test.spec.ts** - Verifies delete functionality
+2. **urgent-comprehensive-test.spec.ts** - Full CRUD workflow
+3. **urgent-create-and-verify.spec.ts** - End-to-end: admin creates → public sees
+4. **urgent-public-display-test.spec.ts** - Public homepage display verification
+
+**Manual Testing**:
+```bash
+# Step 1: Create message
+1. Go to http://localhost:4500/he/admin/urgent
+2. Click "הוסף הודעה" (Add Message)
+3. Fill in Hebrew title, description, and dates
+4. Click "שמור שינויים" (Save Changes)
+
+# Step 2: Verify in public homepage
+5. Open incognito/private window (to avoid localStorage dismissals)
+6. Go to http://localhost:4500/he
+7. Message should appear at top of page in banner
+
+# Step 3: Verify API directly
+curl -s 'http://localhost:4500/api/urgent-messages' | jq '.'
+```
+
+**Lessons Learned**:
+- Always implement cache-busting for dynamic content that needs real-time updates
+- Browser fetch caching can cause stale data even when database is updated
+- Use `cache: 'no-store'` and `Cache-Control: 'no-cache'` headers together
+- Add timestamp query parameter `?_t=${Date.now()}` for additional cache prevention
+- Test both admin and public views separately - they may have different caching behaviors
+- Comprehensive E2E tests catch caching issues that unit tests miss
+
+**Prevention**:
+- Standardize cache-busting pattern across all data-fetching functions
+- Create reusable `fetchWithNoCache()` utility function
+- Add cache-busting by default for admin CRUD operations
+- Document caching strategy in developer guide
+- Include cache-busting checks in code review checklist
+
+**Related Issues Fixed**:
+- Also reverted premature UI modernization changes that didn't match system design
+- Restored original clean UI design for urgent messages admin panel
+- Kept functionality improvements (delete, cache-busting) while reverting cosmetic changes

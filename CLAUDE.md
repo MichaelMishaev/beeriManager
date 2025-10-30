@@ -86,6 +86,26 @@ npm run test:e2e     # Run E2E tests
 - Selective Yellow: #FFBA00
 - UT Orange: #FF8200
 
+## Bug Tracking
+
+All bugs and their solutions are documented in `Docs/development/bugs.md`.
+
+### Recent Critical Fixes (2025-10-30)
+- **Bug #3**: Urgent messages cache issue - Messages not appearing on public homepage
+  - **Root Cause**: Browser fetch cache preventing fresh data
+  - **Solution**: Added cache-busting with `?_t=${Date.now()}` and `cache: 'no-store'` headers
+  - **Files**: `src/app/[locale]/(admin)/admin/urgent/page.tsx`, `src/components/features/urgent/UrgentMessagesBanner.tsx`
+  - **Tests**: Created 4 comprehensive Playwright tests for urgent messages CRUD and display
+
+### Cache-Busting Pattern
+For dynamic content that needs real-time updates:
+```typescript
+const response = await fetch(`/api/endpoint?_t=${Date.now()}`, {
+  cache: 'no-store',
+  headers: { 'Cache-Control': 'no-cache' }
+})
+```
+
 ## Important Context
 
 - Timeline: 7-day MVP development

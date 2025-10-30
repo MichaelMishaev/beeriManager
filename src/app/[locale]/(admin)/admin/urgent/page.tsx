@@ -30,12 +30,22 @@ export default function AdminUrgentMessagesPage() {
 
   async function loadMessages() {
     try {
-      const response = await fetch('/api/urgent-messages?all=true')
+      console.log('[LoadMessages] Fetching messages...')
+      // Add cache-busting timestamp
+      const response = await fetch(`/api/urgent-messages?all=true&_t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache'
+        }
+      })
       const data = await response.json()
+      console.log('[LoadMessages] Received:', data.data?.length || 0, 'messages')
       if (data.success) {
         setMessages(data.data || [])
+        console.log('[LoadMessages] State updated with', data.data?.length || 0, 'messages')
       }
     } catch (error) {
+      console.error('[LoadMessages] Error:', error)
       logger.error('Failed to load urgent messages', { error })
       toast.error('שגיאה בטעינת הודעות דחופות')
     } finally {
@@ -56,6 +66,8 @@ export default function AdminUrgentMessagesPage() {
       if (data.success) {
         toast.success('הודעות דחופות נשמרו בהצלחה')
         logger.success('Urgent messages saved', { count: messages.length })
+        // Reload messages from server to get fresh data with UUIDs
+        await loadMessages()
       } else {
         throw new Error(data.error)
       }
@@ -119,10 +131,50 @@ export default function AdminUrgentMessagesPage() {
     ))
   }
 
-  function deleteMessage(id: string) {
+  async function deleteMessage(id: string) {
+    console.log('[Delete] Starting delete for id:', id)
     if (confirm('האם למחוק הודעה זו?')) {
-      setMessages(messages.filter(m => m.id !== id))
-      toast.success('ההודעה נמחקה')
+      console.log('[Delete] User confirmed')
+      // Remove from local state immediately for better UX
+      const updatedMessages = messages.filter(m => m.id !== id)
+      console.log('[Delete] Updated messages:', updatedMessages.length, 'messages')
+      setMessages(updatedMessages)
+
+      // Save immediately to database
+      try {
+        setIsSaving(true)
+        console.log('[Delete] Sending save request...')
+        const response = await fetch('/api/urgent-messages/save', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ messages: updatedMessages }),
+        })
+
+        console.log('[Delete] Response status:', response.status)
+        const data = await response.json()
+        console.log('[Delete] Response data:', data)
+
+        if (data.success) {
+          toast.success('ההודעה נמחקה')
+          logger.success('Message deleted', { id })
+          // Reload messages from server to ensure sync
+          console.log('[Delete] Reloading messages...')
+          await loadMessages()
+          console.log('[Delete] ✅ Delete complete')
+        } else {
+          throw new Error(data.error)
+        }
+      } catch (error) {
+        console.error('[Delete] ❌ Error:', error)
+        logger.error('Failed to delete message', { error })
+        toast.error('שגיאה במחיקת ההודעה')
+        // Restore the message on error
+        setMessages(messages)
+      } finally {
+        setIsSaving(false)
+      }
+    } else {
+      console.log('[Delete] User cancelled')
     }
   }
 
@@ -136,82 +188,81 @@ export default function AdminUrgentMessagesPage() {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-5xl">
-      <div className="mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-2">
-            <Bell className="h-6 w-6 md:h-8 md:w-8" />
+      {/* Header */}
+      <div className="mb-8">
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-3xl font-bold flex items-center gap-2">
+            <Bell className="h-8 w-8" />
             ניהול הודעות דחופות
           </h1>
         </div>
-        <div className="flex flex-col sm:flex-row gap-2">
-          <Button onClick={addMessage} className="gap-2 w-full sm:w-auto">
-            <Plus className="h-4 w-4" />
+        <div className="flex flex-col sm:flex-row gap-3">
+          <Button
+            onClick={addMessage}
+            className="gap-2 w-full sm:w-auto"
+          >
+            <Plus className="h-5 w-5" />
             הוסף הודעה
           </Button>
           <Button
             onClick={saveMessages}
             disabled={isSaving}
             variant="default"
-            className="gap-2 bg-green-600 hover:bg-green-700 w-full sm:w-auto"
+            className="gap-2 w-full sm:w-auto"
           >
-            <Save className="h-4 w-4" />
+            <Save className="h-5 w-5" />
             {isSaving ? 'שומר...' : 'שמור שינויים'}
           </Button>
         </div>
       </div>
 
       {/* Quick White Shirt Buttons */}
-      <Card className="mb-6 bg-yellow-50 border-yellow-200">
-        <CardHeader className="pb-3">
+      <Card className="mb-8 bg-yellow-50 border-yellow-200">
+        <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
             <Tshirt className="h-5 w-5" />
             תזכורת מהירה לחולצה לבנה
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-3">
+        <CardContent className="space-y-4">
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5">
             <Button
               onClick={() => addWhiteShirtAlert(1)}
               variant="outline"
-              size="default"
-              className="w-full whitespace-nowrap text-sm h-auto py-3"
+              className="w-full"
             >
               + 1 יום
             </Button>
             <Button
               onClick={() => addWhiteShirtAlert(3)}
               variant="outline"
-              size="default"
-              className="w-full whitespace-nowrap text-sm h-auto py-3"
+              className="w-full"
             >
               + 3 ימים
             </Button>
             <Button
               onClick={() => addWhiteShirtAlert(7)}
               variant="outline"
-              size="default"
-              className="w-full whitespace-nowrap text-sm h-auto py-3"
+              className="w-full"
             >
               + שבוע
             </Button>
             <Button
               onClick={() => addWhiteShirtAlert(14)}
               variant="outline"
-              size="default"
-              className="w-full whitespace-nowrap text-sm h-auto py-3"
+              className="w-full"
             >
               + שבועיים
             </Button>
             <Button
               onClick={() => addWhiteShirtAlert(30)}
               variant="outline"
-              size="default"
-              className="w-full whitespace-nowrap text-sm h-auto py-3 sm:col-span-1 col-span-2"
+              className="w-full sm:col-span-1 col-span-2"
             >
               + חודש
             </Button>
           </div>
-          <p className="text-xs text-muted-foreground text-center leading-relaxed">
+          <p className="text-sm text-muted-foreground text-center">
             לחצו כדי להוסיף תזכורת לחולצה לבנה למשך התקופה הנבחרת
           </p>
         </CardContent>
@@ -225,15 +276,22 @@ export default function AdminUrgentMessagesPage() {
             new Date(message.end_date) >= new Date()
 
           return (
-            <Card key={message.id} className={isActive ? 'border-2 border-green-500' : ''} data-testid="message-card">
-              <CardHeader className="pb-3">
+            <Card
+              key={message.id}
+              className={`
+                ${isActive ? 'border-2 border-green-500' : 'border'}
+                ${editingId === message.id ? 'ring-2 ring-blue-500' : ''}
+              `}
+              data-testid="urgent-message-card"
+            >
+              <CardHeader>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Badge className={typeInfo?.color}>
                       {typeInfo?.label}
                     </Badge>
                     {isActive && (
-                      <Badge className="bg-green-100 text-green-800 border-green-200">
+                      <Badge variant="default" className="bg-green-600">
                         פעילה כעת
                       </Badge>
                     )}
@@ -260,9 +318,9 @@ export default function AdminUrgentMessagesPage() {
                       variant="ghost"
                       size="sm"
                       onClick={() => deleteMessage(message.id)}
-                      className="text-red-600 hover:text-red-700"
+                      className="text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Trash2 className="h-5 w-5" />
                     </Button>
                   </div>
                 </div>

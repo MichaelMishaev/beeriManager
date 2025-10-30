@@ -22,7 +22,13 @@ export function UrgentMessagesBanner() {
 
   async function loadMessages() {
     try {
-      const response = await fetch('/api/urgent-messages')
+      // Add cache-busting timestamp to ensure fresh data
+      const response = await fetch(`/api/urgent-messages?_t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache'
+        }
+      })
       const data = await response.json()
       if (data.success) {
         setMessages(data.data || [])
