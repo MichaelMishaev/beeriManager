@@ -27,7 +27,7 @@ export function LanguageSwitcher() {
           key={locale}
           onClick={() => switchLanguage(locale)}
           className={cn(
-            'px-2.5 py-1 text-xs md:text-sm font-medium rounded-full transition-all duration-300 min-w-[40px]',
+            'px-2.5 py-1 text-xs md:text-sm font-medium rounded-full transition-all duration-300 w-16 min-w-16 max-w-16 text-center flex items-center justify-center',
             currentLocale === locale
               ? 'bg-primary text-primary-foreground shadow-sm'
               : 'bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground'
