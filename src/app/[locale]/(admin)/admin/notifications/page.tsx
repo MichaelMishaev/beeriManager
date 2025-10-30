@@ -337,6 +337,30 @@ export default function NotificationsPage() {
               >
                 ⏰ תזכורת
               </Button>
+
+              <Button
+                variant="outline"
+                className="justify-start bg-yellow-50 hover:bg-yellow-100 border-yellow-200"
+                onClick={() => setFormData({
+                  title: '👕 תזכורת: חולצה לבנה מחר!',
+                  body: 'שלום הורים יקרים, מחר יום חולצה לבנה! אנא וודאו שילדכם מגיע עם חולצה לבנה לבית הספר.',
+                  url: '/',
+                })}
+              >
+                👕 חולצה לבנה מחר
+              </Button>
+
+              <Button
+                variant="outline"
+                className="justify-start bg-yellow-50 hover:bg-yellow-100 border-yellow-200"
+                onClick={() => setFormData({
+                  title: '👕 תזכורת: חולצה לבנה השבוע',
+                  body: 'שלום הורים יקרים, השבוע יש יום חולצה לבנה! אנא וודאו שילדכם מגיע עם חולצה לבנה לבית הספר.',
+                  url: '/',
+                })}
+              >
+                👕 חולצה לבנה השבוע
+              </Button>
             </div>
           </CardContent>
         </Card>
