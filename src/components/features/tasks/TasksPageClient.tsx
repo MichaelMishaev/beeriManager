@@ -37,6 +37,7 @@ interface TasksPageClientProps {
 type TaskStatus = 'pending' | 'in_progress' | 'completed' | 'overdue'
 
 type SortOption = 'due_date' | 'created_at' | 'updated_at'
+type SortDirection = 'asc' | 'desc'
 
 export function TasksPageClient({ initialTasks, initialStats, availableTags }: TasksPageClientProps) {
   const router = useRouter()
@@ -48,6 +49,7 @@ export function TasksPageClient({ initialTasks, initialStats, availableTags }: T
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([])
   const [searchQuery, setSearchQuery] = useState<string>('')
   const [sortBy, setSortBy] = useState<SortOption>('due_date')
+  const [sortDirection, setSortDirection] = useState<SortDirection>('asc')
 
   const locale = (params?.locale || 'he') as Locale
 
@@ -225,13 +227,14 @@ export function TasksPageClient({ initialTasks, initialStats, availableTags }: T
       }
 
       if (dateA && dateB) {
-        return dateA.getTime() - dateB.getTime()
+        const diff = dateA.getTime() - dateB.getTime()
+        return sortDirection === 'asc' ? diff : -diff
       }
       return 0
     })
 
     return sorted
-  }, [tasks, statusFilter, selectedTagIds, searchQuery, sortBy])
+  }, [tasks, statusFilter, selectedTagIds, searchQuery, sortBy, sortDirection])
 
   // Group filtered tasks
   const tasksByStatus = useMemo(() => ({
@@ -403,7 +406,7 @@ export function TasksPageClient({ initialTasks, initialStats, availableTags }: T
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="w-56">
-            <DropdownMenuLabel>בחר סדר מיון</DropdownMenuLabel>
+            <DropdownMenuLabel>בחר שדה למיון</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuRadioGroup value={sortBy} onValueChange={(value) => setSortBy(value as SortOption)}>
               <DropdownMenuRadioItem value="due_date">
@@ -414,6 +417,17 @@ export function TasksPageClient({ initialTasks, initialStats, availableTags }: T
               </DropdownMenuRadioItem>
               <DropdownMenuRadioItem value="updated_at">
                 תאריך עדכון אחרון
+              </DropdownMenuRadioItem>
+            </DropdownMenuRadioGroup>
+            <DropdownMenuSeparator />
+            <DropdownMenuLabel>סדר המיון</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuRadioGroup value={sortDirection} onValueChange={(value) => setSortDirection(value as SortDirection)}>
+              <DropdownMenuRadioItem value="asc">
+                עולה (מוקדם לאוחר)
+              </DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="desc">
+                יורד (אוחר למוקדם)
               </DropdownMenuRadioItem>
             </DropdownMenuRadioGroup>
           </DropdownMenuContent>
