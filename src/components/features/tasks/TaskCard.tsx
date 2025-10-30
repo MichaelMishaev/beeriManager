@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useState } from 'react'
 import { CheckSquare, Square, Clock, AlertCircle, Calendar } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -11,12 +11,13 @@ import type { Task, Tag } from '@/types'
 import Link from 'next/link'
 import { QuickTagEditor } from './QuickTagEditor'
 import { ShareTaskButton } from './ShareTaskButton'
+import { TaskCompletionDialog } from './TaskCompletionDialog'
 
 interface TaskCardProps {
   task: Task
   variant?: 'full' | 'compact' | 'minimal'
   showActions?: boolean
-  onComplete?: () => void
+  onComplete?: (comment?: string) => void
   onEdit?: () => void
   onTagsUpdated?: (updatedTask: Task) => void
   availableTags?: Tag[]
@@ -33,9 +34,24 @@ export function TaskCard({
   availableTags = [],
   className = ''
 }: TaskCardProps) {
+  const [showCompletionDialog, setShowCompletionDialog] = useState(false)
   const dueDate = task.due_date ? new Date(task.due_date) : null
   const isOverdue = task.status !== 'completed' && dueDate && dueDate < new Date()
   const isToday = dueDate ? dueDate.toDateString() === new Date().toDateString() : false
+
+  const handleCompletionClick = () => {
+    // If task is not completed, show dialog to add optional comment
+    if (task.status !== 'completed') {
+      setShowCompletionDialog(true)
+    } else {
+      // If already completed, just toggle back without comment
+      onComplete?.()
+    }
+  }
+
+  const handleConfirmCompletion = (comment?: string) => {
+    onComplete?.(comment)
+  }
 
   const getStatusColor = (status: string, isOverdue: boolean) => {
     if (isOverdue) return 'bg-red-100 text-red-800 border-red-200'
@@ -64,10 +80,11 @@ export function TaskCard({
 
   if (variant === 'minimal') {
     return (
-      <div className={`flex items-center justify-between p-3 bg-white rounded-lg border hover:shadow-sm transition-shadow ${className}`}>
+      <>
+        <div className={`flex items-center justify-between p-3 bg-white rounded-lg border hover:shadow-sm transition-shadow ${className}`}>
         <div className="flex items-center gap-3 flex-1">
           <button
-            onClick={onComplete}
+            onClick={handleCompletionClick}
             className={`p-1 rounded transition-colors ${
               task.status === 'completed'
                 ? 'text-green-600 hover:text-green-700'
@@ -121,18 +138,27 @@ export function TaskCard({
           </div>
         )}
       </div>
+
+      <TaskCompletionDialog
+        open={showCompletionDialog}
+        onOpenChange={setShowCompletionDialog}
+        onConfirm={handleConfirmCompletion}
+        taskTitle={task.title}
+      />
+    </>
     )
   }
 
   if (variant === 'compact') {
     return (
-      <Card className={`hover:shadow-lg transition-shadow ${className} ${
-        task.priority === 'urgent' ? 'ring-2 ring-red-200' : ''
-      }`}>
+      <>
+        <Card className={`hover:shadow-lg transition-shadow ${className} ${
+          task.priority === 'urgent' ? 'ring-2 ring-red-200' : ''
+        }`}>
         <CardContent className="p-4">
           <div className="flex items-start gap-3">
             <button
-              onClick={onComplete}
+              onClick={handleCompletionClick}
               className={`p-1 rounded transition-colors flex-shrink-0 mt-0.5 ${
                 task.status === 'completed'
                   ? 'text-green-600 hover:text-green-700'
@@ -208,7 +234,7 @@ export function TaskCard({
                     <Link href={`/tasks/${task.id}`}>פרטים</Link>
                   </Button>
                   {task.status !== 'completed' && onComplete && (
-                    <Button variant="outline" size="sm" onClick={onComplete}>
+                    <Button variant="outline" size="sm" onClick={handleCompletionClick}>
                       {task.status === 'pending' ? 'התחל עבודה' : 'סיים משימה'}
                     </Button>
                   )}
@@ -226,26 +252,35 @@ export function TaskCard({
           </div>
         </CardContent>
       </Card>
+
+      <TaskCompletionDialog
+        open={showCompletionDialog}
+        onOpenChange={setShowCompletionDialog}
+        onConfirm={handleConfirmCompletion}
+        taskTitle={task.title}
+      />
+    </>
     )
   }
 
   // Full variant
   return (
-    <Card className={`hover:shadow-lg transition-shadow ${className} ${
-      task.priority === 'urgent' ? 'ring-2 ring-red-200 shadow-lg' : ''
-    }`}>
-      <CardHeader className="pb-3">
-        <div className="flex items-start gap-3">
-          <button
-            onClick={onComplete}
-            className={`p-2 rounded-lg transition-colors flex-shrink-0 ${
-              task.status === 'completed'
-                ? 'text-green-600 hover:text-green-700 bg-green-50 hover:bg-green-100'
-                : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50'
-            }`}
-          >
-            <StatusIcon className="h-6 w-6" />
-          </button>
+    <>
+      <Card className={`hover:shadow-lg transition-shadow ${className} ${
+        task.priority === 'urgent' ? 'ring-2 ring-red-200 shadow-lg' : ''
+      }`}>
+        <CardHeader className="pb-3">
+          <div className="flex items-start gap-3">
+            <button
+              onClick={handleCompletionClick}
+              className={`p-2 rounded-lg transition-colors flex-shrink-0 ${
+                task.status === 'completed'
+                  ? 'text-green-600 hover:text-green-700 bg-green-50 hover:bg-green-100'
+                  : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              <StatusIcon className="h-6 w-6" />
+            </button>
 
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between mb-2">
@@ -385,7 +420,7 @@ export function TaskCard({
             </Button>
 
             {task.status !== 'completed' && onComplete && (
-              <Button variant="outline" size="sm" onClick={onComplete}>
+              <Button variant="outline" size="sm" onClick={handleCompletionClick}>
                 <CheckSquare className="h-4 w-4 ml-2" />
                 {task.status === 'pending' ? 'התחל עבודה' : 'סיים משימה'}
               </Button>
@@ -418,5 +453,13 @@ export function TaskCard({
         )}
       </CardContent>
     </Card>
+
+    <TaskCompletionDialog
+      open={showCompletionDialog}
+      onOpenChange={setShowCompletionDialog}
+      onConfirm={handleConfirmCompletion}
+      taskTitle={task.title}
+    />
+  </>
   )
 }

@@ -57,6 +57,49 @@ export function TasksPageClient({ initialTasks, initialStats, availableTags }: T
     setTasks(prev => prev.map(t => t.id === updatedTask.id ? updatedTask : t))
   }
 
+  const handleTaskComplete = async (taskId: string, comment?: string) => {
+    try {
+      const task = tasks.find(t => t.id === taskId)
+      if (!task) return
+
+      // Determine new status based on current status
+      const newStatus = task.status === 'completed' ? 'pending' : 'completed'
+
+      const response = await fetch(`/api/tasks/${taskId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          status: newStatus,
+          completion_comment: newStatus === 'completed' ? comment : null
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to update task')
+      }
+
+      const { data: updatedTask } = await response.json()
+
+      // Update local state
+      setTasks(prev => prev.map(t => t.id === taskId ? updatedTask : t))
+
+      toast({
+        title: newStatus === 'completed' ? '✅ המשימה הושלמה' : '🔄 המשימה חזרה לממתינות',
+        description: task.title,
+      })
+
+      // Refresh the page to update stats
+      router.refresh()
+    } catch (error) {
+      console.error('Error updating task:', error)
+      toast({
+        title: 'שגיאה',
+        description: 'לא ניתן לעדכן את המשימה',
+        variant: 'destructive'
+      })
+    }
+  }
+
   const handleShareTasks = async () => {
     // IMPORTANT: Only share tasks that are actually displayed in the UI
     // This includes: urgent (not completed), pending, and in_progress
@@ -540,6 +583,7 @@ export function TasksPageClient({ initialTasks, initialStats, availableTags }: T
                 variant="compact"
                 availableTags={availableTags}
                 onTagsUpdated={handleTaskTagsUpdated}
+                onComplete={(comment) => handleTaskComplete(task.id, comment)}
               />
             ))}
           </CardContent>
@@ -564,6 +608,7 @@ export function TasksPageClient({ initialTasks, initialStats, availableTags }: T
                 variant="compact"
                 availableTags={availableTags}
                 onTagsUpdated={handleTaskTagsUpdated}
+                onComplete={(comment) => handleTaskComplete(task.id, comment)}
               />
             ))}
           </CardContent>
@@ -588,6 +633,7 @@ export function TasksPageClient({ initialTasks, initialStats, availableTags }: T
                 variant="compact"
                 availableTags={availableTags}
                 onTagsUpdated={handleTaskTagsUpdated}
+                onComplete={(comment) => handleTaskComplete(task.id, comment)}
               />
             ))}
           </CardContent>
@@ -612,6 +658,7 @@ export function TasksPageClient({ initialTasks, initialStats, availableTags }: T
                 variant="minimal"
                 availableTags={availableTags}
                 onTagsUpdated={handleTaskTagsUpdated}
+                onComplete={(comment) => handleTaskComplete(task.id, comment)}
               />
             ))}
           </CardContent>
