@@ -4,28 +4,44 @@ import { createClient } from '@/lib/supabase/server';
 import { cookies } from 'next/headers';
 import { verifyJWT } from '@/lib/auth/jwt-edge';
 
+// Track if VAPID has been initialized
+let vapidInitialized = false;
+
 // Configure web-push with VAPID keys (only if keys are available)
+// This is called lazily on first request to avoid build-time errors
 function initializeVapid() {
+  // Skip if already initialized or if we're in build mode
+  if (vapidInitialized || process.env.NEXT_PHASE === 'phase-production-build') {
+    return;
+  }
+
   const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
   const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY;
   const vapidSubject = process.env.VAPID_SUBJECT || 'mailto:admin@beeri.online';
 
   if (vapidPublicKey && vapidPrivateKey) {
     try {
-      webpush.setVapidDetails(
-        vapidSubject,
-        vapidPublicKey,
-        vapidPrivateKey
-      );
+      // Validate VAPID subject format before setting
+      if (!vapidSubject.startsWith('mailto:') && !vapidSubject.startsWith('http')) {
+        console.warn(`Invalid VAPID_SUBJECT format: "${vapidSubject}". Using default.`);
+        webpush.setVapidDetails(
+          'mailto:admin@beeri.online',
+          vapidPublicKey,
+          vapidPrivateKey
+        );
+      } else {
+        webpush.setVapidDetails(
+          vapidSubject,
+          vapidPublicKey,
+          vapidPrivateKey
+        );
+      }
+      vapidInitialized = true;
     } catch (error) {
       console.error('Failed to initialize VAPID keys:', error);
+      // Don't throw - allow the route to work even if VAPID fails
     }
   }
-}
-
-// Initialize VAPID only at runtime, not at build time
-if (typeof window === 'undefined' && process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY) {
-  initializeVapid();
 }
 
 export interface NotificationPayload {
