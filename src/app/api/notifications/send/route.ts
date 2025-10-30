@@ -64,9 +64,9 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const payload = await verifyJWT(token.value);
+    const authPayload = await verifyJWT(token.value);
 
-    if (!payload || payload.role !== 'admin') {
+    if (!authPayload || authPayload.role !== 'admin') {
       return NextResponse.json(
         { success: false, error: 'Unauthorized - Invalid token or not admin' },
         { status: 401 }
