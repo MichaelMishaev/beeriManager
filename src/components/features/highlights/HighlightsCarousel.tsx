@@ -278,7 +278,7 @@ export function HighlightsCarousel() {
                 return (
                   <div
                     key={highlight.id}
-                    className="min-w-full px-6 py-5"
+                    className="min-w-full px-12 py-5"
                     style={{ opacity: index === currentSlide ? 1 : 0.3 }}
                   >
                     {/* Badge */}
@@ -286,20 +286,10 @@ export function HighlightsCarousel() {
                       <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${highlight.badge_color} shadow-sm`}>
                         {slideCategory}
                       </span>
-                      {highlight.created_at && (
-                        <span className="flex items-center gap-1 text-xs text-muted-foreground font-medium bg-gray-100 px-2 py-1 rounded-md" dir="ltr">
-                          <Clock className="h-3 w-3" />
-                          {new Date(highlight.created_at).toLocaleDateString(currentLocale === 'ru' ? 'ru-RU' : 'he-IL', {
-                            day: 'numeric',
-                            month: 'short',
-                            year: 'numeric'
-                          })}
-                        </span>
-                      )}
                     </div>
 
                     {/* Content - Responsive Layout */}
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-3">
                       {/* Top row: Icon + Text (always together) */}
                       <div className="flex items-start gap-4 flex-1 min-w-0 w-full">
                         {/* Enhanced Icon */}
@@ -340,12 +330,26 @@ export function HighlightsCarousel() {
                         </div>
                       )}
                     </div>
+
+                    {/* Footer with Date */}
+                    {highlight.created_at && (
+                      <div className="flex items-center justify-center pt-2 border-t border-gray-100">
+                        <span className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium" dir="ltr">
+                          <Clock className="h-3.5 w-3.5" />
+                          {new Date(highlight.created_at).toLocaleDateString(currentLocale === 'ru' ? 'ru-RU' : 'he-IL', {
+                            day: 'numeric',
+                            month: 'short',
+                            year: 'numeric'
+                          })}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 )
               })}
             </div>
 
-            {/* Enhanced Navigation Arrows */}
+            {/* Navigation Arrows - Positioned outside content area */}
             <button
               onClick={(e) => {
                 e.stopPropagation()
@@ -353,10 +357,10 @@ export function HighlightsCarousel() {
                 setIsAutoPlaying(false)
               }}
               onTouchStart={(e) => e.stopPropagation()}
-              className="absolute top-1/2 -translate-y-1/2 left-2 z-10 bg-white/95 hover:bg-white rounded-full p-2.5 shadow-md hover:shadow-lg transition-all hover:scale-110 active:scale-95"
+              className="absolute top-1/2 -translate-y-1/2 -left-4 z-10 bg-white hover:bg-gray-50 rounded-full p-3 shadow-lg hover:shadow-xl transition-all hover:scale-110 active:scale-95 border border-gray-200"
               aria-label={currentLocale === 'ru' ? 'Предыдущий' : 'הקודם'}
             >
-              <ChevronLeft className="h-5 w-5 text-[#003153]" />
+              <ChevronLeft className="h-6 w-6 text-[#003153]" />
             </button>
             <button
               onClick={(e) => {
@@ -365,10 +369,10 @@ export function HighlightsCarousel() {
                 setIsAutoPlaying(false)
               }}
               onTouchStart={(e) => e.stopPropagation()}
-              className="absolute top-1/2 -translate-y-1/2 right-2 z-10 bg-white/95 hover:bg-white rounded-full p-2.5 shadow-md hover:shadow-lg transition-all hover:scale-110 active:scale-95"
+              className="absolute top-1/2 -translate-y-1/2 -right-4 z-10 bg-white hover:bg-gray-50 rounded-full p-3 shadow-lg hover:shadow-xl transition-all hover:scale-110 active:scale-95 border border-gray-200"
               aria-label={currentLocale === 'ru' ? 'Следующий' : 'הבא'}
             >
-              <ChevronRight className="h-5 w-5 text-[#003153]" />
+              <ChevronRight className="h-6 w-6 text-[#003153]" />
             </button>
           </div>
 
