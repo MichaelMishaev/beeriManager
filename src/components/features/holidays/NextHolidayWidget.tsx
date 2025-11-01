@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { Calendar, Clock, Share2 } from 'lucide-react'
+import { Sparkles, Clock, Share2 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -144,7 +144,7 @@ export function NextHolidayWidget({ onClick }: NextHolidayWidgetProps) {
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between gap-2">
           <CardTitle className="text-base font-medium text-muted-foreground flex items-center gap-2">
-            <Calendar className="h-4 w-4" />
+            <Sparkles className="h-4 w-4" />
             {locale === 'ru' ? 'Следующий праздник' : 'החג הבא'}
           </CardTitle>
           <div className="flex items-center gap-2">
