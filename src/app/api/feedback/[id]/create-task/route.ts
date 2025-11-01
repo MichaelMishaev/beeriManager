@@ -41,7 +41,7 @@ export async function POST(
       )
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
 
     // First, get the feedback to use its message as task description
     const { data: feedback, error: feedbackError } = await supabase

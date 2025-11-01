@@ -25,7 +25,7 @@ const ExpenseSchema = z.object({
 
 export async function GET(req: NextRequest) {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { searchParams } = new URL(req.url)
 
     // Query parameters
@@ -134,7 +134,7 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
 
     // Create expense
     const { data, error } = await supabase

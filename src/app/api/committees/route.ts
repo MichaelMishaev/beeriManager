@@ -16,7 +16,7 @@ const CommitteeSchema = z.object({
 
 export async function GET(req: NextRequest) {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { searchParams } = new URL(req.url)
 
     // Query parameters
@@ -99,7 +99,7 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
 
     // Create committee
     const { data, error } = await supabase
@@ -177,7 +177,7 @@ export async function PUT(req: NextRequest) {
       )
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
 
     // Update committee
     const { data, error } = await supabase
@@ -228,7 +228,7 @@ export async function DELETE(req: NextRequest) {
     const { searchParams } = new URL(req.url)
     const id = searchParams.get('id')
 
-    const supabase = createClient()
+    const supabase = await createClient()
 
     if (!id) {
       // Delete all committees if no ID provided

@@ -19,7 +19,7 @@ const IssueSchema = z.object({
 
 export async function GET(req: NextRequest) {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { searchParams } = new URL(req.url)
 
     // Query parameters
@@ -96,7 +96,7 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
 
     // Prepare insert data - only include core fields that exist in DB schema
     const insertData = {
@@ -148,7 +148,7 @@ export async function DELETE(req: NextRequest) {
       )
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
 
     // Delete all issues (get all IDs first, then delete)
     const { data: allIssues, error: fetchError } = await supabase

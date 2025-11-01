@@ -27,7 +27,7 @@ const EventSchema = z.object({
 
 export async function GET(req: NextRequest) {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { searchParams } = new URL(req.url)
 
     // Query parameters
@@ -120,7 +120,7 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
 
     // Create event
     const { data, error } = await supabase
@@ -172,7 +172,7 @@ export async function DELETE(req: NextRequest) {
       )
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
 
     // Delete all events (get all IDs first, then delete)
     const { data: allEvents, error: fetchError } = await supabase

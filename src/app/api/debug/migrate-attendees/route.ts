@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 
 export async function GET(_request: NextRequest) {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     // Fetch all protocols
     const { data: protocols, error } = await supabase

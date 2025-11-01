@@ -12,7 +12,7 @@ export async function GET(request: Request) {
     const academicYear = searchParams.get('academic_year')
     const locale = searchParams.get('locale') || 'he'
 
-    const supabase = createClient()
+    const supabase = await createClient()
     let query = supabase
       .from('holidays')
       .select('*')

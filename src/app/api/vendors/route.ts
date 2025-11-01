@@ -23,7 +23,7 @@ const VendorSchema = z.object({
 
 export async function GET(req: NextRequest) {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { searchParams } = new URL(req.url)
 
     // Query parameters
@@ -120,7 +120,7 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
 
     // Create vendor
     const { data, error } = await supabase
@@ -169,7 +169,7 @@ export async function DELETE(req: NextRequest) {
       )
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
 
     // Delete all vendors
     const { data: allVendors, error: fetchError } = await supabase

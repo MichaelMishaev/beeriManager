@@ -16,7 +16,7 @@ export async function DELETE(
       )
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
 
     // Delete the idea
     const { error } = await supabase

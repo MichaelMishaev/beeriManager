@@ -27,7 +27,7 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data, error } = await supabase
       .from('tags')
@@ -90,7 +90,7 @@ export async function PATCH(
       )
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
 
     // Check if tag exists and get system status
     const { data: existing, error: fetchError } = await supabase
@@ -198,7 +198,7 @@ export async function DELETE(
       )
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
 
     // Check if tag exists and is system tag
     const { data: existing, error: fetchError } = await supabase

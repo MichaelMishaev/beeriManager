@@ -33,7 +33,7 @@ export async function POST(
       )
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
 
     // Check if event exists and is open for registration
     const { data: event, error: eventError } = await supabase
@@ -166,7 +166,7 @@ export async function GET(
       )
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data: registrations, error } = await supabase
       .from('event_registrations')
@@ -222,7 +222,7 @@ export async function DELETE(
       )
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
 
     // Find registration
     const { data: registration, error: findError } = await supabase

@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
 
     // Verify all tasks exist
     const { data: tasks, error: tasksError } = await supabase
@@ -184,7 +184,7 @@ export async function DELETE(req: NextRequest) {
       )
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
 
     // Delete all combinations of task_id + tag_id
     // We need to delete them one by one or use a more complex query

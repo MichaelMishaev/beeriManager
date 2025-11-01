@@ -28,7 +28,7 @@ const TagSchema = z.object({
  */
 export async function GET(req: NextRequest) {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { searchParams } = new URL(req.url)
 
     // Query parameters
@@ -118,7 +118,7 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
 
     // Check if tag with same name already exists
     const { data: existing } = await supabase
@@ -187,7 +187,7 @@ export async function DELETE(req: NextRequest) {
       )
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
 
     // Only delete non-system tags
     const { error } = await supabase

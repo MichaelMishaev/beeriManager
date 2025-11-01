@@ -26,7 +26,7 @@ const TicketSchema = z.object({
 // GET /api/tickets - List tickets
 export async function GET(req: NextRequest) {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { searchParams } = new URL(req.url)
 
     const status = searchParams.get('status')
@@ -108,7 +108,7 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
 
     // Create ticket
     const { data, error } = await supabase

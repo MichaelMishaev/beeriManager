@@ -24,7 +24,7 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     // Verify task exists
     const { data: task, error: taskError } = await supabase
@@ -123,7 +123,7 @@ export async function POST(
       )
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
 
     // Verify task exists
     const { data: task, error: taskError } = await supabase
@@ -242,7 +242,7 @@ export async function DELETE(
       )
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
 
     // Delete the task_tag relationship
     const { error } = await supabase

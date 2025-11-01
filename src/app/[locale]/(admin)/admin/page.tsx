@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
-import { Calendar, CheckSquare, AlertTriangle, FileText, Users, DollarSign, MessageSquare, Settings, Plus, Edit, BarChart, GripVertical, HelpCircle, Ticket, Tags, Phone, Bell, Lightbulb } from 'lucide-react'
+import { Calendar, CheckSquare, AlertTriangle, FileText, Users, DollarSign, MessageSquare, Settings, Plus, Edit, BarChart, GripVertical, HelpCircle, Ticket, Tags, Phone, Bell, Lightbulb, Sparkles } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
@@ -169,6 +169,17 @@ const defaultAdminSections = [
     bgColor: 'bg-red-50',
     links: [
       { href: '/admin/urgent', label: 'ניהול הודעות דחופות', icon: Edit }
+    ]
+  },
+  {
+    id: 'highlights',
+    title: 'קרוסלת הדגשות',
+    description: 'ניהול הדגשות להישגים, ספורט, פרסים ואירועים',
+    icon: Sparkles,
+    color: 'text-yellow-600',
+    bgColor: 'bg-yellow-50',
+    links: [
+      { href: '/admin/highlights', label: 'ניהול הדגשות', icon: Edit }
     ]
   },
   {

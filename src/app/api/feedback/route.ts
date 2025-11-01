@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
       )
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { searchParams } = new URL(req.url)
 
     // Query parameters
@@ -100,7 +100,7 @@ export async function POST(req: NextRequest) {
 
     console.log('Feedback validation passed:', validation.data)
 
-    const supabase = createClient()
+    const supabase = await createClient()
 
     // Prepare message combining subject and detailed message
     const fullMessage = validation.data.subject +
@@ -172,7 +172,7 @@ export async function DELETE(req: NextRequest) {
       )
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
 
     // Delete all feedback
     const { error } = await supabase

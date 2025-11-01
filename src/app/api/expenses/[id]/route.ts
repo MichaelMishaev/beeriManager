@@ -7,7 +7,7 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data, error } = await supabase
       .from('expenses')
@@ -51,7 +51,7 @@ export async function PUT(
     }
 
     const body = await req.json()
-    const supabase = createClient()
+    const supabase = await createClient()
 
     // Update expense
     const { data, error } = await supabase
@@ -101,7 +101,7 @@ export async function DELETE(
       )
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
 
     // Soft delete - mark as archived
     const { error } = await supabase

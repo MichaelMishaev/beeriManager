@@ -26,7 +26,7 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { data, error } = await supabase
       .from('tasks')
@@ -98,7 +98,7 @@ export async function PUT(
       )
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
 
     // Update task
     const { data, error } = await supabase
@@ -187,7 +187,7 @@ export async function DELETE(
       )
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
 
     // Soft delete - mark as archived
     const { error } = await supabase

@@ -27,21 +27,21 @@ export function SchoolStats({ variant = 'cards' }: SchoolStatsProps) {
   if (variant === 'cards') {
     return (
       <div className="container mx-auto px-4 -mt-12 mb-12">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {stats.map((stat) => {
             const Icon = stat.icon
             return (
               <Card
                 key={stat.labelKey}
-                className="bg-white shadow-lg hover:shadow-xl transition-shadow duration-300"
+                className="bg-white shadow-md hover:shadow-lg transition-shadow duration-300"
               >
-                <CardContent className="pt-6 pb-6">
+                <CardContent className="pt-4 pb-4">
                   <div className="text-center">
-                    <Icon className={`h-8 w-8 mx-auto mb-3 ${stat.color}`} />
-                    <div className="text-4xl font-bold text-gray-900 mb-1">
+                    <Icon className={`h-6 w-6 mx-auto mb-2 ${stat.color}`} />
+                    <div className="text-2xl font-bold text-gray-900 mb-1">
                       {stat.value}
                     </div>
-                    <div className="text-sm text-gray-600 font-medium">
+                    <div className="text-xs text-gray-600 font-medium">
                       {t(stat.labelKey)}
                     </div>
                   </div>

@@ -55,9 +55,44 @@ For GDPR/CCPA compliance:
 - No personal information is collected
 - Users in Israel/EU are protected by default settings
 
+## PWA Installation Tracking (Automatically Tracked)
+
+The app automatically tracks PWA installation events:
+
+### Events Tracked:
+
+1. **`pwa_install_prompt_shown`** - When browser shows install is available
+   - Category: PWA
+   - Label: "Install prompt available"
+
+2. **`pwa_install_button_clicked`** - When user clicks install button
+   - Category: PWA
+   - Label: "User clicked install button"
+
+3. **`pwa_install_accepted`** - When user accepts installation
+   - Category: PWA
+   - Label: "User accepted PWA installation"
+
+4. **`pwa_install_dismissed`** - When user dismisses installation
+   - Category: PWA
+   - Label: "User dismissed PWA installation"
+
+5. **`pwa_running_standalone`** - When app is running as installed PWA
+   - Category: PWA
+   - Label: "App running in standalone mode"
+
+### Viewing PWA Stats in Google Analytics:
+
+1. Go to **Reports** → **Engagement** → **Events**
+2. Search for events starting with `pwa_`
+3. View metrics:
+   - **pwa_install_accepted** count = Total installations
+   - **pwa_install_prompt_shown** count = Install opportunities
+   - Conversion rate = accepted / prompt_shown
+
 ## Custom Events (Optional)
 
-You can track custom events:
+You can track additional custom events:
 
 ```typescript
 // Track event registration

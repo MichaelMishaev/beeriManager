@@ -16,7 +16,7 @@ export async function DELETE(
       )
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { error } = await supabase
       .from('anonymous_feedback')
       .delete()

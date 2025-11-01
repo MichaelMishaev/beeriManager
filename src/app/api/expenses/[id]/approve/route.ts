@@ -16,7 +16,7 @@ export async function PUT(
       )
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
 
     // Approve expense
     const { data, error } = await supabase

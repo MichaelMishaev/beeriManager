@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 
 export async function POST(_request: NextRequest) {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
     // Add attendees column to protocols table
     const { error: alterError } = await supabase.rpc('exec_sql', {

@@ -559,3 +559,45 @@ export interface UrgentMessage {
   updated_at: string
   created_by?: string
 }
+
+export interface Highlight {
+  id: string
+  type: 'achievement' | 'sports' | 'award' | 'event' | 'announcement'
+  icon: string // Emoji icon
+
+  // Bilingual content
+  title_he: string
+  title_ru: string
+  description_he: string
+  description_ru: string
+  category_he: string
+  category_ru: string
+
+  // Optional fields
+  event_date?: string // ISO date for future events or past achievements
+  image_url?: string // Optional image URL (future feature)
+  image_placeholder?: string // Emoji or icon as placeholder
+
+  // Call-to-action
+  cta_text_he?: string
+  cta_text_ru?: string
+  cta_link?: string
+
+  // Badge styling
+  badge_color: string // Tailwind CSS classes (e.g., 'bg-gradient-to-r from-yellow-400 to-yellow-500 text-yellow-900')
+
+  // Display settings
+  is_active: boolean
+  display_order: number // Lower numbers appear first
+  start_date?: string // ISO timestamp - when to start showing (optional)
+  end_date?: string // ISO timestamp - when to stop showing (optional)
+
+  // Share settings
+  share_text_he?: string
+  share_text_ru?: string
+
+  // Metadata
+  created_by?: string
+  created_at: string
+  updated_at: string
+}

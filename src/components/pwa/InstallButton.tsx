@@ -28,6 +28,14 @@ export function InstallButton({ variant = 'compact' }: InstallButtonProps) {
       setDeferredPrompt(e as BeforeInstallPromptEvent)
       setIsInstallable(true)
       logger.info('PWA install prompt available')
+
+      // Track that install prompt was shown
+      if (typeof window !== 'undefined' && (window as any).gtag) {
+        (window as any).gtag('event', 'pwa_install_prompt_shown', {
+          event_category: 'PWA',
+          event_label: 'Install prompt available'
+        })
+      }
     }
 
     window.addEventListener('beforeinstallprompt', handler)
@@ -36,6 +44,14 @@ export function InstallButton({ variant = 'compact' }: InstallButtonProps) {
     if (window.matchMedia('(display-mode: standalone)').matches) {
       setIsInstallable(false)
       logger.info('PWA already installed')
+
+      // Track that app is running in standalone mode
+      if (typeof window !== 'undefined' && (window as any).gtag) {
+        (window as any).gtag('event', 'pwa_running_standalone', {
+          event_category: 'PWA',
+          event_label: 'App running in standalone mode'
+        })
+      }
     }
 
     return () => {
@@ -49,6 +65,14 @@ export function InstallButton({ variant = 'compact' }: InstallButtonProps) {
       return
     }
 
+    // Track that user clicked the install button
+    if (typeof window !== 'undefined' && (window as any).gtag) {
+      (window as any).gtag('event', 'pwa_install_button_clicked', {
+        event_category: 'PWA',
+        event_label: 'User clicked install button'
+      })
+    }
+
     // Show the install prompt
     await deferredPrompt.prompt()
 
@@ -56,6 +80,21 @@ export function InstallButton({ variant = 'compact' }: InstallButtonProps) {
     const { outcome } = await deferredPrompt.userChoice
 
     logger.userAction('PWA install prompt', { outcome })
+
+    // Track the outcome
+    if (typeof window !== 'undefined' && (window as any).gtag) {
+      if (outcome === 'accepted') {
+        (window as any).gtag('event', 'pwa_install_accepted', {
+          event_category: 'PWA',
+          event_label: 'User accepted PWA installation'
+        })
+      } else {
+        (window as any).gtag('event', 'pwa_install_dismissed', {
+          event_category: 'PWA',
+          event_label: 'User dismissed PWA installation'
+        })
+      }
+    }
 
     if (outcome === 'accepted') {
       setIsInstallable(false)

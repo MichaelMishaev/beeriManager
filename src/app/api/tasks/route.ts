@@ -22,7 +22,7 @@ const TaskSchema = z.object({
 
 export async function GET(req: NextRequest) {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { searchParams } = new URL(req.url)
 
     // Query parameters
@@ -124,7 +124,7 @@ export async function POST(req: NextRequest) {
     }
 
     console.log('Validation passed, creating task...')
-    const supabase = createClient()
+    const supabase = await createClient()
 
     // Create task
     const { data, error } = await supabase
@@ -183,7 +183,7 @@ export async function DELETE(req: NextRequest) {
       )
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
 
     // Delete all tasks one by one to work with audit triggers
     const { data: allTasks, error: fetchError } = await supabase

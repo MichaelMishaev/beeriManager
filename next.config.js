@@ -2,7 +2,7 @@ const withNextIntl = require('next-intl/plugin')('./src/i18n/request.ts')
 
 const withPWA = require('@ducanh2912/next-pwa').default({
   dest: 'public',
-  disable: process.env.NODE_ENV === 'development',
+  disable: false, // Enable PWA in development for testing notifications
   register: true,
   skipWaiting: true,
   cacheOnFrontEndNav: true,
@@ -47,6 +47,17 @@ const nextConfig = {
   },
   experimental: {
     // Server Actions are enabled by default in Next.js 14
+  },
+  // Optimize CSS loading in development
+  webpack: (config, { dev, isServer }) => {
+    if (dev && !isServer) {
+      // Prevent CSS module errors in development
+      config.optimization = {
+        ...config.optimization,
+        moduleIds: 'named',
+      }
+    }
+    return config
   },
   // Environment variables
   env: {

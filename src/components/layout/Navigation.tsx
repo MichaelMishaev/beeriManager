@@ -179,13 +179,14 @@ export function Navigation() {
             )}
           </div>
 
-          {/* Mobile - Notification Bell, Notification Subscribe, Contacts Button & Menu Button */}
+          {/* Mobile - Notifications, Contacts Button & Menu Button */}
           <div className="flex items-center gap-2 md:hidden">
-            {/* Notification Bell - Admin Panel Only (shows counts) */}
-            {isAuthenticated && pathname.includes('/admin') && <NotificationBell />}
-
-            {/* Notification Subscription - For All Users */}
-            <NotificationSubscription />
+            {/* Notifications: Show bell with counts for admins, subscription button for public */}
+            {isAuthenticated && pathname.includes('/admin') ? (
+              <NotificationBell />
+            ) : (
+              <NotificationSubscription />
+            )}
 
             {/* Contacts Button - Always visible on mobile */}
             <ContactsDialog>

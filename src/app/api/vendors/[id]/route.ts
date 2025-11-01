@@ -26,7 +26,7 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { id } = params
 
     const { data, error } = await supabase
@@ -102,7 +102,7 @@ export async function PUT(
       )
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
 
     // Update vendor
     const { data, error } = await supabase
@@ -153,7 +153,7 @@ export async function DELETE(
     }
 
     const { id } = params
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { error } = await supabase
       .from('vendors')

@@ -1,17 +1,20 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { Calendar, MessageSquare, ChevronLeft, Camera, ArrowLeft } from 'lucide-react'
+import { useState, useEffect, useRef } from 'react'
+import { Calendar, MessageSquare, ChevronLeft, Camera, ArrowLeft, MapPin, ChevronDown, ChevronUp } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { CommitteeCard } from './CommitteeCard'
-import { CollapsibleCalendarWidget } from '@/components/features/holidays/CollapsibleCalendarWidget'
 import { SchoolStats } from './SchoolStats'
 import { WhatsAppCommunityCard } from '@/components/features/whatsapp/WhatsAppCommunityCard'
 import { TicketsSection } from '@/components/features/tickets/TicketsSection'
 import { WhiteShirtBanner } from './WhiteShirtBanner'
 import { UrgentMessagesBanner } from '@/components/features/urgent/UrgentMessagesBanner'
 import { FeedbackAndIdeasCard } from './FeedbackAndIdeasCard'
+import { HighlightsCarousel } from '@/components/features/highlights/HighlightsCarousel'
+import { NextHolidayWidget } from '@/components/features/holidays/NextHolidayWidget'
+import { HolidaysModal } from '@/components/features/holidays/HolidaysModal'
+import { MobileCalendar } from '@/components/ui/MobileCalendar'
 import type { Event, CalendarEvent, Ticket } from '@/types'
 import Link from 'next/link'
 import { format } from 'date-fns'
@@ -25,6 +28,70 @@ interface PublicHomepageProps {
   calendarEvents: CalendarEvent[]
 }
 
+// Upcoming Events Card Component with Collapse/Expand
+function UpcomingEventsCard({
+  upcomingEvents,
+  dateLocale,
+  locale
+}: {
+  upcomingEvents: Event[]
+  dateLocale: typeof he | typeof ru
+  locale: Locale
+}) {
+  const t = useTranslations('homepage')
+  const [isExpanded, setIsExpanded] = useState(false)
+
+  const displayedEvents = isExpanded ? upcomingEvents : upcomingEvents.slice(0, 3)
+  const hasMore = upcomingEvents.length > 3
+
+  return (
+    <Card className="shadow-md hover:shadow-lg transition-shadow border-0">
+      <CardHeader className="pb-4">
+        <div className="flex items-center gap-2">
+          <Calendar className="h-6 w-6 text-[#0D98BA]" />
+          <CardTitle className="text-2xl text-[#003153]">
+            {t('upcomingEvents')}
+          </CardTitle>
+        </div>
+        <CardDescription className="text-base mt-2">
+          {t('nextSchoolEvents')}
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="p-3">
+        <div className="space-y-1">
+          {upcomingEvents.length > 0 ? (
+            <>
+              {displayedEvents.map((event) => (
+                <EventItem key={event.id} event={event} dateLocale={dateLocale} locale={locale} />
+              ))}
+              {hasMore && (
+                <div className="text-center pt-3">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setIsExpanded(!isExpanded)}
+                    className="gap-2"
+                  >
+                    {isExpanded
+                      ? (locale === 'ru' ? 'Свернуть' : 'הצג פחות')
+                      : `${locale === 'ru' ? 'Показать все' : 'הצג הכל'} (${upcomingEvents.length})`}
+                    <ChevronLeft className={`h-4 w-4 transition-transform ${isExpanded ? 'rotate-90' : '-rotate-90'}`} />
+                  </Button>
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="text-center py-12">
+              <Calendar className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+              <p className="text-muted-foreground">{t('noUpcomingEvents')}</p>
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
 function EventItem({ event, dateLocale, locale }: { event: Event; dateLocale: typeof he | typeof ru; locale: Locale }) {
   const startDate = new Date(event.start_datetime)
   const now = new Date()
@@ -32,6 +99,7 @@ function EventItem({ event, dateLocale, locale }: { event: Event; dateLocale: ty
   // Get localized content - fallback to Hebrew if Russian not available
   const title = (locale === 'ru' && event.title_ru) ? event.title_ru : event.title
   const description = (locale === 'ru' && event.description_ru) ? event.description_ru : event.description
+  const location = (locale === 'ru' && event.location_ru) ? event.location_ru : event.location
 
   // Calculate end time: use end_datetime if available, otherwise start + 2 hours
   // Only use end_datetime if it's valid and after start time
@@ -49,6 +117,27 @@ function EventItem({ event, dateLocale, locale }: { event: Event; dateLocale: ty
   const timeDiff = startDate.getTime() - now.getTime()
   const isStartingSoon = !isHappeningNow && timeDiff > 0 && timeDiff <= 60 * 60 * 1000 // Within 1 hour (future only)
   const hasEnded = now > endDate
+
+  // Get event type icon and color
+  const getEventIcon = () => {
+    switch (event.event_type) {
+      case 'meeting': return '👥'
+      case 'fundraiser': return '💰'
+      case 'trip': return '🚌'
+      case 'workshop': return '📚'
+      default: return '📅'
+    }
+  }
+
+  const getEventAccentColor = () => {
+    switch (event.event_type) {
+      case 'meeting': return 'border-r-[#FF8200]'
+      case 'fundraiser': return 'border-r-[#0D98BA]'
+      case 'trip': return 'border-r-[#FFBA00]'
+      case 'workshop': return 'border-r-[#003153]'
+      default: return 'border-r-[#0D98BA]'
+    }
+  }
 
   // Status badge configuration
   const statusConfig = isHappeningNow
@@ -76,32 +165,23 @@ function EventItem({ event, dateLocale, locale }: { event: Event; dateLocale: ty
 
   return (
     <Link href={`/events/${event.id}`} className="block group">
-      <div className="flex items-start gap-4 p-4 rounded-xl hover:bg-gray-50 transition-all duration-200">
-        {/* Larger, More Prominent Date Box */}
-        <div className="flex-shrink-0">
-          <div className={`w-16 h-16 rounded-xl flex flex-col items-center justify-center text-white shadow-md group-hover:shadow-lg transition-shadow ${
-            isHappeningNow
-              ? 'bg-gradient-to-br from-[#FF8200] to-[#FF8200]/80'
-              : 'bg-gradient-to-br from-[#0D98BA] to-[#003153]'
-          }`}>
-            <div className="text-2xl font-bold leading-none">
-              {format(startDate, 'd', { locale: dateLocale })}
-            </div>
-            <div className="text-xs uppercase mt-1 leading-none">
-              {format(startDate, 'MMM', { locale: dateLocale })}
-            </div>
+      <div className={`flex items-start gap-2.5 p-3 rounded-lg hover:bg-gray-50/80 transition-all duration-200 border-r-4 ${getEventAccentColor()} bg-white`}>
+        {/* Icon - Compact and meaningful */}
+        <div className="flex-shrink-0 mt-0.5">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#0D98BA]/10 to-[#003153]/5 flex items-center justify-center text-base">
+            {getEventIcon()}
           </div>
         </div>
 
-        {/* Event Info */}
+        {/* Event Info - Primary focus */}
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
-            <h3 className="text-lg font-semibold text-[#003153] group-hover:text-[#0D98BA] transition-colors leading-snug">
+          <div className="flex items-start justify-between gap-2 mb-0.5">
+            <h3 className="text-[15px] font-semibold text-[#003153] group-hover:text-[#0D98BA] transition-colors leading-tight flex-1">
               {title}
             </h3>
             {statusConfig && (
-              <div className="relative">
-                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${statusConfig.bgColor} ${statusConfig.textColor}`}>
+              <div className="relative flex-shrink-0">
+                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium ${statusConfig.bgColor} ${statusConfig.textColor}`}>
                   {statusConfig.showPulse && (
                     <span className="absolute inline-flex h-full w-full rounded-full bg-[#FF8200] opacity-75 animate-ping"></span>
                   )}
@@ -110,21 +190,29 @@ function EventItem({ event, dateLocale, locale }: { event: Event; dateLocale: ty
               </div>
             )}
           </div>
+
           {description && (
-            <p className="text-sm text-gray-600 line-clamp-2 mb-2">
+            <p className="text-[13px] text-gray-600 line-clamp-1 mb-1.5">
               {description}
             </p>
           )}
-          <div className="flex items-center gap-2 text-sm text-gray-500">
-            <Calendar className="h-4 w-4" />
-            <span>
-              {format(startDate, 'EEEE, d MMMM', { locale: dateLocale })}
-            </span>
-            <span>• {format(startDate, 'HH:mm', { locale: dateLocale })}</span>
+
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[12px] text-gray-500">
+            <div className="flex items-center gap-1">
+              <span className="truncate">
+                {format(startDate, 'd MMMM', { locale: dateLocale })}
+                {event.end_datetime && isValidEndDate && (
+                  <span className="mr-1"> • {format(startDate, 'HH:mm', { locale: dateLocale })}</span>
+                )}
+              </span>
+            </div>
+            {location && (
+              <div className="flex items-center gap-1">
+                <span className="truncate">📍 {location}</span>
+              </div>
+            )}
           </div>
         </div>
-
-        <ChevronLeft className="h-5 w-5 text-gray-400 group-hover:text-[#0D98BA] transition-colors self-center flex-shrink-0" />
       </div>
     </Link>
   )
@@ -138,6 +226,11 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
 
   const [tickets, setTickets] = useState<Ticket[]>([])
   const [settings, setSettings] = useState<{ committee_name?: string; school_name?: string } | null>(null)
+  const [holidaysModalOpen, setHolidaysModalOpen] = useState(false)
+  const [isCalendarExpanded, setIsCalendarExpanded] = useState(false)
+  const calendarContentRef = useRef<HTMLDivElement>(null)
+  const [calendarContentHeight, setCalendarContentHeight] = useState(0)
+  const calendarT = useTranslations('calendar')
 
   useEffect(() => {
     // Load active tickets (all or featured)
@@ -170,6 +263,26 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
     fetchSettings()
   }, [])
 
+  // Update calendar content height when expanded or events change
+  useEffect(() => {
+    if (calendarContentRef.current) {
+      setCalendarContentHeight(calendarContentRef.current.scrollHeight)
+    }
+  }, [calendarEvents, isCalendarExpanded])
+
+  const handleCalendarEventClick = async (event: CalendarEvent) => {
+    // If it's a holiday with school closure, navigate to holidays modal
+    if (event.type === 'holiday' && event.isSchoolClosed) {
+      setHolidaysModalOpen(true)
+      return
+    }
+
+    // For regular events, navigate to event page
+    if (event.type !== 'holiday') {
+      window.location.href = `/events/${event.id}`
+    }
+  }
+
   // Get recent events with photos (past events only)
   const now = new Date()
   const eventsWithPhotos = upcomingEvents
@@ -198,11 +311,85 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
       <SchoolStats variant="cards" />
 
       <div className="container mx-auto px-4 py-4 max-w-6xl">
-        {/* Urgent Messages Banner */}
-        <UrgentMessagesBanner />
+        {/* Highlights Carousel */}
+        <HighlightsCarousel />
 
-        {/* White Shirt Friday Reminder - Shows Thu 9:00 AM - Fri 9:00 AM */}
-        <WhiteShirtBanner />
+        {/* Next Holiday Widget - Right after carousel */}
+        <div className="mb-6">
+          <NextHolidayWidget onClick={() => setHolidaysModalOpen(true)} />
+        </div>
+
+        {/* Calendar Action Buttons - Right under NextHolidayWidget */}
+        <div className="mb-6">
+          {/* Buttons in a single row, 50/50 */}
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-1 text-sm transition-all hover:bg-blue-100/50"
+              onClick={() => setHolidaysModalOpen(true)}
+            >
+              <Calendar className="h-4 w-4 ml-2" />
+              {calendarT('holidaysAndEvents')}
+            </Button>
+
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-1 text-sm transition-all hover:bg-muted"
+              onClick={() => setIsCalendarExpanded(!isCalendarExpanded)}
+              title={isCalendarExpanded ? calendarT('hideCalendar') : calendarT('showCalendar')}
+            >
+              <Calendar className="h-4 w-4" />
+              {isCalendarExpanded ? (
+                <ChevronUp className="h-4 w-4 transition-transform mr-2" />
+              ) : (
+                <ChevronDown className="h-4 w-4 transition-transform mr-2" />
+              )}
+              {isCalendarExpanded ? calendarT('hideCalendar') : calendarT('showCalendar')}
+            </Button>
+          </div>
+
+          {/* Collapsible Calendar - Under the buttons */}
+          <div
+            className="overflow-hidden transition-all duration-500 ease-in-out mt-3"
+            style={{
+              maxHeight: isCalendarExpanded ? `${calendarContentHeight}px` : '0px',
+              opacity: isCalendarExpanded ? 1 : 0
+            }}
+          >
+            <div ref={calendarContentRef} className={isCalendarExpanded ? 'animate-in fade-in-50 slide-in-from-top-2 duration-500' : ''}>
+              <MobileCalendar
+                events={calendarEvents}
+                onEventClick={handleCalendarEventClick}
+                showLegend={false}
+                showWeeklySummary={true}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          {/* Urgent Messages Banner */}
+          <UrgentMessagesBanner />
+
+          {/* White Shirt Friday Reminder - Shows Thu 9:00 AM - Fri 9:00 AM */}
+          <WhiteShirtBanner />
+        </div>
+
+        {/* UPCOMING EVENTS */}
+        <div className="mb-8">
+          <UpcomingEventsCard
+            upcomingEvents={upcomingEvents}
+            dateLocale={dateLocale}
+            locale={currentLocale}
+          />
+        </div>
+
+        {/* WhatsApp Community Card - After Upcoming Events */}
+        <div className="mb-8">
+          <WhatsAppCommunityCard />
+        </div>
 
       {/* Photos Gallery Section */}
       {eventsWithPhotos.length > 0 && (
@@ -267,77 +454,14 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
       )}
 
       {/* Main Content Grid */}
-      <div className="grid gap-6 lg:grid-cols-3">
-        {/* Upcoming Events - Takes 2 columns */}
-        <div className="lg:col-span-2 space-y-8 order-2 lg:order-1">
-          <Card className="shadow-md hover:shadow-lg transition-shadow border-0">
-            <CardHeader className="pb-4">
-              <div className="flex items-center gap-2">
-                <Calendar className="h-6 w-6 text-[#0D98BA]" />
-                <CardTitle className="text-2xl text-[#003153]">
-                  {t('upcomingEvents')}
-                </CardTitle>
-              </div>
-              <CardDescription className="text-base mt-2">
-                {t('nextSchoolEvents')}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                {upcomingEvents.length > 0 ? (
-                  <>
-                    {upcomingEvents.slice(0, 5).map((event) => (
-                      <EventItem key={event.id} event={event} dateLocale={dateLocale} locale={currentLocale} />
-                    ))}
-                    {upcomingEvents.length > 5 && (
-                      <div className="text-center pt-4">
-                        <Button variant="outline" size="sm" asChild>
-                          <Link href="/events">
-                            {t('viewAllEvents')} ({upcomingEvents.length})
-                          </Link>
-                        </Button>
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <div className="text-center py-12">
-                    <Calendar className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-                    <p className="text-muted-foreground">{t('noUpcomingEvents')}</p>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
+      <div className="grid gap-6 lg:grid-cols-1">
+        {/* Main Content - Full width */}
+        <div className="space-y-8">
           {/* Tickets Section - Placed in main content */}
           <TicketsSection tickets={tickets} />
 
-          {/* Unified Feedback & Ideas Card */}
-          <FeedbackAndIdeasCard />
-
           {/* Committee Members Card */}
           <CommitteeCard />
-        </div>
-
-        {/* Calendar & Holidays - Takes 1 column */}
-        <div className="lg:col-span-1 order-1 lg:order-2">
-          <div className="lg:sticky lg:top-20 space-y-4">
-            {/* Collapsible Calendar Widget */}
-            <CollapsibleCalendarWidget
-              calendarEvents={calendarEvents}
-              onEventClick={(event) => {
-                // Only navigate for non-holiday events
-                // Holiday events are handled by CollapsibleCalendarWidget
-                if (event.type !== 'holiday') {
-                  window.location.href = `/events/${event.id}`
-                }
-              }}
-              defaultExpanded={false}
-            />
-
-            {/* WhatsApp Community Card */}
-            <WhatsAppCommunityCard />
-          </div>
         </div>
       </div>
 
@@ -377,6 +501,11 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
           </div>
         </CardContent>
       </Card>
+
+      {/* Unified Feedback & Ideas Card - At the bottom */}
+      <div className="mt-8">
+        <FeedbackAndIdeasCard />
+      </div>
     </div>
 
     {/* Footer Credit */}
@@ -387,6 +516,12 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
           : 'נבנה באהבה על ידי ועד ההורים של בית ספר בארי 💙'}
       </p>
     </div>
+
+    {/* Holidays Modal */}
+    <HolidaysModal
+      open={holidaysModalOpen}
+      onOpenChange={setHolidaysModalOpen}
+    />
     </>
   )
 }

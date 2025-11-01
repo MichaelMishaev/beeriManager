@@ -32,7 +32,7 @@ export async function PUT(
       )
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
 
     // Prepare update data
     const updateData: any = { status: validation.data.status }

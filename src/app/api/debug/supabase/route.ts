@@ -24,7 +24,7 @@ export async function GET() {
     const startTime = Date.now()
 
     // Test 1: Create client
-    const supabase = createClient()
+    const supabase = await createClient()
     diagnostics.test.clientCreated = true
 
     // Test 2: Simple query with timeout

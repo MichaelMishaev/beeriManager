@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
       )
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
     const { searchParams } = new URL(req.url)
 
     // Query parameters
@@ -97,7 +97,7 @@ export async function POST(req: NextRequest) {
 
     console.log('Idea validation passed:', validation.data)
 
-    const supabase = createClient()
+    const supabase = await createClient()
 
     // Prepare idea data
     const ideaData: any = {
@@ -169,7 +169,7 @@ export async function DELETE(req: NextRequest) {
       )
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
 
     // Delete all ideas
     const { error } = await supabase

@@ -22,7 +22,7 @@ const ProtocolSchema = z.object({
 
 export async function GET(req: NextRequest) {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const { searchParams } = new URL(req.url)
 
     // Query parameters
@@ -118,7 +118,7 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
 
     // Use columns that exist in DB (verified by check-protocols-schema.ts)
     const attendeesList = validation.data.attendees.join(', ')

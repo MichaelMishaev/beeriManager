@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
 
     // Generate unique filename
     const timestamp = Date.now()
@@ -126,7 +126,7 @@ export async function DELETE(req: NextRequest) {
       )
     }
 
-    const supabase = createClient()
+    const supabase = await createClient()
 
     const { error } = await supabase
       .storage
