@@ -257,7 +257,8 @@ function EventItem({
       case 'fundraiser': return '💰'
       case 'trip': return '🚌'
       case 'workshop': return '📚'
-      default: return '📅'
+      case 'general': return '🎯'
+      default: return '🎯'
     }
   }
 
