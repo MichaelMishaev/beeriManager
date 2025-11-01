@@ -1,9 +1,10 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { ChevronRight, ChevronLeft, Sparkles, Pause, Play, Clock } from 'lucide-react'
+import { ChevronRight, ChevronLeft, Sparkles, Pause, Play, Clock, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { useParams } from 'next/navigation'
 import type { Locale } from '@/i18n/config'
 import type { Highlight } from '@/types'
@@ -27,6 +28,7 @@ interface DisplayHighlight {
   cta_text_ru?: string
   cta_link?: string
   image_placeholder?: string
+  created_at?: string
 }
 
 // Convert Highlight from DB to DisplayHighlight for rendering
@@ -47,6 +49,7 @@ function convertToDisplay(highlight: Highlight): DisplayHighlight {
     cta_text_ru: highlight.cta_text_ru,
     cta_link: highlight.cta_link,
     image_placeholder: highlight.image_placeholder,
+    created_at: highlight.created_at,
   }
 }
 
@@ -93,6 +96,8 @@ export function HighlightsCarousel() {
   const [isAutoPlaying, setIsAutoPlaying] = useState(true)
   const [highlights, setHighlights] = useState<DisplayHighlight[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [selectedHighlight, setSelectedHighlight] = useState<DisplayHighlight | null>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
   const touchStartX = useRef<number | null>(null)
   const touchEndX = useRef<number | null>(null)
 
@@ -278,8 +283,13 @@ export function HighlightsCarousel() {
                 return (
                   <div
                     key={highlight.id}
-                    className="min-w-full px-12 py-5"
+                    className="min-w-full px-12 py-5 cursor-pointer hover:bg-gray-50/50 transition-colors rounded-lg"
                     style={{ opacity: index === currentSlide ? 1 : 0.3 }}
+                    onClick={() => {
+                      setSelectedHighlight(highlight)
+                      setIsModalOpen(true)
+                      setIsAutoPlaying(false)
+                    }}
                   >
                     {/* Badge */}
                     <div className="flex items-center gap-2 mb-3">
@@ -401,6 +411,83 @@ export function HighlightsCarousel() {
           : `שקופית ${currentSlide + 1} מתוך ${totalSlides}. ${isAutoPlaying ? 'מעבר אוטומטי פעיל' : 'מעבר אוטומטי מושהה'}.`
         }
       </div>
+
+      {/* Details Modal */}
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+          {selectedHighlight && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-3 text-2xl">
+                  <span className="text-4xl">{selectedHighlight.image_placeholder || selectedHighlight.icon}</span>
+                  {currentLocale === 'ru' ? selectedHighlight.title_ru : selectedHighlight.title_he}
+                </DialogTitle>
+              </DialogHeader>
+
+              <div className="space-y-4 pt-4">
+                {/* Category Badge */}
+                <div className="flex items-center gap-2">
+                  <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-sm font-semibold ${selectedHighlight.badge_color} shadow-sm`}>
+                    {currentLocale === 'ru' ? selectedHighlight.category_ru : selectedHighlight.category_he}
+                  </span>
+                  {selectedHighlight.created_at && (
+                    <span className="flex items-center gap-1.5 text-sm text-muted-foreground font-medium bg-gray-100 px-3 py-1.5 rounded-md" dir="ltr">
+                      <Clock className="h-4 w-4" />
+                      {new Date(selectedHighlight.created_at).toLocaleDateString(currentLocale === 'ru' ? 'ru-RU' : 'he-IL', {
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric'
+                      })}
+                    </span>
+                  )}
+                </div>
+
+                {/* Full Description */}
+                <div className="prose prose-sm max-w-none">
+                  <p className="text-base text-gray-700 leading-relaxed whitespace-pre-wrap">
+                    {currentLocale === 'ru' ? selectedHighlight.description_ru : selectedHighlight.description_he}
+                  </p>
+                </div>
+
+                {/* Event Date if exists */}
+                {selectedHighlight.event_date && (
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                    <p className="text-sm font-medium text-blue-900">
+                      {currentLocale === 'ru' ? '📅 Дата мероприятия: ' : '📅 תאריך האירוע: '}
+                      {new Date(selectedHighlight.event_date).toLocaleDateString(currentLocale === 'ru' ? 'ru-RU' : 'he-IL', {
+                        weekday: 'long',
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric'
+                      })}
+                    </p>
+                  </div>
+                )}
+
+                {/* CTA Button if exists */}
+                {selectedHighlight.cta_link && (currentLocale === 'ru' ? selectedHighlight.cta_text_ru : selectedHighlight.cta_text_he) && (
+                  <div className="pt-4">
+                    <Button
+                      variant="default"
+                      size="lg"
+                      asChild
+                      className="w-full bg-gradient-to-r from-[#0D98BA] to-[#003153] hover:from-[#0D98BA]/90 hover:to-[#003153]/90 shadow-lg hover:shadow-xl transition-all"
+                    >
+                      <a
+                        href={selectedHighlight.cta_link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {currentLocale === 'ru' ? selectedHighlight.cta_text_ru : selectedHighlight.cta_text_he}
+                      </a>
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
