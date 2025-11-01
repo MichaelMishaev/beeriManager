@@ -1,14 +1,14 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
-import { ChevronRight, ChevronLeft, Share2 } from 'lucide-react'
+import { useState, useEffect, useCallback, useRef } from 'react'
+import { ChevronRight, ChevronLeft, Sparkles, Pause, Play } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { useParams } from 'next/navigation'
 import type { Locale } from '@/i18n/config'
 import type { Highlight } from '@/types'
-import { toast } from 'sonner'
 import { logger } from '@/lib/logger'
+import { useTranslations } from 'next-intl'
 
 // Local interface for backward compatibility with mock data
 interface DisplayHighlight {
@@ -50,14 +50,51 @@ function convertToDisplay(highlight: Highlight): DisplayHighlight {
   }
 }
 
+// Loading Skeleton Component
+function HighlightsSkeleton() {
+  return (
+    <div className="mb-6">
+      {/* Header Skeleton */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 bg-gray-200 rounded-lg animate-pulse" />
+          <div>
+            <div className="h-6 w-32 bg-gray-200 rounded animate-pulse mb-1" />
+            <div className="h-4 w-48 bg-gray-100 rounded animate-pulse" />
+          </div>
+        </div>
+      </div>
+
+      {/* Card Skeleton */}
+      <div className="relative bg-gradient-to-br from-blue-50/50 via-white to-purple-50/30 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-100/50 p-6">
+        <div className="flex items-center gap-4">
+          <div className="w-16 h-16 bg-gray-200 rounded-2xl animate-pulse flex-shrink-0" />
+          <div className="flex-1 space-y-3">
+            <div className="h-4 w-24 bg-gray-200 rounded animate-pulse" />
+            <div className="h-6 w-3/4 bg-gray-200 rounded animate-pulse" />
+            <div className="h-4 w-full bg-gray-100 rounded animate-pulse" />
+          </div>
+        </div>
+        <div className="flex justify-center gap-2 mt-4">
+          <div className="w-2 h-2 bg-gray-200 rounded-full animate-pulse" />
+          <div className="w-2 h-2 bg-gray-200 rounded-full animate-pulse" />
+          <div className="w-2 h-2 bg-gray-200 rounded-full animate-pulse" />
+        </div>
+      </div>
+    </div>
+  )
+}
 
 export function HighlightsCarousel() {
+  const t = useTranslations('homepage')
   const params = useParams()
   const currentLocale = (params.locale as Locale) || 'he'
   const [currentSlide, setCurrentSlide] = useState(0)
   const [isAutoPlaying, setIsAutoPlaying] = useState(true)
   const [highlights, setHighlights] = useState<DisplayHighlight[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const touchStartX = useRef<number | null>(null)
+  const touchEndX = useRef<number | null>(null)
 
   const totalSlides = highlights.length
 
@@ -104,43 +141,82 @@ export function HighlightsCarousel() {
 
   // Auto-rotation
   useEffect(() => {
-    if (!isAutoPlaying) return
+    if (!isAutoPlaying || totalSlides === 0) return
 
     const interval = setInterval(() => {
       nextSlide()
     }, 6000) // 6 seconds per slide
 
     return () => clearInterval(interval)
-  }, [isAutoPlaying, nextSlide])
+  }, [isAutoPlaying, nextSlide, totalSlides])
 
-  const shareHighlight = async (highlight: DisplayHighlight) => {
-    const title = currentLocale === 'ru' ? highlight.title_ru : highlight.title_he
-    const description = currentLocale === 'ru' ? highlight.description_ru : highlight.description_he
-    const url = `${window.location.origin}/${currentLocale}`
-
-    const shareText = `${highlight.icon} ${title}\n\n${description}\n\n🌐 ${url}`
-
-    try {
-      if (navigator.share) {
-        await navigator.share({
-          title: title,
-          text: shareText
-        })
-        logger.userAction('Share highlight', { highlightId: highlight.id, locale: currentLocale })
-      } else {
-        await navigator.clipboard.writeText(shareText)
-        toast.success(currentLocale === 'ru' ? 'Скопировано!' : 'הועתק ללוח!')
-        logger.userAction('Copy highlight to clipboard', { highlightId: highlight.id })
-      }
-    } catch (error) {
-      if ((error as Error).name !== 'AbortError') {
-        console.error('Share failed:', error)
-      }
-    }
+  // Touch handlers for swipe gestures
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX
   }
 
-  // Show nothing if no highlights (not even loading)
-  if (highlights.length === 0 && !isLoading) {
+  const handleTouchMove = (e: React.TouchEvent) => {
+    touchEndX.current = e.touches[0].clientX
+  }
+
+  const handleTouchEnd = () => {
+    if (!touchStartX.current || !touchEndX.current) return
+
+    const distance = touchStartX.current - touchEndX.current
+    const isLeftSwipe = distance > 50
+    const isRightSwipe = distance < -50
+
+    if (currentLocale === 'he') {
+      if (isLeftSwipe) {
+        prevSlide()
+        setIsAutoPlaying(false)
+      }
+      if (isRightSwipe) {
+        nextSlide()
+        setIsAutoPlaying(false)
+      }
+    } else {
+      if (isLeftSwipe) {
+        nextSlide()
+        setIsAutoPlaying(false)
+      }
+      if (isRightSwipe) {
+        prevSlide()
+        setIsAutoPlaying(false)
+      }
+    }
+
+    touchStartX.current = null
+    touchEndX.current = null
+  }
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') {
+        currentLocale === 'he' ? nextSlide() : prevSlide()
+        setIsAutoPlaying(false)
+      } else if (e.key === 'ArrowRight') {
+        currentLocale === 'he' ? prevSlide() : nextSlide()
+        setIsAutoPlaying(false)
+      } else if (e.key === ' ') {
+        e.preventDefault()
+        setIsAutoPlaying((prev) => !prev)
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [nextSlide, prevSlide, currentLocale])
+
+
+  // Show loading skeleton
+  if (isLoading) {
+    return <HighlightsSkeleton />
+  }
+
+  // Show nothing if no highlights
+  if (highlights.length === 0) {
     return null
   }
 
@@ -153,11 +229,49 @@ export function HighlightsCarousel() {
   const ctaText = currentLocale === 'ru' ? currentHighlight.cta_text_ru : currentHighlight.cta_text_he
 
   return (
-    <div className="mb-4 animate-slide-down">
-      <div className="relative bg-white/50 backdrop-blur-sm rounded-xl shadow-sm border border-gray-100">
+    <div className="mb-6 animate-in fade-in-50 slide-in-from-top-5 duration-700">
+      {/* Section Header */}
+      <div className="flex items-center justify-between mb-4 px-1">
+        <div className="flex items-center gap-3">
+          <div className="bg-gradient-to-br from-[#0D98BA] to-[#003153] p-2 rounded-xl shadow-md">
+            <Sparkles className="h-5 w-5 text-white" />
+          </div>
+          <div>
+            <h2 className="text-xl font-bold text-[#003153] flex items-center gap-2">
+              {t('highlights')}
+            </h2>
+            <p className="text-sm text-gray-500">
+              {t('highlightsSubtitle')}
+            </p>
+          </div>
+        </div>
+
+        {/* Play/Pause Button */}
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setIsAutoPlaying(!isAutoPlaying)}
+          className="text-gray-500 hover:text-[#0D98BA] transition-colors"
+          aria-label={isAutoPlaying ? (currentLocale === 'ru' ? 'Пауза' : 'השהה') : (currentLocale === 'ru' ? 'Воспроизвести' : 'הפעל')}
+        >
+          {isAutoPlaying ? (
+            <Pause className="h-5 w-5" />
+          ) : (
+            <Play className="h-5 w-5" />
+          )}
+        </Button>
+      </div>
+
+      {/* Enhanced Carousel Card */}
+      <div className="relative bg-gradient-to-br from-blue-50/50 via-white to-purple-50/30 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-100/50 overflow-hidden transition-all duration-300 hover:shadow-xl hover:scale-[1.01]">
         <Card className="border-0 shadow-none overflow-hidden bg-transparent">
           {/* Carousel Container */}
-          <div className="relative overflow-hidden">
+          <div
+            className="relative overflow-hidden"
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+          >
             {/* Slides */}
             <div
               className="flex transition-transform duration-500 ease-out"
@@ -172,16 +286,16 @@ export function HighlightsCarousel() {
                 return (
                   <div
                     key={highlight.id}
-                    className="min-w-full px-4 py-3"
+                    className="min-w-full px-6 py-5"
                     style={{ opacity: index === currentSlide ? 1 : 0.3 }}
                   >
                     {/* Badge */}
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${highlight.badge_color}`}>
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${highlight.badge_color} shadow-sm`}>
                         {slideCategory}
                       </span>
                       {highlight.event_date && (
-                        <span className="text-xs text-muted-foreground" dir="ltr">
+                        <span className="text-xs text-muted-foreground font-medium" dir="ltr">
                           {new Date(highlight.event_date).toLocaleDateString(currentLocale === 'ru' ? 'ru-RU' : 'he-IL', {
                             day: 'numeric',
                             month: 'short'
@@ -190,88 +304,104 @@ export function HighlightsCarousel() {
                       )}
                     </div>
 
-                    {/* Content - Compact Horizontal Layout */}
-                    <div className="flex items-center gap-4">
-                      {/* Smaller Icon */}
-                      <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-[#0D98BA]/20 to-[#003153]/20 rounded-xl flex items-center justify-center text-3xl">
-                        {highlight.image_placeholder || highlight.icon}
+                    {/* Content - Responsive Layout */}
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                      {/* Top row: Icon + Text (always together) */}
+                      <div className="flex items-start gap-4 flex-1 min-w-0 w-full">
+                        {/* Enhanced Icon */}
+                        <div className="flex-shrink-0 w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-[#0D98BA]/20 to-[#003153]/20 rounded-2xl flex items-center justify-center text-3xl sm:text-4xl shadow-sm transform transition-transform hover:scale-110">
+                          {highlight.image_placeholder || highlight.icon}
+                        </div>
+
+                        {/* Enhanced Text */}
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-lg sm:text-xl font-bold text-[#003153] mb-1 leading-tight">
+                            {slideTitle}
+                          </h3>
+                          <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed">
+                            {slideDescription}
+                          </p>
+                        </div>
                       </div>
 
-                      {/* Compact Text */}
-                      <div className="flex-1 min-w-0">
-                        <h2 className="text-lg font-bold text-[#003153] mb-1 leading-tight line-clamp-1">
-                          {slideTitle}
-                        </h2>
-                        <p className="text-sm text-gray-600 line-clamp-2 leading-snug">
-                          {slideDescription}
-                        </p>
-                      </div>
-
-                      {/* Compact Actions */}
-                      <div className="flex items-center gap-2 flex-shrink-0">
-                        {slideCtaText && (
+                      {/* Bottom row on mobile, right side on desktop: Actions */}
+                      {slideCtaText && highlight.cta_link && (
+                        <div className="flex items-center gap-2 w-full sm:w-auto sm:flex-shrink-0 justify-end">
                           <Button
                             variant="default"
                             size="sm"
-                            className="bg-gradient-to-r from-[#0D98BA] to-[#003153] hover:from-[#0D98BA]/90 hover:to-[#003153]/90 text-xs px-3 py-1 h-auto"
+                            asChild
+                            className="bg-gradient-to-r from-[#0D98BA] to-[#003153] hover:from-[#0D98BA]/90 hover:to-[#003153]/90 text-sm px-4 py-2 h-auto shadow-md hover:shadow-lg transition-all flex-1 sm:flex-none"
                           >
-                            {slideCtaText}
+                            <a
+                              href={highlight.cta_link}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                              onTouchStart={(e) => e.stopPropagation()}
+                            >
+                              {slideCtaText}
+                            </a>
                           </Button>
-                        )}
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => shareHighlight(highlight)}
-                          className="p-2 h-auto"
-                        >
-                          <Share2 className="h-3.5 w-3.5" />
-                        </Button>
-                      </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )
               })}
             </div>
 
-            {/* Navigation Arrows - Smaller */}
+            {/* Enhanced Navigation Arrows */}
             <button
-              onClick={() => {
+              onClick={(e) => {
+                e.stopPropagation()
                 prevSlide()
                 setIsAutoPlaying(false)
               }}
-              className="absolute top-1/2 -translate-y-1/2 left-1 z-10 bg-white/80 hover:bg-white rounded-full p-1.5 shadow-sm transition-all hover:scale-105"
+              onTouchStart={(e) => e.stopPropagation()}
+              className="absolute top-1/2 -translate-y-1/2 left-2 z-10 bg-white/95 hover:bg-white rounded-full p-2.5 shadow-md hover:shadow-lg transition-all hover:scale-110 active:scale-95"
               aria-label={currentLocale === 'ru' ? 'Предыдущий' : 'הקודם'}
             >
-              <ChevronLeft className="h-4 w-4 text-[#003153]" />
+              <ChevronLeft className="h-5 w-5 text-[#003153]" />
             </button>
             <button
-              onClick={() => {
+              onClick={(e) => {
+                e.stopPropagation()
                 nextSlide()
                 setIsAutoPlaying(false)
               }}
-              className="absolute top-1/2 -translate-y-1/2 right-1 z-10 bg-white/80 hover:bg-white rounded-full p-1.5 shadow-sm transition-all hover:scale-105"
+              onTouchStart={(e) => e.stopPropagation()}
+              className="absolute top-1/2 -translate-y-1/2 right-2 z-10 bg-white/95 hover:bg-white rounded-full p-2.5 shadow-md hover:shadow-lg transition-all hover:scale-110 active:scale-95"
               aria-label={currentLocale === 'ru' ? 'Следующий' : 'הבא'}
             >
-              <ChevronRight className="h-4 w-4 text-[#003153]" />
+              <ChevronRight className="h-5 w-5 text-[#003153]" />
             </button>
           </div>
 
-          {/* Dot Indicators - Minimal */}
-          <div className="flex justify-center gap-1.5 pb-3 pt-1">
+          {/* Enhanced Dot Indicators */}
+          <div className="flex justify-center gap-2 pb-4 pt-2">
             {highlights.map((_, index) => (
               <button
                 key={index}
                 onClick={() => goToSlide(index)}
-                className={`w-1.5 h-1.5 rounded-full transition-all ${
+                className={`h-2 rounded-full transition-all duration-300 ${
                   index === currentSlide
-                    ? 'bg-[#0D98BA] w-6'
-                    : 'bg-gray-300 hover:bg-gray-400'
+                    ? 'bg-gradient-to-r from-[#0D98BA] to-[#003153] w-8 shadow-sm'
+                    : 'bg-gray-300 hover:bg-gray-400 w-2'
                 }`}
                 aria-label={`${currentLocale === 'ru' ? 'Слайд' : 'שקופית'} ${index + 1}`}
               />
             ))}
           </div>
         </Card>
+      </div>
+
+      {/* Accessibility Info - Hidden but available for screen readers */}
+      <div className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+        {currentLocale === 'ru'
+          ? `Слайд ${currentSlide + 1} из ${totalSlides}. ${isAutoPlaying ? 'Автоматическая смена включена' : 'Автоматическая смена выключена'}.`
+          : `שקופית ${currentSlide + 1} מתוך ${totalSlides}. ${isAutoPlaying ? 'מעבר אוטומטי פעיל' : 'מעבר אוטומטי מושהה'}.`
+        }
       </div>
     </div>
   )

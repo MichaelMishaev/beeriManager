@@ -16,6 +16,22 @@ import { Badge } from '@/components/ui/badge'
 import { EVENT_TYPES, PRIORITY_LEVELS } from '@/lib/utils/constants'
 import type { Event } from '@/types'
 
+// Helper function to format date for datetime-local input
+// Converts to local timezone and formats as YYYY-MM-DDTHH:MM
+function formatDateTimeLocal(date: Date | string | null | undefined): string {
+  if (!date) return ''
+
+  const d = new Date(date)
+  if (isNaN(d.getTime())) return ''
+
+  // Get local timezone offset
+  const offset = d.getTimezoneOffset()
+  const localDate = new Date(d.getTime() - offset * 60 * 1000)
+
+  // Format as YYYY-MM-DDTHH:MM
+  return localDate.toISOString().slice(0, 16)
+}
+
 const eventSchema = z.object({
   title: z.string().min(2, 'כותרת חייבת להכיל לפחות 2 תווים'),
   description: z.string().optional(),
@@ -69,10 +85,10 @@ export function EventForm({
       event_type: event?.event_type || 'general',
       priority: event?.priority || 'normal',
       location: event?.location || '',
-      start_datetime: event?.start_datetime ? new Date(event.start_datetime).toISOString().slice(0, 16) : '',
-      end_datetime: event?.end_datetime ? new Date(event.end_datetime).toISOString().slice(0, 16) : '',
+      start_datetime: formatDateTimeLocal(event?.start_datetime),
+      end_datetime: formatDateTimeLocal(event?.end_datetime),
       registration_enabled: event?.registration_enabled || false,
-      registration_deadline: event?.registration_deadline ? new Date(event.registration_deadline).toISOString().slice(0, 16) : '',
+      registration_deadline: formatDateTimeLocal(event?.registration_deadline),
       max_attendees: event?.max_attendees || undefined,
       requires_payment: event?.requires_payment || false,
       payment_amount: event?.payment_amount || undefined,
