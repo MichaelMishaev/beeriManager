@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { ChevronRight, ChevronLeft, Sparkles, Pause, Play } from 'lucide-react'
+import { ChevronRight, ChevronLeft, Sparkles, Pause, Play, Clock } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { useParams } from 'next/navigation'
@@ -286,11 +286,13 @@ export function HighlightsCarousel() {
                       <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${highlight.badge_color} shadow-sm`}>
                         {slideCategory}
                       </span>
-                      {highlight.event_date && (
-                        <span className="text-xs text-muted-foreground font-medium" dir="ltr">
-                          {new Date(highlight.event_date).toLocaleDateString(currentLocale === 'ru' ? 'ru-RU' : 'he-IL', {
+                      {highlight.created_at && (
+                        <span className="flex items-center gap-1 text-xs text-muted-foreground font-medium bg-gray-100 px-2 py-1 rounded-md" dir="ltr">
+                          <Clock className="h-3 w-3" />
+                          {new Date(highlight.created_at).toLocaleDateString(currentLocale === 'ru' ? 'ru-RU' : 'he-IL', {
                             day: 'numeric',
-                            month: 'short'
+                            month: 'short',
+                            year: 'numeric'
                           })}
                         </span>
                       )}
