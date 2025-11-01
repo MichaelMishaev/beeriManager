@@ -164,7 +164,7 @@ function EventItem({ event, dateLocale, locale }: { event: Event; dateLocale: ty
     : null
 
   return (
-    <Link href={`/events/${event.id}`} className="block group">
+    <Link href={`/${locale}/events/${event.id}`} className="block group">
       <div className={`flex items-start gap-2.5 p-3 rounded-lg hover:bg-gray-50/80 transition-all duration-200 border-r-4 ${getEventAccentColor()} bg-white`}>
         {/* Icon - Compact and meaningful */}
         <div className="flex-shrink-0 mt-0.5">
@@ -279,7 +279,7 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
 
     // For regular events, navigate to event page
     if (event.type !== 'holiday') {
-      window.location.href = `/events/${event.id}`
+      window.location.href = `/${currentLocale}/events/${event.id}`
     }
   }
 
@@ -320,9 +320,9 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
         </div>
 
         {/* Calendar Action Buttons - Right under NextHolidayWidget */}
-        <div className="mb-6">
+        <div className="mb-6 relative">
           {/* Buttons in a single row, 50/50 */}
-          <div className="flex gap-2">
+          <div className="flex gap-2 relative z-10">
             <Button
               variant="outline"
               size="sm"
@@ -350,9 +350,9 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
             </Button>
           </div>
 
-          {/* Collapsible Calendar - Under the buttons */}
+          {/* Collapsible Calendar - Under the buttons with proper z-index */}
           <div
-            className="overflow-hidden transition-all duration-500 ease-in-out mt-3"
+            className="overflow-hidden transition-all duration-500 ease-in-out mt-3 relative z-0"
             style={{
               maxHeight: isCalendarExpanded ? `${calendarContentHeight}px` : '0px',
               opacity: isCalendarExpanded ? 1 : 0
@@ -400,7 +400,7 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
               {t('photoGallery')}
             </h2>
             <Button variant="ghost" asChild size="sm">
-              <Link href="/events?tab=photos" className="gap-1">
+              <Link href={`/${currentLocale}/events?tab=photos`} className="gap-1">
                 {t('allGalleries')}
                 <ArrowLeft className="h-4 w-4" />
               </Link>
@@ -465,7 +465,12 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
         </div>
       </div>
 
-      {/* Info Banner */}
+      {/* Unified Feedback & Ideas Card - First */}
+      <div className="mt-8">
+        <FeedbackAndIdeasCard />
+      </div>
+
+      {/* Info Banner - Second */}
       <Card className="mt-8 border-muted">
         <CardContent className="py-6">
           <div className="flex items-start gap-4">
@@ -501,11 +506,6 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
           </div>
         </CardContent>
       </Card>
-
-      {/* Unified Feedback & Ideas Card - At the bottom */}
-      <div className="mt-8">
-        <FeedbackAndIdeasCard />
-      </div>
     </div>
 
     {/* Footer Credit */}
