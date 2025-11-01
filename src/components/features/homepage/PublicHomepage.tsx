@@ -1,9 +1,11 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Calendar, ChevronLeft, Camera, ArrowLeft, ChevronDown, ChevronUp, MessageSquare } from 'lucide-react'
+import { Calendar, ChevronLeft, Camera, ArrowLeft, ChevronDown, ChevronUp, MessageSquare, Clock, MapPin } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { CommitteeCard } from './CommitteeCard'
 import { SchoolStats } from './SchoolStats'
 import { WhatsAppCommunityCard } from '@/components/features/whatsapp/WhatsAppCommunityCard'
@@ -40,9 +42,16 @@ function UpcomingEventsCard({
 }) {
   const t = useTranslations('homepage')
   const [isExpanded, setIsExpanded] = useState(false)
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   const displayedEvents = isExpanded ? upcomingEvents : upcomingEvents.slice(0, 3)
   const hasMore = upcomingEvents.length > 3
+
+  const handleEventClick = (event: Event) => {
+    setSelectedEvent(event)
+    setIsModalOpen(true)
+  }
 
   return (
     <Card className="shadow-md hover:shadow-lg transition-shadow border-0">
@@ -62,7 +71,13 @@ function UpcomingEventsCard({
           {upcomingEvents.length > 0 ? (
             <>
               {displayedEvents.map((event) => (
-                <EventItem key={event.id} event={event} dateLocale={dateLocale} locale={locale} />
+                <EventItem
+                  key={event.id}
+                  event={event}
+                  dateLocale={dateLocale}
+                  locale={locale}
+                  onClick={() => handleEventClick(event)}
+                />
               ))}
               {hasMore && (
                 <div className="text-center pt-3">
@@ -88,11 +103,128 @@ function UpcomingEventsCard({
           )}
         </div>
       </CardContent>
+
+      {/* Event Details Modal */}
+      {selectedEvent && (
+        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+          <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3 text-2xl">
+                <span className="text-3xl">
+                  {selectedEvent.event_type === 'meeting' ? '👥' :
+                   selectedEvent.event_type === 'fundraiser' ? '💰' :
+                   selectedEvent.event_type === 'trip' ? '🚌' :
+                   selectedEvent.event_type === 'workshop' ? '📚' : '📅'}
+                </span>
+                {(locale === 'ru' && selectedEvent.title_ru) ? selectedEvent.title_ru : selectedEvent.title}
+              </DialogTitle>
+            </DialogHeader>
+
+            <div className="space-y-4 pt-4">
+              {/* Event Status Badge */}
+              {(() => {
+                const startDate = new Date(selectedEvent.start_datetime)
+                const endDateTime = selectedEvent.end_datetime ? new Date(selectedEvent.end_datetime) : null
+                const isValidEndDate = endDateTime && !isNaN(endDateTime.getTime()) && endDateTime.getTime() > startDate.getTime()
+                const endDate = isValidEndDate ? endDateTime! : new Date(startDate.getTime() + 2 * 60 * 60 * 1000)
+                const now = new Date()
+                const isHappeningNow = now >= startDate && now <= endDate
+                const timeDiff = startDate.getTime() - now.getTime()
+                const isStartingSoon = !isHappeningNow && timeDiff > 0 && timeDiff <= 60 * 60 * 1000
+
+                return isHappeningNow ? (
+                  <Badge className="bg-[#FF8200] text-white text-sm">
+                    {locale === 'ru' ? '🔴 Сейчас' : '🔴 מתקיים כעת'}
+                  </Badge>
+                ) : isStartingSoon ? (
+                  <Badge className="bg-[#FFBA00] text-white text-sm">
+                    {locale === 'ru' ? '⚡ Скоро' : '⚡ בקרוב'}
+                  </Badge>
+                ) : null
+              })()}
+
+              {/* Date and Time */}
+              <div className="flex items-start gap-2 bg-blue-50 border border-blue-200 rounded-lg p-3">
+                <Clock className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-medium text-blue-900">
+                    {format(new Date(selectedEvent.start_datetime), 'EEEE, d MMMM yyyy', { locale: dateLocale })}
+                  </p>
+                  <p className="text-sm text-blue-700">
+                    {format(new Date(selectedEvent.start_datetime), 'HH:mm', { locale: dateLocale })}
+                    {selectedEvent.end_datetime && (
+                      <span> - {format(new Date(selectedEvent.end_datetime), 'HH:mm', { locale: dateLocale })}</span>
+                    )}
+                  </p>
+                </div>
+              </div>
+
+              {/* Location */}
+              {((locale === 'ru' && selectedEvent.location_ru) ? selectedEvent.location_ru : selectedEvent.location) && (
+                <div className="flex items-start gap-2 bg-gray-50 border border-gray-200 rounded-lg p-3">
+                  <MapPin className="h-5 w-5 text-gray-600 flex-shrink-0 mt-0.5" />
+                  <p className="text-gray-800">
+                    {(locale === 'ru' && selectedEvent.location_ru) ? selectedEvent.location_ru : selectedEvent.location}
+                  </p>
+                </div>
+              )}
+
+              {/* Description */}
+              {((locale === 'ru' && selectedEvent.description_ru) ? selectedEvent.description_ru : selectedEvent.description) && (
+                <div className="prose prose-sm max-w-none">
+                  <p className="text-base text-gray-700 leading-relaxed whitespace-pre-wrap">
+                    {(locale === 'ru' && selectedEvent.description_ru) ? selectedEvent.description_ru : selectedEvent.description}
+                  </p>
+                </div>
+              )}
+
+              {/* Registration Info */}
+              {selectedEvent.registration_enabled && (
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                  <p className="font-medium text-green-900 mb-2">
+                    {locale === 'ru' ? '✓ Требуется регистрация' : '✓ נדרשת הרשמה'}
+                  </p>
+                  {selectedEvent.max_attendees && (
+                    <p className="text-sm text-green-700">
+                      {locale === 'ru' ? `Максимум участников: ${selectedEvent.max_attendees}` : `מקסימום משתתפים: ${selectedEvent.max_attendees}`}
+                    </p>
+                  )}
+                  {selectedEvent.registration_deadline && (
+                    <p className="text-sm text-green-700">
+                      {locale === 'ru' ? 'Крайний срок регистрации: ' : 'מועד אחרון להרשמה: '}
+                      {format(new Date(selectedEvent.registration_deadline), 'd MMMM, HH:mm', { locale: dateLocale })}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* Payment Info */}
+              {selectedEvent.requires_payment && selectedEvent.payment_amount && (
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                  <p className="font-medium text-yellow-900">
+                    {locale === 'ru' ? `💰 Стоимость: ₪${selectedEvent.payment_amount}` : `💰 עלות: ₪${selectedEvent.payment_amount}`}
+                  </p>
+                </div>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </Card>
   )
 }
 
-function EventItem({ event, dateLocale, locale }: { event: Event; dateLocale: typeof he | typeof ru; locale: Locale }) {
+function EventItem({
+  event,
+  dateLocale,
+  locale,
+  onClick
+}: {
+  event: Event
+  dateLocale: typeof he | typeof ru
+  locale: Locale
+  onClick: () => void
+}) {
   const startDate = new Date(event.start_datetime)
   const now = new Date()
 
@@ -164,7 +296,10 @@ function EventItem({ event, dateLocale, locale }: { event: Event; dateLocale: ty
     : null
 
   return (
-    <Link href={`/${locale}/events/${event.id}`} className="block group">
+    <div
+      onClick={onClick}
+      className="block group cursor-pointer"
+    >
       <div className={`flex items-start gap-2.5 p-3 rounded-lg hover:bg-gray-50/80 transition-all duration-200 border-r-4 ${getEventAccentColor()} bg-white`}>
         {/* Icon - Compact and meaningful */}
         <div className="flex-shrink-0 mt-0.5">
@@ -214,7 +349,7 @@ function EventItem({ event, dateLocale, locale }: { event: Event; dateLocale: ty
           </div>
         </div>
       </div>
-    </Link>
+    </div>
   )
 }
 
