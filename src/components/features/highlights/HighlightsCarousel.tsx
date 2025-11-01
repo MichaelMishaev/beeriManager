@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { ChevronRight, ChevronLeft, Sparkles, Pause, Play, Clock, X } from 'lucide-react'
+import { ChevronRight, ChevronLeft, Sparkles, Pause, Play, Clock } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
