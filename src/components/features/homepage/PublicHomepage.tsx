@@ -301,10 +301,12 @@ function EventItem({
       className="block group cursor-pointer"
     >
       <div className={`flex items-start gap-2.5 p-3 rounded-lg hover:bg-gray-50/80 transition-all duration-200 border-r-4 ${getEventAccentColor()} bg-white`}>
-        {/* Icon - Compact and meaningful */}
+        {/* Icon - Square gradient (previous style) */}
         <div className="flex-shrink-0 mt-0.5">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#0D98BA]/10 to-[#003153]/5 flex items-center justify-center text-base">
-            {getEventIcon()}
+          <div className={
+            `w-8 h-8 rounded-lg bg-gradient-to-br from-[#0D98BA]/10 to-[#003153]/5 flex items-center justify-center`
+          }>
+            <span className="text-base">{getEventIcon()}</span>
           </div>
         </div>
 
