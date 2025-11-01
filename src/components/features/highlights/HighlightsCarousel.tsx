@@ -220,14 +220,6 @@ export function HighlightsCarousel() {
     return null
   }
 
-  const currentHighlight = highlights[currentSlide]
-  if (!currentHighlight) return null
-
-  const title = currentLocale === 'ru' ? currentHighlight.title_ru : currentHighlight.title_he
-  const description = currentLocale === 'ru' ? currentHighlight.description_ru : currentHighlight.description_he
-  const category = currentLocale === 'ru' ? currentHighlight.category_ru : currentHighlight.category_he
-  const ctaText = currentLocale === 'ru' ? currentHighlight.cta_text_ru : currentHighlight.cta_text_he
-
   return (
     <div className="mb-6 animate-in fade-in-50 slide-in-from-top-5 duration-700">
       {/* Section Header */}

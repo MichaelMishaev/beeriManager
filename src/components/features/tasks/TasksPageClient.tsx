@@ -46,7 +46,7 @@ export function TasksPageClient({ initialTasks, initialStats, availableTags }: T
   const [stats] = useState(initialStats)
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([])
   const [searchQuery, setSearchQuery] = useState<string>('')
-  const [sortBy] = useState<SortOption>('created_at') // Always sort by created date
+  const [_sortBy] = useState<SortOption>('created_at') // Always sort by created date
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc') // Default: newest first
 
   const locale = (params?.locale || 'he') as Locale

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Calendar, MessageSquare, ChevronLeft, Camera, ArrowLeft, MapPin, ChevronDown, ChevronUp } from 'lucide-react'
+import { Calendar, ChevronLeft, Camera, ArrowLeft, ChevronDown, ChevronUp, MessageSquare } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { CommitteeCard } from './CommitteeCard'
