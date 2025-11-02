@@ -6,9 +6,9 @@ export const dynamic = 'force-dynamic'
 export async function GET(req: NextRequest) {
   try {
     console.log('[Urgent GET] 🔍 Starting request...')
-    // Try using anon client first to test RLS
-    const supabase = createClientServer()
-    console.log('[Urgent GET] 🔗 Supabase client created (using anon key for RLS test)')
+    // Use service role to bypass RLS
+    const supabase = await createClient()
+    console.log('[Urgent GET] 🔗 Supabase client created (using service role)')
 
     const { searchParams } = new URL(req.url)
 
@@ -43,15 +43,23 @@ export async function GET(req: NextRequest) {
     const { data, error } = await query
 
     if (error) {
-      console.error('[Urgent GET] ❌ Failed to load urgent messages', error)
+      console.error('[Urgent GET] ❌ Failed to load urgent messages')
+      console.error('[Urgent GET] ❌ Error details:', JSON.stringify(error, null, 2))
+      console.error('[Urgent GET] ❌ Error message:', error.message)
+      console.error('[Urgent GET] ❌ Error code:', error.code)
+      console.error('[Urgent GET] ❌ Error hint:', error.hint)
       return NextResponse.json(
-        { success: false, error: 'Failed to load urgent messages' },
+        { success: false, error: 'Failed to load urgent messages', details: error.message },
         { status: 500 }
       )
     }
 
     console.log('[Urgent GET] ✅ Query successful. Rows returned:', data?.length || 0)
-    console.log('[Urgent GET] 📦 Data:', JSON.stringify(data, null, 2))
+    if (data && data.length > 0) {
+      console.log('[Urgent GET] 📦 First row:', JSON.stringify(data[0], null, 2))
+    } else {
+      console.log('[Urgent GET] 📦 No data returned (empty array)')
+    }
 
     return NextResponse.json({
       success: true,
