@@ -226,7 +226,7 @@ export function HighlightsCarousel() {
   }
 
   return (
-    <div className="mb-6 animate-in fade-in-50 slide-in-from-top-5 duration-700">
+    <div className="mb-6 animate-in fade-in-50 slide-in-from-top-5 duration-700 relative z-50">
       {/* Section Header */}
       <div className="flex items-center justify-between mb-4 px-1">
         <div className="flex items-center gap-3">
