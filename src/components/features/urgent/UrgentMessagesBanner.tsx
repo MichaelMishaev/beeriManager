@@ -67,10 +67,11 @@ export function UrgentMessagesBanner() {
       ? `📅 ${startDate} - ${endDate}`
       : `📅 ${startDate} - ${endDate}`
 
-    // Build share text
-    let text = message.share_text_he || message.share_text_ru || ''
-    if (!text) {
-      text = `${message.icon || ''} ${title}\n${description || ''}`
+    // Build share text - always use title and description in the correct language
+    // Custom share_text fields are ignored to ensure consistency
+    let text = `${message.icon || ''} ${title}`
+    if (description) {
+      text += `\n\n${description}`
     }
 
     // Add date range
