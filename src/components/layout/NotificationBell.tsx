@@ -154,7 +154,7 @@ export function NotificationBell() {
               {/* Tasks Notification */}
               {counts.tasks > 0 && (
                 <Link
-                  href="/admin/tasks/new"
+                  href="/admin/tasks"
                   onClick={handleNavigation}
                   className="flex items-start gap-3 p-3 rounded-lg hover:bg-accent transition-colors"
                 >
