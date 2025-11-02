@@ -493,6 +493,11 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
       <SchoolStats variant="cards" />
 
       <div className="container mx-auto px-4 py-4 max-w-6xl">
+        {/* Urgent Messages Banner - Always on top! */}
+        <div className="mb-6">
+          <UrgentMessagesBanner />
+        </div>
+
         {/* Highlights Carousel */}
         <HighlightsCarousel />
 
@@ -552,9 +557,6 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
         </div>
 
         <div className="space-y-3">
-          {/* Urgent Messages Banner */}
-          <UrgentMessagesBanner />
-
           {/* White Shirt Friday Reminder - Shows Thu 9:00 AM - Fri 9:00 AM */}
           <WhiteShirtBanner />
         </div>
