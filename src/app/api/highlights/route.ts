@@ -49,13 +49,13 @@ export async function GET(req: NextRequest) {
 
       query = query
         .eq('is_active', true)
-        .or(`start_date.is.null,start_date.lte.${now}`)
-        .or(`end_date.is.null,end_date.gte.${now}`)
+        // Combined OR condition: (start_date is null OR start_date <= now) AND (end_date is null OR end_date >= now)
+        .or(`and(start_date.is.null,end_date.is.null),and(start_date.is.null,end_date.gte.${now}),and(start_date.lte.${now},end_date.is.null),and(start_date.lte.${now},end_date.gte.${now})`)
     }
 
-    // Order by display_order (ascending) then created_at (descending)
+    // Order by display_order (descending - higher numbers first), then by created_at (descending - newest first)
     query = query
-      .order('display_order', { ascending: true })
+      .order('display_order', { ascending: false })
       .order('created_at', { ascending: false })
       .limit(Math.min(limit, 50))
 

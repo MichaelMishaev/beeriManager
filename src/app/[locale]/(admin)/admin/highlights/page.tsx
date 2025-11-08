@@ -685,10 +685,14 @@ export default function AdminHighlightsPage() {
                           <Calendar className="h-4 w-4" />
                           תאריך אירוע (אופציונלי)
                         </label>
+                        <p className="text-xs text-gray-500 mb-1">
+                          📅 התאריך בו האירוע התרחש/יתרחש - יוצג למשתמשים בכרטיסייה ובשיתוף
+                        </p>
                         <Input
                           type="date"
                           value={highlight.event_date || ''}
                           onChange={(e) => updateLocalHighlight(highlight.id, 'event_date', e.target.value || null)}
+                          placeholder="dd/mm/yyyy"
                         />
                       </div>
                       <div>
@@ -733,28 +737,39 @@ export default function AdminHighlightsPage() {
                     {/* Display Settings */}
                     <div className="grid grid-cols-3 gap-4">
                       <div>
-                        <label className="text-sm font-medium">סדר תצוגה</label>
+                        <label className="text-sm font-medium">
+                          סדר תצוגה <span className="text-xs text-gray-500">(מספר גבוה יותר = מוצג ראשון)</span>
+                        </label>
                         <Input
                           type="number"
                           value={highlight.display_order}
                           onChange={(e) => updateLocalHighlight(highlight.id, 'display_order', parseInt(e.target.value) || 0)}
                           min={0}
+                          placeholder="0"
                         />
                       </div>
                       <div>
                         <label className="text-sm font-medium">תאריך התחלה</label>
+                        <p className="text-xs text-gray-500 mb-1">
+                          🟢 מתי להתחיל להציג - ריק = מיד
+                        </p>
                         <Input
                           type="date"
                           value={highlight.start_date || ''}
                           onChange={(e) => updateLocalHighlight(highlight.id, 'start_date', e.target.value || null)}
+                          placeholder="dd/mm/yyyy"
                         />
                       </div>
                       <div>
                         <label className="text-sm font-medium">תאריך סיום</label>
+                        <p className="text-xs text-gray-500 mb-1">
+                          🔴 מתי להפסיק להציג - ריק = לעולם
+                        </p>
                         <Input
                           type="date"
                           value={highlight.end_date || ''}
                           onChange={(e) => updateLocalHighlight(highlight.id, 'end_date', e.target.value || null)}
+                          placeholder="dd/mm/yyyy"
                         />
                       </div>
                     </div>
