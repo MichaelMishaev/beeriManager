@@ -139,7 +139,8 @@ export function HighlightsCarousel() {
 
     const shareData = {
       title: title,
-      text: shareText
+      text: shareText,
+      url: url
     }
 
     try {

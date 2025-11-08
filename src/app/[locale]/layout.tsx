@@ -50,18 +50,19 @@ export const metadata: Metadata = {
     description: 'פורטל בית הספר בארי - אירועים, משימות, הוצאות ועוד',
     images: [
       {
-        url: '/icons/icon-512x512.png',
+        url: 'https://beeri.online/icons/icon-512x512.png',
         width: 512,
         height: 512,
         alt: 'פורטל בארי',
+        type: 'image/png',
       },
     ],
   },
   twitter: {
-    card: 'summary',
+    card: 'summary_large_image',
     title: 'פורטל בארי',
     description: 'פורטל בית הספר בארי - אירועים, משימות, הוצאות ועוד',
-    images: ['/icons/icon-512x512.png'],
+    images: ['https://beeri.online/icons/icon-512x512.png'],
   },
   manifest: '/manifest.json',
   appleWebApp: {
