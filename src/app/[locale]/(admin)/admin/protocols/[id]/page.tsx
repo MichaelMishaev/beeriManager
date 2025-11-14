@@ -27,6 +27,9 @@ import {
 import TaskDrawer from '@/components/protocols/TaskDrawer'
 import ExpandableTaskMentionTextarea from '@/components/protocols/ExpandableTaskMentionTextarea'
 import { ExpandableTextarea } from '@/components/ui/expandable-textarea'
+import { useFormDraft } from '@/hooks/useFormDraft'
+import { useAutoSave } from '@/hooks/useAutoSave'
+import { DraftBanner, DraftSaveIndicator } from '@/components/ui/draft-banner'
 
 const protocolSchema = z.object({
   title: z.string().min(2, 'כותרת חייבת להכיל לפחות 2 תווים'),
@@ -61,6 +64,7 @@ export default function EditProtocolPage() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [attendeeInput, setAttendeeInput] = useState('')
   const [attendees, setAttendees] = useState<string[]>([])
+  const [showDraftBanner, setShowDraftBanner] = useState(false)
 
   const {
     register,
@@ -79,6 +83,54 @@ export default function EditProtocolPage() {
 
   const isPublic = watch('is_public')
   const selectedCategory = watch('categories')?.[0] || 'regular'
+
+  // Draft management
+  const { saveDraft, restoreDraft, clearDraft, hasDraft, draftTimestamp } = useFormDraft<ProtocolFormData>({
+    formType: 'protocol',
+    action: 'edit',
+    entityId: protocolId
+  })
+
+  // Auto-save
+  const formData = watch()
+  const { lastSaved, isSaving } = useAutoSave({
+    data: { ...formData, attendees },
+    onSave: (data) => saveDraft(data),
+    delay: 3000,
+    enabled: !isLoading // Only auto-save after protocol is loaded
+  })
+
+  // Check for existing draft on mount (after protocol is loaded)
+  useEffect(() => {
+    if (!isLoading && hasDraft && draftTimestamp) {
+      setShowDraftBanner(true)
+    }
+  }, [isLoading, hasDraft, draftTimestamp])
+
+  // Restore draft handler
+  const handleRestoreDraft = () => {
+    const draft = restoreDraft()
+    if (draft) {
+      // Restore all form fields
+      const draftData = draft as any
+      Object.keys(draftData).forEach((key) => {
+        if (key === 'attendees') {
+          setAttendees(draftData[key] as string[])
+        } else if (key in draftData) {
+          setValue(key as any, draftData[key])
+        }
+      })
+      setShowDraftBanner(false)
+      toast.success('הטיוטה שוחזרה בהצלחה!')
+    }
+  }
+
+  // Discard draft handler
+  const handleDiscardDraft = () => {
+    clearDraft()
+    setShowDraftBanner(false)
+    toast.success('הטיוטה נמחקה')
+  }
 
   const addAttendee = () => {
     if (attendeeInput.trim() && !attendees.includes(attendeeInput.trim())) {
@@ -190,6 +242,7 @@ export default function EditProtocolPage() {
       const result = await response.json()
 
       if (result.success) {
+        clearDraft() // Clear draft on successful save
         toast.success('הפרוטוקול עודכן בהצלחה!')
         router.push(`/he/protocols/${protocolId}`)
       } else {
@@ -223,6 +276,16 @@ export default function EditProtocolPage() {
           עדכון פרטי הפרוטוקול
         </p>
       </div>
+
+      {/* Draft Banner */}
+      {showDraftBanner && draftTimestamp && (
+        <DraftBanner
+          timestamp={draftTimestamp}
+          onRestore={handleRestoreDraft}
+          onDiscard={handleDiscardDraft}
+          onDismiss={() => setShowDraftBanner(false)}
+        />
+      )}
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Basic Information */}
@@ -453,6 +516,10 @@ export default function EditProtocolPage() {
 
         {/* Actions */}
         <div className="flex flex-col gap-4">
+          {/* Draft Save Indicator */}
+          <div className="flex items-center justify-start">
+            <DraftSaveIndicator lastSaved={lastSaved} isSaving={isSaving} />
+          </div>
           <div className="flex gap-4">
             <Button
               type="submit"

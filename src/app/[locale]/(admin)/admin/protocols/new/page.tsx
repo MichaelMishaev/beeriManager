@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Save, Plus, X, ClipboardList } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -16,6 +16,9 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import TaskDrawer from '@/components/protocols/TaskDrawer'
 import TaskMentionTextarea from '@/components/protocols/TaskMentionTextarea'
+import { useFormDraft } from '@/hooks/useFormDraft'
+import { useAutoSave } from '@/hooks/useAutoSave'
+import { DraftBanner, DraftSaveIndicator } from '@/components/ui/draft-banner'
 
 const protocolSchema = z.object({
   title: z.string().min(2, 'כותרת חייבת להכיל לפחות 2 תווים'),
@@ -47,6 +50,7 @@ export default function NewProtocolPage() {
   const [attendees, setAttendees] = useState<string[]>([])
   const [formattedHTML, setFormattedHTML] = useState('')
   const [taskDrawerOpen, setTaskDrawerOpen] = useState(false)
+  const [showDraftBanner, setShowDraftBanner] = useState(false)
 
   const {
     register,
@@ -67,6 +71,55 @@ export default function NewProtocolPage() {
 
   const isPublic = watch('is_public')
   const approved = watch('approved')
+
+  // Draft management
+  const { saveDraft, restoreDraft, clearDraft, hasDraft, draftTimestamp } = useFormDraft<ProtocolFormData>({
+    formType: 'protocol',
+    action: 'new'
+  })
+
+  // Auto-save
+  const formData = watch()
+  const { lastSaved, isSaving } = useAutoSave({
+    data: { ...formData, attendees, formattedHTML },
+    onSave: (data) => saveDraft(data),
+    delay: 3000,
+    enabled: true
+  })
+
+  // Check for existing draft on mount
+  useEffect(() => {
+    if (hasDraft && draftTimestamp) {
+      setShowDraftBanner(true)
+    }
+  }, [hasDraft, draftTimestamp])
+
+  // Restore draft handler
+  const handleRestoreDraft = () => {
+    const draft = restoreDraft()
+    if (draft) {
+      // Restore all form fields
+      const draftData = draft as any
+      Object.keys(draftData).forEach((key) => {
+        if (key === 'attendees') {
+          setAttendees(draftData[key] as string[])
+        } else if (key === 'formattedHTML') {
+          setFormattedHTML(draftData[key] as string)
+        } else if (key in draftData) {
+          setValue(key as any, draftData[key])
+        }
+      })
+      setShowDraftBanner(false)
+      toast.success('הטיוטה שוחזרה בהצלחה!')
+    }
+  }
+
+  // Discard draft handler
+  const handleDiscardDraft = () => {
+    clearDraft()
+    setShowDraftBanner(false)
+    toast.success('הטיוטה נמחקה')
+  }
 
   const addAttendee = () => {
     if (attendeeInput.trim() && !attendees.includes(attendeeInput.trim())) {
@@ -109,6 +162,7 @@ export default function NewProtocolPage() {
       const result = await response.json()
 
       if (result.success) {
+        clearDraft() // Clear draft on successful save
         toast.success('הפרוטוקול נוצר בהצלחה!')
         router.push('/protocols')
       } else {
@@ -131,6 +185,16 @@ export default function NewProtocolPage() {
           תיעוד ישיבות והחלטות ועד ההורים
         </p>
       </div>
+
+      {/* Draft Banner */}
+      {showDraftBanner && draftTimestamp && (
+        <DraftBanner
+          timestamp={draftTimestamp}
+          onRestore={handleRestoreDraft}
+          onDiscard={handleDiscardDraft}
+          onDismiss={() => setShowDraftBanner(false)}
+        />
+      )}
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Basic Information */}
@@ -417,6 +481,11 @@ export default function NewProtocolPage() {
           >
             ביטול
           </Button>
+        </div>
+
+        {/* Draft Save Indicator */}
+        <div className="flex items-center justify-start">
+          <DraftSaveIndicator lastSaved={lastSaved} isSaving={isSaving} />
         </div>
       </form>
 

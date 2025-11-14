@@ -413,7 +413,11 @@ export default function AdminHighlightsPage() {
                           size="sm"
                           onClick={() => {
                             if (canSave) {
-                              saveHighlight(highlight)
+                              // Find the current highlight from state to ensure we have the latest changes
+                              const currentHighlight = highlights.find(h => h.id === highlight.id)
+                              if (currentHighlight) {
+                                saveHighlight(currentHighlight)
+                              }
                             } else {
                               scrollToMissingField(validation.missingField!)
                             }

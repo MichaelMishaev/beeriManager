@@ -22,18 +22,14 @@ export async function GET(req: NextRequest) {
 
     if (!showAll) {
       // Filter only active messages within date range (for public view)
-      const now = new Date()
-      const today = now.toISOString().split('T')[0]
-      console.log('[Urgent GET] 📅 Full timestamp:', now.toISOString())
-      console.log('[Urgent GET] 📅 Today (date only):', today)
-      console.log('[Urgent GET] 📅 Timezone offset (minutes):', now.getTimezoneOffset())
+      const now = new Date().toISOString().split('T')[0]
+      console.log('[Urgent GET] 📅 Today (date only):', now)
 
       query = query
         .eq('is_active', true)
-        .lte('start_date', today)
-        .gte('end_date', today)
+        .or(`and(start_date.is.null,end_date.is.null),and(start_date.is.null,end_date.gte.${now}),and(start_date.lte.${now},end_date.is.null),and(start_date.lte.${now},end_date.gte.${now})`)
 
-      console.log('[Urgent GET] 🔍 Filters applied: is_active=true, start_date<=', today, ', end_date>=', today)
+      console.log('[Urgent GET] 🔍 Filters applied: is_active=true, date range:', now)
     }
 
     // Add ordering - must be after filters

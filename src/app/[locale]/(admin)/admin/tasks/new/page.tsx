@@ -15,6 +15,9 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { SmartDatePicker } from '@/components/ui/smart-date-picker'
+import { useFormDraft } from '@/hooks/useFormDraft'
+import { useAutoSave } from '@/hooks/useAutoSave'
+import { DraftBanner, DraftSaveIndicator } from '@/components/ui/draft-banner'
 
 const taskSchema = z.object({
   title: z.string().min(2, 'כותרת חייבת להכיל לפחות 2 תווים'),
@@ -44,6 +47,7 @@ export default function NewTaskPage() {
   const [tasks, setTasks] = useState<any[]>([])
   const [dueDate, setDueDate] = useState<string>('')
   const [reminderDate, setReminderDate] = useState<string>('')
+  const [showDraftBanner, setShowDraftBanner] = useState(false)
 
   const {
     register,
@@ -61,6 +65,56 @@ export default function NewTaskPage() {
   })
 
   const watchDueDate = watch('due_date')
+
+  // Draft management
+  const { saveDraft, restoreDraft, clearDraft, hasDraft, draftTimestamp } = useFormDraft<TaskFormData>({
+    formType: 'task',
+    action: 'new'
+  })
+
+  // Auto-save
+  const formData = watch()
+  const { lastSaved, isSaving } = useAutoSave({
+    data: formData,
+    onSave: (data) => saveDraft(data),
+    delay: 3000,
+    enabled: true
+  })
+
+  // Check for existing draft on mount
+  useEffect(() => {
+    if (hasDraft && draftTimestamp) {
+      setShowDraftBanner(true)
+    }
+  }, [hasDraft, draftTimestamp])
+
+  // Restore draft handler
+  const handleRestoreDraft = () => {
+    const draft = restoreDraft()
+    if (draft) {
+      // Restore all form fields
+      const draftData = draft as any
+      Object.keys(draftData).forEach((key) => {
+        if (key === 'due_date') {
+          setDueDate(draftData[key] as string)
+        } else if (key === 'reminder_date') {
+          setReminderDate(draftData[key] as string)
+        }
+        if (key in draftData) {
+          setValue(key as any, draftData[key])
+        }
+      })
+      setShowDraftBanner(false)
+      toast.success('הטיוטה שוחזרה בהצלחה!')
+    }
+  }
+
+  // Discard draft handler
+  const handleDiscardDraft = () => {
+    clearDraft()
+    setShowDraftBanner(false)
+    toast.success('הטיוטה נמחקה')
+  }
 
   // Fetch events and tasks for linking
   useEffect(() => {
@@ -116,6 +170,7 @@ export default function NewTaskPage() {
       const result = await response.json()
 
       if (result.success) {
+        clearDraft() // Clear draft on successful save
         toast.success('המשימה נוצרה בהצלחה!')
         router.push('/tasks')
         router.refresh() // Force refresh to show new task
@@ -139,6 +194,16 @@ export default function NewTaskPage() {
           הוסף משימה חדשה למעקב ביצוע
         </p>
       </div>
+
+      {/* Draft Banner */}
+      {showDraftBanner && draftTimestamp && (
+        <DraftBanner
+          timestamp={draftTimestamp}
+          onRestore={handleRestoreDraft}
+          onDiscard={handleDiscardDraft}
+          onDismiss={() => setShowDraftBanner(false)}
+        />
+      )}
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Basic Information */}
@@ -353,12 +418,17 @@ export default function NewTaskPage() {
         </Card>
 
         {/* Actions */}
-        <div className="flex flex-col sm:flex-row gap-3">
-          <Button
-            type="submit"
-            disabled={isSubmitting}
-            className="flex-1"
-          >
+        <div className="flex flex-col gap-3">
+          {/* Draft Save Indicator */}
+          <div className="flex items-center justify-start">
+            <DraftSaveIndicator lastSaved={lastSaved} isSaving={isSaving} />
+          </div>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              className="flex-1"
+            >
             {isSubmitting ? (
               <>טוען...</>
             ) : (
@@ -376,6 +446,7 @@ export default function NewTaskPage() {
           >
             ביטול
           </Button>
+          </div>
         </div>
       </form>
     </div>
