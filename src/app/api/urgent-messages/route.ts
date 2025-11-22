@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
+// Force dynamic rendering - critical for production to prevent Vercel caching
 export const dynamic = 'force-dynamic'
+export const revalidate = 0
+export const fetchCache = 'force-no-store'
 
 export async function GET(req: NextRequest) {
   try {
@@ -57,15 +60,27 @@ export async function GET(req: NextRequest) {
       console.log('[Urgent GET] 📦 No data returned (empty array)')
     }
 
+    // Return with cache-busting headers to prevent stale data
     return NextResponse.json({
       success: true,
       data: data || []
+    }, {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+      }
     })
   } catch (error) {
     console.error('[Urgent GET] ❌ Exception:', error)
     return NextResponse.json(
       { success: false, error: 'Failed to load urgent messages' },
-      { status: 500 }
+      {
+        status: 500,
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate',
+        }
+      }
     )
   }
 }

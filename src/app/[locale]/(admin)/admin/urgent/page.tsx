@@ -56,22 +56,39 @@ export default function AdminUrgentMessagesPage() {
   async function saveMessages() {
     setIsSaving(true)
     try {
+      console.log('[SaveMessages] Sending save request with', messages.length, 'messages')
       const response = await fetch('/api/urgent-messages/save', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache'
+        },
         body: JSON.stringify({ messages }),
       })
 
+      console.log('[SaveMessages] Response status:', response.status)
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        console.error('[SaveMessages] Server error:', response.status, errorData)
+        throw new Error(errorData.error || `Server error: ${response.status}`)
+      }
+
       const data = await response.json()
+      console.log('[SaveMessages] Response data:', data)
+
       if (data.success) {
         toast.success('הודעות דחופות נשמרו בהצלחה')
         logger.success('Urgent messages saved', { count: messages.length })
+        // Small delay to ensure DB consistency before reload
+        await new Promise(resolve => setTimeout(resolve, 300))
         // Reload messages from server to get fresh data with UUIDs
         await loadMessages()
       } else {
-        throw new Error(data.error)
+        throw new Error(data.error || 'Unknown error')
       }
     } catch (error) {
+      console.error('[SaveMessages] Error:', error)
       logger.error('Failed to save urgent messages', { error })
       toast.error('שגיאה בשמירת הודעות דחופות')
     } finally {
@@ -135,9 +152,12 @@ export default function AdminUrgentMessagesPage() {
     console.log('[Delete] Starting delete for id:', id)
     if (confirm('האם למחוק הודעה זו?')) {
       console.log('[Delete] User confirmed')
+      // Save original messages for rollback
+      const originalMessages = [...messages]
       // Remove from local state immediately for better UX
       const updatedMessages = messages.filter(m => m.id !== id)
       console.log('[Delete] Updated messages:', updatedMessages.length, 'messages')
+      console.log('[Delete] Message IDs being sent:', updatedMessages.map(m => m.id))
       setMessages(updatedMessages)
 
       // Save immediately to database
@@ -146,30 +166,42 @@ export default function AdminUrgentMessagesPage() {
         console.log('[Delete] Sending save request...')
         const response = await fetch('/api/urgent-messages/save', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-cache'
+          },
           body: JSON.stringify({ messages: updatedMessages }),
         })
 
         console.log('[Delete] Response status:', response.status)
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}))
+          console.error('[Delete] Server error:', response.status, errorData)
+          throw new Error(errorData.error || `Server error: ${response.status}`)
+        }
+
         const data = await response.json()
         console.log('[Delete] Response data:', data)
 
         if (data.success) {
           toast.success('ההודעה נמחקה')
           logger.success('Message deleted', { id })
+          // Small delay to ensure DB consistency before reload
+          await new Promise(resolve => setTimeout(resolve, 300))
           // Reload messages from server to ensure sync
           console.log('[Delete] Reloading messages...')
           await loadMessages()
           console.log('[Delete] ✅ Delete complete')
         } else {
-          throw new Error(data.error)
+          throw new Error(data.error || 'Unknown error')
         }
       } catch (error) {
         console.error('[Delete] ❌ Error:', error)
         logger.error('Failed to delete message', { error })
         toast.error('שגיאה במחיקת ההודעה')
         // Restore the message on error
-        setMessages(messages)
+        setMessages(originalMessages)
       } finally {
         setIsSaving(false)
       }

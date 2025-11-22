@@ -4,6 +4,11 @@ import { verifyJWT } from '@/lib/auth/jwt'
 import { logger } from '@/lib/logger'
 import type { UrgentMessage } from '@/types'
 
+// Force dynamic rendering - critical for production to prevent Vercel caching
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+export const fetchCache = 'force-no-store'
+
 export async function POST(req: NextRequest) {
   try {
     // Verify admin authentication
@@ -44,10 +49,16 @@ export async function POST(req: NextRequest) {
     const supabase = await createClient()
 
     // Get all existing message IDs
-    const { data: existing } = await supabase
+    const { data: existing, error: fetchError } = await supabase
       .from('urgent_messages')
       .select('id')
 
+    if (fetchError) {
+      console.error('[Urgent Save] Error fetching existing messages:', fetchError)
+      throw fetchError
+    }
+
+    console.log('[Urgent Save] Existing messages in DB:', existing?.length || 0)
     const existingIds = new Set(existing?.map(m => m.id) || [])
     // Only include real UUIDs in incoming IDs set (not temporary numeric IDs)
     const incomingIds = new Set(
@@ -91,6 +102,9 @@ export async function POST(req: NextRequest) {
     const newMessages = messages.filter(msg => !msg.id || /^\d+$/.test(msg.id))
     const existingMessages = messages.filter(msg => msg.id && !/^\d+$/.test(msg.id))
 
+    console.log('[Urgent Save] New messages to insert:', newMessages.length)
+    console.log('[Urgent Save] Existing messages to upsert:', existingMessages.length)
+
     // Insert new messages (let DB generate UUID)
     if (newMessages.length > 0) {
       const insertData = newMessages.map(msg => ({
@@ -109,14 +123,19 @@ export async function POST(req: NextRequest) {
         created_by: 'admin'
       }))
 
-      const { error: insertError } = await supabase
+      console.log('[Urgent Save] Insert data:', JSON.stringify(insertData, null, 2))
+
+      const { data: insertedData, error: insertError } = await supabase
         .from('urgent_messages')
         .insert(insertData)
+        .select()
 
       if (insertError) {
         console.error('[Urgent Save] Insert error:', insertError)
         throw insertError
       }
+
+      console.log('[Urgent Save] ✅ Inserted successfully:', insertedData?.length || 0, 'rows')
     }
 
     // Update existing messages
@@ -154,17 +173,30 @@ export async function POST(req: NextRequest) {
       count: messages.length
     })
 
+    console.log('[Urgent Save] ✅ Save completed successfully. Total messages:', messages.length)
+
     return NextResponse.json({
       success: true,
       message: 'הודעות דחופות נשמרו בהצלחה',
-      count: messages.length
+      count: messages.length,
+      timestamp: Date.now()
+    }, {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate',
+      }
     })
 
   } catch (error) {
+    console.error('[Urgent Save] ❌ Error:', error)
     logger.error('Urgent messages save error', { component: 'Urgent Messages Admin', error })
     return NextResponse.json(
-      { success: false, error: 'שגיאה בשמירת הודעות דחופות' },
-      { status: 500 }
+      { success: false, error: 'שגיאה בשמירת הודעות דחופות', details: String(error) },
+      {
+        status: 500,
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate',
+        }
+      }
     )
   }
 }
