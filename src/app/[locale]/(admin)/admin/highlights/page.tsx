@@ -198,6 +198,10 @@ export default function AdminHighlightsPage() {
   }
 
   function addHighlight() {
+    // Calculate highest display_order and add 1 so new item appears first
+    const maxOrder = highlights.length > 0
+      ? Math.max(...highlights.map(h => h.display_order || 0))
+      : 0
     const newHighlight: Highlight = {
       id: `temp-${Date.now()}`,
       type: 'achievement',
@@ -210,11 +214,12 @@ export default function AdminHighlightsPage() {
       category_ru: '',
       badge_color: 'bg-gradient-to-r from-blue-400 to-blue-500 text-blue-900',
       is_active: true,
-      display_order: highlights.length,
+      display_order: maxOrder + 1,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     }
-    setHighlights([...highlights, newHighlight])
+    // Add new highlight at the beginning of the list
+    setHighlights([newHighlight, ...highlights])
     setEditingId(newHighlight.id)
   }
 
@@ -471,7 +476,7 @@ export default function AdminHighlightsPage() {
                     <div className="grid grid-cols-2 gap-4">
                       <div className="relative">
                         <label className="text-sm font-medium block mb-1">
-                          סוג הדגשה <span className="text-red-600">*</span>
+                          סוג הדגשה <span className="text-red-500 font-bold text-base" title="שדה חובה">*</span>
                         </label>
                         <select
                           value={highlight.type}
@@ -502,7 +507,7 @@ export default function AdminHighlightsPage() {
                       </div>
                       <div className="relative">
                         <label className="text-sm font-medium block mb-1">
-                          אייקון <span className="text-red-600">*</span>
+                          אייקון <span className="text-red-500 font-bold text-base" title="שדה חובה">*</span>
                         </label>
                         <select
                           value={highlight.icon}
@@ -582,7 +587,7 @@ export default function AdminHighlightsPage() {
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <label className="text-sm font-medium block mb-1">
-                          כותרת (עברית) <span className="text-red-600">*</span>
+                          כותרת (עברית) <span className="text-red-500 font-bold text-base" title="שדה חובה">*</span>
                           <span className="text-xs text-gray-500"> (לפחות 2 תווים)</span>
                         </label>
                         <Input
@@ -607,14 +612,15 @@ export default function AdminHighlightsPage() {
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <label className="text-sm font-medium block mb-1">
-                          תיאור (עברית) <span className="text-red-600">*</span>
+                          תיאור (עברית) <span className="text-red-500 font-bold text-base" title="שדה חובה">*</span>
                           <span className="text-xs text-gray-500"> (לפחות 10 תווים)</span>
                         </label>
                         <Textarea
                           value={highlight.description_he}
                           onChange={(e) => updateLocalHighlight(highlight.id, 'description_he', e.target.value)}
                           placeholder="תיאור מפורט של ההישג..."
-                          rows={3}
+                          rows={10}
+                          className="resize-y min-h-[200px]"
                         />
                       </div>
                       <div>
@@ -625,7 +631,8 @@ export default function AdminHighlightsPage() {
                           value={highlight.description_ru}
                           onChange={(e) => updateLocalHighlight(highlight.id, 'description_ru', e.target.value)}
                           placeholder="Подробное описание достижения..."
-                          rows={3}
+                          rows={10}
+                          className="resize-y min-h-[200px]"
                         />
                       </div>
                     </div>
@@ -634,7 +641,7 @@ export default function AdminHighlightsPage() {
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <label className="text-sm font-medium block mb-1">
-                          קטגוריה (עברית) <span className="text-red-600">*</span>
+                          קטגוריה (עברית) <span className="text-red-500 font-bold text-base" title="שדה חובה">*</span>
                           <span className="text-xs text-gray-500"> (לפחות 2 תווים)</span>
                         </label>
                         <Input

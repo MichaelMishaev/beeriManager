@@ -486,16 +486,19 @@ export function HighlightsCarousel() {
                     <span className="text-4xl">{selectedHighlight.image_placeholder || selectedHighlight.icon}</span>
                     {currentLocale === 'ru' ? selectedHighlight.title_ru : selectedHighlight.title_he}
                   </DialogTitle>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => shareHighlight(selectedHighlight)}
-                    className="flex-shrink-0"
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      shareHighlight(selectedHighlight)
+                    }}
+                    className="flex-shrink-0 p-2 rounded-full hover:bg-gray-100 active:bg-gray-200 transition-colors"
                     title={currentLocale === 'ru' ? 'Поделиться' : 'שתף'}
+                    aria-label={currentLocale === 'ru' ? 'Поделиться' : 'שתף'}
                   >
-                    <Share2 className="h-4 w-4 ml-2" />
-                    {currentLocale === 'ru' ? 'Поделиться' : 'שתף'}
-                  </Button>
+                    <Share2 className="h-5 w-5 text-gray-600" />
+                  </button>
                 </div>
               </DialogHeader>
 
