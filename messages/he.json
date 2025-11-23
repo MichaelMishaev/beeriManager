@@ -241,6 +241,18 @@
     "shareTitle": "תזכורת חולצה לבנה - בית ספר בארי",
     "shareText": "👕 תזכורת: יום שישי - חולצה לבנה!\n\nכל תלמידי בית הספר בארי 💙"
   },
+  "feedbackAndIdeas": {
+    "title": "💬💡 יש לכם משוב או רעיון?",
+    "subtitle": "שתפו אותנו - בחרו איך!",
+    "description": "המשוב שלכם עוזר לנו לשפר ולארגן אירועים טובים יותר עבור כולם. תוכלו לשלוח פניה או משוב אנונימי על כל נושא.",
+    "shareButton": "שתפו אותנו",
+    "modalTitle": "איך תרצו לשתף אותנו?",
+    "modalSubtitle": "בחרו את הדרך המתאימה לכם",
+    "feedbackTitle": "💬 שלחו משוב",
+    "feedbackDescription": "שתפו אותנו בדעתכם על האירועים והשירותים שקיבלתם. המשוב שלכם עוזר לנו לשפר!",
+    "ideaTitle": "💡 שלחו רעיון",
+    "ideaDescription": "יש לכם רעיון לשיפור או תכונה חדשה? שתפו אותנו והרעיונות שלכם יישקלו ויבדקו!"
+  },
   "contacts": {
     "title": "אנשי קשר חשובים",
     "description": "טלפונים וכתובות מייל של צוות בית הספר",

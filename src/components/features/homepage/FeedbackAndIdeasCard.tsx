@@ -12,6 +12,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 
 /**
  * Unified card component combining feedback and ideas functionality
@@ -20,6 +21,7 @@ import Link from 'next/link'
  */
 export function FeedbackAndIdeasCard() {
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const t = useTranslations('feedbackAndIdeas')
 
   return (
     <>
@@ -30,16 +32,16 @@ export function FeedbackAndIdeasCard() {
               <MessageSquare className="h-5 w-5 text-[#0D98BA]" />
             </div>
             <CardTitle className="text-xl text-[#003153]">
-              💬💡 יש לכם משוב או רעיון?
+              {t('title')}
             </CardTitle>
           </div>
           <CardDescription className="text-base mt-2">
-            שתפו אותנו - בחרו איך!
+            {t('subtitle')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
           <p className="text-sm text-gray-600 mb-2">
-            המשוב שלכם עוזר לנו לשפר ולארגן אירועים טובים יותר עבור כולם. תוכלו לשלוח פניה או משוב אנונימי על כל נושא.
+            {t('description')}
           </p>
 
           {/* Single CTA Button */}
@@ -49,7 +51,7 @@ export function FeedbackAndIdeasCard() {
             size="lg"
             data-testid="share-feedback-ideas-button"
           >
-            שתפו אותנו
+            {t('shareButton')}
             <ChevronLeft className="h-5 w-5 mr-2" />
           </Button>
         </CardContent>
@@ -60,10 +62,10 @@ export function FeedbackAndIdeasCard() {
         <DialogContent className="sm:max-w-md" data-testid="feedback-ideas-modal">
           <DialogHeader>
             <DialogTitle className="text-2xl text-center mb-2">
-              איך תרצו לשתף אותנו?
+              {t('modalTitle')}
             </DialogTitle>
             <DialogDescription className="text-center text-base">
-              בחרו את הדרך המתאימה לכם
+              {t('modalSubtitle')}
             </DialogDescription>
           </DialogHeader>
 
@@ -82,10 +84,10 @@ export function FeedbackAndIdeasCard() {
                   </div>
                   <div className="flex-1">
                     <h3 className="font-semibold text-lg text-[#003153] mb-1 group-hover:text-[#0D98BA] transition-colors">
-                      💬 שלחו משוב
+                      {t('feedbackTitle')}
                     </h3>
                     <p className="text-sm text-gray-600">
-                      שתפו אותנו בדעתכם על האירועים והשירותים שקיבלתם. המשוב שלכם עוזר לנו לשפר!
+                      {t('feedbackDescription')}
                     </p>
                   </div>
                   <ChevronLeft className="h-5 w-5 text-gray-400 group-hover:text-[#0D98BA] transition-colors flex-shrink-0" />
@@ -107,10 +109,10 @@ export function FeedbackAndIdeasCard() {
                   </div>
                   <div className="flex-1">
                     <h3 className="font-semibold text-lg text-[#003153] mb-1 group-hover:text-[#FFBA00] transition-colors">
-                      💡 שלחו רעיון
+                      {t('ideaTitle')}
                     </h3>
                     <p className="text-sm text-gray-600">
-                      יש לכם רעיון לשיפור או תכונה חדשה? שתפו אותנו והרעיונות שלכם יישקלו ויבדקו!
+                      {t('ideaDescription')}
                     </p>
                   </div>
                   <ChevronLeft className="h-5 w-5 text-gray-400 group-hover:text-[#FFBA00] transition-colors flex-shrink-0" />

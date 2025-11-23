@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Sparkles, Plus, Trash2, Edit2, Save, X, Calendar } from 'lucide-react'
+import { Sparkles, Plus, Trash2, Edit2, Save, X, Languages } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
@@ -102,10 +102,61 @@ export default function AdminHighlightsPage() {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
+  const [isTranslating, setIsTranslating] = useState<string | null>(null)
 
   useEffect(() => {
     loadHighlights()
   }, [])
+
+  async function translateToRussian(highlightId: string) {
+    const highlight = highlights.find(h => h.id === highlightId)
+    if (!highlight) return
+
+    // Check if there's Hebrew content to translate
+    if (!highlight.title_he && !highlight.description_he && !highlight.category_he) {
+      toast.error('אין תוכן בעברית לתרגום')
+      return
+    }
+
+    setIsTranslating(highlightId)
+    try {
+      const textsToTranslate = [
+        { key: 'title_ru', value: highlight.title_he || '' },
+        { key: 'description_ru', value: highlight.description_he || '' },
+        { key: 'category_ru', value: highlight.category_he || '' },
+      ].filter(t => t.value.trim().length > 0)
+
+      const response = await fetch('/api/translate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ texts: textsToTranslate }),
+      })
+
+      const data = await response.json()
+      if (data.success && data.data) {
+        // Update the highlight with translations
+        setHighlights(highlights.map(h => {
+          if (h.id === highlightId) {
+            return {
+              ...h,
+              title_ru: data.data.title_ru || h.title_ru,
+              description_ru: data.data.description_ru || h.description_ru,
+              category_ru: data.data.category_ru || h.category_ru,
+            }
+          }
+          return h
+        }))
+        toast.success('תורגם לרוסית בהצלחה!')
+      } else {
+        toast.error(data.error || 'שגיאה בתרגום')
+      }
+    } catch (error) {
+      console.error('Translation error:', error)
+      toast.error('שגיאה בתרגום')
+    } finally {
+      setIsTranslating(null)
+    }
+  }
 
   async function loadHighlights() {
     try {
@@ -215,6 +266,8 @@ export default function AdminHighlightsPage() {
       badge_color: 'bg-gradient-to-r from-blue-400 to-blue-500 text-blue-900',
       is_active: true,
       display_order: maxOrder + 1,
+      cta_text_he: 'קרא עוד',
+      cta_text_ru: 'Читать далее',
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     }
@@ -472,6 +525,20 @@ export default function AdminHighlightsPage() {
               <CardContent>
                 {isEditing ? (
                   <div className="space-y-4">
+                    {/* Translate Button */}
+                    <div className="flex justify-end">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => translateToRussian(highlight.id)}
+                        disabled={isTranslating === highlight.id}
+                        className="gap-2"
+                      >
+                        <Languages className="h-4 w-4" />
+                        {isTranslating === highlight.id ? 'מתרגם...' : 'תרגם לרוסית'}
+                      </Button>
+                    </div>
+
                     {/* Type and Icon */}
                     <div className="grid grid-cols-2 gap-4">
                       <div className="relative">
@@ -689,61 +756,6 @@ export default function AdminHighlightsPage() {
                       </div>
                     </div>
 
-                    {/* Event Date */}
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="text-sm font-medium flex items-center gap-2">
-                          <Calendar className="h-4 w-4" />
-                          תאריך אירוע (אופציונלי)
-                        </label>
-                        <p className="text-xs text-gray-500 mb-1">
-                          📅 התאריך בו האירוע התרחש/יתרחש - יוצג למשתמשים בכרטיסייה ובשיתוף
-                        </p>
-                        <Input
-                          type="date"
-                          value={highlight.event_date || ''}
-                          onChange={(e) => updateLocalHighlight(highlight.id, 'event_date', e.target.value || null)}
-                          placeholder="dd/mm/yyyy"
-                        />
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium">סמל/תמונה</label>
-                        <Input
-                          value={highlight.image_placeholder || ''}
-                          onChange={(e) => updateLocalHighlight(highlight.id, 'image_placeholder', e.target.value || null)}
-                          placeholder="🎓 (אופציונלי)"
-                          maxLength={2}
-                        />
-                      </div>
-                    </div>
-
-                    {/* CTA */}
-                    <div className="grid grid-cols-3 gap-4">
-                      <div>
-                        <label className="text-sm font-medium">כפתור פעולה (עברית)</label>
-                        <Input
-                          value={highlight.cta_text_he || ''}
-                          onChange={(e) => updateLocalHighlight(highlight.id, 'cta_text_he', e.target.value || null)}
-                          placeholder="קרא עוד"
-                        />
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium">כפתור פעולה (רוסית)</label>
-                        <Input
-                          value={highlight.cta_text_ru || ''}
-                          onChange={(e) => updateLocalHighlight(highlight.id, 'cta_text_ru', e.target.value || null)}
-                          placeholder="Читать далее"
-                        />
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium">קישור CTA</label>
-                        <Input
-                          value={highlight.cta_link || ''}
-                          onChange={(e) => updateLocalHighlight(highlight.id, 'cta_link', e.target.value || null)}
-                          placeholder="https://..."
-                        />
-                      </div>
-                    </div>
 
                     {/* Display Settings */}
                     <div className="grid grid-cols-3 gap-4">
@@ -766,7 +778,7 @@ export default function AdminHighlightsPage() {
                         </p>
                         <Input
                           type="date"
-                          value={highlight.start_date || ''}
+                          value={highlight.start_date ? highlight.start_date.split('T')[0] : ''}
                           onChange={(e) => updateLocalHighlight(highlight.id, 'start_date', e.target.value || null)}
                           placeholder="dd/mm/yyyy"
                         />
@@ -778,7 +790,7 @@ export default function AdminHighlightsPage() {
                         </p>
                         <Input
                           type="date"
-                          value={highlight.end_date || ''}
+                          value={highlight.end_date ? highlight.end_date.split('T')[0] : ''}
                           onChange={(e) => updateLocalHighlight(highlight.id, 'end_date', e.target.value || null)}
                           placeholder="dd/mm/yyyy"
                         />
@@ -807,11 +819,6 @@ export default function AdminHighlightsPage() {
                           <Badge className={highlight.badge_color}>
                             {highlight.category_he}
                           </Badge>
-                          {highlight.event_date && (
-                            <span className="text-xs text-muted-foreground">
-                              📅 {new Date(highlight.event_date).toLocaleDateString('he-IL')}
-                            </span>
-                          )}
                         </div>
                         <strong className="text-lg">{highlight.icon} {highlight.title_he}</strong>
                         {highlight.title_ru && (

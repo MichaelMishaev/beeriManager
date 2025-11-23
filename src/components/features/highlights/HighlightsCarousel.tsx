@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { ChevronRight, ChevronLeft, Sparkles, Pause, Play, Clock, Share2 } from 'lucide-react'
+import { ChevronRight, ChevronLeft, Clock, Share2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -9,7 +9,6 @@ import { useParams } from 'next/navigation'
 import type { Locale } from '@/i18n/config'
 import type { Highlight } from '@/types'
 import { logger } from '@/lib/logger'
-import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 
 // Local interface for backward compatibility with mock data
@@ -90,7 +89,6 @@ function HighlightsSkeleton() {
 }
 
 export function HighlightsCarousel() {
-  const t = useTranslations('homepage')
   const params = useParams()
   const currentLocale = (params.locale as Locale) || 'he'
   const [currentSlide, setCurrentSlide] = useState(0)
@@ -290,38 +288,6 @@ export function HighlightsCarousel() {
 
   return (
     <div className="mb-6 animate-in fade-in-50 slide-in-from-top-5 duration-700 relative z-50">
-      {/* Section Header */}
-      <div className="flex items-center justify-between mb-4 px-1">
-        <div className="flex items-center gap-3">
-          <div className="bg-gradient-to-br from-[#0D98BA] to-[#003153] p-2 rounded-xl shadow-md">
-            <Sparkles className="h-5 w-5 text-white" />
-          </div>
-          <div>
-            <h2 className="text-xl font-bold text-[#003153] flex items-center gap-2">
-              {t('highlights')}
-            </h2>
-            <p className="text-sm text-gray-500">
-              {t('highlightsSubtitle')}
-            </p>
-          </div>
-        </div>
-
-        {/* Play/Pause Button */}
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setIsAutoPlaying(!isAutoPlaying)}
-          className="text-gray-500 hover:text-[#0D98BA] transition-colors"
-          aria-label={isAutoPlaying ? (currentLocale === 'ru' ? 'Пауза' : 'השהה') : (currentLocale === 'ru' ? 'Воспроизвести' : 'הפעל')}
-        >
-          {isAutoPlaying ? (
-            <Pause className="h-5 w-5" />
-          ) : (
-            <Play className="h-5 w-5" />
-          )}
-        </Button>
-      </div>
-
       {/* Enhanced Carousel Card */}
       <div className="relative bg-gradient-to-br from-blue-50/50 via-white to-purple-50/30 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-100/50 overflow-hidden transition-all duration-300 hover:shadow-xl hover:scale-[1.01]">
         <Card className="border-0 shadow-none overflow-hidden bg-transparent">
