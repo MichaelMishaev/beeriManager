@@ -10,7 +10,8 @@ import { TASK_STATUSES, PRIORITY_LEVELS } from '@/lib/utils/constants'
 import type { Task, Tag } from '@/types'
 import Link from 'next/link'
 import { QuickTagEditor } from './QuickTagEditor'
-import { ShareTaskButton } from './ShareTaskButton'
+import { ShareButton } from '@/components/ui/share-button'
+import { formatTaskShareData } from '@/lib/utils/share-formatters'
 import { TaskCompletionDialog } from './TaskCompletionDialog'
 
 interface TaskCardProps {
@@ -134,7 +135,7 @@ export function TaskCard({
             <Button variant="ghost" asChild size="sm">
               <Link href={`/tasks/${task.id}`}>פרטים</Link>
             </Button>
-            <ShareTaskButton task={task} variant="ghost" size="sm" />
+            <ShareButton shareData={formatTaskShareData(task)} variant="ghost" size="sm" />
           </div>
         )}
       </div>
@@ -245,7 +246,7 @@ export function TaskCard({
                       onTagsUpdated={onTagsUpdated}
                     />
                   )}
-                  <ShareTaskButton task={task} variant="ghost" size="sm" />
+                  <ShareButton shareData={formatTaskShareData(task)} variant="ghost" size="sm" />
                 </div>
               )}
             </div>
@@ -434,7 +435,7 @@ export function TaskCard({
               />
             )}
 
-            <ShareTaskButton task={task} variant="ghost" size="sm" />
+            <ShareButton shareData={formatTaskShareData(task)} variant="ghost" size="sm" />
 
             {task.owner_phone && (
               <Button variant="ghost" asChild size="sm">

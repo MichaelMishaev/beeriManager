@@ -1,15 +1,16 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { ChevronRight, ChevronLeft, Clock, Share2 } from 'lucide-react'
+import { ChevronRight, ChevronLeft, Clock } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { ShareButton } from '@/components/ui/share-button'
+import { formatHighlightShareData } from '@/lib/utils/share-formatters'
 import { useParams } from 'next/navigation'
 import type { Locale } from '@/i18n/config'
 import type { Highlight } from '@/types'
 import { logger } from '@/lib/logger'
-import { toast } from 'sonner'
 
 // Local interface for backward compatibility with mock data
 interface DisplayHighlight {
@@ -101,68 +102,6 @@ export function HighlightsCarousel() {
   const touchEndX = useRef<number | null>(null)
 
   const totalSlides = highlights.length
-
-  // Share highlight function
-  const shareHighlight = async (highlight: DisplayHighlight, event?: React.MouseEvent) => {
-    if (event) {
-      event.stopPropagation()
-    }
-
-    const title = currentLocale === 'ru' ? highlight.title_ru : highlight.title_he
-    const description = currentLocale === 'ru' ? highlight.description_ru : highlight.description_he
-    const category = currentLocale === 'ru' ? highlight.category_ru : highlight.category_he
-
-    // Format the share text
-    let shareText = `${highlight.icon} ${title}\n\n`
-
-    if (category) {
-      shareText += `📌 ${category}\n\n`
-    }
-
-    shareText += `${description}\n\n`
-
-    // Add event date if exists
-    if (highlight.event_date) {
-      const eventDate = new Date(highlight.event_date)
-      const formattedDate = eventDate.toLocaleDateString(
-        currentLocale === 'ru' ? 'ru-RU' : 'he-IL',
-        { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }
-      )
-      shareText += `📅 ${formattedDate}\n\n`
-    }
-
-    // Add link to beeri.online
-    const url = `https://beeri.online/${currentLocale}`
-    shareText += `🌐 ${url}`
-
-    const shareData = {
-      title: title,
-      text: shareText,
-      url: url
-    }
-
-    try {
-      if (navigator.share) {
-        await navigator.share(shareData)
-        logger.userAction('Share highlight via Web Share API', {
-          highlightId: highlight.id,
-          locale: currentLocale
-        })
-      } else {
-        await navigator.clipboard.writeText(shareText)
-        toast.success(currentLocale === 'ru' ? 'Скопировано!' : 'הועתק ללוח!')
-        logger.userAction('Copy highlight to clipboard', {
-          highlightId: highlight.id,
-          locale: currentLocale
-        })
-      }
-    } catch (error) {
-      if ((error as Error).name !== 'AbortError') {
-        logger.error('Share highlight failed', { error })
-        toast.error(currentLocale === 'ru' ? 'Ошибка при копировании' : 'שגיאה בהעתקה')
-      }
-    }
-  }
 
   // Fetch highlights from API
   useEffect(() => {
@@ -452,19 +391,19 @@ export function HighlightsCarousel() {
                     <span className="text-4xl">{selectedHighlight.image_placeholder || selectedHighlight.icon}</span>
                     {currentLocale === 'ru' ? selectedHighlight.title_ru : selectedHighlight.title_he}
                   </DialogTitle>
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.preventDefault()
-                      e.stopPropagation()
-                      shareHighlight(selectedHighlight)
+                  <ShareButton
+                    shareData={formatHighlightShareData(selectedHighlight, currentLocale)}
+                    variant="ghost"
+                    size="icon"
+                    locale={currentLocale}
+                    className="flex-shrink-0"
+                    onShareSuccess={() => {
+                      logger.userAction('Share highlight', {
+                        highlightId: selectedHighlight.id,
+                        locale: currentLocale
+                      })
                     }}
-                    className="flex-shrink-0 p-2 rounded-full hover:bg-gray-100 active:bg-gray-200 transition-colors"
-                    title={currentLocale === 'ru' ? 'Поделиться' : 'שתף'}
-                    aria-label={currentLocale === 'ru' ? 'Поделиться' : 'שתף'}
-                  >
-                    <Share2 className="h-5 w-5 text-gray-600" />
-                  </button>
+                  />
                 </div>
               </DialogHeader>
 

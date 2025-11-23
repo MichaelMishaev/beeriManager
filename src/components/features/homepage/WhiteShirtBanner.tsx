@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import { X, Shirt } from 'lucide-react'
+import { ShareButton } from '@/components/ui/share-button'
+import { formatWhiteShirtShareData } from '@/lib/utils/share-formatters'
 import { useTranslations } from 'next-intl'
 import { useParams } from 'next/navigation'
 import type { Locale } from '@/i18n/config'
@@ -18,7 +20,6 @@ export function WhiteShirtBanner() {
   const [isVisible, setIsVisible] = useState(false)
   const [isFriday, setIsFriday] = useState(false)
   const [isDismissed, setIsDismissed] = useState(false)
-  const [showShareSuccess, setShowShareSuccess] = useState(false)
 
   useEffect(() => {
     checkVisibility()
@@ -65,54 +66,6 @@ export function WhiteShirtBanner() {
     localStorage.setItem('whiteShirtBannerDismissed', nextThursday.toISOString())
   }
 
-  const handleShare = async () => {
-    const shareUrl = `https://beeri.online/${locale}`
-    const shareTitle = t('shareTitle')
-    const shareTextOnly = t('shareText')
-    const shareTextWithUrl = `${shareTextOnly}\n\n${shareUrl}`
-
-    // Try native share API first (mobile)
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: shareTitle,
-          text: shareTextOnly,
-          url: shareUrl
-        })
-        return
-      } catch (err) {
-        // User cancelled or share failed, fall through to clipboard
-        if ((err as Error).name !== 'AbortError') {
-          console.error('Share failed:', err)
-        }
-      }
-    }
-
-    // Fallback: Copy to clipboard (include URL in text)
-    try {
-      await navigator.clipboard.writeText(shareTextWithUrl)
-      setShowShareSuccess(true)
-      setTimeout(() => setShowShareSuccess(false), 3000)
-    } catch (err) {
-      console.error('Copy to clipboard failed:', err)
-      // Final fallback: Create text area and copy
-      const textArea = document.createElement('textarea')
-      textArea.value = shareTextWithUrl
-      textArea.style.position = 'fixed'
-      textArea.style.left = '-999999px'
-      document.body.appendChild(textArea)
-      textArea.select()
-      try {
-        document.execCommand('copy')
-        setShowShareSuccess(true)
-        setTimeout(() => setShowShareSuccess(false), 3000)
-      } catch (err2) {
-        console.error('execCommand copy failed:', err2)
-      }
-      document.body.removeChild(textArea)
-    }
-  }
-
   if (!isVisible) return null
 
   return (
@@ -126,17 +79,12 @@ export function WhiteShirtBanner() {
 
         <div className="relative">
           <div className="flex items-start gap-3">
-            {/* Shirt Icon - Clickable for Share */}
-            <button
-              onClick={handleShare}
-              className="flex-shrink-0 mt-1 group cursor-pointer"
-              aria-label={t('share')}
-              title={t('share')}
-            >
-              <div className="bg-white rounded-full p-2 shadow-sm group-hover:shadow-md group-hover:scale-110 transition-all duration-200">
-                <Shirt className="h-6 w-6 text-blue-900 group-hover:text-blue-700" />
+            {/* Shirt Icon with Share Button */}
+            <div className="flex-shrink-0 mt-1">
+              <div className="bg-white rounded-full p-2 shadow-sm">
+                <Shirt className="h-6 w-6 text-blue-900" />
               </div>
-            </button>
+            </div>
 
             {/* Content */}
             <div className="flex-1 min-w-0">
@@ -146,26 +94,25 @@ export function WhiteShirtBanner() {
               <p className="text-blue-800 text-sm">
                 {t('description')}
               </p>
-
-              {/* Success Toast */}
-              {showShareSuccess && (
-                <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg animate-slide-up flex items-center gap-2">
-                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span className="font-medium">{t('shareSuccess')}</span>
-                </div>
-              )}
             </div>
 
-            {/* Dismiss Button */}
-            <button
-              onClick={handleDismiss}
-              className="flex-shrink-0 text-gray-400 hover:text-gray-600 transition-colors p-1 hover:bg-gray-100 rounded-full"
-              aria-label={t('dismiss')}
-            >
-              <X className="h-5 w-5" />
-            </button>
+            {/* Share & Dismiss Buttons */}
+            <div className="flex items-center gap-1 flex-shrink-0">
+              <ShareButton
+                shareData={formatWhiteShirtShareData(locale, isFriday)}
+                variant="ghost"
+                size="icon"
+                locale={locale}
+                className="text-blue-600 hover:text-blue-800 hover:bg-white/50 h-8 w-8"
+              />
+              <button
+                onClick={handleDismiss}
+                className="flex-shrink-0 text-gray-400 hover:text-gray-600 transition-colors p-1 hover:bg-gray-100 rounded-full"
+                aria-label={t('dismiss')}
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
           </div>
         </div>
       </div>

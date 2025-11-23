@@ -1,8 +1,10 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { Calendar, Download, Share2 } from 'lucide-react'
+import { Calendar, Download } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { ShareButton } from '@/components/ui/share-button'
+import { formatAllHolidaysShareData } from '@/lib/utils/share-formatters'
 import {
   Dialog,
   DialogContent,
@@ -58,59 +60,6 @@ export function HolidaysModal({ open, onOpenChange }: HolidaysModalProps) {
     }
   }
 
-  const handleShare = async () => {
-    const schoolClosedText = locale === 'ru' ? 'Школа закрыта' : 'בית הספר סגור'
-    const text = holidays
-      .map(h => {
-        const start = parseISO(h.start_date)
-        const end = parseISO(h.end_date)
-
-        // Format dates with locale-specific month names
-        let dateRange
-        if (h.start_date === h.end_date) {
-          // Single day
-          dateRange = locale === 'ru'
-            ? format(start, 'd MMMM', { locale: dateLocale })
-            : format(start, 'd בMMMM', { locale: dateLocale })
-        } else {
-          // Date range
-          const startFormatted = format(start, 'd', { locale: dateLocale })
-          const endFormatted = locale === 'ru'
-            ? format(end, 'd MMMM', { locale: dateLocale })
-            : format(end, 'd בMMMM', { locale: dateLocale })
-          dateRange = `${endFormatted} - ${startFormatted}`
-        }
-
-        const hebrewDate = h.hebrew_date ? `\n${h.hebrew_date}` : ''
-        const schoolClosed = h.is_school_closed ? `\n${schoolClosedText}` : ''
-
-        return `${h.icon_emoji || '📅'} *${h.hebrew_name}*${hebrewDate}\n${dateRange}${schoolClosed}`
-      })
-      .join('\n\n')
-
-    const modalTitle = t('holidaysAndEvents')
-    const moreInfo = locale === 'ru'
-      ? 'Подробнее на https://beeri.online'
-      : 'לעוד מידע כנסו ל https://beeri.online'
-    const fullText = `📆 *${modalTitle}*\n${t('schoolYearHolidays')}\n\n${text}\n\n${moreInfo}`
-
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: `${modalTitle} ${academicYear}`,
-          text: fullText
-        })
-      } catch (err) {
-        console.log('Share cancelled')
-      }
-    } else {
-      // Fallback to clipboard
-      await navigator.clipboard.writeText(fullText)
-      const copiedText = locale === 'ru' ? 'Скопировано в буфер обмена!' : 'הלוח הועתק ללוח!'
-      alert(copiedText)
-    }
-  }
-
   const handlePrint = () => {
     window.print()
   }
@@ -129,15 +78,13 @@ export function HolidaysModal({ open, onOpenChange }: HolidaysModalProps) {
         </DialogHeader>
 
         <div className="flex gap-2 mb-4">
-          <Button
+          <ShareButton
+            shareData={formatAllHolidaysShareData(holidays, locale)}
             variant="outline"
             size="sm"
-            onClick={handleShare}
-            className="flex items-center gap-2"
-          >
-            <Share2 className="h-4 w-4" />
-            {t('share')}
-          </Button>
+            locale={locale}
+            label={t('share')}
+          />
           <Button
             variant="outline"
             size="sm"

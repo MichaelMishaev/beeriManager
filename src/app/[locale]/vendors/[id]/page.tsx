@@ -6,7 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { createClient } from '@/lib/supabase/server'
-import { ShareVendorButton } from '@/components/vendors/ShareVendorButton'
+import { ShareButton } from '@/components/ui/share-button'
+import { formatVendorShareData } from '@/lib/utils/share-formatters'
 
 const categoryLabels: Record<string, string> = {
   catering: '🍕 קייטרינג',
@@ -122,7 +123,11 @@ async function VendorDetail({ id }: { id: string }) {
                 </a>
               </Button>
             )}
-            <ShareVendorButton vendor={vendor} variant="outline" />
+            <ShareButton
+                shareData={formatVendorShareData(vendor)}
+                variant="outline"
+                size="sm"
+              />
           </div>
         </CardContent>
       </Card>

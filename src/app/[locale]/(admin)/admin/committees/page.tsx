@@ -5,7 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { createClient } from '@/lib/supabase/server'
-import { WhatsAppShareButton } from '@/components/committees/WhatsAppShareButton'
+import { ShareButton } from '@/components/ui/share-button'
+import { formatCommitteeShareData } from '@/lib/utils/share-formatters'
 import { CommitteesHeader } from '@/components/committees/CommitteesHeader'
 
 async function getCommittees() {
@@ -193,7 +194,11 @@ async function CommitteesList() {
 
               {/* Actions */}
               <div className="flex gap-2 pt-2">
-                <WhatsAppShareButton committee={committee} />
+                <ShareButton
+                  shareData={formatCommitteeShareData(committee)}
+                  variant="outline"
+                  size="sm"
+                />
                 <Button asChild size="sm" variant="outline" className="flex-1">
                   <Link href={`/admin/committees/${committee.id}/edit`}>
                     <Edit className="h-3 w-3 ml-1" />

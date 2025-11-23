@@ -8,7 +8,8 @@ import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { formatHebrewDate } from '@/lib/utils/date'
 import { createClient } from '@/lib/supabase/server'
-import { ShareProtocolButton } from '@/components/protocols/ShareProtocolButton'
+import { ShareButton } from '@/components/ui/share-button'
+import { formatProtocolShareData } from '@/lib/utils/share-formatters'
 import { EditProtocolButton } from '@/components/protocols/EditProtocolButton'
 import { DeleteProtocolButton } from '@/components/protocols/DeleteProtocolButton'
 import TextWithTaskMentions from '@/components/protocols/TextWithTaskMentions'
@@ -181,7 +182,12 @@ async function ProtocolContent({ id }: { id: string }) {
                 </Button>
               )}
               <EditProtocolButton protocolId={protocol.id} />
-              <ShareProtocolButton protocol={protocol} />
+              <ShareButton
+                shareData={formatProtocolShareData(protocol)}
+                variant="outline"
+                size="sm"
+                className="w-full"
+              />
               <DeleteProtocolButton
                 protocolId={protocol.id}
                 protocolTitle={protocol.title}

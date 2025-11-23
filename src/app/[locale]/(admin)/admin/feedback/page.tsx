@@ -12,7 +12,8 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { toast } from 'sonner'
 import { format } from 'date-fns'
 import { cn } from '@/lib/utils'
-import { WhatsAppShareButton } from '@/components/feedback/WhatsAppShareButton'
+import { ShareButton } from '@/components/ui/share-button'
+import { formatFeedbackShareData } from '@/lib/utils/share-formatters'
 import Link from 'next/link'
 
 interface Task {
@@ -508,7 +509,11 @@ export default function AdminFeedbackPage() {
 
                 {/* Actions - Buttons */}
                 <div className="flex gap-2 pt-4 flex-wrap" onClick={(e) => e.stopPropagation()}>
-                  <WhatsAppShareButton feedback={feedback} />
+                  <ShareButton
+                    shareData={formatFeedbackShareData(feedback)}
+                    variant="outline"
+                    size="sm"
+                  />
 
                   {!feedback.task && (
                     <Button

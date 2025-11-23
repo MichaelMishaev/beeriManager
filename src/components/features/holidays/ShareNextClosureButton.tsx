@@ -1,8 +1,8 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { Share2 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { ShareButton } from '@/components/ui/share-button'
+import { formatHolidayShareData } from '@/lib/utils/share-formatters'
 import { format, parseISO, isAfter, isBefore, addDays, startOfDay } from 'date-fns'
 import { he, ru } from 'date-fns/locale'
 import { useParams } from 'next/navigation'
@@ -55,62 +55,6 @@ export function ShareNextClosureButton() {
     }
   }
 
-  const handleShare = async () => {
-    if (!nextClosure) return
-
-    const startDate = parseISO(nextClosure.start_date)
-    const endDate = parseISO(nextClosure.end_date)
-    const today = startOfDay(new Date())
-    const tomorrow = addDays(today, 1)
-
-    // Check if it's tomorrow
-    const isTomorrow = startDate.getTime() === tomorrow.getTime()
-
-    let whenText = ''
-    if (isTomorrow) {
-      whenText = locale === 'ru' ? '⚠️ ЗАВТРА' : '⚠️ מחר'
-    } else {
-      const formattedDate = format(startDate, locale === 'ru' ? 'd MMMM' : 'd בMMMM', { locale: dateLocale })
-      whenText = locale === 'ru' ? `📅 ${formattedDate}` : `📅 ${formattedDate}`
-    }
-
-    const schoolClosedText = locale === 'ru' ? '🏫 ШКОЛА ЗАКРЫТА' : '🏫 בית הספר סגור'
-    const hebrewDate = nextClosure.hebrew_date ? `\n(${nextClosure.hebrew_date})` : ''
-
-    // Date range
-    let dateRange = ''
-    if (nextClosure.start_date !== nextClosure.end_date) {
-      const endFormatted = format(endDate, locale === 'ru' ? 'd MMMM' : 'd בMMMM', { locale: dateLocale })
-      const rangeText = locale === 'ru' ? 'по' : 'עד'
-      dateRange = `\n${rangeText} ${endFormatted}`
-    }
-
-    const moreInfo = locale === 'ru'
-      ? '\n\nПодробнее на https://beeri.online'
-      : '\n\nלעוד מידע כנסו ל https://beeri.online'
-
-    const text = `${whenText}\n\n*${nextClosure.hebrew_name}*${hebrewDate}${dateRange}\n\n${schoolClosedText}${moreInfo}`
-
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: locale === 'ru' ? 'Школа закрыта' : 'בית הספר סגור',
-          text
-        })
-      } catch (err) {
-        if ((err as Error).name !== 'AbortError') {
-          // Fallback to clipboard
-          await navigator.clipboard.writeText(text)
-          alert(locale === 'ru' ? 'Скопировано!' : 'הועתק!')
-        }
-      }
-    } else {
-      // Fallback to WhatsApp
-      const encodedText = encodeURIComponent(text)
-      window.open(`https://wa.me/?text=${encodedText}`, '_blank')
-    }
-  }
-
   if (loading || !nextClosure) {
     return null
   }
@@ -142,14 +86,13 @@ export function ShareNextClosureButton() {
   }
 
   return (
-    <Button
-      onClick={handleShare}
+    <ShareButton
+      shareData={formatHolidayShareData(nextClosure, locale)}
       variant="outline"
       size="sm"
-      className="w-full gap-2 bg-amber-50 border-amber-300 text-amber-900 hover:bg-amber-100 hover:border-amber-400 font-medium shadow-sm"
-    >
-      <Share2 className="h-4 w-4" />
-      {buttonText}
-    </Button>
+      locale={locale}
+      label={buttonText}
+      className="w-full bg-amber-50 border-amber-300 text-amber-900 hover:bg-amber-100 hover:border-amber-400 font-medium shadow-sm"
+    />
   )
 }

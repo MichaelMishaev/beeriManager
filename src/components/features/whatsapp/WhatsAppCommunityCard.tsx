@@ -1,8 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { MessageCircle, ChevronDown, ExternalLink, Share2 } from 'lucide-react'
+import { MessageCircle, ChevronDown, ExternalLink } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { ShareButton } from '@/components/ui/share-button'
+import { formatWhatsAppLinksShareData } from '@/lib/utils/share-formatters'
 import { WHATSAPP_COMMUNITY } from './WhatsAppCommunityLinks'
 import { useTranslations } from 'next-intl'
 import { useParams } from 'next/navigation'
@@ -13,37 +15,6 @@ export function WhatsAppCommunityCard() {
   const t = useTranslations('whatsapp')
   const params = useParams()
   const locale = (params.locale || 'he') as Locale
-
-  const handleShare = () => {
-    const message = `קבוצות WhatsApp לפי שכבות - בית ספר בארי
-
-הצטרפו לקבוצת WhatsApp של שכבת ילדכם!
-לחצו על הקישור המתאים:
-
-*שכבת א׳*
-${WHATSAPP_COMMUNITY.grades[0].url}
-
-*שכבת ב׳*
-${WHATSAPP_COMMUNITY.grades[1].url}
-
-*שכבת ג׳*
-${WHATSAPP_COMMUNITY.grades[2].url}
-
-*שכבת ד׳*
-${WHATSAPP_COMMUNITY.grades[3].url}
-
-*שכבת ה׳*
-${WHATSAPP_COMMUNITY.grades[4].url}
-
-*שכבת ו׳*
-${WHATSAPP_COMMUNITY.grades[5].url}
-
-לכל השאלות והעדכונים:
-https://beeri.online`
-
-    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`
-    window.open(whatsappUrl, '_blank')
-  }
 
   return (
     <Card className="shadow-md hover:shadow-lg transition-shadow border-0">
@@ -57,13 +28,13 @@ https://beeri.online`
               {t('title')}
             </CardTitle>
           </div>
-          <button
-            onClick={handleShare}
-            className="p-2 rounded-full bg-green-50 hover:bg-green-100 transition-all duration-200 group flex-shrink-0"
-            title="שתף קישורים בוואטסאפ"
-          >
-            <Share2 className="h-4 w-4 text-green-600 group-hover:scale-110 transition-transform" />
-          </button>
+          <ShareButton
+            shareData={formatWhatsAppLinksShareData(WHATSAPP_COMMUNITY.grades, locale)}
+            variant="ghost"
+            size="icon"
+            locale={locale}
+            className="p-2 rounded-full bg-green-50 hover:bg-green-100 text-green-600"
+          />
         </div>
         <CardDescription className="text-sm text-gray-600">
           {t('subtitle')}

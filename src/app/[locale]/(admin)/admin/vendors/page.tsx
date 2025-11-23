@@ -5,7 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { createClient } from '@/lib/supabase/server'
-import { ShareVendorButton } from '@/components/vendors/ShareVendorButton'
+import { ShareButton } from '@/components/ui/share-button'
+import { formatVendorShareData } from '@/lib/utils/share-formatters'
 
 const categoryLabels: Record<string, string> = {
   catering: 'קייטרינג',
@@ -204,7 +205,12 @@ async function VendorsList() {
                         </Button>
                       )}
                     </div>
-                    <ShareVendorButton vendor={vendor} className="w-full" />
+                    <ShareButton
+                      shareData={formatVendorShareData(vendor)}
+                      variant="outline"
+                      size="sm"
+                      className="w-full"
+                    />
                   </div>
                 </CardContent>
               </Card>

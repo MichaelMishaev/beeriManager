@@ -1,9 +1,10 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { X, Share2, Shirt } from 'lucide-react'
+import { X, Shirt } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { toast } from 'sonner'
+import { ShareButton } from '@/components/ui/share-button'
+import { formatUrgentMessageShareData } from '@/lib/utils/share-formatters'
 import { useParams } from 'next/navigation'
 import type { UrgentMessage } from '@/types'
 import type { Locale } from '@/i18n/config'
@@ -56,50 +57,6 @@ export function UrgentMessagesBanner() {
     logger.userAction('Dismiss urgent message', { messageId: id })
   }
 
-  async function shareMessage(message: UrgentMessage) {
-    const title = currentLocale === 'ru' ? message.title_ru : message.title_he
-    const description = currentLocale === 'ru' ? message.description_ru : message.description_he
-
-    // Format dates for sharing
-    const startDate = new Date(message.start_date).toLocaleDateString(currentLocale === 'ru' ? 'ru-RU' : 'he-IL')
-    const endDate = new Date(message.end_date).toLocaleDateString(currentLocale === 'ru' ? 'ru-RU' : 'he-IL')
-    const dateRange = currentLocale === 'ru'
-      ? `📅 ${startDate} - ${endDate}`
-      : `📅 ${startDate} - ${endDate}`
-
-    // Build share text - always use title and description in the correct language
-    // Custom share_text fields are ignored to ensure consistency
-    let text = `${message.icon || ''} ${title}`
-    if (description) {
-      text += `\n\n${description}`
-    }
-
-    // Add date range
-    text = text + '\n\n' + dateRange
-
-    const url = `${window.location.origin}/${currentLocale}`
-
-    const shareData = {
-      title: title,
-      text: text + '\n\n🌐 ' + url
-    }
-
-    try {
-      if (navigator.share) {
-        await navigator.share(shareData)
-        logger.userAction('Share urgent message via Web Share API', { messageId: message.id, locale: currentLocale })
-      } else {
-        await navigator.clipboard.writeText(shareData.text)
-        toast.success(currentLocale === 'ru' ? 'Скопировано!' : 'הועתק ללוח!')
-        logger.userAction('Copy urgent message to clipboard', { messageId: message.id, locale: currentLocale })
-      }
-    } catch (error) {
-      if ((error as Error).name !== 'AbortError') {
-        logger.error('Share urgent message failed', { error })
-      }
-    }
-  }
-
   // Filter out dismissed messages
   const visibleMessages = messages.filter(m => !dismissedIds.includes(m.id))
 
@@ -147,14 +104,13 @@ export function UrgentMessagesBanner() {
 
                     {/* Share & Dismiss Buttons */}
                     <div className="flex items-center gap-1 flex-shrink-0">
-                      <button
-                        onClick={() => shareMessage(message)}
-                        className="text-blue-600 hover:text-blue-800 transition-colors p-1 hover:bg-white/50 rounded-full"
-                        aria-label="שתף"
-                        title="שתף תזכורת"
-                      >
-                        <Share2 className="h-5 w-5" />
-                      </button>
+                      <ShareButton
+                        shareData={formatUrgentMessageShareData(message, currentLocale)}
+                        variant="ghost"
+                        size="icon"
+                        locale={currentLocale}
+                        className="text-blue-600 hover:text-blue-800 hover:bg-white/50 h-8 w-8"
+                      />
                       <button
                         onClick={() => dismissMessage(message.id)}
                         className="text-gray-400 hover:text-gray-600 transition-colors p-1 hover:bg-gray-100 rounded-full"
@@ -191,14 +147,13 @@ export function UrgentMessagesBanner() {
                 )}
               </div>
               <div className="flex items-center gap-1 flex-shrink-0">
-                <Button
+                <ShareButton
+                  shareData={formatUrgentMessageShareData(message, currentLocale)}
                   variant="ghost"
-                  size="sm"
-                  onClick={() => shareMessage(message)}
-                  className="h-8 w-8 p-0"
-                >
-                  <Share2 className="h-4 w-4" />
-                </Button>
+                  size="icon"
+                  locale={currentLocale}
+                  className="h-8 w-8"
+                />
                 <Button
                   variant="ghost"
                   size="sm"

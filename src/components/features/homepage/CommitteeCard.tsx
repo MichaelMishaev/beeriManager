@@ -1,9 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { Users, ChevronDown, ChevronUp, Share2 } from 'lucide-react'
+import { Users, ChevronDown, ChevronUp } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+import { ShareButton } from '@/components/ui/share-button'
+import { formatCommitteeRepresentativesShareData } from '@/lib/utils/share-formatters'
 import { useTranslations } from 'next-intl'
 import { useParams } from 'next/navigation'
 import type { Locale } from '@/i18n/config'
@@ -59,48 +60,6 @@ export function CommitteeCard() {
   const locale = (params.locale || 'he') as Locale
   const [isExpanded, setIsExpanded] = useState(false)
 
-  const handleShare = async () => {
-    // RLM (Right-to-Left Mark) to force RTL direction
-    const RLM = '\u200F'
-
-    const text = locale === 'ru'
-      ? `Представители родительского комитета
-
-${Object.entries(groupedMembers).map(([gradeLevel, members]) =>
-  `${gradeLevel} класс:\n${members.map(m => `${m.name} - ${m.grade}${RLM}`).join('\n')}`
-).join('\n\n')}
-
-По вопросам или предложениям - свяжитесь с нами
-https://beeri.online/`
-      : `נציגי ועד ההורים
-
-${Object.entries(groupedMembers).map(([gradeLevel, members]) =>
-  `${gradeLevel}׳:\n${members.map(m => `${m.name} - ${m.grade}${RLM}`).join('\n')}`
-).join('\n\n')}
-
-לכל שאלה או הצעה - צרו קשר
-https://beeri.online/`
-
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: t('committeeRepresentatives'),
-          text
-        })
-      } catch (err) {
-        if ((err as Error).name !== 'AbortError') {
-          // Fallback to clipboard
-          await navigator.clipboard.writeText(text)
-          alert(t('copiedToClipboard'))
-        }
-      }
-    } else {
-      // Fallback to WhatsApp
-      const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(text)}`
-      window.open(whatsappUrl, '_blank')
-    }
-  }
-
   return (
     <Card className="bg-gradient-to-br from-blue-50 to-cyan-50 border-blue-200" dir="rtl">
       <CardHeader
@@ -150,15 +109,14 @@ https://beeri.online/`
           </div>
 
           <div className="mt-6 pt-4 border-t border-blue-200 flex flex-col gap-3">
-            <Button
-              onClick={handleShare}
+            <ShareButton
+              shareData={formatCommitteeRepresentativesShareData(committeeMembers, locale)}
               variant="outline"
               size="sm"
-              className="w-full gap-2 bg-blue-50 border-blue-300 text-blue-900 hover:bg-blue-100 hover:border-blue-400"
-            >
-              <Share2 className="h-4 w-4" />
-              {t('shareRepresentativesList')}
-            </Button>
+              locale={locale}
+              className="w-full bg-blue-50 border-blue-300 text-blue-900 hover:bg-blue-100 hover:border-blue-400"
+              label={t('shareRepresentativesList')}
+            />
             <p className="text-sm text-blue-900 text-center">
               {t('forQuestionsAndSuggestions')}{' '}
               <a

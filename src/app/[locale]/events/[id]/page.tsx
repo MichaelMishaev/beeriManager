@@ -8,7 +8,8 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { EventFeedbackForm } from '@/components/features/feedback/EventFeedbackForm'
 import { EventActions } from '@/components/events/event-actions'
-import { ShareEventButton } from '@/components/events/ShareEventButton'
+import { ShareButton } from '@/components/ui/share-button'
+import { formatEventShareData } from '@/lib/utils/share-formatters'
 import Link from 'next/link'
 import type { Event } from '@/types'
 
@@ -258,7 +259,12 @@ export default function EventPage() {
 
       {/* Action Buttons */}
       <div className="flex flex-col sm:flex-row gap-2 mb-8">
-        <ShareEventButton event={event} />
+        <ShareButton
+          shareData={formatEventShareData(event, locale as 'he' | 'ru')}
+          variant="outline"
+          size="sm"
+          className="flex-1"
+        />
         <Button variant="outline" asChild size="sm" className="flex-1">
           <Link href={`/${locale}/calendar?event=${event.id}`}>
             {locale === 'ru' ? 'Показать в календаре' : 'הצג בלוח שנה'}

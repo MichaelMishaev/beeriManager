@@ -3,7 +3,7 @@
 import React from 'react'
 import { format, parseISO } from 'date-fns'
 import { he, ru } from 'date-fns/locale'
-import { Share2, Calendar as CalendarIcon, X } from 'lucide-react'
+import { Calendar as CalendarIcon, X } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -12,6 +12,8 @@ import {
   DialogClose,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
+import { ShareButton } from '@/components/ui/share-button'
+import { formatHolidayShareData } from '@/lib/utils/share-formatters'
 import type { Holiday } from '@/types'
 import { useParams } from 'next/navigation'
 import type { Locale } from '@/i18n/config'
@@ -28,41 +30,6 @@ export function HolidayDetailModal({ holiday, isOpen, onClose }: HolidayDetailMo
   const dateLocale = locale === 'ru' ? ru : he
 
   if (!holiday) return null
-
-  const handleShare = async () => {
-    const startDate = format(parseISO(holiday.start_date), 'd/M/yyyy', { locale: dateLocale })
-    const endDate = format(parseISO(holiday.end_date), 'd/M/yyyy', { locale: dateLocale })
-    const dateRange = holiday.start_date === holiday.end_date
-      ? startDate
-      : `${startDate} - ${endDate}`
-
-    const hebrewDate = holiday.hebrew_date ? ` (${holiday.hebrew_date})` : ''
-    const schoolClosed = holiday.is_school_closed
-      ? (locale === 'ru' ? '\n🏫 Школа закрыта' : '\n🏫 בית הספר סגור')
-      : ''
-
-    const moreInfo = locale === 'ru'
-      ? 'Подробнее на https://beeri.online'
-      : 'לעוד מידע כנסו ל https://beeri.online'
-
-    const text = `${holiday.hebrew_name}${hebrewDate}\n📅 ${dateRange}${schoolClosed}\n\n${moreInfo}`
-
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          text,
-          title: holiday.hebrew_name,
-        })
-      } catch (err) {
-        if ((err as Error).name !== 'AbortError') {
-          console.error('Error sharing:', err)
-        }
-      }
-    } else {
-      await navigator.clipboard.writeText(text)
-      alert('הטקסט הועתק ללוח!')
-    }
-  }
 
   const startDate = parseISO(holiday.start_date)
   const endDate = parseISO(holiday.end_date)
@@ -104,7 +71,7 @@ export function HolidayDetailModal({ holiday, isOpen, onClose }: HolidayDetailMo
           {holiday.is_school_closed && (
             <div className="bg-red-100 border-2 border-red-500 rounded-lg p-4 text-center animate-in fade-in-50 slide-in-from-top-2 duration-300">
               <span className="text-2xl block mb-1">🏫</span>
-              <p className="text-red-900 font-bold text-lg">בית הספר סגור</p>
+              <p className="text-red-900 font-bold text-lg">{locale === 'ru' ? 'Школа закрыта' : 'בית הספר סגור'}</p>
             </div>
           )}
 
@@ -112,16 +79,16 @@ export function HolidayDetailModal({ holiday, isOpen, onClose }: HolidayDetailMo
           <div className="bg-muted/50 rounded-lg p-4">
             <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground mb-2">
               <CalendarIcon className="h-4 w-4" />
-              <span>תאריכים</span>
+              <span>{locale === 'ru' ? 'Даты' : 'תאריכים'}</span>
             </div>
             <p className="text-center font-medium">
               {isSingleDay ? (
-                format(startDate, 'EEEE, d MMMM yyyy', { locale: he })
+                format(startDate, 'EEEE, d MMMM yyyy', { locale: dateLocale })
               ) : (
                 <>
-                  {format(startDate, 'd MMMM', { locale: he })}
+                  {format(startDate, 'd MMMM', { locale: dateLocale })}
                   {' - '}
-                  {format(endDate, 'd MMMM yyyy', { locale: he })}
+                  {format(endDate, 'd MMMM yyyy', { locale: dateLocale })}
                 </>
               )}
             </p>
@@ -136,22 +103,21 @@ export function HolidayDetailModal({ holiday, isOpen, onClose }: HolidayDetailMo
 
           {/* Actions */}
           <div className="flex gap-2 pt-2">
-            <Button
-              onClick={handleShare}
+            <ShareButton
+              shareData={formatHolidayShareData(holiday, locale)}
               variant="outline"
-              className="flex-1 gap-2"
               size="lg"
-            >
-              <Share2 className="h-4 w-4" />
-              שיתוף
-            </Button>
+              locale={locale}
+              className="flex-1"
+              label={locale === 'ru' ? 'Поделиться' : 'שיתוף'}
+            />
             <Button
               onClick={onClose}
               variant="default"
               className="flex-1"
               size="lg"
             >
-              סגור
+              {locale === 'ru' ? 'Закрыть' : 'סגור'}
             </Button>
           </div>
         </div>

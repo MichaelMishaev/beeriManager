@@ -1,7 +1,9 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Calendar, ChevronLeft, Camera, ArrowLeft, ChevronDown, ChevronUp, MessageSquare, Clock, MapPin, Share2 } from 'lucide-react'
+import { Calendar, ChevronLeft, Camera, ArrowLeft, ChevronDown, ChevronUp, MessageSquare, Clock, MapPin } from 'lucide-react'
+import { ShareButton } from '@/components/ui/share-button'
+import { formatEventShareData } from '@/lib/utils/share-formatters'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
@@ -51,39 +53,6 @@ function UpcomingEventsCard({
   const handleEventClick = (event: Event) => {
     setSelectedEvent(event)
     setIsModalOpen(true)
-  }
-
-  const handleShareEvent = async (event: Event) => {
-    const title = (locale === 'ru' && event.title_ru) ? event.title_ru : event.title
-    const description = (locale === 'ru' && event.description_ru) ? event.description_ru : event.description
-    const location = (locale === 'ru' && event.location_ru) ? event.location_ru : event.location
-    const startDate = new Date(event.start_datetime)
-
-    const icon = event.event_type === 'meeting' ? '👥' :
-                 event.event_type === 'fundraiser' ? '💰' :
-                 event.event_type === 'trip' ? '🚌' :
-                 event.event_type === 'workshop' ? '📚' : '🎯'
-
-    const dateText = format(startDate, 'EEEE, d MMMM yyyy', { locale: dateLocale })
-    const timeText = format(startDate, 'HH:mm', { locale: dateLocale })
-
-    const shareText = `${icon} ${title}\n\n📅 ${dateText}\n🕐 ${timeText}${location ? `\n📍 ${location}` : ''}${description ? `\n\n${description}` : ''}\n\n🌐 ${window.location.origin}/${locale}`
-
-    try {
-      if (navigator.share) {
-        await navigator.share({
-          title: title,
-          text: shareText
-        })
-      } else {
-        await navigator.clipboard.writeText(shareText)
-        alert(locale === 'ru' ? 'Скопировано!' : 'הועתק!')
-      }
-    } catch (error) {
-      if ((error as Error).name !== 'AbortError') {
-        console.error('Share failed:', error)
-      }
-    }
   }
 
   return (
@@ -152,15 +121,13 @@ function UpcomingEventsCard({
                   </span>
                   {(locale === 'ru' && selectedEvent.title_ru) ? selectedEvent.title_ru : selectedEvent.title}
                 </DialogTitle>
-                <Button
+                <ShareButton
+                  shareData={formatEventShareData(selectedEvent, locale)}
                   variant="ghost"
-                  size="sm"
-                  onClick={() => handleShareEvent(selectedEvent)}
-                  className="flex-shrink-0 hover:bg-gray-100"
-                  title={locale === 'ru' ? 'Поделиться' : 'שתף'}
-                >
-                  <Share2 className="h-5 w-5" />
-                </Button>
+                  size="icon"
+                  locale={locale}
+                  className="flex-shrink-0"
+                />
               </div>
             </DialogHeader>
 

@@ -8,7 +8,8 @@ import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { formatHebrewDate, getHebrewRelativeTime } from '@/lib/utils/date'
 import { createClient } from '@/lib/supabase/server'
-import { ShareIssueButton } from '@/components/issues/ShareIssueButton'
+import { ShareButton } from '@/components/ui/share-button'
+import { formatIssueShareData } from '@/lib/utils/share-formatters'
 
 const ISSUE_STATUSES = {
   open: 'פתוח',
@@ -315,13 +316,18 @@ async function IssueContent({ id }: { id: string }) {
                   הוסף תגובה
                 </Link>
               </Button>
-              <ShareIssueButton issue={{
-                id: issue.id,
-                title: issue.title,
-                category: issue.category,
-                priority: issue.priority,
-                status: issue.status
-              }} />
+              <ShareButton
+                shareData={formatIssueShareData({
+                  id: issue.id,
+                  title: issue.title,
+                  category: issue.category,
+                  priority: issue.priority,
+                  status: issue.status
+                })}
+                variant="outline"
+                size="sm"
+                className="w-full"
+              />
             </CardContent>
           </Card>
 

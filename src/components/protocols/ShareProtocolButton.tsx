@@ -1,8 +1,9 @@
 'use client'
 
-import { Share2 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { formatHebrewDate } from '@/lib/utils/date'
+import { ShareButton } from '@/components/ui/share-button'
+import { formatProtocolShareData } from '@/lib/utils/share-formatters'
+import { useParams } from 'next/navigation'
+import type { Locale } from '@/i18n/config'
 
 interface ShareProtocolButtonProps {
   protocol: {
@@ -13,34 +14,17 @@ interface ShareProtocolButtonProps {
 }
 
 export function ShareProtocolButton({ protocol }: ShareProtocolButtonProps) {
-  const handleShare = async () => {
-    const url = `${window.location.origin}/he/protocols/${protocol.id}`
-    const text = `📋 *${protocol.title}*\n\n📅 ${formatHebrewDate(new Date(protocol.protocol_date))}\n\n🔗 לצפייה בפרוטוקול המלא:\n${url}\n\nלמידע נוסף: https://beeri.online`
-
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: protocol.title,
-          text,
-          url
-        })
-      } catch (err) {
-        if ((err as Error).name !== 'AbortError') {
-          await navigator.clipboard.writeText(`${text}`)
-          alert('הקישור הועתק! ניתן להדבקה בווטסאפ')
-        }
-      }
-    } else {
-      // Fallback to WhatsApp Web
-      const encodedText = encodeURIComponent(text)
-      window.open(`https://wa.me/?text=${encodedText}`, '_blank')
-    }
-  }
+  const params = useParams()
+  const locale = (params.locale || 'he') as Locale
 
   return (
-    <Button variant="outline" size="sm" className="w-full" onClick={handleShare}>
-      <Share2 className="h-4 w-4 ml-2" />
-      שתף
-    </Button>
+    <ShareButton
+      shareData={formatProtocolShareData(protocol, locale)}
+      variant="outline"
+      size="sm"
+      locale={locale}
+      className="w-full"
+      label={locale === 'ru' ? 'Поделиться' : 'שתף'}
+    />
   )
 }
