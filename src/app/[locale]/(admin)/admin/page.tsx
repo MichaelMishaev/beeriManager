@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
-import { Calendar, CheckSquare, AlertTriangle, FileText, Users, DollarSign, MessageSquare, Settings, Plus, Edit, BarChart, GripVertical, HelpCircle, Ticket, Tags, Phone, Bell, Lightbulb, Sparkles } from 'lucide-react'
+import { Calendar, CheckSquare, AlertTriangle, FileText, Users, DollarSign, MessageSquare, Settings, Plus, Edit, BarChart, GripVertical, HelpCircle, Ticket, Tags, Phone, Bell, Lightbulb, Sparkles, GraduationCap } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
@@ -134,6 +134,19 @@ const defaultAdminSections = [
     links: [
       { href: '/admin/ideas', label: 'צפייה ברעיונות', icon: Lightbulb },
       { href: '/ideas', label: 'שליחת רעיון', icon: Plus }
+    ]
+  },
+  {
+    id: 'prom',
+    title: 'מסיבת סיום',
+    description: 'תכנון מסיבת סיום כיתה ו\' - השוואת מחירים והצבעות',
+    icon: GraduationCap,
+    color: 'text-pink-600',
+    bgColor: 'bg-pink-50',
+    links: [
+      { href: '/admin/prom/new', label: 'מסיבה חדשה', icon: Plus },
+      { href: '/admin/prom', label: 'ניהול מסיבות', icon: Edit },
+      { href: '/admin/prom', label: 'השוואת הצעות', icon: DollarSign }
     ]
   },
   {
