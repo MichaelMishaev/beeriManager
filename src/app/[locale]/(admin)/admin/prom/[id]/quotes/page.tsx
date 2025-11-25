@@ -21,7 +21,8 @@ import {
   TrendingDown,
   Sparkles,
   Package,
-  AlertCircle
+  AlertCircle,
+  HelpCircle
 } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -157,6 +158,7 @@ export default function QuotesComparisonPage() {
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set())
   const [selectedForPackage, setSelectedForPackage] = useState<Record<string, string>>({}) // category -> quoteId
   const [showPackageBuilder, setShowPackageBuilder] = useState(false)
+  const [isHelpOpen, setIsHelpOpen] = useState(false)
 
   useEffect(() => {
     fetchData()
@@ -524,6 +526,95 @@ export default function QuotesComparisonPage() {
         </div>
 
         <div className="flex gap-2">
+          <Dialog open={isHelpOpen} onOpenChange={setIsHelpOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline" size="icon" title="מדריך שימוש">
+                <HelpCircle className="h-4 w-4" />
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle className="text-2xl">מדריך שימוש - תכנון מסיבת סיום</DialogTitle>
+                <DialogDescription>
+                  מדריך פשוט לשימוש במערכת השוואת הצעות המחיר
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-6 text-right prose prose-sm max-w-none">
+                <section>
+                  <h3 className="text-lg font-bold mb-3">🎯 איך מוסיפים הצעה?</h3>
+                  <ol className="list-decimal list-inside space-y-2 text-sm">
+                    <li>לחצו על <strong>"+ הוסף הצעה"</strong> (כפתור ורוד-סגול)</li>
+                    <li>מלאו את הפרטים: שם ספק, קטגוריה, מחיר</li>
+                    <li>הוסיפו שירותים כלולים, יתרונות וחסרונות</li>
+                    <li>דרגו את ההצעה (1-5 כוכבים)</li>
+                    <li>לחצו <strong>"הוסף"</strong></li>
+                  </ol>
+                </section>
+
+                <section>
+                  <h3 className="text-lg font-bold mb-3">📊 מה רואים בטבלה?</h3>
+                  <ul className="list-disc list-inside space-y-2 text-sm">
+                    <li><strong>תגיות חכמות:</strong> 🟢 "הכי זול" - המחיר הנמוך ביותר בקטגוריה</li>
+                    <li><strong>⭐ "מדורג גבוה"</strong> - הדירוג הגבוה ביותר</li>
+                    <li><strong>💎 "תמורה לכסף"</strong> - הכי טוב ביחס מחיר/איכות</li>
+                    <li><strong>⚠️ "מעל הממוצע"</strong> - יקר יותר מהממוצע</li>
+                    <li><strong>לחצו על שורה</strong> כדי לראות פרטים נוספים</li>
+                  </ul>
+                </section>
+
+                <section>
+                  <h3 className="text-lg font-bold mb-3">📦 בונה חבילה - איך משתמשים?</h3>
+                  <ol className="list-decimal list-inside space-y-2 text-sm">
+                    <li>לחצו על הכרטיס <strong>"בונה חבילה"</strong> (בשורת הסטטיסטיקה)</li>
+                    <li>לחצו על כפתור החבילה (📦) ליד כל הצעה כדי להוסיף אותה</li>
+                    <li>תראו מיד: סה"כ חבילה, מחיר לתלמיד, אחוז מתקציב</li>
+                    <li>אם אתם עוברים את התקציב - תראו אזהרה באדום ⚠️</li>
+                  </ol>
+                </section>
+
+                <section>
+                  <h3 className="text-lg font-bold mb-3">🏷️ כרטיסי קטגוריה</h3>
+                  <p className="text-sm mb-2">בחלק העליון יש כרטיסים קטנים לכל קטגוריה:</p>
+                  <ul className="list-disc list-inside space-y-1 text-sm">
+                    <li>מספר הצעות בקטגוריה</li>
+                    <li>טווח מחירים (מינימום - מקסימום)</li>
+                    <li>מחיר ממוצע</li>
+                    <li>לחצו על כרטיס כדי לסנן את הטבלה לפי הקטגוריה</li>
+                  </ul>
+                </section>
+
+                <section>
+                  <h3 className="text-lg font-bold mb-3">✅ בחירת זוכה</h3>
+                  <ol className="list-decimal list-inside space-y-2 text-sm">
+                    <li>לחצו על שורה כדי לראות פרטים</li>
+                    <li>לחצו על <strong>"בחר כזוכה"</strong> (כפתור ירוק)</li>
+                    <li>ההצעה תסומן ב<strong>"נבחר"</strong> (תג ירוק)</li>
+                    <li>להצבעת הורים: סמנו הצעות כ<strong>"סופיים"</strong> לפני פתיחת הצבעה</li>
+                  </ol>
+                </section>
+
+                <section>
+                  <h3 className="text-lg font-bold mb-3">💡 טיפים שימושיים</h3>
+                  <ul className="list-disc list-inside space-y-2 text-sm">
+                    <li><strong>הוסיפו כמה הצעות</strong> לכל קטגוריה כדי להשוות</li>
+                    <li><strong>השתמשו בבונה חבילה</strong> כדי לבדוק עלות כוללת</li>
+                    <li><strong>ייצאו ל-CSV</strong> כדי לשתף את הטבלה ב-WhatsApp</li>
+                    <li><strong>עקבו אחר התקציב</strong> - לחצו על כרטיס "הוצאו" לראות תקציב</li>
+                  </ul>
+                </section>
+
+                <section className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                  <h3 className="text-lg font-bold mb-2 text-blue-900">❓ שאלות?</h3>
+                  <p className="text-sm text-blue-800">
+                    אם אתם צריכים עזרה נוספת, פנו למנהל המערכת או בדקו את המדריך המלא בתיעוד.
+                  </p>
+                </section>
+              </div>
+              <DialogFooter>
+                <Button onClick={() => setIsHelpOpen(false)}>סגור</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
           <Button variant="outline" onClick={exportToCSV}>
             <Download className="h-4 w-4 ml-2" />
             ייצוא CSV

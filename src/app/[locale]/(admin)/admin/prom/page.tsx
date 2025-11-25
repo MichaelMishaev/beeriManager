@@ -14,11 +14,21 @@ import {
   FileSpreadsheet,
   BarChart3,
   Trash2,
-  Edit
+  Edit,
+  HelpCircle
 } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from '@/components/ui/dialog'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 
@@ -47,6 +57,7 @@ const statusLabels: Record<string, { label: string; color: string }> = {
 export default function PromDashboardPage() {
   const [promEvents, setPromEvents] = useState<PromEvent[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [isHelpOpen, setIsHelpOpen] = useState(false)
 
   useEffect(() => {
     fetchPromEvents()
@@ -131,12 +142,75 @@ export default function PromDashboardPage() {
             </div>
           </div>
         </div>
-        <Button asChild className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700">
-          <Link href="/admin/prom/new">
-            <Plus className="h-4 w-4 ml-2" />
-            אירוע חדש
-          </Link>
-        </Button>
+        <div className="flex gap-2">
+          <Dialog open={isHelpOpen} onOpenChange={setIsHelpOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline" size="icon" title="מדריך שימוש">
+                <HelpCircle className="h-4 w-4" />
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle className="text-2xl">מדריך שימוש - תכנון מסיבת סיום</DialogTitle>
+                <DialogDescription>
+                  מדריך פשוט לשימוש במערכת תכנון מסיבת סיום
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-6 text-right prose prose-sm max-w-none">
+                <section>
+                  <h3 className="text-lg font-bold mb-3">🚀 איך מתחילים?</h3>
+                  <ol className="list-decimal list-inside space-y-2 text-sm">
+                    <li>לחצו על <strong>"אירוע חדש"</strong> כדי ליצור מסיבת סיום</li>
+                    <li>מלאו פרטים: כותרת, תאריך, תקציב, מספר תלמידים</li>
+                    <li>לחצו על <strong>"השוואת הצעות"</strong> כדי להוסיף הצעות מחיר</li>
+                    <li>הוסיפו הצעות מכל הספקים</li>
+                  </ol>
+                </section>
+
+                <section>
+                  <h3 className="text-lg font-bold mb-3">📊 מה רואים בדף הראשי?</h3>
+                  <ul className="list-disc list-inside space-y-2 text-sm">
+                    <li><strong>כרטיסי סטטיסטיקה:</strong> אירועים פעילים, תקציב כולל, תלמידים, הצבעות</li>
+                    <li><strong>לחצו על כרטיסים</strong> כדי לנווט לדפים רלוונטיים</li>
+                    <li><strong>רשימת מסיבות:</strong> כל המסיבות שיצרתם עם סטטוס ועדכונים אחרונים</li>
+                  </ul>
+                </section>
+
+                <section>
+                  <h3 className="text-lg font-bold mb-3">💡 טיפים מהירים</h3>
+                  <ul className="list-disc list-inside space-y-2 text-sm">
+                    <li>לחצו על <strong>"השוואת הצעות"</strong> כדי לראות את כל ההצעות ולהשוות</li>
+                    <li>לחצו על <strong>"תקציב"</strong> כדי לעקוב אחר ההוצאות</li>
+                    <li>השתמשו ב<strong>"בונה חבילה"</strong> כדי לבדוק עלות כוללת</li>
+                    <li>פתחו <strong>הצבעה להורים</strong> כדי לאסוף משוב</li>
+                  </ul>
+                </section>
+
+                <section className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                  <h3 className="text-lg font-bold mb-2 text-blue-900">📖 מדריכים נוספים</h3>
+                  <p className="text-sm text-blue-800 mb-2">
+                    במסך השוואת הצעות יש כפתור עזרה (❓) עם מדריך מפורט על:
+                  </p>
+                  <ul className="list-disc list-inside space-y-1 text-sm text-blue-800">
+                    <li>הוספת הצעות מחיר</li>
+                    <li>שימוש בבונה חבילה</li>
+                    <li>בחירת זוכים</li>
+                    <li>ייצוא ל-CSV</li>
+                  </ul>
+                </section>
+              </div>
+              <DialogFooter>
+                <Button onClick={() => setIsHelpOpen(false)}>סגור</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+          <Button asChild className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700">
+            <Link href="/admin/prom/new">
+              <Plus className="h-4 w-4 ml-2" />
+              אירוע חדש
+            </Link>
+          </Button>
+        </div>
       </div>
 
       {/* Stats Overview */}
