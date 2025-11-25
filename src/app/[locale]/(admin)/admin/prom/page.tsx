@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { format } from 'date-fns'
 import { he } from 'date-fns/locale'
 import { 
@@ -55,6 +56,7 @@ const statusLabels: Record<string, { label: string; color: string }> = {
 }
 
 export default function PromDashboardPage() {
+  const router = useRouter()
   const [promEvents, setPromEvents] = useState<PromEvent[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isHelpOpen, setIsHelpOpen] = useState(false)
@@ -315,16 +317,17 @@ export default function PromDashboardPage() {
           ) : (
             <div className="space-y-4">
               {promEvents.map((event) => (
-                <Card 
-                  key={event.id} 
+                <Card
+                  key={event.id}
                   className={cn(
-                    "hover:shadow-md transition-all border-r-4",
+                    "hover:shadow-md transition-all border-r-4 cursor-pointer group",
                     event.status === 'planning' && "border-r-blue-500",
                     event.status === 'voting' && "border-r-purple-500",
                     event.status === 'confirmed' && "border-r-green-500",
                     event.status === 'completed' && "border-r-gray-400",
                     event.status === 'cancelled' && "border-r-red-500"
                   )}
+                  onClick={() => router.push(`/admin/prom/${event.id}/quotes`)}
                 >
                   <CardContent className="p-4">
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -395,7 +398,7 @@ export default function PromDashboardPage() {
                         )}
                       </div>
 
-                      <div className="flex flex-wrap gap-2">
+                      <div className="flex flex-wrap gap-2" onClick={(e) => e.stopPropagation()}>
                         <Button variant="outline" size="sm" asChild>
                           <Link href={`/admin/prom/${event.id}/quotes`}>
                             <FileSpreadsheet className="h-4 w-4 ml-2" />
@@ -414,8 +417,8 @@ export default function PromDashboardPage() {
                             עריכה
                           </Link>
                         </Button>
-                        <Button 
-                          variant="ghost" 
+                        <Button
+                          variant="ghost"
                           size="sm"
                           className="text-red-600 hover:text-red-700 hover:bg-red-50"
                           onClick={() => handleDelete(event.id)}
