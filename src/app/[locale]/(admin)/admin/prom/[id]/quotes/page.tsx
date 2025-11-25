@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import { 
+import {
   ArrowRight,
   Plus,
   Star,
@@ -17,12 +17,12 @@ import {
   ChevronDown,
   ChevronUp,
   CheckCircle2,
-  Trophy,
   TrendingDown,
   Sparkles,
   Package,
   AlertCircle,
-  HelpCircle
+  HelpCircle,
+  FileSpreadsheet
 } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
