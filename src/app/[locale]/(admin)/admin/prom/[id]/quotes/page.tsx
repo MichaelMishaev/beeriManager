@@ -158,6 +158,7 @@ export default function QuotesComparisonPage() {
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set())
   const [selectedForPackage, setSelectedForPackage] = useState<Record<string, string>>({}) // category -> quoteId
   const [showPackageBuilder, setShowPackageBuilder] = useState(false)
+  const [showSupplierBuilder, setShowSupplierBuilder] = useState(false)
   const [isHelpOpen, setIsHelpOpen] = useState(false)
 
   useEffect(() => {
@@ -853,24 +854,34 @@ export default function QuotesComparisonPage() {
             <div className="text-2xl font-bold">{quotes.filter(q => q.is_finalist).length}</div>
           </CardContent>
         </Card>
-        <Card className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => setShowPackageBuilder(!showPackageBuilder)}>
+        <Card>
           <CardContent className="pt-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-sm text-muted-foreground flex items-center gap-1">
-                  <Package className="h-3 w-3" />
-                  בונה חבילה
-                </div>
-                <div className="text-2xl font-bold">
-                  {Object.keys(selectedForPackage).length > 0 
-                    ? `₪${packageTotal.toLocaleString('he-IL')}`
-                    : 'בחר ספקים'}
-                </div>
-              </div>
-              <ChevronDown className={cn("h-5 w-5 transition-transform", showPackageBuilder && "rotate-180")} />
-            </div>
+            <div className="text-sm text-muted-foreground">תלמידים</div>
+            <div className="text-2xl font-bold">{promEvent?.student_count || 0}</div>
           </CardContent>
         </Card>
+      </div>
+
+      {/* Builder Buttons - Minimized at Start */}
+      <div className="flex gap-3 flex-wrap">
+        <Button
+          variant="outline"
+          className="flex items-center gap-2"
+          onClick={() => setShowPackageBuilder(!showPackageBuilder)}
+        >
+          <Package className="h-4 w-4" />
+          בונה חבילה
+          <ChevronDown className={cn("h-4 w-4 transition-transform", showPackageBuilder && "rotate-180")} />
+        </Button>
+        <Button
+          variant="outline"
+          className="flex items-center gap-2"
+          onClick={() => setShowSupplierBuilder(!showSupplierBuilder)}
+        >
+          <FileSpreadsheet className="h-4 w-4" />
+          בונה ספקים
+          <ChevronDown className={cn("h-4 w-4 transition-transform", showSupplierBuilder && "rotate-180")} />
+        </Button>
       </div>
 
       {/* Package Builder Panel */}
@@ -993,10 +1004,21 @@ export default function QuotesComparisonPage() {
         </Card>
       )}
 
-      {/* Category Summary Cards */}
-      {categoryStats.length > 0 && (
-        <div className="grid gap-3 grid-cols-2 md:grid-cols-4 lg:grid-cols-4">
-          {categoryStats.map(stat => (
+      {/* Supplier Builder - Category Summary Cards */}
+      {showSupplierBuilder && categoryStats.length > 0 && (
+        <Card className="bg-gradient-to-br from-blue-50 to-cyan-50 border-blue-200">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <FileSpreadsheet className="h-5 w-5 text-blue-600" />
+              בונה ספקים - סקירת קטגוריות
+            </CardTitle>
+            <CardDescription>
+              לחצו על קטגוריה כדי לסנן את הטבלה ולהשוות הצעות
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-3 grid-cols-2 md:grid-cols-4 lg:grid-cols-4">
+              {categoryStats.map(stat => (
             <Card 
               key={stat.category}
               className={cn(
@@ -1043,7 +1065,9 @@ export default function QuotesComparisonPage() {
               </CardContent>
             </Card>
           ))}
-        </div>
+            </div>
+          </CardContent>
+        </Card>
       )}
 
       {/* Category Filter */}
