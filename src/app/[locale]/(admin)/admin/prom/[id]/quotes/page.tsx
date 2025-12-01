@@ -2,62 +2,33 @@
 
 import React, { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
-import Link from 'next/link'
-import {
-  ArrowRight,
-  Plus,
-  Star,
-  Check,
-  Edit2,
-  Trash2,
-  Phone,
-  Mail,
-  FileText,
-  Download,
-  ChevronDown,
-  ChevronUp,
-  CheckCircle2,
-  TrendingDown,
-  Sparkles,
-  Package,
-  AlertCircle,
-  HelpCircle,
-  FileSpreadsheet,
-  MoreVertical
-} from 'lucide-react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import dynamic from 'next/dynamic'
+import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Badge } from '@/components/ui/badge'
-import { Switch } from '@/components/ui/switch'
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
   DialogFooter,
 } from '@/components/ui/dialog'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
+import { QuoteCard } from '@/components/features/prom/quotes/QuoteCard'
+import { MobileBottomBar } from '@/components/features/prom/quotes/MobileBottomBar'
+import { CategoryFilter } from '@/components/features/prom/quotes/CategoryFilter'
+import { MobileHeader } from '@/components/features/prom/quotes/MobileHeader'
+
+// Dynamic imports for client-only components
+const QRCode = dynamic(() => import('qrcode.react').then(mod => ({ default: mod.QRCodeSVG })), {
+  ssr: false,
+  loading: () => <div className="h-64 w-64 bg-gray-100 animate-pulse rounded" />
+})
 
 interface Quote {
   id: string
@@ -139,7 +110,6 @@ const emptyQuote = {
   display_label: ''
 }
 
-// Category stats interface
 interface CategoryStats {
   category: string
   count: number
@@ -151,7 +121,7 @@ interface CategoryStats {
   bestValueId: string | null
 }
 
-export default function QuotesComparisonPage() {
+export default function QuotesComparisonPageMobileFirst() {
   const params = useParams()
   const promId = params.id as string
   const [isLoading, setIsLoading] = useState(true)
@@ -162,15 +132,13 @@ export default function QuotesComparisonPage() {
   const [formData, setFormData] = useState(emptyQuote)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
-  const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set())
-  const [selectedForPackage, setSelectedForPackage] = useState<Record<string, string>>({}) // category -> quoteId
-  const [showPackageBuilder, setShowPackageBuilder] = useState(false)
-  const [showSupplierBuilder, setShowSupplierBuilder] = useState(false)
-  const [showCategorySummary, setShowCategorySummary] = useState(false)
-  const [isHelpOpen, setIsHelpOpen] = useState(false)
+  const [isDarkMode, setIsDarkMode] = useState(false)
+  const [showQRDialog, setShowQRDialog] = useState(false)
+  const [qrCodeUrl, setQRCodeUrl] = useState('')
 
   useEffect(() => {
     fetchData()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [promId])
 
   async function fetchData() {
@@ -206,10 +174,6 @@ export default function QuotesComparisonPage() {
 
   const handleSelectChange = (name: string, value: string) => {
     setFormData(prev => ({ ...prev, [name]: value }))
-  }
-
-  const handleSwitchChange = (name: string, checked: boolean) => {
-    setFormData(prev => ({ ...prev, [name]: checked }))
   }
 
   const openEditDialog = (quote: Quote) => {
@@ -310,66 +274,6 @@ export default function QuotesComparisonPage() {
     }
   }
 
-  const handleToggleFinalist = async (quote: Quote) => {
-    try {
-      const response = await fetch(`/api/prom/${promId}/quotes/${quote.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ is_finalist: !quote.is_finalist })
-      })
-      const data = await response.json()
-
-      if (data.success) {
-        toast.success(quote.is_finalist ? 'הוסר מהסופיים' : 'נוסף לסופיים')
-        fetchData()
-      }
-    } catch (error) {
-      console.error('Error updating quote:', error)
-    }
-  }
-
-  const handleSelectWinner = async (quote: Quote) => {
-    try {
-      // First, unselect all quotes
-      await Promise.all(
-        quotes.filter(q => q.is_selected).map(q =>
-          fetch(`/api/prom/${promId}/quotes/${q.id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ is_selected: false })
-          })
-        )
-      )
-
-      // Select the winner
-      const response = await fetch(`/api/prom/${promId}/quotes/${quote.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ is_selected: true })
-      })
-      const data = await response.json()
-
-      if (data.success) {
-        toast.success('נבחר כזוכה!')
-        fetchData()
-      }
-    } catch (error) {
-      console.error('Error selecting winner:', error)
-    }
-  }
-
-  const toggleRowExpand = (id: string) => {
-    setExpandedRows(prev => {
-      const next = new Set(prev)
-      if (next.has(id)) {
-        next.delete(id)
-      } else {
-        next.add(id)
-      }
-      return next
-    })
-  }
-
   const exportToCSV = () => {
     const headers = ['שם ספק', 'קטגוריה', 'מחיר כולל', 'מחיר לתלמיד', 'זמינות', 'דירוג', 'יתרונות', 'חסרונות']
     const rows = quotes.map(q => [
@@ -397,21 +301,52 @@ export default function QuotesComparisonPage() {
     toast.success('הקובץ הורד')
   }
 
+  const handleNativeShare = async () => {
+    const shareUrl = `${window.location.origin}/he/prom/${promId}/quotes`
+    const shareTitle = 'השוואת הצעות מחיר - מסיבת סיום'
+    const shareText = `צפו בכל הצעות המחיר למסיבת הסיום`
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: shareTitle,
+          text: shareText,
+          url: shareUrl
+        })
+        toast.success('שותף בהצלחה!')
+      } catch (error) {
+        if ((error as Error).name !== 'AbortError') {
+          console.error('Error sharing:', error)
+          navigator.clipboard.writeText(shareUrl)
+          toast.success('✅ קישור הועתק ללוח!')
+        }
+      }
+    } else {
+      navigator.clipboard.writeText(shareUrl)
+      toast.success('✅ קישור הועתק ללוח!')
+    }
+  }
+
+  const handleShowQR = () => {
+    const shareUrl = `${window.location.origin}/he/prom/${promId}/quotes`
+    setQRCodeUrl(shareUrl)
+    setShowQRDialog(true)
+  }
+
+  const toggleDarkMode = () => {
+    setIsDarkMode(prev => !prev)
+    document.documentElement.classList.toggle('dark')
+  }
+
   const filteredQuotes = (selectedCategory === 'all'
     ? quotes
     : quotes.filter(q => q.category === selectedCategory))
     .sort((a, b) => {
-      // First sort by category
       if (a.category !== b.category) {
         return a.category.localeCompare(b.category, 'he')
       }
-      // Then sort by price within category (lowest first)
       return a.price_total - b.price_total
     })
-
-  // Group by category for display
-  const totalPrice = filteredQuotes.reduce((sum, q) => sum + q.price_total, 0)
-  const avgPrice = filteredQuotes.length > 0 ? Math.round(totalPrice / filteredQuotes.length) : 0
 
   // Calculate category stats
   const categoryStats: CategoryStats[] = Object.keys(categoryLabels).map(category => {
@@ -431,20 +366,14 @@ export default function QuotesComparisonPage() {
 
     const prices = categoryQuotes.map(q => q.price_total)
     const minPrice = Math.min(...prices)
-    const maxPrice = Math.max(...prices)
-    const avgCatPrice = Math.round(prices.reduce((a, b) => a + b, 0) / prices.length)
-
-    // Find cheapest
     const cheapest = categoryQuotes.reduce((min, q) =>
       q.price_total < min.price_total ? q : min, categoryQuotes[0])
 
-    // Find highest rated
     const rated = categoryQuotes.filter(q => q.rating !== null)
     const highestRated = rated.length > 0
       ? rated.reduce((max, q) => (q.rating || 0) > (max.rating || 0) ? q : max, rated[0])
       : null
 
-    // Find best value (rating / price ratio - higher is better)
     const withRating = categoryQuotes.filter(q => q.rating !== null && q.price_total > 0)
     const bestValue = withRating.length > 0
       ? withRating.reduce((best, q) => {
@@ -458,542 +387,119 @@ export default function QuotesComparisonPage() {
       category,
       count: categoryQuotes.length,
       minPrice,
-      maxPrice,
-      avgPrice: avgCatPrice,
+      maxPrice: Math.max(...prices),
+      avgPrice: Math.round(prices.reduce((a, b) => a + b, 0) / prices.length),
       cheapestId: cheapest?.id || null,
       highestRatedId: highestRated?.id || null,
       bestValueId: bestValue?.id || null
     }
   }).filter(s => s.count > 0)
 
-  // Get badges for a quote
-  const getQuoteBadges = (quote: Quote): { type: string; label: string; color: string }[] => {
-    const badges: { type: string; label: string; color: string }[] = []
+  const quoteCounts = quotes.reduce((acc, quote) => {
+    acc[quote.category] = (acc[quote.category] || 0) + 1
+    return acc
+  }, {} as Record<string, number>)
+
+  const isCheapest = (quote: Quote) => {
     const stats = categoryStats.find(s => s.category === quote.category)
-
-    if (stats) {
-      if (stats.cheapestId === quote.id) {
-        badges.push({ type: 'cheapest', label: 'הכי זול', color: 'bg-green-100 text-green-800 border-green-300' })
-      }
-      if (stats.highestRatedId === quote.id && quote.rating) {
-        badges.push({ type: 'rated', label: 'מדורג גבוה', color: 'bg-yellow-100 text-yellow-800 border-yellow-300' })
-      }
-      if (stats.bestValueId === quote.id && stats.cheapestId !== quote.id) {
-        badges.push({ type: 'value', label: 'תמורה לכסף', color: 'bg-purple-100 text-purple-800 border-purple-300' })
-      }
-      // Check if above average
-      if (quote.price_total > stats.avgPrice * 1.2 && stats.count > 1) {
-        badges.push({ type: 'expensive', label: 'מעל הממוצע', color: 'bg-orange-100 text-orange-800 border-orange-300' })
-      }
-    }
-
-    return badges
+    return stats?.cheapestId === quote.id
   }
 
-  // Package builder calculations
-  const packageTotal = Object.entries(selectedForPackage).reduce((sum, [, quoteId]) => {
-    const quote = quotes.find(q => q.id === quoteId)
-    return sum + (quote?.price_total || 0)
-  }, 0)
+  const isHighestRated = (quote: Quote) => {
+    const stats = categoryStats.find(s => s.category === quote.category)
+    return stats?.highestRatedId === quote.id && quote.rating !== null
+  }
 
-  const packagePerStudent = promEvent?.student_count && promEvent.student_count > 0
-    ? Math.round(packageTotal / promEvent.student_count)
-    : 0
-
-  const budgetRemaining = (promEvent?.total_budget || 0) - packageTotal
-  const budgetUsagePercent = promEvent?.total_budget
-    ? Math.round((packageTotal / promEvent.total_budget) * 100)
-    : 0
-
-  const togglePackageSelection = (quote: Quote) => {
-    setSelectedForPackage(prev => {
-      const newSelection = { ...prev }
-      if (newSelection[quote.category] === quote.id) {
-        delete newSelection[quote.category]
-      } else {
-        newSelection[quote.category] = quote.id
-      }
-      return newSelection
-    })
+  const isBestValue = (quote: Quote) => {
+    const stats = categoryStats.find(s => s.category === quote.category)
+    return stats?.bestValueId === quote.id && stats?.cheapestId !== quote.id
   }
 
   if (isLoading) {
     return (
-      <div className="space-y-6">
-        <div className="h-16 bg-gray-100 rounded-lg animate-pulse" />
-        <div className="h-64 bg-gray-100 rounded-lg animate-pulse" />
+      <div className="space-y-4 p-4">
+        {/* Loading skeleton */}
+        <div className="h-16 bg-gray-200 animate-pulse rounded" />
+        <div className="h-12 bg-gray-100 animate-pulse rounded" />
+        {[1, 2, 3].map(i => (
+          <div key={i} className="h-64 bg-gray-100 animate-pulse rounded-2xl" />
+        ))}
       </div>
     )
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" asChild>
-            <Link href={`/admin/prom/${promId}`}>
-              <ArrowRight className="h-5 w-5" />
-            </Link>
-          </Button>
-          <div>
-            <h1 className="text-2xl font-bold">השוואת הצעות מחיר</h1>
-            <p className="text-muted-foreground">{promEvent?.title}</p>
-          </div>
-        </div>
+    <div className={cn("min-h-screen", isDarkMode && "dark bg-gray-900")}>
+      {/* Mobile Header */}
+      <MobileHeader
+        promId={promId}
+        quotesCount={quotes.length}
+        promTitle={promEvent?.title}
+        isDarkMode={isDarkMode}
+        onToggleDarkMode={toggleDarkMode}
+        onShowQR={handleShowQR}
+        onShare={handleNativeShare}
+      />
 
-        <div className="flex gap-2">
-          <Dialog open={isHelpOpen} onOpenChange={setIsHelpOpen}>
-            <DialogTrigger asChild>
-              <Button variant="outline" size="icon" title="מדריך שימוש">
-                <HelpCircle className="h-4 w-4" />
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle className="text-xl sm:text-2xl md:text-3xl">📚 מדריך מלא - מערכת השוואת הצעות מחיר</DialogTitle>
-                <DialogDescription className="text-sm sm:text-base">
-                  מדריך מפורט וידידותי לשימוש במערכת תכנון מסיבת הסיום
-                </DialogDescription>
-              </DialogHeader>
+      {/* Category Filter */}
+      <CategoryFilter
+        categories={categoryLabels}
+        selectedCategory={selectedCategory}
+        onSelectCategory={setSelectedCategory}
+        quoteCounts={quoteCounts}
+        totalQuotes={quotes.length}
+      />
 
-              <div className="space-y-4 sm:space-y-6 text-right max-w-none px-1">
-                {/* Quick Start */}
-                <section className="bg-gradient-to-r from-purple-50 to-pink-50 p-3 sm:p-4 md:p-6 rounded-xl border-2 border-purple-200">
-                  <h3 className="text-lg sm:text-xl font-bold mb-3 text-purple-900 flex items-center gap-2">
-                    <span className="text-xl sm:text-2xl">🚀</span> התחלה מהירה (2 דקות)
-                  </h3>
-                  <div className="space-y-2 sm:space-y-3 text-sm sm:text-base">
-                    <div className="bg-white p-2 sm:p-3 rounded-lg">
-                      <span className="font-bold text-purple-700">שלב 1:</span> הוסיפו את ההצעה הראשונה שלכם
-                      <br />
-                      <span className="text-xs text-gray-600">לחצו על הכפתור הוורוד "הוסף הצעה" בראש העמוד</span>
-                    </div>
-                    <div className="bg-white p-2 sm:p-3 rounded-lg">
-                      <span className="font-bold text-purple-700">שלב 2:</span> מלאו לפחות שם ספק, קטגוריה ומחיר
-                      <br />
-                      <span className="text-xs text-gray-600">שאר השדות אופציונליים אבל מומלצים להשוואה טובה</span>
-                    </div>
-                    <div className="bg-white p-2 sm:p-3 rounded-lg">
-                      <span className="font-bold text-purple-700">שלב 3:</span> הוסיפו עוד הצעות ולחצו על השורות כדי להשוות
-                      <br />
-                      <span className="text-xs text-gray-600">ככל שתוסיפו יותר הצעות, כך ההשוואה תהיה טובה יותר</span>
-                    </div>
-                  </div>
-                </section>
+      {/* Main Content */}
+      <main className="p-4 space-y-3 pb-32">
+        {filteredQuotes.length === 0 ? (
+          <Card className="p-8 text-center">
+            <p className="text-gray-500">אין הצעות מחיר להצגה</p>
+            <Button className="mt-4" onClick={() => setIsAddDialogOpen(true)}>
+              הוסף הצעה ראשונה
+            </Button>
+          </Card>
+        ) : (
+          filteredQuotes.map(quote => (
+            <QuoteCard
+              key={quote.id}
+              quote={quote}
+              onTap={() => {}} // TODO: implement details view
+              onEdit={() => openEditDialog(quote)}
+              onDelete={() => handleDelete(quote.id)}
+              isCheapest={isCheapest(quote)}
+              isHighestRated={isHighestRated(quote)}
+              isBestValue={isBestValue(quote)}
+              categoryLabel={categoryLabels[quote.category]?.label || quote.category}
+              categoryEmoji={categoryLabels[quote.category]?.emoji || '📋'}
+              availabilityLabel={availabilityLabels[quote.availability_status]?.label || 'לא ידוע'}
+              availabilityColor={availabilityLabels[quote.availability_status]?.color || 'bg-gray-100 text-gray-800'}
+            />
+          ))
+        )}
+      </main>
 
-                {/* Adding Quote - Detailed */}
-                <section className="border-r-4 border-blue-400 pr-2 sm:pr-4">
-                  <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4 text-blue-900 flex items-center gap-2">
-                    <span className="text-xl sm:text-2xl">➕</span> איך מוסיפים הצעת מחיר? (מפורט)
-                  </h3>
-                  <div className="space-y-3">
-                    <div className="bg-blue-50 p-3 sm:p-4 rounded-lg space-y-2 text-sm sm:text-base">
-                      <p className="font-bold text-blue-900">1️⃣ לחצו על הכפתור "הוסף הצעה"</p>
-                      <p className="pr-4 sm:pr-6">הכפתור נמצא בפינה השמאלית העליונה, צבע ורוד-סגול עם סימן פלוס (+)</p>
+      {/* Mobile Bottom Bar */}
+      <MobileBottomBar
+        onAddQuote={() => setIsAddDialogOpen(true)}
+        onExportCSV={exportToCSV}
+      />
 
-                      <p className="font-bold text-blue-900 pt-2">2️⃣ מלאו את הפרטים הבסיסיים (שדות חובה):</p>
-                      <ul className="pr-6 sm:pr-10 space-y-1 text-xs sm:text-sm">
-                        <li>• <strong>שם הספק</strong> - למשל: "אולמי ברושים", "DJ מוטי כהן"</li>
-                        <li>• <strong>קטגוריה</strong> - בחרו מהרשימה (אולם, קייטרינג, DJ וכו')</li>
-                        <li>• <strong>מחיר כולל</strong> - הסכום הסופי בשקלים (למשל: 15000)</li>
-                      </ul>
-
-                      <p className="font-bold text-blue-900 pt-2">3️⃣ הוסיפו פרטים נוספים (מומלץ מאוד):</p>
-                      <ul className="pr-6 sm:pr-10 space-y-1 text-xs sm:text-sm">
-                        <li>• <strong>איש קשר</strong> - שם האיש שאיתו דיברתם</li>
-                        <li>• <strong>טלפון ואימייל</strong> - ליצירת קשר מהירה</li>
-                        <li>• <strong>שירותים כלולים</strong> - למשל: "DJ, תאורה, מערכת שמע, מיקרופון אלחוטי"</li>
-                        <li>• <strong>זמינות</strong> - האם הספק פנוי בתאריך שלכם?</li>
-                        <li>• <strong>דירוג</strong> - תנו ציון מ-1 עד 5 כוכבים לפי הרושם שלכם</li>
-                      </ul>
-
-                      <p className="font-bold text-blue-900 pt-2">4️⃣ תיעדו יתרונות וחסרונות:</p>
-                      <div className="pr-4 sm:pr-6 space-y-2 text-xs sm:text-sm">
-                        <div className="bg-green-50 p-2 rounded border border-green-200">
-                          <strong className="text-green-800">יתרונות:</strong> "ניסיון רב, ציוד מקצועי, מחיר תחרותי"
-                        </div>
-                        <div className="bg-red-50 p-2 rounded border border-red-200">
-                          <strong className="text-red-800">חסרונות:</strong> "לא כולל גנרטור חשמל, דורש מקדמה גבוהה"
-                        </div>
-                      </div>
-
-                      <p className="font-bold text-blue-900 pt-2">5️⃣ לחצו "הוסף" ותראו את ההצעה בטבלה!</p>
-                    </div>
-                  </div>
-                </section>
-
-                {/* Understanding Table */}
-                <section className="border-r-4 border-green-400 pr-2 sm:pr-4">
-                  <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4 text-green-900 flex items-center gap-2">
-                    <span className="text-xl sm:text-2xl">📊</span> הבנת הטבלה - מה כל הסימנים אומרים?
-                  </h3>
-                  <div className="space-y-3 text-sm sm:text-base">
-                    <div className="bg-green-50 p-3 sm:p-4 rounded-lg">
-                      <p className="font-bold mb-2 text-green-900">תגיות אוטומטיות חכמות:</p>
-                      <div className="space-y-2 pr-2 sm:pr-4">
-                        <div className="flex items-start gap-2">
-                          <span className="text-lg sm:text-xl flex-shrink-0">🟢</span>
-                          <div className="text-xs sm:text-sm">
-                            <strong>"הכי זול"</strong> - ההצעה עם המחיר הנמוך ביותר בקטגוריה הזו
-                            <br />
-                            <span className="text-[10px] sm:text-xs text-green-700">דוגמה: אם יש 3 DJs במחירים 5000₪, 7000₪, 6000₪ - התג יופיע על זה של 5000₪</span>
-                          </div>
-                        </div>
-                        <div className="flex items-start gap-2">
-                          <span className="text-lg sm:text-xl flex-shrink-0">⭐</span>
-                          <div className="text-xs sm:text-sm">
-                            <strong>"מדורג גבוה"</strong> - הדירוג הגבוה ביותר שנתתם בקטגוריה
-                            <br />
-                            <span className="text-[10px] sm:text-xs text-green-700">דוגמה: אם דירגתם DJ אחד 5 כוכבים ואחר 3 - התג יופיע על זה עם 5</span>
-                          </div>
-                        </div>
-                        <div className="flex items-start gap-2">
-                          <span className="text-lg sm:text-xl flex-shrink-0">💎</span>
-                          <div className="text-xs sm:text-sm">
-                            <strong>"תמורה לכסף"</strong> - היחס הטוב ביותר בין איכות (דירוג) למחיר
-                            <br />
-                            <span className="text-[10px] sm:text-xs text-green-700">דוגמה: DJ ב-6000₪ עם דירוג 5 זה "תמורה לכסף" יותר מאשר DJ ב-5000₪ עם דירוג 3</span>
-                          </div>
-                        </div>
-                        <div className="flex items-start gap-2">
-                          <span className="text-lg sm:text-xl flex-shrink-0">⚠️</span>
-                          <div className="text-xs sm:text-sm">
-                            <strong>"מעל הממוצע"</strong> - יקר ב-20% או יותר מהמחיר הממוצע בקטגוריה
-                            <br />
-                            <span className="text-[10px] sm:text-xs text-green-700">דוגמה: אם ממוצע DJs הוא 6000₪, כל DJ מעל 7200₪ יקבל תג זה</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="bg-yellow-50 p-3 sm:p-4 rounded-lg border border-yellow-200">
-                      <p className="font-bold mb-2 text-yellow-900 text-sm sm:text-base">💡 טיפ חשוב - לחיצה על שורה:</p>
-                      <p className="text-xs sm:text-sm">לחצו על כל שורה בטבלה כדי לראות:</p>
-                      <ul className="pr-4 sm:pr-6 space-y-1 mt-2 text-xs sm:text-sm">
-                        <li>✓ פרטי התקשרות מלאים (טלפון, אימייל)</li>
-                        <li>✓ כל השירותים הכלולים במחיר</li>
-                        <li>✓ יתרונות וחסרונות מלאים</li>
-                        <li>✓ תנאי תשלום והערות מחיר</li>
-                        <li>✓ כפתורים לפעולות: "בחר כזוכה", "הוסף לסופיים"</li>
-                      </ul>
-                    </div>
-                  </div>
-                </section>
-
-                {/* Package Builder */}
-                <section className="border-r-4 border-purple-400 pr-2 sm:pr-4">
-                  <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4 text-purple-900 flex items-center gap-2">
-                    <span className="text-xl sm:text-2xl">📦</span> בונה חבילה - איך מתכננים את כל המסיבה?
-                  </h3>
-                  <div className="space-y-3 text-sm sm:text-base">
-                    <div className="bg-purple-50 p-3 sm:p-4 rounded-lg">
-                      <p className="font-bold mb-3 text-purple-900 text-sm sm:text-base">🎯 מטרה: לבדוק כמה תעלה החבילה המושלמת שלכם</p>
-
-                      <p className="font-bold mt-4 mb-2 text-purple-900 text-sm sm:text-base">איך זה עובד? (צעד אחר צעד)</p>
-                      <ol className="space-y-2 sm:space-y-3 pr-4 sm:pr-6 text-xs sm:text-sm">
-                        <li>
-                          <strong>1. פתחו את בונה החבילה:</strong>
-                          <br />
-                          <span className="text-xs">לחצו על הכפתור "בונה חבילה" מעל הטבלה (עם אייקון 📦)</span>
-                        </li>
-                        <li>
-                          <strong>2. בחרו ספק אחד מכל קטגוריה:</strong>
-                          <br />
-                          <span className="text-xs">לחצו על כפתור החבילה (📦) בטבלה ליד כל הצעה שאתם רוצים</span>
-                        </li>
-                        <li>
-                          <strong>3. עקבו אחר הסיכום בזמן אמת:</strong>
-                          <br />
-                          <div className="bg-white p-2 sm:p-3 rounded mt-2 space-y-1 text-xs">
-                            <div>📊 <strong>סה"כ חבילה:</strong> כמה זה יעלה בסך הכל</div>
-                            <div>👨‍🎓 <strong>מחיר לתלמיד:</strong> אוטומטי - מחיר כולל ÷ מספר תלמידים</div>
-                            <div>💰 <strong>אחוז מתקציב:</strong> כמה אחוזים מהתקציב השתמשתם</div>
-                            <div>✅ <strong>נשאר בתקציב:</strong> כמה כסף נשאר לכם (או כמה חרגתם)</div>
-                          </div>
-                        </li>
-                      </ol>
-
-                      <div className="bg-white p-3 sm:p-4 rounded-lg border-2 border-purple-300 mt-3 sm:mt-4">
-                        <p className="font-bold text-purple-900 mb-2 text-xs sm:text-sm">📝 דוגמה מלאה:</p>
-                        <div className="space-y-2 text-xs sm:text-sm">
-                          <p className="font-semibold">תקציב: 50,000₪ | תלמידים: 100</p>
-                          <div className="pr-2 sm:pr-4 space-y-1 text-[11px] sm:text-xs">
-                            <div>🏛️ <strong>אולם:</strong> אולמי ברושים - 15,000₪</div>
-                            <div>🍕 <strong>קייטרינג:</strong> פיצה בר - 20,000₪</div>
-                            <div>🎵 <strong>DJ:</strong> DJ מוטי - 8,000₪</div>
-                            <div>📷 <strong>צילום:</strong> צלם אלי - 5,000₪</div>
-                          </div>
-                          <div className="border-t pt-2 mt-2 font-bold text-xs sm:text-sm">
-                            <div className="text-purple-900">סה"כ: 48,000₪</div>
-                            <div className="text-green-700">לתלמיד: 480₪</div>
-                            <div className="text-green-700">96% מתקציב - נשארו 2,000₪ ✓</div>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="bg-red-50 p-2 sm:p-3 rounded-lg border border-red-200 mt-3">
-                        <p className="font-bold text-red-800 text-xs sm:text-sm">⚠️ אזהרה אוטומטית:</p>
-                        <p className="text-xs">אם אתם חורגים מהתקציב, המערכת תציג אזהרה באדום ותראה לכם בכמה חרגתם</p>
-                      </div>
-                    </div>
-                  </div>
-                </section>
-
-                {/* Category Cards */}
-                <section className="border-r-4 border-orange-400 pr-2 sm:pr-4">
-                  <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4 text-orange-900 flex items-center gap-2">
-                    <span className="text-xl sm:text-2xl">🏷️</span> כרטיסי קטגוריה - סינון והשוואה מהירה
-                  </h3>
-                  <div className="bg-orange-50 p-3 sm:p-4 rounded-lg space-y-3 text-sm sm:text-base">
-                    <p className="text-xs sm:text-sm">בחלק העליון של העמוד יש כרטיסים צבעוניים - אחד לכל קטגוריה שיש לה הצעות.</p>
-
-                    <div className="bg-white p-2 sm:p-3 rounded-lg space-y-2">
-                      <p className="font-bold text-orange-900 text-xs sm:text-sm">מה רואים על כל כרטיס?</p>
-                      <ul className="pr-4 sm:pr-6 space-y-1 text-xs">
-                        <li>🔢 <strong>מספר הצעות:</strong> כמה ספקים יש בקטגוריה הזו</li>
-                        <li>📊 <strong>טווח מחירים:</strong> המחיר הכי נמוך עד הכי גבוה</li>
-                        <li>💵 <strong>מחיר ממוצע:</strong> ממוצע של כל ההצעות</li>
-                        <li>🏆 <strong>תגיות זוכות:</strong> סימונים של "הכי זול" ו"מדורג גבוה"</li>
-                      </ul>
-                    </div>
-
-                    <div className="bg-white p-2 sm:p-3 rounded-lg">
-                      <p className="font-bold text-orange-900 mb-2 text-xs sm:text-sm">איך משתמשים בכרטיסים?</p>
-                      <p className="text-xs"><strong>לחצו על כרטיס</strong> כדי לסנן את הטבלה ולראות רק הצעות מהקטגוריה הזו.</p>
-                      <p className="text-[10px] sm:text-xs mt-2 text-gray-600">למשל: לחצו על כרטיס "DJ/מוזיקה" כדי להשוות רק את ה-DJs ביניהם</p>
-                      <p className="text-[10px] sm:text-xs text-gray-600">לחצו שוב או על "הכל" כדי לבטל את הסינון</p>
-                    </div>
-                  </div>
-                </section>
-
-                {/* Selecting Winner & Finalists */}
-                <section className="border-r-4 border-green-400 pr-2 sm:pr-4">
-                  <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4 text-green-900 flex items-center gap-2">
-                    <span className="text-xl sm:text-2xl">✅</span> בחירת זוכה והצבעת הורים
-                  </h3>
-                  <div className="space-y-3 sm:space-y-4 text-sm sm:text-base">
-                    <div className="bg-green-50 p-3 sm:p-4 rounded-lg">
-                      <p className="font-bold mb-3 text-green-900 text-sm sm:text-base">🎯 שני מצבים שונים:</p>
-
-                      <div className="space-y-3">
-                        <div className="bg-white p-2 sm:p-3 rounded-lg border-2 border-purple-300">
-                          <p className="font-bold text-purple-900 text-xs sm:text-sm">1️⃣ הוספה לסופיים (להצבעת הורים):</p>
-                          <ul className="pr-4 sm:pr-6 mt-2 space-y-1 text-xs">
-                            <li>• לחצו על שורה להרחבה</li>
-                            <li>• לחצו "הוסף לסופיים"</li>
-                            <li>• ההצעה תקבל תג <strong>"סופי"</strong> בצבע סגול</li>
-                            <li>• עשו את זה עבור 2-3 אפשרויות טובות בכל קטגוריה</li>
-                          </ul>
-                          <p className="text-[10px] sm:text-xs mt-2 text-purple-700 font-semibold">
-                            💡 טיפ: הסופיים יופיעו בהצבעה להורים - תנו להם לבחור!
-                          </p>
-                        </div>
-
-                        <div className="bg-white p-2 sm:p-3 rounded-lg border-2 border-green-300">
-                          <p className="font-bold text-green-900 text-xs sm:text-sm">2️⃣ בחירת זוכה סופית:</p>
-                          <ul className="pr-4 sm:pr-6 mt-2 space-y-1 text-xs">
-                            <li>• לחצו על שורה להרחבה</li>
-                            <li>• לחצו "בחר כזוכה" (כפתור ירוק)</li>
-                            <li>• ההצעה תקבל תג <strong>"נבחר"</strong> בצבע ירוק</li>
-                            <li>• <strong>רק הצעה אחת</strong> יכולה להיות "נבחר" בכל רגע</li>
-                          </ul>
-                          <p className="text-[10px] sm:text-xs mt-2 text-green-700 font-semibold">
-                            ⚠️ כשאתם בוחרים זוכה חדש, הזוכה הקודם מבוטל אוטומטית
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </section>
-
-                {/* Export & Share */}
-                <section className="border-r-4 border-indigo-400 pr-2 sm:pr-4">
-                  <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4 text-indigo-900 flex items-center gap-2">
-                    <span className="text-xl sm:text-2xl">📤</span> ייצוא ושיתוף
-                  </h3>
-                  <div className="bg-indigo-50 p-3 sm:p-4 rounded-lg space-y-3 text-sm sm:text-base">
-                    <p className="font-bold text-indigo-900 text-xs sm:text-sm">לחצו על "ייצוא CSV" כדי להוריד קובץ Excel</p>
-                    <div className="bg-white p-2 sm:p-3 rounded-lg space-y-2">
-                      <p className="text-xs sm:text-sm"><strong>מה כלול בקובץ?</strong></p>
-                      <ul className="pr-4 sm:pr-6 text-xs">
-                        <li>• כל ההצעות עם כל הפרטים</li>
-                        <li>• אפשר לפתוח ב-Excel או Google Sheets</li>
-                        <li>• מושלם לשיתוף ב-WhatsApp או מייל</li>
-                      </ul>
-                    </div>
-                  </div>
-                </section>
-
-                {/* Common Scenarios */}
-                <section className="bg-gradient-to-r from-yellow-50 to-orange-50 p-3 sm:p-4 md:p-6 rounded-xl border-2 border-yellow-300">
-                  <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4 text-yellow-900 flex items-center gap-2">
-                    <span className="text-xl sm:text-2xl">💼</span> תרחישים נפוצים - איך עושים את זה בפועל?
-                  </h3>
-                  <div className="space-y-3 sm:space-y-4 text-sm sm:text-base">
-                    <div className="bg-white p-3 sm:p-4 rounded-lg">
-                      <p className="font-bold text-yellow-900 text-xs sm:text-sm">📞 קיבלתי הצעת מחיר בטלפון מספק DJ:</p>
-                      <ol className="pr-4 sm:pr-6 mt-2 space-y-1 text-xs">
-                        <li>1. לחצו "+ הוסף הצעה"</li>
-                        <li>2. שם ספק: "DJ מוטי כהן"</li>
-                        <li>3. קטגוריה: בחרו "DJ/מוזיקה"</li>
-                        <li>4. מחיר: 8000</li>
-                        <li>5. טלפון: מספר שדיברתם איתו</li>
-                        <li>6. שירותים: "מערכת שמע מקצועית, תאורה, 5 שעות נגינה"</li>
-                        <li>7. יתרונות: "ניסיון 10 שנים, המלצות מעולות"</li>
-                        <li>8. דירוג: 4 (לפי הרושם שלכם)</li>
-                      </ol>
-                    </div>
-
-                    <div className="bg-white p-3 sm:p-4 rounded-lg">
-                      <p className="font-bold text-yellow-900 text-xs sm:text-sm">🤔 רוצה להשוות רק אולמות:</p>
-                      <p className="pr-4 sm:pr-6 mt-2 text-xs">לחצו על הכרטיס הקטן של "אולם/מקום" 🏛️ בחלק העליון - הטבלה תציג רק אולמות!</p>
-                    </div>
-
-                    <div className="bg-white p-3 sm:p-4 rounded-lg">
-                      <p className="font-bold text-yellow-900 text-xs sm:text-sm">💰 רוצה לבדוק אם אני בתקציב:</p>
-                      <ol className="pr-4 sm:pr-6 mt-2 space-y-1 text-xs">
-                        <li>1. לחצו "בונה חבילה"</li>
-                        <li>2. לחצו על 📦 ליד ההצעות שאתם חושבים לקחת</li>
-                        <li>3. תראו מיד אם אתם בתקציב (ירוק ✓) או חרגתם (אדום ⚠️)</li>
-                      </ol>
-                    </div>
-
-                    <div className="bg-white p-3 sm:p-4 rounded-lg">
-                      <p className="font-bold text-yellow-900 text-xs sm:text-sm">👨‍👩‍👧‍👦 רוצה להכין הצבעה להורים:</p>
-                      <ol className="pr-4 sm:pr-6 mt-2 space-y-1 text-xs">
-                        <li>1. בחרו 2-3 אפשרויות טובות בכל קטגוריה</li>
-                        <li>2. לחצו על כל שורה ובחרו "הוסף לסופיים"</li>
-                        <li>3. ההצעות הסופיות יופיעו בהצבעה להורים</li>
-                        <li>4. אחרי ההצבעה - בחרו את הזוכה עם "בחר כזוכה"</li>
-                      </ol>
-                    </div>
-                  </div>
-                </section>
-
-                {/* Tips & Tricks */}
-                <section className="bg-gradient-to-r from-green-50 to-teal-50 p-3 sm:p-4 md:p-6 rounded-xl border-2 border-green-300">
-                  <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4 text-green-900 flex items-center gap-2">
-                    <span className="text-xl sm:text-2xl">💡</span> טיפים מתקדמים וחכמים
-                  </h3>
-                  <div className="space-y-2 text-sm sm:text-base">
-                    <div className="bg-white p-2 sm:p-3 rounded-lg flex items-start gap-2 sm:gap-3">
-                      <span className="text-lg sm:text-xl flex-shrink-0">✨</span>
-                      <div className="text-xs sm:text-sm">
-                        <strong>הוסיפו כמה שיותר הצעות:</strong> ככל שיש יותר אפשרויות, ההשוואה מדויקת יותר והתגיות החכמות עובדות טוב יותר
-                      </div>
-                    </div>
-                    <div className="bg-white p-2 sm:p-3 rounded-lg flex items-start gap-2 sm:gap-3">
-                      <span className="text-lg sm:text-xl flex-shrink-0">📝</span>
-                      <div className="text-xs sm:text-sm">
-                        <strong>תעדו הכל:</strong> אפילו אם זה נראה לא חשוב עכשיו - בעוד שבועיים לא תזכרו מה הספק הזה הציע
-                      </div>
-                    </div>
-                    <div className="bg-white p-2 sm:p-3 rounded-lg flex items-start gap-2 sm:gap-3">
-                      <span className="text-lg sm:text-xl flex-shrink-0">⭐</span>
-                      <div className="text-xs sm:text-sm">
-                        <strong>דרגו מיד:</strong> תנו דירוג ישר אחרי השיחה עם הספק, לפי הרושם הראשוני שלכם
-                      </div>
-                    </div>
-                    <div className="bg-white p-2 sm:p-3 rounded-lg flex items-start gap-2 sm:gap-3">
-                      <span className="text-lg sm:text-xl flex-shrink-0">🎯</span>
-                      <div className="text-xs sm:text-sm">
-                        <strong>השתמשו בבונה חבילה:</strong> נסו שילובים שונים ותראו איך המחיר משתנה - לפעמים חיסכון באולם מאפשר DJ יותר טוב!
-                      </div>
-                    </div>
-                    <div className="bg-white p-2 sm:p-3 rounded-lg flex items-start gap-2 sm:gap-3">
-                      <span className="text-lg sm:text-xl flex-shrink-0">💬</span>
-                      <div className="text-xs sm:text-sm">
-                        <strong>שתפו עם ההורים:</strong> ייצאו ל-CSV ושלחו בקבוצת WhatsApp - כולם יהיו מעודכנים
-                      </div>
-                    </div>
-                    <div className="bg-white p-2 sm:p-3 rounded-lg flex items-start gap-2 sm:gap-3">
-                      <span className="text-lg sm:text-xl flex-shrink-0">🔄</span>
-                      <div className="text-xs sm:text-sm">
-                        <strong>עדכנו במהלך הדרך:</strong> קיבלתם הנחה מספק? עדכנו את המחיר! המערכת תחשב מחדש את כל התגיות
-                      </div>
-                    </div>
-                  </div>
-                </section>
-
-                {/* FAQ */}
-                <section className="bg-gray-50 p-3 sm:p-4 md:p-6 rounded-xl border border-gray-300">
-                  <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4 text-gray-900 flex items-center gap-2">
-                    <span className="text-xl sm:text-2xl">❓</span> שאלות נפוצות
-                  </h3>
-                  <div className="space-y-2 sm:space-y-3 text-sm sm:text-base">
-                    <details className="bg-white p-2 sm:p-3 rounded-lg">
-                      <summary className="font-bold cursor-pointer text-gray-900 text-xs sm:text-sm">האם אני חייב למלא את כל השדות?</summary>
-                      <p className="mt-2 pr-3 sm:pr-4 text-xs">לא. רק שם ספק, קטגוריה ומחיר הם חובה. אבל ככל שתמלאו יותר פרטים, ההשוואה תהיה טובה יותר!</p>
-                    </details>
-                    <details className="bg-white p-2 sm:p-3 rounded-lg">
-                      <summary className="font-bold cursor-pointer text-gray-900 text-xs sm:text-sm">איך אני מוחק הצעה?</summary>
-                      <p className="mt-2 pr-3 sm:pr-4 text-xs">לחצו על האייקון של פח האשפה 🗑️ בשורה של ההצעה. תתבקשו לאשר את המחיקה.</p>
-                    </details>
-                    <details className="bg-white p-2 sm:p-3 rounded-lg">
-                      <summary className="font-bold cursor-pointer text-gray-900 text-xs sm:text-sm">אפשר לערוך הצעה קיימת?</summary>
-                      <p className="mt-2 pr-3 sm:pr-4 text-xs">כן! לחצו על האייקון של העיפרון ✏️ בשורה, תוכלו לשנות כל פרט.</p>
-                    </details>
-                    <details className="bg-white p-2 sm:p-3 rounded-lg">
-                      <summary className="font-bold cursor-pointer text-gray-900 text-xs sm:text-sm">מה זה "תווית להצבעה"?</summary>
-                      <p className="mt-2 pr-3 sm:pr-4 text-xs">זה שם קצר שיופיע בהצבעה להורים. למשל: "אפשרות א'" או "DJ - מוטי". זה עוזר להורים להבין על מה הם מצביעים.</p>
-                    </details>
-                    <details className="bg-white p-2 sm:p-3 rounded-lg">
-                      <summary className="font-bold cursor-pointer text-gray-900 text-xs sm:text-sm">איך מחשבים "תמורה לכסף"?</summary>
-                      <p className="mt-2 pr-3 sm:pr-4 text-xs">המערכת מחשבת דירוג ÷ מחיר. ככל שהמספר גבוה יותר - היחס טוב יותר. זה עוזר למצוא ספקים איכותיים במחיר הוגן.</p>
-                    </details>
-                    <details className="bg-white p-2 sm:p-3 rounded-lg">
-                      <summary className="font-bold cursor-pointer text-gray-900 text-xs sm:text-sm">הנתונים נשמרים?</summary>
-                      <p className="mt-2 pr-3 sm:pr-4 text-xs">כן! כל מה שאתם מזינים נשמר אוטומטית. אפשר לצאת ולחזור - הכל יישאר.</p>
-                    </details>
-                  </div>
-                </section>
-
-                {/* Help */}
-                <section className="bg-gradient-to-r from-blue-50 to-indigo-50 p-3 sm:p-4 md:p-6 rounded-xl border-2 border-blue-300">
-                  <h3 className="text-lg sm:text-xl font-bold mb-3 text-blue-900 flex items-center gap-2">
-                    <span className="text-xl sm:text-2xl">🆘</span> זקוקים לעזרה נוספת?
-                  </h3>
-                  <div className="space-y-3 text-sm sm:text-base">
-                    <div className="bg-white p-3 sm:p-4 rounded-lg">
-                      <p className="mb-2 text-xs sm:text-sm">אם משהו לא ברור או שיש בעיה טכנית:</p>
-                      <ul className="pr-4 sm:pr-6 space-y-1 text-xs">
-                        <li>📧 פנו למנהל המערכת</li>
-                        <li>📖 בדקו את המדריך המלא בתיעוד</li>
-                        <li>💬 שאלו בקבוצת WhatsApp של ההורים</li>
-                      </ul>
-                    </div>
-                    <div className="bg-blue-100 p-2 sm:p-3 rounded-lg">
-                      <p className="font-bold text-blue-900 text-xs sm:text-sm">💪 בהצלחה עם תכנון המסיבה!</p>
-                      <p className="text-xs mt-1">המערכת כאן כדי לעזור לכם לארגן את המסיבה המושלמת במחיר הטוב ביותר</p>
-                    </div>
-                  </div>
-                </section>
-              </div>
-
-              <DialogFooter className="mt-4 sm:mt-6">
-                <Button onClick={() => setIsHelpOpen(false)} className="w-full sm:w-auto text-sm sm:text-base">
-                  הבנתי, בואו נתחיל! 🚀
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-          <Button variant="outline" onClick={exportToCSV}>
-            <Download className="h-4 w-4 ml-2" />
-            ייצוא CSV
-          </Button>
-          <Dialog open={isAddDialogOpen} onOpenChange={(open) => {
-            setIsAddDialogOpen(open)
-            if (!open) resetForm()
-          }}>
-            <DialogTrigger asChild>
-              <Button className="bg-gradient-to-r from-pink-500 to-purple-600">
-                <Plus className="h-4 w-4 ml-2" />
-                הוסף הצעה
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
+      {/* Add/Edit Dialog */}
+      <Dialog open={isAddDialogOpen} onOpenChange={(open) => {
+        setIsAddDialogOpen(open)
+        if (!open) resetForm()
+      }}>
+        <DialogContent className="fixed inset-0 w-full h-full max-w-full m-0 p-0 rounded-none sm:max-w-2xl sm:h-auto sm:rounded-lg sm:relative sm:inset-auto">
+          <div className="sticky top-0 bg-white z-50 border-b sm:relative sm:border-0">
+            <div className="flex items-center justify-between p-4 sm:p-0">
+              <button
+                onClick={() => setIsAddDialogOpen(false)}
+                className="text-gray-500 text-lg sm:hidden"
+              >
+                ביטול
+              </button>
+              <DialogHeader className="sm:block hidden">
                 <DialogTitle>
                   {editingQuote ? 'עריכת הצעת מחיר' : 'הצעת מחיר חדשה'}
                 </DialogTitle>
@@ -1001,993 +507,135 @@ export default function QuotesComparisonPage() {
                   הזן את פרטי הצעת המחיר מהספק
                 </DialogDescription>
               </DialogHeader>
-
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label htmlFor="vendor_name">שם הספק *</Label>
-                    <Input
-                      id="vendor_name"
-                      name="vendor_name"
-                      value={formData.vendor_name}
-                      onChange={handleChange}
-                      required
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="category">קטגוריה</Label>
-                    <Select
-                      value={formData.category}
-                      onValueChange={(v) => handleSelectChange('category', v)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {Object.entries(categoryLabels).map(([key, { label, emoji }]) => (
-                          <SelectItem key={key} value={key}>
-                            {emoji} {label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="vendor_contact_name">איש קשר</Label>
-                    <Input
-                      id="vendor_contact_name"
-                      name="vendor_contact_name"
-                      value={formData.vendor_contact_name}
-                      onChange={handleChange}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="vendor_phone">טלפון</Label>
-                    <Input
-                      id="vendor_phone"
-                      name="vendor_phone"
-                      value={formData.vendor_phone}
-                      onChange={handleChange}
-                      dir="ltr"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="price_total">מחיר כולל (₪) *</Label>
-                    <Input
-                      id="price_total"
-                      name="price_total"
-                      type="number"
-                      min="0"
-                      value={formData.price_total}
-                      onChange={handleChange}
-                      required
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="availability_status">זמינות</Label>
-                    <Select
-                      value={formData.availability_status}
-                      onValueChange={(v) => handleSelectChange('availability_status', v)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {Object.entries(availabilityLabels).map(([key, { label }]) => (
-                          <SelectItem key={key} value={key}>{label}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="services_included">שירותים כלולים (מופרדים בפסיקים)</Label>
-                  <Input
-                    id="services_included"
-                    name="services_included"
-                    value={formData.services_included}
-                    onChange={handleChange}
-                    placeholder="DJ, תאורה, מערכת שמע..."
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="price_notes">הערות מחיר / תנאי תשלום</Label>
-                  <Textarea
-                    id="price_notes"
-                    name="price_notes"
-                    value={formData.price_notes}
-                    onChange={handleChange}
-                    rows={2}
-                  />
-                </div>
-
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label htmlFor="pros">יתרונות</Label>
-                    <Textarea
-                      id="pros"
-                      name="pros"
-                      value={formData.pros}
-                      onChange={handleChange}
-                      rows={2}
-                      className="text-green-700"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="cons">חסרונות</Label>
-                    <Textarea
-                      id="cons"
-                      name="cons"
-                      value={formData.cons}
-                      onChange={handleChange}
-                      rows={2}
-                      className="text-red-700"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label htmlFor="rating">דירוג (1-5)</Label>
-                    <Input
-                      id="rating"
-                      name="rating"
-                      type="number"
-                      min="1"
-                      max="5"
-                      value={formData.rating}
-                      onChange={handleChange}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="display_label">תווית להצבעה</Label>
-                    <Input
-                      id="display_label"
-                      name="display_label"
-                      value={formData.display_label}
-                      onChange={handleChange}
-                      placeholder="אפשרות א'"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="admin_notes">הערות פנימיות (למנהלים בלבד)</Label>
-                  <Textarea
-                    id="admin_notes"
-                    name="admin_notes"
-                    value={formData.admin_notes}
-                    onChange={handleChange}
-                    rows={2}
-                  />
-                </div>
-
-                <div className="flex items-center gap-3 pt-2">
-                  <Switch
-                    checked={formData.is_finalist}
-                    onCheckedChange={(checked) => handleSwitchChange('is_finalist', checked)}
-                  />
-                  <Label>הוסף לאפשרויות הסופיות (להצבעה)</Label>
-                </div>
-
-                <DialogFooter>
-                  <Button type="button" variant="outline" onClick={() => {
-                    setIsAddDialogOpen(false)
-                    resetForm()
-                  }}>
-                    ביטול
-                  </Button>
-                  <Button type="submit" disabled={isSubmitting}>
-                    {isSubmitting ? 'שומר...' : editingQuote ? 'עדכן' : 'הוסף'}
-                  </Button>
-                </DialogFooter>
-              </form>
-            </DialogContent>
-          </Dialog>
-        </div>
-      </div>
-
-      {/* Quick Stats Row */}
-      <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
-        <Card>
-          <CardContent className="pt-4">
-            <div className="text-sm text-muted-foreground">סה"כ הצעות</div>
-            <div className="text-2xl font-bold">{quotes.length}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-4">
-            <div className="text-sm text-muted-foreground">מחיר ממוצע</div>
-            <div className="text-2xl font-bold">₪{avgPrice.toLocaleString('he-IL')}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-4">
-            <div className="text-sm text-muted-foreground">סופיים להצבעה</div>
-            <div className="text-2xl font-bold">{quotes.filter(q => q.is_finalist).length}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-4">
-            <div className="text-sm text-muted-foreground">תלמידים</div>
-            <div className="text-2xl font-bold">{promEvent?.student_count || 0}</div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Tools - Mobile: Dropdown, Desktop: Buttons */}
-      <div>
-        {/* Mobile: Single Dropdown Menu */}
-        <div className="md:hidden">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="w-full">
-                <MoreVertical className="h-4 w-4 ml-2" />
-                כלים מתקדמים
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuItem onClick={() => setShowPackageBuilder(!showPackageBuilder)}>
-                <Package className="h-4 w-4 ml-2" />
-                בונה חבילה
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setShowSupplierBuilder(!showSupplierBuilder)}>
-                <FileSpreadsheet className="h-4 w-4 ml-2" />
-                בונה ספקים
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setShowCategorySummary(!showCategorySummary)}>
-                <FileText className="h-4 w-4 ml-2" />
-                סיכום קטגוריות
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-
-        {/* Desktop: Three Separate Buttons */}
-        <div className="hidden md:flex gap-3 flex-wrap">
-          <Button
-            variant="outline"
-            className="flex items-center gap-2"
-            onClick={() => setShowPackageBuilder(!showPackageBuilder)}
-          >
-            <Package className="h-4 w-4" />
-            בונה חבילה
-            <ChevronDown className={cn("h-4 w-4 transition-transform", showPackageBuilder && "rotate-180")} />
-          </Button>
-          <Button
-            variant="outline"
-            className="flex items-center gap-2"
-            onClick={() => setShowSupplierBuilder(!showSupplierBuilder)}
-          >
-            <FileSpreadsheet className="h-4 w-4" />
-            בונה ספקים
-            <ChevronDown className={cn("h-4 w-4 transition-transform", showSupplierBuilder && "rotate-180")} />
-          </Button>
-          <Button
-            variant="outline"
-            className="flex items-center gap-2"
-            onClick={() => setShowCategorySummary(!showCategorySummary)}
-          >
-            <FileText className="h-4 w-4" />
-            סיכום קטגוריות
-            <ChevronDown className={cn("h-4 w-4 transition-transform", showCategorySummary && "rotate-180")} />
-          </Button>
-        </div>
-      </div>
-
-      {/* Package Builder Panel */}
-      {showPackageBuilder && (
-        <Card className="bg-gradient-to-br from-indigo-50 to-purple-50 border-indigo-200">
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <Package className="h-5 w-5 text-indigo-600" />
-              בונה חבילה
-            </CardTitle>
-            <CardDescription>
-              בחר ספק אחד מכל קטגוריה לחישוב עלות כוללת
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
-              {categoryStats.map(stat => {
-                const selectedQuote = selectedForPackage[stat.category]
-                  ? quotes.find(q => q.id === selectedForPackage[stat.category])
-                  : null
-
-                return (
-                  <div
-                    key={stat.category}
-                    className={cn(
-                      "p-3 rounded-lg border-2 transition-all",
-                      selectedQuote
-                        ? "bg-white border-indigo-400 shadow-sm"
-                        : "bg-white/50 border-dashed border-gray-300"
-                    )}
-                  >
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-lg">{categoryLabels[stat.category]?.emoji}</span>
-                      <span className="font-medium text-sm">{categoryLabels[stat.category]?.label}</span>
-                    </div>
-                    {selectedQuote ? (
-                      <div className="space-y-1">
-                        <div className="font-semibold text-indigo-900">{selectedQuote.vendor_name}</div>
-                        <div className="text-lg font-bold">₪{selectedQuote.price_total.toLocaleString('he-IL')}</div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="w-full text-red-600 hover:text-red-700 hover:bg-red-50"
-                          onClick={() => togglePackageSelection(selectedQuote)}
-                        >
-                          הסר מהחבילה
-                        </Button>
-                      </div>
-                    ) : (
-                      <div className="text-sm text-muted-foreground">
-                        {stat.count} הצעות זמינות
-                        <div className="text-xs mt-1">
-                          ₪{stat.minPrice.toLocaleString('he-IL')} - ₪{stat.maxPrice.toLocaleString('he-IL')}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )
-              })}
+              <h2 className="text-xl font-bold sm:hidden">הצעה חדשה</h2>
+              <div className="w-12 sm:hidden" />
             </div>
-
-            {/* Package Summary */}
-            {Object.keys(selectedForPackage).length > 0 && (
-              <div className="mt-4 p-4 bg-white rounded-lg border-2 border-indigo-300">
-                <div className="grid gap-4 md:grid-cols-4">
-                  <div>
-                    <div className="text-sm text-muted-foreground">סה"כ חבילה</div>
-                    <div className="text-2xl font-bold text-indigo-900">
-                      ₪{packageTotal.toLocaleString('he-IL')}
-                    </div>
-                  </div>
-                  <div>
-                    <div className="text-sm text-muted-foreground">לתלמיד</div>
-                    <div className="text-2xl font-bold">
-                      {packagePerStudent > 0 ? `₪${packagePerStudent.toLocaleString('he-IL')}` : '—'}
-                    </div>
-                  </div>
-                  <div>
-                    <div className="text-sm text-muted-foreground">מתקציב</div>
-                    <div className={cn(
-                      "text-2xl font-bold",
-                      budgetUsagePercent > 100 ? "text-red-600" : budgetUsagePercent > 80 ? "text-orange-600" : "text-green-600"
-                    )}>
-                      {budgetUsagePercent}%
-                    </div>
-                  </div>
-                  <div>
-                    <div className="text-sm text-muted-foreground">
-                      {budgetRemaining >= 0 ? 'נשאר בתקציב' : 'חריגה מתקציב'}
-                    </div>
-                    <div className={cn(
-                      "text-2xl font-bold",
-                      budgetRemaining >= 0 ? "text-green-600" : "text-red-600"
-                    )}>
-                      ₪{Math.abs(budgetRemaining).toLocaleString('he-IL')}
-                      {budgetRemaining < 0 && <AlertCircle className="inline h-5 w-5 mr-1" />}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Budget Progress Bar */}
-                {promEvent?.total_budget && promEvent.total_budget > 0 && (
-                  <div className="mt-4">
-                    <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
-                      <div
-                        className={cn(
-                          "h-full rounded-full transition-all duration-500",
-                          budgetUsagePercent > 100 ? "bg-red-500"
-                            : budgetUsagePercent > 80 ? "bg-orange-500"
-                            : "bg-green-500"
-                        )}
-                        style={{ width: `${Math.min(100, budgetUsagePercent)}%` }}
-                      />
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Category Summary Cards - Minimized at Start */}
-      {showCategorySummary && categoryStats.length > 0 && (
-        <div className="grid gap-3 grid-cols-2 md:grid-cols-4 lg:grid-cols-4">
-          {categoryStats.map(stat => (
-            <Card
-              key={stat.category}
-              className={cn(
-                "cursor-pointer transition-all hover:shadow-md",
-                selectedCategory === stat.category && "ring-2 ring-pink-500"
-              )}
-              onClick={() => setSelectedCategory(selectedCategory === stat.category ? 'all' : stat.category)}
-            >
-              <CardContent className="pt-4">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-2xl">{categoryLabels[stat.category]?.emoji}</span>
-                  <Badge variant="secondary" className="text-xs">
-                    {stat.count} הצעות
-                  </Badge>
-                </div>
-                <div className="font-medium text-sm mb-1">
-                  {categoryLabels[stat.category]?.label}
-                </div>
-                <div className="text-xs text-muted-foreground space-y-0.5">
-                  <div className="flex justify-between">
-                    <span>טווח:</span>
-                    <span className="font-medium">
-                      ₪{stat.minPrice.toLocaleString('he-IL')} - ₪{stat.maxPrice.toLocaleString('he-IL')}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>ממוצע:</span>
-                    <span className="font-medium">₪{stat.avgPrice.toLocaleString('he-IL')}</span>
-                  </div>
-                </div>
-                {/* Mini badges */}
-                <div className="flex gap-1 mt-2 flex-wrap">
-                  {stat.cheapestId && (
-                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-green-100 text-green-700">
-                      <TrendingDown className="inline h-2.5 w-2.5" /> זול
-                    </span>
-                  )}
-                  {stat.highestRatedId && (
-                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-yellow-100 text-yellow-700">
-                      <Star className="inline h-2.5 w-2.5" /> מדורג
-                    </span>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
-
-      {/* Category Filter - Mobile Optimized */}
-      <div className="space-y-3">
-        {/* Mobile: Dropdown Select */}
-        <div className="md:hidden">
-          <Label htmlFor="category-select" className="text-sm font-medium mb-2 block">
-            סנן לפי קטגוריה
-          </Label>
-          <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-            <SelectTrigger id="category-select" className="w-full">
-              <SelectValue>
-                {selectedCategory === 'all'
-                  ? 'הכל'
-                  : `${categoryLabels[selectedCategory]?.emoji} ${categoryLabels[selectedCategory]?.label}`
-                }
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">הכל ({quotes.length} הצעות)</SelectItem>
-              {Object.entries(categoryLabels)
-                .sort(([, a], [, b]) => a.label.localeCompare(b.label, 'he'))
-                .map(([key, { label, emoji }]) => {
-                  const count = quotes.filter(q => q.category === key).length
-                  return count > 0 ? (
-                    <SelectItem key={key} value={key}>
-                      {emoji} {label} ({count})
-                    </SelectItem>
-                  ) : null
-                })}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Desktop: Pills */}
-        <div className="hidden md:flex gap-2 flex-wrap">
-          <Button
-            variant={selectedCategory === 'all' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setSelectedCategory('all')}
-          >
-            הכל
-          </Button>
-          {Object.entries(categoryLabels)
-            .sort(([, a], [, b]) => a.label.localeCompare(b.label, 'he'))
-            .map(([key, { label, emoji }]) => {
-              const count = quotes.filter(q => q.category === key).length
-              return count > 0 ? (
-                <Button
-                  key={key}
-                  variant={selectedCategory === key ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setSelectedCategory(key)}
-                >
-                  {emoji} {label}
-                </Button>
-              ) : null
-            })}
-        </div>
-      </div>
-
-      {/* Quotes Display */}
-      {quotes.length === 0 ? (
-        <Card>
-          <CardContent className="text-center py-12">
-            <FileText className="h-16 w-16 text-muted-foreground mx-auto mb-4 opacity-50" />
-            <h3 className="text-xl font-semibold mb-2">אין הצעות מחיר</h3>
-            <p className="text-muted-foreground mb-6">
-              הוסיפו הצעות מחיר מספקים שונים להשוואה
-            </p>
-            <Button onClick={() => setIsAddDialogOpen(true)}>
-              <Plus className="h-4 w-4 ml-2" />
-              הוסף הצעה ראשונה
-            </Button>
-          </CardContent>
-        </Card>
-      ) : (
-        <>
-          {/* Mobile: Card Layout */}
-          <div className="md:hidden space-y-3">
-            {filteredQuotes.map((quote, index) => {
-              const isFirstInCategory = index === 0 || filteredQuotes[index - 1].category !== quote.category
-              const isExpanded = expandedRows.has(quote.id)
-
-              return (
-                <React.Fragment key={quote.id}>
-                  {/* Category Header */}
-                  {isFirstInCategory && (
-                    <div className="bg-gray-100 px-3 py-2 rounded-lg font-bold text-sm flex items-center gap-2">
-                      <span className="text-xl">{categoryLabels[quote.category]?.emoji}</span>
-                      <span>{categoryLabels[quote.category]?.label}</span>
-                      <Badge variant="secondary" className="text-xs mr-auto">
-                        {filteredQuotes.filter(q => q.category === quote.category).length}
-                      </Badge>
-                    </div>
-                  )}
-
-                  {/* Quote Card */}
-                  <Card className={cn(
-                    "transition-all",
-                    quote.is_selected && "ring-2 ring-green-500 bg-green-50",
-                    quote.is_finalist && !quote.is_selected && "ring-2 ring-purple-500 bg-purple-50"
-                  )}>
-                    <CardContent className="p-4">
-                      {/* Card Header - Always Visible */}
-                      <div className="space-y-3">
-                        {/* Vendor Name + Price */}
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="flex-1">
-                            <h3 className="font-bold text-lg">{quote.vendor_name}</h3>
-                            {quote.is_selected && (
-                              <Badge className="bg-green-600 mt-1">נבחר ✓</Badge>
-                            )}
-                            {quote.is_finalist && !quote.is_selected && (
-                              <Badge className="bg-purple-600 mt-1">סופי</Badge>
-                            )}
-                          </div>
-                          <div className="text-left">
-                            <div className="text-2xl font-bold">₪{quote.price_total.toLocaleString('he-IL')}</div>
-                            {quote.price_per_student && (
-                              <div className="text-xs text-muted-foreground">₪{quote.price_per_student.toLocaleString('he-IL')} לתלמיד</div>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Availability + Rating */}
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <Badge className={availabilityLabels[quote.availability_status]?.color}>
-                            {availabilityLabels[quote.availability_status]?.label}
-                          </Badge>
-                          {quote.rating && (
-                            <div className="flex items-center gap-1">
-                              <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                              <span className="text-sm font-medium">{quote.rating}</span>
-                            </div>
-                          )}
-                          {/* Smart Badges */}
-                          {getQuoteBadges(quote).map((badge) => (
-                            <Badge key={badge.type} variant="outline" className={badge.color}>
-                              {badge.label}
-                            </Badge>
-                          ))}
-                        </div>
-
-                        {/* Expand/Collapse Button */}
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="w-full"
-                          onClick={() => toggleRowExpand(quote.id)}
-                        >
-                          {isExpanded ? (
-                            <>
-                              <ChevronUp className="h-4 w-4 ml-2" />
-                              הסתר פרטים
-                            </>
-                          ) : (
-                            <>
-                              <ChevronDown className="h-4 w-4 ml-2" />
-                              הצג פרטים
-                            </>
-                          )}
-                        </Button>
-                      </div>
-
-                      {/* Expanded Details */}
-                      {isExpanded && (
-                        <div className="mt-4 pt-4 border-t space-y-3">
-                          {/* Contact Info */}
-                          {(quote.vendor_contact_name || quote.vendor_phone || quote.vendor_email) && (
-                            <div className="space-y-1 text-sm">
-                              {quote.vendor_contact_name && <div>👤 {quote.vendor_contact_name}</div>}
-                              {quote.vendor_phone && (
-                                <a href={`tel:${quote.vendor_phone}`} className="flex items-center gap-1 text-blue-600">
-                                  <Phone className="h-3 w-3" />
-                                  {quote.vendor_phone}
-                                </a>
-                              )}
-                              {quote.vendor_email && (
-                                <a href={`mailto:${quote.vendor_email}`} className="flex items-center gap-1 text-blue-600">
-                                  <Mail className="h-3 w-3" />
-                                  {quote.vendor_email}
-                                </a>
-                              )}
-                            </div>
-                          )}
-
-                          {/* Services */}
-                          {quote.services_included?.length > 0 && (
-                            <div>
-                              <div className="text-sm font-medium mb-1">שירותים כלולים:</div>
-                              <div className="flex flex-wrap gap-1">
-                                {quote.services_included.map((service, i) => (
-                                  <Badge key={i} variant="secondary" className="text-xs">{service}</Badge>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Pros & Cons */}
-                          {(quote.pros || quote.cons) && (
-                            <div className="space-y-2">
-                              {quote.pros && (
-                                <div className="p-2 bg-green-50 rounded border border-green-200">
-                                  <div className="text-xs font-medium text-green-800 mb-1">✓ יתרונות</div>
-                                  <div className="text-xs text-green-700">{quote.pros}</div>
-                                </div>
-                              )}
-                              {quote.cons && (
-                                <div className="p-2 bg-red-50 rounded border border-red-200">
-                                  <div className="text-xs font-medium text-red-800 mb-1">✗ חסרונות</div>
-                                  <div className="text-xs text-red-700">{quote.cons}</div>
-                                </div>
-                              )}
-                            </div>
-                          )}
-
-                          {/* Actions */}
-                          <div className="flex gap-2 pt-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="flex-1"
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                togglePackageSelection(quote)
-                              }}
-                            >
-                              <Package className="h-3 w-3 ml-1" />
-                              {selectedForPackage[quote.category] === quote.id ? 'הסר מחבילה' : 'הוסף לחבילה'}
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                setEditingQuote(quote)
-                              }}
-                            >
-                              <Edit2 className="h-3 w-3" />
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                handleDelete(quote.id)
-                              }}
-                            >
-                              <Trash2 className="h-3 w-3 text-red-600" />
-                            </Button>
-                          </div>
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                </React.Fragment>
-              )
-            })}
           </div>
 
-          {/* Desktop: Table Layout */}
-          <Card className="hidden md:block">
-            <CardHeader>
-              <CardTitle>טבלת השוואה</CardTitle>
-              <CardDescription>
-                לחץ על שורה להרחבת פרטים • {filteredQuotes.length} הצעות
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="overflow-x-auto">
-              <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-8"></TableHead>
-                  <TableHead>ספק</TableHead>
-                  <TableHead>קטגוריה</TableHead>
-                  <TableHead className="text-left">מחיר</TableHead>
-                  <TableHead className="text-left">לתלמיד</TableHead>
-                  <TableHead>זמינות</TableHead>
-                  <TableHead>דירוג</TableHead>
-                  <TableHead>סטטוס</TableHead>
-                  <TableHead className="w-24">פעולות</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredQuotes.map((quote, index) => {
-                  // Check if this is the first quote in a new category
-                  const isFirstInCategory = index === 0 || filteredQuotes[index - 1].category !== quote.category
-                  const categoryIndex = filteredQuotes.slice(0, index).filter((q, i) =>
-                    i === 0 || filteredQuotes[i - 1].category !== q.category
-                  ).length
+          <form onSubmit={handleSubmit} className="h-full flex flex-col sm:block">
+            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="vendor_name" className="text-base font-bold">שם הספק *</Label>
+                <Input
+                  id="vendor_name"
+                  name="vendor_name"
+                  value={formData.vendor_name}
+                  onChange={handleChange}
+                  required
+                  className="h-14 text-lg"
+                  placeholder="לדוגמה: DJ מוטי כהן"
+                />
+              </div>
 
-                  // Alternating colors for different categories
-                  const categoryColors = [
-                    'bg-blue-50/30',
-                    'bg-amber-50/30',
-                    'bg-green-50/30',
-                    'bg-purple-50/30',
-                    'bg-pink-50/30',
-                    'bg-cyan-50/30',
-                    'bg-orange-50/30',
-                    'bg-teal-50/30',
-                  ]
-                  const baseCategoryBg = categoryColors[categoryIndex % categoryColors.length]
+              <div className="space-y-2">
+                <Label htmlFor="category" className="text-base font-bold">קטגוריה *</Label>
+                <Select
+                  value={formData.category}
+                  onValueChange={(v) => handleSelectChange('category', v)}
+                >
+                  <SelectTrigger className="h-14 text-lg">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(categoryLabels).map(([key, { label, emoji }]) => (
+                      <SelectItem key={key} value={key} className="text-base">
+                        {emoji} {label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-                  return (
-                    <React.Fragment key={quote.id}>
-                      {/* Category Header Row */}
-                      {isFirstInCategory && (
-                        <TableRow className="bg-gray-100 border-t-2 border-gray-300">
-                          <TableCell colSpan={9} className="font-bold text-sm py-2">
-                            <div className="flex items-center gap-2">
-                              <span className="text-xl">{categoryLabels[quote.category]?.emoji}</span>
-                              <span>{categoryLabels[quote.category]?.label}</span>
-                              <Badge variant="secondary" className="text-xs mr-2">
-                                {filteredQuotes.filter(q => q.category === quote.category).length} הצעות
-                              </Badge>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      )}
+              <div className="space-y-2">
+                <Label htmlFor="price_total" className="text-base font-bold">מחיר כולל (₪) *</Label>
+                <Input
+                  id="price_total"
+                  name="price_total"
+                  type="number"
+                  min="0"
+                  value={formData.price_total}
+                  onChange={handleChange}
+                  required
+                  className="h-14 text-lg"
+                  placeholder="8000"
+                />
+              </div>
 
-                      {/* Quote Row */}
-                      <TableRow
-                        className={cn(
-                          "cursor-pointer transition-colors",
-                          baseCategoryBg,
-                          quote.is_selected && "bg-green-100 hover:bg-green-200",
-                          quote.is_finalist && !quote.is_selected && "bg-purple-100 hover:bg-purple-200",
-                          selectedForPackage[quote.category] === quote.id && !quote.is_selected && !quote.is_finalist && "bg-indigo-100 hover:bg-indigo-200",
-                          !quote.is_selected && !quote.is_finalist && selectedForPackage[quote.category] !== quote.id && `hover:${baseCategoryBg.replace('/30', '/50')}`
-                        )}
-                        onClick={() => toggleRowExpand(quote.id)}
-                      >
-                      <TableCell>
-                        {expandedRows.has(quote.id) ? (
-                          <ChevronUp className="h-4 w-4" />
-                        ) : (
-                          <ChevronDown className="h-4 w-4" />
-                        )}
-                      </TableCell>
-                      <TableCell className="font-medium">
-                        <div className="flex items-center gap-2">
-                          {quote.is_selected && <CheckCircle2 className="h-4 w-4 text-green-600" />}
-                          {selectedForPackage[quote.category] === quote.id && (
-                            <Package className="h-4 w-4 text-indigo-600" />
-                          )}
-                          {quote.vendor_name}
-                        </div>
-                        {/* Smart Badges */}
-                        <div className="flex gap-1 mt-1 flex-wrap">
-                          {getQuoteBadges(quote).map((badge) => (
-                            <span
-                              key={badge.type}
-                              className={cn("text-[10px] px-1.5 py-0.5 rounded border", badge.color)}
-                            >
-                              {badge.type === 'cheapest' && <TrendingDown className="inline h-2.5 w-2.5 mr-0.5" />}
-                              {badge.type === 'rated' && <Star className="inline h-2.5 w-2.5 mr-0.5" />}
-                              {badge.type === 'value' && <Sparkles className="inline h-2.5 w-2.5 mr-0.5" />}
-                              {badge.type === 'expensive' && <AlertCircle className="inline h-2.5 w-2.5 mr-0.5" />}
-                              {badge.label}
-                            </span>
-                          ))}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <span className="flex items-center gap-1">
-                          {categoryLabels[quote.category]?.emoji}
-                          <span className="hidden sm:inline">{categoryLabels[quote.category]?.label}</span>
-                        </span>
-                      </TableCell>
-                      <TableCell className="text-left font-semibold">
-                        ₪{quote.price_total.toLocaleString('he-IL')}
-                      </TableCell>
-                      <TableCell className="text-left text-muted-foreground">
-                        {quote.price_per_student
-                          ? `₪${quote.price_per_student.toLocaleString('he-IL')}`
-                          : '—'}
-                      </TableCell>
-                      <TableCell>
-                        <Badge className={availabilityLabels[quote.availability_status]?.color}>
-                          {availabilityLabels[quote.availability_status]?.label}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        {quote.rating && (
-                          <div className="flex items-center gap-1">
-                            <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                            {quote.rating}
-                          </div>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        {quote.is_selected ? (
-                          <Badge className="bg-green-600">נבחר</Badge>
-                        ) : quote.is_finalist ? (
-                          <Badge variant="outline" className="border-purple-400 text-purple-700">סופי</Badge>
-                        ) : null}
-                      </TableCell>
-                      <TableCell onClick={(e: React.MouseEvent) => e.stopPropagation()}>
-                        <div className="flex gap-1">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            title={selectedForPackage[quote.category] === quote.id ? "הסר מחבילה" : "הוסף לחבילה"}
-                            className={cn(
-                              selectedForPackage[quote.category] === quote.id && "text-indigo-600 bg-indigo-50"
-                            )}
-                            onClick={() => togglePackageSelection(quote)}
-                          >
-                            <Package className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => openEditDialog(quote)}
-                          >
-                            <Edit2 className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="text-red-600"
-                            onClick={() => handleDelete(quote.id)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
+              <div className="space-y-2">
+                <Label htmlFor="vendor_phone" className="text-base font-bold">טלפון</Label>
+                <Input
+                  id="vendor_phone"
+                  name="vendor_phone"
+                  type="tel"
+                  value={formData.vendor_phone}
+                  onChange={handleChange}
+                  className="h-14 text-lg"
+                  placeholder="050-1234567"
+                  dir="ltr"
+                />
+              </div>
 
-                    {/* Expanded Row */}
-                    {expandedRows.has(quote.id) && (
-                      <TableRow className="bg-muted/30">
-                        <TableCell colSpan={9}>
-                          <div className="p-4 space-y-4">
-                            {/* Contact Info */}
-                            <div className="flex flex-wrap gap-4 text-sm">
-                              {quote.vendor_contact_name && (
-                                <span>👤 {quote.vendor_contact_name}</span>
-                              )}
-                              {quote.vendor_phone && (
-                                <a href={`tel:${quote.vendor_phone}`} className="flex items-center gap-1 text-blue-600">
-                                  <Phone className="h-3 w-3" />
-                                  {quote.vendor_phone}
-                                </a>
-                              )}
-                              {quote.vendor_email && (
-                                <a href={`mailto:${quote.vendor_email}`} className="flex items-center gap-1 text-blue-600">
-                                  <Mail className="h-3 w-3" />
-                                  {quote.vendor_email}
-                                </a>
-                              )}
-                            </div>
+              <div className="space-y-2">
+                <Label htmlFor="services_included" className="text-base font-bold">שירותים כלולים</Label>
+                <Textarea
+                  id="services_included"
+                  name="services_included"
+                  value={formData.services_included}
+                  onChange={handleChange}
+                  className="min-h-[80px] text-base"
+                  placeholder="מערכת הגברה, תאורה, 5 שעות ניגון (הפרד בפסיקים)"
+                />
+              </div>
 
-                            {/* Services */}
-                            {quote.services_included?.length > 0 && (
-                              <div>
-                                <span className="text-sm font-medium">שירותים כלולים:</span>
-                                <div className="flex flex-wrap gap-1 mt-1">
-                                  {quote.services_included.map((service, i) => (
-                                    <Badge key={i} variant="secondary">{service}</Badge>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
+              <div className="space-y-2">
+                <Label htmlFor="rating" className="text-base font-bold">דירוג (1-5)</Label>
+                <Select
+                  value={formData.rating}
+                  onValueChange={(v) => handleSelectChange('rating', v)}
+                >
+                  <SelectTrigger className="h-14 text-lg">
+                    <SelectValue placeholder="בחר דירוג" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {[1, 2, 3, 4, 5].map(n => (
+                      <SelectItem key={n} value={n.toString()} className="text-base">
+                        {Array(n).fill('⭐').join('')} ({n})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
 
-                            {/* Pros & Cons */}
-                            <div className="grid gap-4 md:grid-cols-2">
-                              {quote.pros && (
-                                <div className="p-3 bg-green-50 rounded-lg border border-green-200">
-                                  <span className="text-sm font-medium text-green-800">✓ יתרונות</span>
-                                  <p className="text-sm text-green-700 mt-1">{quote.pros}</p>
-                                </div>
-                              )}
-                              {quote.cons && (
-                                <div className="p-3 bg-red-50 rounded-lg border border-red-200">
-                                  <span className="text-sm font-medium text-red-800">✗ חסרונות</span>
-                                  <p className="text-sm text-red-700 mt-1">{quote.cons}</p>
-                                </div>
-                              )}
-                            </div>
+            <div className="sticky bottom-0 bg-white border-t p-4 sm:relative sm:border-0 sm:p-0 sm:mt-6">
+              <DialogFooter>
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full h-14 text-lg font-bold bg-gradient-to-r from-purple-600 to-pink-600 sm:w-auto sm:h-auto sm:text-base"
+                >
+                  {isSubmitting ? 'שומר...' : editingQuote ? 'עדכן' : 'הוסף הצעה'}
+                </Button>
+              </DialogFooter>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
 
-                            {/* Price Notes */}
-                            {quote.price_notes && (
-                              <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
-                                <span className="text-sm font-medium text-blue-800">💰 תנאי תשלום</span>
-                                <p className="text-sm text-blue-700 mt-1">{quote.price_notes}</p>
-                              </div>
-                            )}
-
-                            {/* Admin Notes */}
-                            {quote.admin_notes && (
-                              <div className="p-3 bg-gray-100 rounded-lg border">
-                                <span className="text-sm font-medium">📝 הערות פנימיות</span>
-                                <p className="text-sm text-muted-foreground mt-1">{quote.admin_notes}</p>
-                              </div>
-                            )}
-
-                            {/* Actions */}
-                            <div className="flex gap-2 pt-2">
-                              <Button
-                                variant={quote.is_finalist ? 'secondary' : 'outline'}
-                                size="sm"
-                                onClick={() => handleToggleFinalist(quote)}
-                              >
-                                {quote.is_finalist ? 'הסר מהסופיים' : 'הוסף לסופיים'}
-                              </Button>
-                              {!quote.is_selected && (
-                                <Button
-                                  variant="default"
-                                  size="sm"
-                                  className="bg-green-600 hover:bg-green-700"
-                                  onClick={() => handleSelectWinner(quote)}
-                                >
-                                  <Check className="h-4 w-4 ml-1" />
-                                  בחר כזוכה
-                                </Button>
-                              )}
-                            </div>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </React.Fragment>
-                  )
-                })}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-        </>
-      )}
+      {/* QR Dialog */}
+      <Dialog open={showQRDialog} onOpenChange={setShowQRDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>שתף עם קוד QR</DialogTitle>
+            <DialogDescription>
+              סרוק את הקוד כדי לפתוח את דף ההשוואה
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-center p-6">
+            <QRCode value={qrCodeUrl} size={256} />
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

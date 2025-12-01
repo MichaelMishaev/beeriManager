@@ -126,28 +126,26 @@ export default function PromDashboardPage() {
   const activeEvents = promEvents.filter(e => !['completed', 'cancelled'].includes(e.status)).length
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6 px-3 md:px-0">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <div className="flex items-center gap-3">
-            <div className="bg-gradient-to-br from-pink-500 to-purple-600 p-3 rounded-xl shadow-lg">
-              <GraduationCap className="h-8 w-8 text-white" />
-            </div>
-            <div>
-              <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
-                תכנון מסיבת סיום
-              </h1>
-              <p className="text-muted-foreground">
-                ניהול מסיבות סיום כיתה ו' - השוואת מחירים והצבעות
-              </p>
-            </div>
+      <div className="flex flex-col gap-4">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="bg-gradient-to-br from-pink-500 to-purple-600 p-2.5 md:p-3 rounded-xl shadow-lg shrink-0">
+            <GraduationCap className="h-6 w-6 md:h-8 md:w-8 text-white" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <h1 className="text-xl md:text-3xl font-bold bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
+              תכנון מסיבת סיום
+            </h1>
+            <p className="text-sm md:text-base text-muted-foreground hidden sm:block">
+              ניהול מסיבות סיום כיתה ו' - השוואת מחירים והצבעות
+            </p>
           </div>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 w-full sm:w-auto">
           <Dialog open={isHelpOpen} onOpenChange={setIsHelpOpen}>
             <DialogTrigger asChild>
-              <Button variant="outline" size="icon" title="מדריך שימוש">
+              <Button variant="outline" size="icon" title="מדריך שימוש" className="shrink-0">
                 <HelpCircle className="h-4 w-4" />
               </Button>
             </DialogTrigger>
@@ -206,7 +204,7 @@ export default function PromDashboardPage() {
               </DialogFooter>
             </DialogContent>
           </Dialog>
-          <Button asChild className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700">
+          <Button asChild className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 flex-1 sm:flex-initial h-11">
             <Link href="/admin/prom/new">
               <Plus className="h-4 w-4 ml-2" />
               אירוע חדש
@@ -216,48 +214,48 @@ export default function PromDashboardPage() {
       </div>
 
       {/* Stats Overview */}
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-3 md:gap-4 grid-cols-2 lg:grid-cols-4">
         <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-blue-800 flex items-center gap-2">
-              <Calendar className="h-4 w-4" />
+          <CardHeader className="pb-2 pt-4">
+            <CardTitle className="text-base md:text-sm font-medium text-blue-800 flex items-center gap-2">
+              <Calendar className="h-5 w-5 md:h-4 md:w-4" />
               אירועים פעילים
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-blue-900">{activeEvents}</div>
-            <p className="text-xs text-blue-700">מתוך {promEvents.length} סה"כ</p>
+          <CardContent className="pb-4">
+            <div className="text-3xl md:text-3xl font-bold text-blue-900">{activeEvents}</div>
+            <p className="text-sm md:text-xs text-blue-700">מתוך {promEvents.length} סה"כ</p>
           </CardContent>
         </Card>
 
         <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-green-800 flex items-center gap-2">
-              <DollarSign className="h-4 w-4" />
+          <CardHeader className="pb-2 pt-4">
+            <CardTitle className="text-base md:text-sm font-medium text-green-800 flex items-center gap-2">
+              <DollarSign className="h-5 w-5 md:h-4 md:w-4" />
               תקציב כולל
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-green-900">
+          <CardContent className="pb-4">
+            <div className="text-2xl md:text-3xl font-bold text-green-900">
               ₪{totalBudget.toLocaleString('he-IL')}
             </div>
-            <p className="text-xs text-green-700">
+            <p className="text-sm md:text-xs text-green-700">
               הוצאו: ₪{totalSpent.toLocaleString('he-IL')}
             </p>
           </CardContent>
         </Card>
 
         <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-purple-800 flex items-center gap-2">
-              <Users className="h-4 w-4" />
+          <CardHeader className="pb-2 pt-4">
+            <CardTitle className="text-base md:text-sm font-medium text-purple-800 flex items-center gap-2">
+              <Users className="h-5 w-5 md:h-4 md:w-4" />
               תלמידים
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-purple-900">{totalStudents}</div>
-            <p className="text-xs text-purple-700">
-              {totalStudents > 0 && totalBudget > 0 
+          <CardContent className="pb-4">
+            <div className="text-3xl md:text-3xl font-bold text-purple-900">{totalStudents}</div>
+            <p className="text-sm md:text-xs text-purple-700">
+              {totalStudents > 0 && totalBudget > 0
                 ? `₪${Math.round(totalBudget / totalStudents)} לתלמיד`
                 : 'אין נתונים'}
             </p>
@@ -265,17 +263,17 @@ export default function PromDashboardPage() {
         </Card>
 
         <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-orange-800 flex items-center gap-2">
-              <Vote className="h-4 w-4" />
+          <CardHeader className="pb-2 pt-4">
+            <CardTitle className="text-base md:text-sm font-medium text-orange-800 flex items-center gap-2">
+              <Vote className="h-5 w-5 md:h-4 md:w-4" />
               הצבעות
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-orange-900">
+          <CardContent className="pb-4">
+            <div className="text-3xl md:text-3xl font-bold text-orange-900">
               {promEvents.reduce((sum, e) => sum + (e.votes_count || 0), 0)}
             </div>
-            <p className="text-xs text-orange-700">
+            <p className="text-sm md:text-xs text-orange-700">
               {promEvents.filter(e => e.voting_enabled).length} הצבעות פעילות
             </p>
           </CardContent>
@@ -315,7 +313,7 @@ export default function PromDashboardPage() {
               </Button>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3 md:space-y-4">
               {promEvents.map((event) => (
                 <Card
                   key={event.id}
@@ -330,43 +328,45 @@ export default function PromDashboardPage() {
                   onClick={() => router.push(`/admin/prom/${event.id}/quotes`)}
                 >
                   <CardContent className="p-4">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <h3 className="text-lg font-semibold">{event.title}</h3>
-                          <Badge className={statusLabels[event.status].color}>
-                            {statusLabels[event.status].label}
-                          </Badge>
-                          {event.voting_enabled && (
-                            <Badge variant="outline" className="border-purple-300 text-purple-700">
-                              <Vote className="h-3 w-3 ml-1" />
-                              הצבעה פעילה
+                    <div className="flex flex-col gap-4">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-3">
+                          <h3 className="text-lg md:text-xl font-semibold min-w-0 break-words">{event.title}</h3>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <Badge className={cn(statusLabels[event.status].color, "text-xs")}>
+                              {statusLabels[event.status].label}
                             </Badge>
-                          )}
+                            {event.voting_enabled && (
+                              <Badge variant="outline" className="border-purple-300 text-purple-700 text-xs">
+                                <Vote className="h-3 w-3 ml-1" />
+                                הצבעה פעילה
+                              </Badge>
+                            )}
+                          </div>
                         </div>
-                        
-                        <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+
+                        <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-3 sm:gap-4 text-sm text-muted-foreground mb-3">
                           {event.event_date && (
-                            <span className="flex items-center gap-1">
-                              <Calendar className="h-4 w-4" />
-                              {format(new Date(event.event_date), 'dd בMMMM yyyy', { locale: he })}
+                            <span className="flex items-center gap-1.5">
+                              <Calendar className="h-4 w-4 shrink-0" />
+                              <span className="truncate">{format(new Date(event.event_date), 'dd בMMMM yyyy', { locale: he })}</span>
                             </span>
                           )}
-                          <span className="flex items-center gap-1">
-                            <Users className="h-4 w-4" />
+                          <span className="flex items-center gap-1.5">
+                            <Users className="h-4 w-4 shrink-0" />
                             {event.student_count || 0} תלמידים
                           </span>
-                          <span className="flex items-center gap-1">
-                            <DollarSign className="h-4 w-4" />
+                          <span className="flex items-center gap-1.5">
+                            <DollarSign className="h-4 w-4 shrink-0" />
                             ₪{(event.total_budget || 0).toLocaleString('he-IL')}
                           </span>
-                          <span className="flex items-center gap-1">
-                            <FileSpreadsheet className="h-4 w-4" />
-                            {event.quotes_count || 0} הצעות מחיר
+                          <span className="flex items-center gap-1.5">
+                            <FileSpreadsheet className="h-4 w-4 shrink-0" />
+                            {event.quotes_count || 0} הצעות
                           </span>
                           {event.votes_count && event.votes_count > 0 && (
-                            <span className="flex items-center gap-1">
-                              <BarChart3 className="h-4 w-4" />
+                            <span className="flex items-center gap-1.5">
+                              <BarChart3 className="h-4 w-4 shrink-0" />
                               {event.votes_count} הצבעות
                             </span>
                           )}
@@ -375,18 +375,18 @@ export default function PromDashboardPage() {
                         {/* Budget Progress */}
                         {event.total_budget > 0 && (
                           <div className="mt-3">
-                            <div className="flex justify-between text-xs text-muted-foreground mb-1">
+                            <div className="flex justify-between text-xs text-muted-foreground mb-1.5">
                               <span>תקציב</span>
                               <span>
                                 ₪{(event.total_spent || 0).toLocaleString('he-IL')} / ₪{event.total_budget.toLocaleString('he-IL')}
                               </span>
                             </div>
-                            <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                              <div 
+                            <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
+                              <div
                                 className={cn(
                                   "h-full rounded-full transition-all",
-                                  ((event.total_spent || 0) / event.total_budget) > 0.9 
-                                    ? "bg-red-500" 
+                                  ((event.total_spent || 0) / event.total_budget) > 0.9
+                                    ? "bg-red-500"
                                     : ((event.total_spent || 0) / event.total_budget) > 0.7
                                       ? "bg-yellow-500"
                                       : "bg-green-500"
@@ -398,29 +398,29 @@ export default function PromDashboardPage() {
                         )}
                       </div>
 
-                      <div className="flex flex-wrap gap-2" onClick={(e) => e.stopPropagation()}>
-                        <Button variant="outline" size="sm" asChild>
+                      <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2" onClick={(e) => e.stopPropagation()}>
+                        <Button variant="outline" size="sm" asChild className="h-10">
                           <Link href={`/admin/prom/${event.id}/quotes`}>
                             <FileSpreadsheet className="h-4 w-4 ml-2" />
                             השוואה
                           </Link>
                         </Button>
-                        <Button variant="outline" size="sm" asChild>
+                        <Button variant="outline" size="sm" asChild className="h-10">
                           <Link href={`/admin/prom/${event.id}/budget`}>
                             <DollarSign className="h-4 w-4 ml-2" />
                             תקציב
                           </Link>
                         </Button>
-                        <Button variant="outline" size="sm" asChild>
+                        <Button variant="outline" size="sm" asChild className="h-10">
                           <Link href={`/admin/prom/${event.id}`}>
                             <Edit className="h-4 w-4 ml-2" />
                             עריכה
                           </Link>
                         </Button>
                         <Button
-                          variant="ghost"
+                          variant="outline"
                           size="sm"
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200 h-10"
                           onClick={() => handleDelete(event.id)}
                         >
                           <Trash2 className="h-4 w-4" />
@@ -438,32 +438,32 @@ export default function PromDashboardPage() {
       {/* Quick Actions */}
       <Card>
         <CardHeader>
-          <CardTitle>פעולות מהירות</CardTitle>
+          <CardTitle className="text-base md:text-lg">פעולות מהירות</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <Button variant="outline" asChild className="h-auto py-4 flex-col gap-2">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
+            <Button variant="outline" asChild className="h-auto py-5 md:py-4 flex-col gap-2">
               <Link href="/admin/prom/new">
-                <Plus className="h-5 w-5" />
-                <span>מסיבה חדשה</span>
+                <Plus className="h-5 w-5 md:h-5 md:w-5" />
+                <span className="text-sm md:text-base">מסיבה חדשה</span>
               </Link>
             </Button>
-            <Button variant="outline" asChild className="h-auto py-4 flex-col gap-2">
+            <Button variant="outline" asChild className="h-auto py-5 md:py-4 flex-col gap-2">
               <Link href="/admin/vendors">
-                <Users className="h-5 w-5" />
-                <span>ספקים</span>
+                <Users className="h-5 w-5 md:h-5 md:w-5" />
+                <span className="text-sm md:text-base">ספקים</span>
               </Link>
             </Button>
-            <Button variant="outline" asChild className="h-auto py-4 flex-col gap-2">
+            <Button variant="outline" asChild className="h-auto py-5 md:py-4 flex-col gap-2">
               <Link href="/admin/expenses">
-                <DollarSign className="h-5 w-5" />
-                <span>הוצאות</span>
+                <DollarSign className="h-5 w-5 md:h-5 md:w-5" />
+                <span className="text-sm md:text-base">הוצאות</span>
               </Link>
             </Button>
-            <Button variant="outline" asChild className="h-auto py-4 flex-col gap-2">
+            <Button variant="outline" asChild className="h-auto py-5 md:py-4 flex-col gap-2">
               <Link href="/admin/events/new">
-                <Calendar className="h-5 w-5" />
-                <span>אירוע חדש</span>
+                <Calendar className="h-5 w-5 md:h-5 md:w-5" />
+                <span className="text-sm md:text-base">אירוע חדש</span>
               </Link>
             </Button>
           </div>

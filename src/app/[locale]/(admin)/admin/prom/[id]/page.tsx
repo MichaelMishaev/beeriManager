@@ -200,71 +200,74 @@ export default function PromDetailPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6 px-3 md:px-0">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" asChild>
+      <div className="space-y-4">
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="icon" asChild className="shrink-0">
             <Link href="/admin/prom">
               <ArrowRight className="h-5 w-5" />
             </Link>
           </Button>
-          <div className="flex items-center gap-3">
-            <div className="bg-gradient-to-br from-pink-500 to-purple-600 p-3 rounded-xl shadow-lg">
-              <GraduationCap className="h-6 w-6 text-white" />
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="bg-gradient-to-br from-pink-500 to-purple-600 p-2.5 md:p-3 rounded-xl shadow-lg shrink-0">
+              <GraduationCap className="h-5 w-5 md:h-6 md:w-6 text-white" />
             </div>
-            <div>
-              <h1 className="text-2xl font-bold">{promEvent.title}</h1>
-              <p className="text-muted-foreground">עריכת פרטי מסיבת הסיום</p>
+            <div className="min-w-0">
+              <h1 className="text-xl md:text-2xl font-bold truncate">{promEvent.title}</h1>
+              <p className="text-sm text-muted-foreground hidden md:block">עריכת פרטי מסיבת הסיום</p>
             </div>
           </div>
         </div>
 
-        <div className="flex gap-2">
-          <Button variant="outline" asChild>
+        {/* Action Buttons - Full width on mobile */}
+        <div className="grid grid-cols-2 gap-2 md:flex md:gap-2">
+          <Button variant="outline" asChild className="w-full md:w-auto h-11">
             <Link href={`/admin/prom/${id}/quotes`}>
               <FileSpreadsheet className="h-4 w-4 ml-2" />
               השוואת הצעות
             </Link>
           </Button>
-          <Button variant="outline" asChild>
+          <Button variant="outline" asChild className="w-full md:w-auto h-11">
             <Link href={`/admin/prom/${id}/budget`}>
               <DollarSign className="h-4 w-4 ml-2" />
               תקציב
             </Link>
           </Button>
-          <Button 
-            variant="ghost" 
-            size="icon"
-            className="text-red-600 hover:text-red-700 hover:bg-red-50"
-            onClick={handleDelete}
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
         </div>
+
+        {/* Delete Button - Separated and clear */}
+        <Button
+          variant="outline"
+          className="w-full md:w-auto text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200 h-11"
+          onClick={handleDelete}
+        >
+          <Trash2 className="h-4 w-4 ml-2" />
+          מחק מסיבת סיום
+        </Button>
       </div>
 
       {/* Stats Row - Clickable Cards */}
-      <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
-        <Link href={`/admin/prom/${id}/quotes`}>
-          <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 cursor-pointer hover:shadow-lg hover:scale-[1.02] transition-all">
-            <CardContent className="pt-4">
+      <div className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+        <Link href={`/admin/prom/${id}/quotes`} className="block">
+          <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 cursor-pointer hover:shadow-lg hover:scale-[1.02] transition-all h-full">
+            <CardContent className="pt-5 pb-5">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="flex items-center gap-2 text-blue-800 text-sm font-medium">
-                    <FileSpreadsheet className="h-4 w-4" />
+                  <div className="flex items-center gap-2 text-blue-800 text-base font-medium mb-2">
+                    <FileSpreadsheet className="h-5 w-5" />
                     הצעות מחיר
                   </div>
-                  <div className="text-2xl font-bold text-blue-900">{promEvent.quotes_count}</div>
+                  <div className="text-3xl md:text-2xl font-bold text-blue-900">{promEvent.quotes_count}</div>
                 </div>
-                <ArrowRight className="h-5 w-5 text-blue-400 rotate-180" />
+                <ArrowRight className="h-6 w-6 text-blue-400 rotate-180" />
               </div>
             </CardContent>
           </Card>
         </Link>
 
-        <Card 
-          className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200 cursor-pointer hover:shadow-lg hover:scale-[1.02] transition-all"
+        <Card
+          className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200 cursor-pointer hover:shadow-lg hover:scale-[1.02] transition-all h-full"
           onClick={() => {
             if (formData.voting_enabled) {
               const voteUrl = `${window.location.origin}/prom/${id}/vote`
@@ -275,45 +278,45 @@ export default function PromDetailPage() {
             }
           }}
         >
-          <CardContent className="pt-4">
+          <CardContent className="pt-5 pb-5">
             <div className="flex items-center justify-between">
               <div>
-                <div className="flex items-center gap-2 text-purple-800 text-sm font-medium">
-                  <Vote className="h-4 w-4" />
+                <div className="flex items-center gap-2 text-purple-800 text-base font-medium mb-2">
+                  <Vote className="h-5 w-5" />
                   הצבעות
                 </div>
-                <div className="text-2xl font-bold text-purple-900">{promEvent.votes_count}</div>
+                <div className="text-3xl md:text-2xl font-bold text-purple-900">{promEvent.votes_count}</div>
               </div>
               {formData.voting_enabled ? (
-                <span className="text-xs bg-purple-200 text-purple-800 px-2 py-1 rounded-full">העתק קישור</span>
+                <span className="text-sm bg-purple-200 text-purple-800 px-3 py-1.5 rounded-full whitespace-nowrap">העתק קישור</span>
               ) : (
-                <span className="text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded-full">לא פעיל</span>
+                <span className="text-sm bg-gray-200 text-gray-600 px-3 py-1.5 rounded-full whitespace-nowrap">לא פעיל</span>
               )}
             </div>
           </CardContent>
         </Card>
 
-        <Link href={`/admin/prom/${id}/budget`}>
-          <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200 cursor-pointer hover:shadow-lg hover:scale-[1.02] transition-all">
-            <CardContent className="pt-4">
+        <Link href={`/admin/prom/${id}/budget`} className="block">
+          <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200 cursor-pointer hover:shadow-lg hover:scale-[1.02] transition-all h-full">
+            <CardContent className="pt-5 pb-5">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="flex items-center gap-2 text-green-800 text-sm font-medium">
-                    <DollarSign className="h-4 w-4" />
+                  <div className="flex items-center gap-2 text-green-800 text-base font-medium mb-2">
+                    <DollarSign className="h-5 w-5" />
                     הוצאו
                   </div>
-                  <div className="text-2xl font-bold text-green-900">
+                  <div className="text-3xl md:text-2xl font-bold text-green-900">
                     ₪{promEvent.total_spent.toLocaleString('he-IL')}
                   </div>
                 </div>
-                <ArrowRight className="h-5 w-5 text-green-400 rotate-180" />
+                <ArrowRight className="h-6 w-6 text-green-400 rotate-180" />
               </div>
             </CardContent>
           </Card>
         </Link>
 
-        <Card 
-          className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200 cursor-pointer hover:shadow-lg hover:scale-[1.02] transition-all"
+        <Card
+          className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200 cursor-pointer hover:shadow-lg hover:scale-[1.02] transition-all h-full"
           onClick={() => {
             if (promEvent.student_count > 0 && promEvent.total_budget > 0) {
               const perStudent = Math.round(promEvent.total_budget / promEvent.student_count)
@@ -324,27 +327,27 @@ export default function PromDetailPage() {
             }
           }}
         >
-          <CardContent className="pt-4">
+          <CardContent className="pt-5 pb-5">
             <div className="flex items-center justify-between">
               <div>
-                <div className="flex items-center gap-2 text-orange-800 text-sm font-medium">
-                  <Users className="h-4 w-4" />
+                <div className="flex items-center gap-2 text-orange-800 text-base font-medium mb-2">
+                  <Users className="h-5 w-5" />
                   לתלמיד
                 </div>
-                <div className="text-2xl font-bold text-orange-900">
-                  {promEvent.student_count > 0 
+                <div className="text-3xl md:text-2xl font-bold text-orange-900">
+                  {promEvent.student_count > 0
                     ? `₪${Math.round(promEvent.total_budget / promEvent.student_count)}`
                     : '—'}
                 </div>
               </div>
-              <span className="text-xs bg-orange-200 text-orange-800 px-2 py-1 rounded-full">פרטים</span>
+              <span className="text-sm bg-orange-200 text-orange-800 px-3 py-1.5 rounded-full whitespace-nowrap">פרטים</span>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      <form onSubmit={handleSubmit}>
-        <div className="grid gap-6 md:grid-cols-2">
+      <form onSubmit={handleSubmit} className="pb-6">
+        <div className="grid gap-4 md:gap-6 md:grid-cols-2">
           {/* Basic Info */}
           <Card>
             <CardHeader>
@@ -593,14 +596,14 @@ export default function PromDetailPage() {
         </div>
 
         {/* Submit */}
-        <div className="flex justify-end gap-3 mt-6">
-          <Button variant="outline" asChild>
+        <div className="flex flex-col sm:flex-row justify-end gap-3 mt-6">
+          <Button variant="outline" asChild className="w-full sm:w-auto h-11">
             <Link href="/admin/prom">ביטול</Link>
           </Button>
-          <Button 
-            type="submit" 
+          <Button
+            type="submit"
             disabled={isSubmitting}
-            className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700"
+            className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 w-full sm:w-auto h-11"
           >
             {isSubmitting ? (
               <>

@@ -56,8 +56,9 @@ export async function GET(
       query = query.eq('category', category)
     }
 
-    // Non-admin users can only see finalists
-    if (!isAdmin || finalistsOnly) {
+    // Non-admin users can see all quotes (public sharing enabled)
+    // But if finalistsOnly param is set, filter by finalists
+    if (finalistsOnly) {
       query = query.eq('is_finalist', true)
     }
 
@@ -76,13 +77,13 @@ export async function GET(
       )
     }
 
-    // For non-admin, hide sensitive info
+    // For non-admin, hide only truly sensitive information
+    // But keep vendor names and all other details visible for transparency
     const sanitizedData = isAdmin ? data : data?.map(quote => ({
       ...quote,
-      vendor_phone: undefined,
-      vendor_email: undefined,
-      admin_notes: undefined,
-      vendor_name: quote.display_label || `אפשרות ${quote.display_order + 1}`
+      vendor_phone: undefined,      // Hide phone for privacy
+      vendor_email: undefined,      // Hide email for privacy
+      admin_notes: undefined        // Hide internal admin notes
     }))
 
     return NextResponse.json({
