@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useCallback } from 'react'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams } from 'next/navigation'
 import { ArrowRight, Share2 } from 'lucide-react'
 import Link from 'next/link'
 import { QuoteCardReadOnly } from '@/components/features/prom/quotes/QuoteCardReadOnly'
@@ -60,7 +60,6 @@ const AVAILABILITY_CONFIG = {
 
 export default function PublicQuotesPage() {
   const params = useParams()
-  const router = useRouter()
   const promId = params.id as string
 
   const [quotes, setQuotes] = useState<Quote[]>([])
@@ -116,8 +115,8 @@ export default function PublicQuotesPage() {
     const ratings = categoryQuotes.map(q => q.rating).filter(r => r !== null) as number[]
 
     const isCheapest = quote.price_total === Math.min(...prices) && prices.length > 1
-    const isHighestRated = quote.rating && quote.rating === Math.max(...ratings) && ratings.length > 1
-    const isBestValue = quote.rating && quote.rating >= 4 &&
+    const isHighestRated = !!quote.rating && quote.rating === Math.max(...ratings) && ratings.length > 1
+    const isBestValue = !!quote.rating && quote.rating >= 4 &&
                         quote.price_total <= (prices.reduce((a, b) => a + b, 0) / prices.length)
 
     return { isCheapest, isHighestRated, isBestValue }

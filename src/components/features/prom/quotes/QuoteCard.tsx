@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { Star, Phone, Edit2, Trash2, Check } from 'lucide-react'
+import { Star, Phone, Edit2, Trash2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface Quote {
@@ -125,7 +125,7 @@ export function QuoteCard({
                 key={i}
                 className={cn(
                   "h-4 w-4",
-                  i < quote.rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
+                  i < (quote.rating ?? 0) ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
                 )}
               />
             ))}

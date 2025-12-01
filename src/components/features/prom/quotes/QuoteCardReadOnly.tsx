@@ -121,7 +121,7 @@ export function QuoteCardReadOnly({
                 key={i}
                 className={cn(
                   "h-4 w-4",
-                  i < quote.rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
+                  i < (quote.rating ?? 0) ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
                 )}
               />
             ))}
