@@ -64,10 +64,6 @@ import {
 } from '@/components/ui/table'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
-import { QuoteCard } from '@/components/features/prom/quotes/QuoteCard'
-import { MobileBottomBar } from '@/components/features/prom/quotes/MobileBottomBar'
-import { CategoryFilter } from '@/components/features/prom/quotes/CategoryFilter'
-import { MobileHeader } from '@/components/features/prom/quotes/MobileHeader'
 
 // Dynamic imports for client-only components
 const QRCode = dynamic(() => import('qrcode.react').then(mod => ({ default: mod.QRCodeSVG })), {
