@@ -54,6 +54,32 @@ export function MobileHeader({
             </p>
           </div>
 
+          {/* Mobile actions */}
+          <div className="flex lg:hidden gap-2">
+            {onShare && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onShare}
+                className="min-w-[44px] min-h-[44px] transition-all hover:scale-110 active:scale-95 focus-visible:ring-2 focus-visible:ring-offset-2"
+                aria-label="שתף"
+              >
+                <Share2 className="h-5 w-5" />
+              </Button>
+            )}
+            {onShowQR && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onShowQR}
+                className="min-w-[44px] min-h-[44px] transition-all hover:scale-110 active:scale-95 focus-visible:ring-2 focus-visible:ring-offset-2"
+                aria-label="הצג QR"
+              >
+                <QrCode className="h-5 w-5" />
+              </Button>
+            )}
+          </div>
+
           {/* Desktop actions */}
           <div className="hidden lg:flex gap-2">
             {onToggleDarkMode && (
