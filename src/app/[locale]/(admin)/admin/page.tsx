@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
-import { Calendar, CheckSquare, AlertTriangle, FileText, Users, DollarSign, MessageSquare, Settings, Plus, Edit, BarChart, GripVertical, HelpCircle, Ticket, Tags, Phone, Bell, Lightbulb, Sparkles, GraduationCap } from 'lucide-react'
+import { Calendar, CheckSquare, AlertTriangle, FileText, Users, DollarSign, MessageSquare, Settings, Plus, Edit, BarChart, GripVertical, HelpCircle, Ticket, Tags, Phone, Bell, Lightbulb, Sparkles, GraduationCap, Store } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
@@ -109,6 +109,18 @@ const defaultAdminSections = [
       { href: '/admin/expenses/new', label: 'הוסף הוצאה', icon: Plus },
       { href: '/admin/expenses', label: 'רשימת הוצאות', icon: Edit },
       { href: '/admin/expenses/reports', label: 'דוחות כספיים', icon: BarChart }
+    ]
+  },
+  {
+    id: 'vendors',
+    title: 'ספקים',
+    description: 'ניהול ספקים ונותני שירותים',
+    icon: Store,
+    color: 'text-rose-600',
+    bgColor: 'bg-rose-50',
+    links: [
+      { href: '/admin/vendors/new', label: 'ספק חדש', icon: Plus },
+      { href: '/admin/vendors', label: 'רשימת ספקים', icon: Edit }
     ]
   },
   {
@@ -582,6 +594,24 @@ export default function AdminDashboard() {
                     <li>• <strong>רשימת הוצאות</strong> - צפו בכל ההוצאות</li>
                     <li>• <strong>דוחות כספיים</strong> - קבלו דוח מסודר לשקיפות מלאה</li>
                     <li className="text-muted-foreground mt-2">💡 טיפ: שמרו תמיד קבלות וצרפו אותן להוצאות</li>
+                  </ul>
+                </div>
+
+                {/* ספקים */}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <div className="bg-rose-50 p-2 rounded-lg">
+                      <Store className="h-5 w-5 text-rose-600" />
+                    </div>
+                    <h3 className="font-bold text-lg">ספקים 🏪</h3>
+                  </div>
+                  <ul className="space-y-1 text-sm mr-9">
+                    <li>• <strong>ספק חדש</strong> - הוסיפו ספק או נותן שירות למאגר</li>
+                    <li>• <strong>רשימת ספקים</strong> - צפו בכל הספקים מאורגנים לפי קטגוריות</li>
+                    <li>• <strong>קטגוריות</strong> - קייטרינג, ציוד, בידור, הסעות, אולמות, צילום והדפסה</li>
+                    <li>• <strong>דירוגים</strong> - נהלו דירוגים וביקורות עבור כל ספק</li>
+                    <li>• <strong>שיתוף</strong> - שתפו פרטי ספקים בווטסאפ עם הורים אחרים</li>
+                    <li className="text-muted-foreground mt-2">💡 טיפ: נהלו מאגר ספקים מומלצים כדי לחסוך זמן בתכנון אירועים!</li>
                   </ul>
                 </div>
 

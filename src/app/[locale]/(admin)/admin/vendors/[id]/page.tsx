@@ -9,6 +9,7 @@ import { formatHebrewDate } from '@/lib/utils/date'
 import { createClient } from '@/lib/supabase/server'
 import { ShareButton } from '@/components/ui/share-button'
 import { formatVendorShareData } from '@/lib/utils/share-formatters'
+import { DeleteVendorButton } from '@/components/features/vendors/DeleteVendorButton'
 
 const categoryLabels: Record<string, string> = {
   catering: '🍕 קייטרינג',
@@ -238,7 +239,7 @@ async function VendorDetail({ id }: { id: string }) {
       </Card>
 
       {/* Action Buttons */}
-      <div className="flex gap-3">
+      <div className="flex flex-col sm:flex-row gap-3">
         <Button asChild variant="outline" className="flex-1">
           <Link href="/admin/vendors">
             <ArrowRight className="h-4 w-4 ml-2" />
@@ -251,6 +252,7 @@ async function VendorDetail({ id }: { id: string }) {
             ערוך ספק
           </Link>
         </Button>
+        <DeleteVendorButton vendorId={vendor.id} vendorName={vendor.name} />
       </div>
     </div>
   )

@@ -1,30 +1,37 @@
-import { Suspense } from 'react'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { Store, Phone, Mail, Globe, MapPin, DollarSign, FileText, ArrowRight, Star } from 'lucide-react'
+import { Phone, Mail, Star, MapPin, Globe, ArrowRight, Share2, DollarSign, Building2, FileText, Edit, Settings } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Separator } from '@/components/ui/separator'
 import { createClient } from '@/lib/supabase/server'
 import { ShareButton } from '@/components/ui/share-button'
 import { formatVendorShareData } from '@/lib/utils/share-formatters'
+import { cookies } from 'next/headers'
+import { verifyJWT } from '@/lib/auth/jwt'
+import { DeleteVendorButton } from '@/components/features/vendors/DeleteVendorButton'
 
 const categoryLabels: Record<string, string> = {
-  catering: '🍕 קייטרינג',
-  equipment: '📦 ציוד',
-  entertainment: '🎭 בידור',
-  transportation: '🚌 הסעות',
-  venue: '🏛️ אולמות',
-  photography: '📷 צילום',
-  printing: '🖨️ הדפסה',
-  other: '🏪 אחר'
+  catering: 'קייטרינג',
+  equipment: 'ציוד',
+  entertainment: 'בידור',
+  transportation: 'הסעות',
+  venue: 'אולמות',
+  photography: 'צילום',
+  printing: 'הדפסה',
+  other: 'אחר'
 }
 
-const priceRangeLabels: Record<string, string> = {
-  budget: 'חסכוני (₪)',
-  moderate: 'בינוני (₪₪)',
-  premium: 'פרימיום (₪₪₪)',
-  luxury: 'יוקרה (₪₪₪₪)'
+const categoryIcons: Record<string, string> = {
+  catering: '🍕',
+  equipment: '📦',
+  entertainment: '🎭',
+  transportation: '🚌',
+  venue: '🏛️',
+  photography: '📷',
+  printing: '🖨️',
+  other: '🏪'
 }
 
 async function getVendor(id: string) {
@@ -44,213 +51,303 @@ async function getVendor(id: string) {
   return vendor
 }
 
-function VendorDetailSkeleton() {
-  return (
-    <div className="space-y-4">
-      <div className="h-64 bg-gray-200 rounded-lg animate-pulse" />
-      <div className="h-96 bg-gray-200 rounded-lg animate-pulse" />
-    </div>
-  )
+async function getVendorReviews(id: string) {
+  const supabase = createClient()
+
+  const { data: reviews, error } = await supabase
+    .from('vendor_reviews')
+    .select('*')
+    .eq('vendor_id', id)
+    .order('created_at', { ascending: false })
+
+  if (error) {
+    return []
+  }
+
+  return reviews || []
 }
 
-async function VendorDetail({ id }: { id: string }) {
-  const vendor = await getVendor(id)
+export default async function VendorDetailPage({ params }: { params: { id: string } }) {
+  const vendor = await getVendor(params.id)
 
   if (!vendor) {
     notFound()
   }
 
-  return (
-    <div className="space-y-6">
-      {/* Header Card */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-start justify-between">
-            <div className="flex-1">
-              <div className="flex items-center gap-3 mb-2">
-                <Store className="h-6 w-6 text-primary" />
-                <CardTitle className="text-2xl">{vendor.name}</CardTitle>
-              </div>
-              <div className="flex flex-wrap items-center gap-2 mt-3">
-                <Badge variant="outline" className="text-sm">
-                  {categoryLabels[vendor.category] || vendor.category}
-                </Badge>
-                {vendor.price_range && (
-                  <Badge variant="secondary" className="text-sm">
-                    <DollarSign className="h-3 w-3 ml-1" />
-                    {priceRangeLabels[vendor.price_range] || vendor.price_range}
-                  </Badge>
-                )}
-                {vendor.overall_rating && vendor.overall_rating > 0 && (
-                  <Badge variant="outline" className="bg-yellow-50 text-sm">
-                    <Star className="h-3 w-3 ml-1 fill-yellow-400 text-yellow-400" />
-                    {vendor.overall_rating.toFixed(1)}
-                  </Badge>
-                )}
-              </div>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {vendor.description && (
-            <p className="text-muted-foreground leading-relaxed mb-4">
-              {vendor.description}
-            </p>
-          )}
+  const reviews = await getVendorReviews(params.id)
 
-          <div className="flex flex-wrap gap-2 mt-4">
-            {vendor.phone && (
-              <Button asChild size="sm">
-                <a href={`tel:${vendor.phone}`}>
-                  <Phone className="h-4 w-4 ml-2" />
-                  התקשר
-                </a>
-              </Button>
-            )}
-            {vendor.email && (
-              <Button variant="outline" asChild size="sm">
-                <a href={`mailto:${vendor.email}`}>
-                  <Mail className="h-4 w-4 ml-2" />
-                  שלח מייל
-                </a>
-              </Button>
-            )}
-            {vendor.website && (
-              <Button variant="outline" asChild size="sm">
-                <a href={vendor.website} target="_blank" rel="noopener noreferrer">
-                  <Globe className="h-4 w-4 ml-2" />
-                  אתר אינטרנט
-                </a>
-              </Button>
-            )}
-            <ShareButton
+  // Check if user is admin
+  const cookieStore = cookies()
+  const token = cookieStore.get('auth-token')
+  const isAdmin = token ? verifyJWT(token.value) : false
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+      <div className="container mx-auto px-4 py-6 md:py-8 max-w-4xl">
+        {/* Back Button - Mobile First */}
+        <Button variant="ghost" asChild className="mb-4 -mx-2">
+          <Link href="/vendors">
+            <ArrowRight className="h-4 w-4 ml-2" />
+            חזרה לכל הספקים
+          </Link>
+        </Button>
+
+        {/* Vendor Header Card - Mobile Optimized */}
+        <Card className="border-2 shadow-lg mb-6">
+          <CardHeader className="space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+              <div className="space-y-2 flex-1">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <span className="text-2xl">{categoryIcons[vendor.category] || '🏪'}</span>
+                  <Badge variant="secondary">
+                    {categoryLabels[vendor.category] || vendor.category}
+                  </Badge>
+                </div>
+                <h1 className="text-2xl md:text-4xl font-bold">{vendor.name}</h1>
+                {vendor.description && (
+                  <p className="text-base md:text-lg text-muted-foreground leading-relaxed">
+                    {vendor.description}
+                  </p>
+                )}
+              </div>
+
+              {/* Rating Badge */}
+              {vendor.overall_rating && vendor.overall_rating > 0 && (
+                <div className="flex items-center gap-2 bg-gradient-to-br from-yellow-50 to-yellow-100 px-4 py-3 rounded-xl border-2 border-yellow-200 self-start">
+                  <Star className="h-6 w-6 fill-yellow-500 text-yellow-500" />
+                  <div className="text-right">
+                    <div className="text-2xl font-bold text-yellow-900">{vendor.overall_rating.toFixed(1)}</div>
+                    <div className="text-xs text-yellow-700">{vendor.total_reviews || 0} ביקורות</div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </CardHeader>
+
+          <CardContent className="space-y-6">
+            {/* Quick Actions - Mobile First */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {vendor.phone && (
+                <Button asChild size="lg" className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800">
+                  <a href={`tel:${vendor.phone}`}>
+                    <Phone className="h-5 w-5 ml-2" />
+                    התקשר עכשיו
+                  </a>
+                </Button>
+              )}
+              <ShareButton
                 shareData={formatVendorShareData(vendor)}
                 variant="outline"
-                size="sm"
-              />
-          </div>
-        </CardContent>
-      </Card>
+                size="lg"
+                className="w-full border-2"
+              >
+                <Share2 className="h-5 w-5 ml-2" />
+                שתף ספק
+              </ShareButton>
+            </div>
 
-      {/* Contact Information */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Phone className="h-5 w-5" />
-            פרטי התקשרות
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {vendor.contact_person && (
-            <div className="flex items-center gap-3">
-              <div className="w-32 text-muted-foreground">איש קשר:</div>
-              <div className="font-medium">{vendor.contact_person}</div>
-            </div>
-          )}
-          {vendor.phone && (
-            <div className="flex items-center gap-3">
-              <div className="w-32 text-muted-foreground">טלפון:</div>
-              <a href={`tel:${vendor.phone}`} className="font-medium hover:text-primary">
-                {vendor.phone}
-              </a>
-            </div>
-          )}
-          {vendor.email && (
-            <div className="flex items-center gap-3">
-              <div className="w-32 text-muted-foreground">אימייל:</div>
-              <a href={`mailto:${vendor.email}`} className="font-medium hover:text-primary break-all">
-                {vendor.email}
-              </a>
-            </div>
-          )}
-          {vendor.website && (
-            <div className="flex items-center gap-3">
-              <div className="w-32 text-muted-foreground">אתר אינטרנט:</div>
-              <a href={vendor.website} target="_blank" rel="noopener noreferrer" className="font-medium hover:text-primary break-all">
-                {vendor.website}
-              </a>
-            </div>
-          )}
-          {vendor.address && (
-            <div className="flex items-start gap-3">
-              <div className="w-32 text-muted-foreground flex items-center gap-2">
-                <MapPin className="h-4 w-4" />
-                כתובת:
-              </div>
-              <div className="font-medium">{vendor.address}</div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+            <Separator />
 
-      {/* Business Details - Only show if has content */}
-      {(vendor.business_number || vendor.license_number || vendor.payment_terms) && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <FileText className="h-5 w-5" />
-              פרטים נוספים
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {vendor.business_number && (
-              <div className="flex items-center gap-3">
-                <div className="w-32 text-muted-foreground">ח.פ / ע.מ:</div>
-                <div className="font-medium">{vendor.business_number}</div>
+            {/* Contact Information - Mobile Optimized Grid */}
+            <div className="space-y-4">
+              <h3 className="font-semibold text-lg flex items-center gap-2">
+                <Phone className="h-5 w-5 text-primary" />
+                פרטי קשר
+              </h3>
+              <div className="grid gap-4">
+                {vendor.contact_person && (
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 p-3 bg-muted/50 rounded-lg">
+                    <span className="font-medium text-sm text-muted-foreground min-w-[100px]">איש קשר:</span>
+                    <span className="font-medium">{vendor.contact_person}</span>
+                  </div>
+                )}
+                {vendor.phone && (
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 p-3 bg-muted/50 rounded-lg">
+                    <Phone className="h-4 w-4 text-muted-foreground sm:hidden" />
+                    <span className="font-medium text-sm text-muted-foreground min-w-[100px]">טלפון:</span>
+                    <a href={`tel:${vendor.phone}`} className="font-medium hover:text-primary text-lg" dir="ltr">
+                      {vendor.phone}
+                    </a>
+                  </div>
+                )}
+                {vendor.email && (
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 p-3 bg-muted/50 rounded-lg">
+                    <Mail className="h-4 w-4 text-muted-foreground sm:hidden" />
+                    <span className="font-medium text-sm text-muted-foreground min-w-[100px]">אימייל:</span>
+                    <a href={`mailto:${vendor.email}`} className="hover:text-primary break-all">
+                      {vendor.email}
+                    </a>
+                  </div>
+                )}
+                {vendor.website && (
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 p-3 bg-muted/50 rounded-lg">
+                    <Globe className="h-4 w-4 text-muted-foreground sm:hidden" />
+                    <span className="font-medium text-sm text-muted-foreground min-w-[100px]">אתר:</span>
+                    <a
+                      href={vendor.website}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:text-primary break-all underline"
+                    >
+                      {vendor.website}
+                    </a>
+                  </div>
+                )}
+                {vendor.address && (
+                  <div className="flex flex-col sm:flex-row sm:items-start gap-2 p-3 bg-muted/50 rounded-lg">
+                    <MapPin className="h-4 w-4 text-muted-foreground sm:mt-1" />
+                    <span className="font-medium text-sm text-muted-foreground min-w-[100px]">כתובת:</span>
+                    <span className="flex-1">{vendor.address}</span>
+                  </div>
+                )}
               </div>
+            </div>
+
+            {/* Business Details */}
+            {(vendor.business_number || vendor.license_number || vendor.price_range || vendor.payment_terms) && (
+              <>
+                <Separator />
+                <div className="space-y-4">
+                  <h3 className="font-semibold text-lg flex items-center gap-2">
+                    <Building2 className="h-5 w-5 text-primary" />
+                    פרטים עסקיים
+                  </h3>
+                  <div className="grid gap-3">
+                    {vendor.business_number && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <span className="font-medium text-muted-foreground min-w-[120px]">ח.פ / ע.מ:</span>
+                        <span>{vendor.business_number}</span>
+                      </div>
+                    )}
+                    {vendor.license_number && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <span className="font-medium text-muted-foreground min-w-[120px]">רישיון:</span>
+                        <span>{vendor.license_number}</span>
+                      </div>
+                    )}
+                    {vendor.price_range && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <DollarSign className="h-4 w-4 text-muted-foreground" />
+                        <span className="font-medium text-muted-foreground min-w-[120px]">טווח מחירים:</span>
+                        <span>{vendor.price_range}</span>
+                      </div>
+                    )}
+                    {vendor.payment_terms && (
+                      <div className="flex items-start gap-2 text-sm">
+                        <FileText className="h-4 w-4 text-muted-foreground mt-0.5" />
+                        <span className="font-medium text-muted-foreground min-w-[120px]">תנאי תשלום:</span>
+                        <span className="flex-1">{vendor.payment_terms}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </>
             )}
-            {vendor.license_number && (
-              <div className="flex items-center gap-3">
-                <div className="w-32 text-muted-foreground">מספר רישיון:</div>
-                <div className="font-medium">{vendor.license_number}</div>
-              </div>
+
+            {/* Services Offered */}
+            {vendor.services_offered && vendor.services_offered.length > 0 && (
+              <>
+                <Separator />
+                <div className="space-y-4">
+                  <h3 className="font-semibold text-lg">שירותים מוצעים</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {vendor.services_offered.map((service: string, index: number) => (
+                      <Badge key={index} variant="secondary" className="text-sm py-1.5 px-3">
+                        {service}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              </>
             )}
-            {vendor.payment_terms && (
-              <div className="flex items-start gap-3">
-                <div className="w-32 text-muted-foreground">תנאי תשלום:</div>
-                <div className="font-medium whitespace-pre-wrap">{vendor.payment_terms}</div>
-              </div>
+
+            {/* Notes */}
+            {vendor.notes && (
+              <>
+                <Separator />
+                <div className="space-y-3">
+                  <h3 className="font-semibold text-lg">הערות</h3>
+                  <p className="text-muted-foreground leading-relaxed whitespace-pre-wrap">{vendor.notes}</p>
+                </div>
+              </>
             )}
           </CardContent>
         </Card>
-      )}
 
-      {/* Info Card */}
-      <Card className="bg-blue-50 border-blue-200">
-        <CardContent className="pt-6">
-          <div className="flex items-start gap-3">
-            <Store className="h-5 w-5 text-blue-600 mt-0.5" />
-            <div>
-              <p className="text-sm font-medium text-blue-900 mb-1">
-                ספק מומלץ מטעם ועד ההורים
-              </p>
-              <p className="text-sm text-blue-700">
-                הספק הוסף למאגר הספקים המומלצים שלנו. לפרטים נוספים על ספקים נוספים, צור קשר עם ועד ההורים.
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+        {/* Reviews Section */}
+        {reviews.length > 0 && (
+          <Card className="border-2">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Star className="h-5 w-5 fill-yellow-500 text-yellow-500" />
+                ביקורות ({reviews.length})
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {reviews.map((review) => (
+                <div key={review.id} className="border-b pb-4 last:border-0 last:pb-0">
+                  <div className="flex items-start justify-between gap-4 mb-2">
+                    <div className="flex items-center gap-2">
+                      {[...Array(5)].map((_, i) => (
+                        <Star
+                          key={i}
+                          className={`h-4 w-4 ${
+                            i < review.rating
+                              ? 'fill-yellow-500 text-yellow-500'
+                              : 'text-gray-300'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                    <span className="text-xs text-muted-foreground">
+                      {new Date(review.created_at).toLocaleDateString('he-IL')}
+                    </span>
+                  </div>
+                  {review.title && (
+                    <h4 className="font-semibold mb-1">{review.title}</h4>
+                  )}
+                  {review.review_text && (
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      {review.review_text}
+                    </p>
+                  )}
+                  {review.reviewer_name && (
+                    <p className="text-xs text-muted-foreground mt-2">
+                      - {review.reviewer_name}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        )}
 
-      {/* Action Button */}
-      <div className="flex gap-3">
-        <Button asChild variant="outline" className="flex-1">
-          <Link href="/">
-            <ArrowRight className="h-4 w-4 ml-2" />
-            חזרה לעמוד הבית
-          </Link>
-        </Button>
+        {/* Admin Controls - Only visible to logged-in admins */}
+        {isAdmin && (
+          <Card className="border-2 border-amber-200 bg-amber-50/50">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-amber-900">
+                <Settings className="h-5 w-5" />
+                פקדי מנהל
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Button asChild variant="outline" className="flex-1">
+                  <Link href={`/admin/vendors/${vendor.id}`}>
+                    <Edit className="h-4 w-4 ml-2" />
+                    ערוך ספק
+                  </Link>
+                </Button>
+                <DeleteVendorButton vendorId={vendor.id} vendorName={vendor.name} />
+              </div>
+              <p className="text-xs text-amber-700 mt-3">
+                💡 אתה רואה את הכפתורים האלה כי אתה מנהל מחובר
+              </p>
+            </CardContent>
+          </Card>
+        )}
       </div>
-    </div>
-  )
-}
-
-export default function VendorPage({ params }: { params: { id: string } }) {
-  return (
-    <div className="container mx-auto px-4 py-6 max-w-4xl">
-      <Suspense fallback={<VendorDetailSkeleton />}>
-        <VendorDetail id={params.id} />
-      </Suspense>
     </div>
   )
 }

@@ -143,11 +143,27 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
+    console.log('🗑️ DELETE vendor request received for ID:', params.id)
+
     // Only admins can delete vendors
     const token = req.cookies.get('auth-token')
-    if (!token || !verifyJWT(token.value)) {
+    console.log('🔑 Auth token present:', !!token)
+
+    if (!token) {
+      console.log('❌ No auth token found')
       return NextResponse.json(
-        { success: false, error: 'נדרשת הרשאת מנהל' },
+        { success: false, error: 'נדרשת הרשאת מנהל - לא נמצא טוקן' },
+        { status: 401 }
+      )
+    }
+
+    const isValid = verifyJWT(token.value)
+    console.log('🔒 Token valid:', isValid)
+
+    if (!isValid) {
+      console.log('❌ Invalid auth token')
+      return NextResponse.json(
+        { success: false, error: 'נדרשת הרשאת מנהל - טוקן לא תקין' },
         { status: 401 }
       )
     }
@@ -155,18 +171,22 @@ export async function DELETE(
     const { id } = params
     const supabase = await createClient()
 
+    console.log('🗄️ Attempting to delete vendor from database:', id)
+
     const { error } = await supabase
       .from('vendors')
       .delete()
       .eq('id', id)
 
     if (error) {
-      console.error('Vendor deletion error:', error)
+      console.error('❌ Vendor deletion error:', error)
       return NextResponse.json(
-        { success: false, error: 'שגיאה במחיקת הספק' },
+        { success: false, error: 'שגיאה במחיקת הספק: ' + error.message },
         { status: 500 }
       )
     }
+
+    console.log('✅ Vendor deleted successfully:', id)
 
     return NextResponse.json({
       success: true,
@@ -174,9 +194,9 @@ export async function DELETE(
     })
 
   } catch (error) {
-    console.error('Vendor DELETE error:', error)
+    console.error('❌ Vendor DELETE error:', error)
     return NextResponse.json(
-      { success: false, error: 'שגיאה במחיקת הספק' },
+      { success: false, error: 'שגיאה במחיקת הספק: ' + (error instanceof Error ? error.message : 'Unknown error') },
       { status: 500 }
     )
   }
