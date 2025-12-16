@@ -1,4 +1,5 @@
 import { Shield } from 'lucide-react'
+import AIFloatingButton from '@/components/features/ai-assistant/AIFloatingButton'
 
 export default function AdminLayout({
   children,
@@ -22,6 +23,9 @@ export default function AdminLayout({
       <div className="container mx-auto px-4 py-6">
         {children}
       </div>
+
+      {/* AI Assistant Floating Button */}
+      <AIFloatingButton />
     </div>
   )
 }
