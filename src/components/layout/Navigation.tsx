@@ -101,7 +101,7 @@ export function Navigation() {
               <div className="relative flex-shrink-0">
                 <Image
                   src="/logo-small.png"
-                  alt="לוגו באר התניא"
+                  alt="לוגו בארי נתניה"
                   width={80}
                   height={32}
                   className="h-8 w-auto md:h-10 md:w-auto"
@@ -111,7 +111,7 @@ export function Navigation() {
               {/* Title - Hidden on mobile to save space */}
               <div className="hidden sm:flex flex-col items-start min-w-0">
                 <span className="text-base md:text-lg font-bold">
-                  {settings?.school_name ? `${settings.school_name}` : 'באר התניא'}
+                  {settings?.school_name ? `${settings.school_name}` : 'בארי נתניה'}
                 </span>
                 <span className="text-[8px] md:text-[10px] text-muted-foreground leading-tight truncate max-w-[140px] md:max-w-[200px]">
                   {settings?.committee_name && settings?.school_name

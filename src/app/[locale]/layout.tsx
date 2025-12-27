@@ -29,14 +29,14 @@ const roboto = Roboto({
 
 export const metadata: Metadata = {
   title: {
-    default: 'באר התניא - הנהגה הוראית',
-    template: '%s | באר התניא'
+    default: 'בארי נתניה - הנהגה הוראית',
+    template: '%s | בארי נתניה'
   },
-  description: 'באר התניא - מערכת ניהול הנהגה הוראית - אירועים, משימות, הוצאות ועוד',
-  keywords: ['באר התניא', 'הנהגה הוראית', 'אירועים', 'משימות', 'PWA'],
-  authors: [{ name: 'באר התניא' }],
-  creator: 'באר התניא',
-  publisher: 'באר התניא',
+  description: 'בארי נתניה - מערכת ניהול הנהגה הוראית - אירועים, משימות, הוצאות ועוד',
+  keywords: ['בארי נתניה', 'הנהגה הוראית', 'אירועים', 'משימות', 'PWA'],
+  authors: [{ name: 'בארי נתניה' }],
+  creator: 'בארי נתניה',
+  publisher: 'בארי נתניה',
   formatDetection: {
     email: false,
     address: false,
@@ -46,9 +46,9 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'he_IL',
     url: 'https://beeri.online',
-    siteName: 'באר התניא',
-    title: 'באר התניא - הנהגה הוראית',
-    description: 'באר התניא - מערכת ניהול הנהגה הוראית - אירועים, משימות, ועדות ופרוטוקולים',
+    siteName: 'בארי נתניה',
+    title: 'בארי נתניה - הנהגה הוראית',
+    description: 'בארי נתניה - מערכת ניהול הנהגה הוראית - אירועים, משימות, ועדות ופרוטוקולים',
     images: [
       {
         url: 'https://beeri.online/logo-square.png',
@@ -61,15 +61,15 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'באר התניא - הנהגה הוראית',
-    description: 'באר התניא - מערכת ניהול הנהגה הוראית - אירועים, משימות, ועדות ופרוטוקולים',
+    title: 'בארי נתניה - הנהגה הוראית',
+    description: 'בארי נתניה - מערכת ניהול הנהגה הוראית - אירועים, משימות, ועדות ופרוטוקולים',
     images: ['https://beeri.online/logo-square.png'],
   },
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'באר התניא',
+    title: 'בארי נתניה',
     startupImage: [
       {
         url: '/icons/apple-splash-2048-2732.png',

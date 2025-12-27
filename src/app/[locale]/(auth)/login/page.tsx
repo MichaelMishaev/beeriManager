@@ -53,7 +53,7 @@ export default function LoginPage() {
           <div className="mx-auto mb-6">
             <Image
               src="/logo-square.png"
-              alt="לוגו באר התניא"
+              alt="לוגו בארי נתניה"
               width={120}
               height={120}
               className="mx-auto"
@@ -64,7 +64,7 @@ export default function LoginPage() {
             כניסת מנהל
           </CardTitle>
           <p className="text-sm text-gray-600 mt-2">
-            באר התניא - הנהגה הוראית
+            בארי נתניה - הנהגה הוראית
           </p>
         </CardHeader>
 
