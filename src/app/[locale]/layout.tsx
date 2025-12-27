@@ -11,6 +11,7 @@ import { GoogleAnalytics } from '@/components/analytics/GoogleAnalytics'
 import { HtmlAttributes } from '@/components/HtmlAttributes'
 import { IOSInstallPrompt } from '@/components/pwa/IOSInstallPrompt'
 import { locales, localeDirections, type Locale } from '@/i18n/config'
+import { logger } from '@/lib/logger'
 
 const heebo = Heebo({
   subsets: ['hebrew', 'latin'],
@@ -28,14 +29,14 @@ const roboto = Roboto({
 
 export const metadata: Metadata = {
   title: {
-    default: 'פורטל בארי - BeeriManager',
-    template: '%s | פורטל בארי'
+    default: 'באר התניא - הנהגה הוראית',
+    template: '%s | באר התניא'
   },
-  description: 'פורטל בית הספר בארי - אירועים, משימות, הוצאות ועוד',
-  keywords: ['פורטל בארי', 'בית ספר בארי', 'אירועים', 'משימות', 'PWA'],
-  authors: [{ name: 'BeeriManager Team' }],
-  creator: 'BeeriManager',
-  publisher: 'BeeriManager',
+  description: 'באר התניא - מערכת ניהול הנהגה הוראית - אירועים, משימות, הוצאות ועוד',
+  keywords: ['באר התניא', 'הנהגה הוראית', 'אירועים', 'משימות', 'PWA'],
+  authors: [{ name: 'באר התניא' }],
+  creator: 'באר התניא',
+  publisher: 'באר התניא',
   formatDetection: {
     email: false,
     address: false,
@@ -45,30 +46,30 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'he_IL',
     url: 'https://beeri.online',
-    siteName: 'פורטל בארי',
-    title: 'פורטל בארי - ועד הורים בית ספר בארי',
-    description: 'פורטל בית הספר בארי נתניה - אירועים, משימות, ועדות ופרוטוקולים',
+    siteName: 'באר התניא',
+    title: 'באר התניא - הנהגה הוראית',
+    description: 'באר התניא - מערכת ניהול הנהגה הוראית - אירועים, משימות, ועדות ופרוטוקולים',
     images: [
       {
-        url: 'https://beeri.online/og-image.png',
-        width: 1200,
-        height: 630,
-        alt: 'פורטל בארי - ועד הורים בית ספר בארי נתניה',
+        url: 'https://beeri.online/logo-square.png',
+        width: 512,
+        height: 512,
+        alt: 'באר התניא - הנהגה הוראית',
         type: 'image/png',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'פורטל בארי - ועד הורים',
-    description: 'פורטל בית הספר בארי נתניה - אירועים, משימות, ועדות ופרוטוקולים',
-    images: ['https://beeri.online/og-image.png'],
+    title: 'באר התניא - הנהגה הוראית',
+    description: 'באר התניא - מערכת ניהול הנהגה הוראית - אירועים, משימות, ועדות ופרוטוקולים',
+    images: ['https://beeri.online/logo-square.png'],
   },
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'פורטל בארי',
+    title: 'באר התניא',
     startupImage: [
       {
         url: '/icons/apple-splash-2048-2732.png',
@@ -140,6 +141,16 @@ export default async function LocaleLayout({
   const fontFamily = locale === 'he'
     ? 'var(--font-hebrew), system-ui, sans-serif'
     : 'var(--font-russian), system-ui, sans-serif'
+
+  // RUNTIME GUARD 6: RTL Layout Verification
+  // Verify Hebrew locale has RTL direction
+  if ((locale === 'he' || locale === 'ar') && direction !== 'rtl') {
+    logger.error('INVARIANT VIOLATION: Hebrew/Arabic locale without RTL direction', {
+      component: 'Layout',
+      action: 'LocaleLayout',
+      data: { locale, direction }
+    })
+  }
 
   return (
     <>

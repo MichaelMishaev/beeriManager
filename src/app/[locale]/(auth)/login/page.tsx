@@ -1,12 +1,13 @@
 'use client'
 
 import React, { useState } from 'react'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { AlertTriangle, Lock, Eye, EyeOff } from 'lucide-react'
+import { AlertTriangle, Eye, EyeOff } from 'lucide-react'
 
 export default function LoginPage() {
   const [password, setPassword] = useState('')
@@ -49,14 +50,21 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <div className="w-16 h-16 mx-auto mb-4 bg-primary rounded-full flex items-center justify-center">
-            <Lock className="w-8 h-8 text-white" />
+          <div className="mx-auto mb-6">
+            <Image
+              src="/logo-square.png"
+              alt="לוגו באר התניא"
+              width={120}
+              height={120}
+              className="mx-auto"
+              priority
+            />
           </div>
           <CardTitle className="text-2xl font-bold text-gray-900">
             כניסת מנהל
           </CardTitle>
           <p className="text-sm text-gray-600 mt-2">
-            מערכת ניהול ועד הורים - BeeriManager
+            באר התניא - הנהגה הוראית
           </p>
         </CardHeader>
 

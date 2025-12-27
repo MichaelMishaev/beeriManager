@@ -1,7 +1,7 @@
 {
-  "name": "פורטל בארי - BeeriManager",
-  "short_name": "פורטל בארי",
-  "description": "פורטל בית הספר בארי - אירועים, משימות, הוצאות ועוד",
+  "name": "באר התניא - הנהגה הוראית",
+  "short_name": "באר התניא",
+  "description": "באר התניא - מערכת ניהול הנהגה הוראית - אירועים, משימות, הוצאות ועוד",
   "start_url": "/",
   "display": "standalone",
   "orientation": "portrait-primary",

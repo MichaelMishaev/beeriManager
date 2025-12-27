@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { Menu, X, Home, Users, HelpCircle, LogOut, LogIn, Phone } from 'lucide-react'
@@ -93,17 +94,31 @@ export function Navigation() {
           <div className="flex items-center gap-3">
             <Link
               href={isAuthenticated ? "/admin" : "/"}
-              className="flex flex-col items-start min-w-0 flex-shrink"
+              className="flex items-center gap-3 min-w-0 flex-shrink"
               onClick={() => handleNavClick(isAuthenticated ? '/admin' : '/', 'בית')}
             >
-              <span className="text-lg md:text-xl font-bold">
-                {settings?.school_name ? `פורטל ${settings.school_name}` : 'פורטל בארי'}
-              </span>
-              <span className="text-[8px] md:text-[10px] text-muted-foreground leading-tight truncate max-w-[140px] sm:max-w-[200px] md:max-w-none">
-                {settings?.committee_name && settings?.school_name
-                  ? `מופעל על ידי ${settings.committee_name} ${settings.school_name}`
-                  : 'מופעל על ידי ועד הורים בית ספר בארי'}
-              </span>
+              {/* Logo Image */}
+              <div className="relative flex-shrink-0">
+                <Image
+                  src="/logo-small.png"
+                  alt="לוגו באר התניא"
+                  width={80}
+                  height={32}
+                  className="h-8 w-auto md:h-10 md:w-auto"
+                  priority
+                />
+              </div>
+              {/* Title - Hidden on mobile to save space */}
+              <div className="hidden sm:flex flex-col items-start min-w-0">
+                <span className="text-base md:text-lg font-bold">
+                  {settings?.school_name ? `${settings.school_name}` : 'באר התניא'}
+                </span>
+                <span className="text-[8px] md:text-[10px] text-muted-foreground leading-tight truncate max-w-[140px] md:max-w-[200px]">
+                  {settings?.committee_name && settings?.school_name
+                    ? `${settings.committee_name}`
+                    : 'הנהגה הוראית'}
+                </span>
+              </div>
             </Link>
             {/* Language Switcher & PWA Install - Always visible */}
             <div className="flex items-center gap-2">

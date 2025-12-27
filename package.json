@@ -32,6 +32,7 @@
     "db:compare-schemas": "./scripts/compare-schemas.sh",
     "type-check": "tsc --noEmit",
     "icons:generate": "node scripts/generate-icons.js",
+    "logo:process": "node scripts/process-logo.js",
     "postinstall": "npm run icons:generate"
   },
   "keywords": [
@@ -129,6 +130,7 @@
     "lint-staged": "^15.2.0",
     "playwright": "^1.55.1",
     "prettier": "^3.1.0",
+    "sharp": "^0.34.5",
     "temp-dir": "^3.0.0",
     "ts-node": "^10.9.2"
   }
