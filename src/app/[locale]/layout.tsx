@@ -51,10 +51,10 @@ export const metadata: Metadata = {
     description: 'בארי נתניה - מערכת ניהול הנהגה הוראית - אירועים, משימות, ועדות ופרוטוקולים',
     images: [
       {
-        url: 'https://beeri.online/logo-square.png',
-        width: 512,
-        height: 512,
-        alt: 'באר התניא - הנהגה הוראית',
+        url: 'https://beeri.online/og-beeri-netanya.png',
+        width: 1200,
+        height: 630,
+        alt: 'בארי נתניה - הנהגה הוראית',
         type: 'image/png',
       },
     ],
@@ -63,7 +63,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'בארי נתניה - הנהגה הוראית',
     description: 'בארי נתניה - מערכת ניהול הנהגה הוראית - אירועים, משימות, ועדות ופרוטוקולים',
-    images: ['https://beeri.online/logo-square.png'],
+    images: ['https://beeri.online/og-beeri-netanya.png'],
   },
   manifest: '/manifest.json',
   appleWebApp: {
