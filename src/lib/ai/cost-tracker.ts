@@ -28,7 +28,8 @@ export function calculateCost(usage: TokenUsage, model: string = 'gpt-5-mini'): 
 export function logAICost(
   usage: TokenUsage | undefined,
   operation: string,
-  userMessage?: string
+  userMessage?: string,
+  round?: number // Optional round number for multi-round conversations
 ): void {
   if (!usage) return
 
@@ -37,6 +38,7 @@ export function logAICost(
   const logEntry = {
     timestamp: new Date().toISOString(),
     operation,
+    round: round || 1, // Default to round 1
     model: 'gpt-5-mini',
     promptTokens: usage.prompt_tokens,
     completionTokens: usage.completion_tokens,

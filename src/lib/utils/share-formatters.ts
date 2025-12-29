@@ -145,9 +145,9 @@ export function formatEventShareData(
   // Build location text
   const locationText = location ? `\n📍 ${t.location}: ${location}` : ''
 
-  // Build description text
+  // Build description text - show full description
   const descriptionText = description
-    ? `\n\n${description.slice(0, 150)}${description.length > 150 ? '...' : ''}`
+    ? `\n\n${description}`
     : ''
 
   const text = `📅 *${title}*\n\n🏷️ ${t.type}: ${eventType}\n📆 ${dateStr}\n${timeDisplay}${locationText}${descriptionText}\n\n🔗 ${t.viewFull}:`

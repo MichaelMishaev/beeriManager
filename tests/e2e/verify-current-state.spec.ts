@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test'
+import { test } from '@playwright/test'
 
 test('Verify current state after fresh restart', async ({ page }) => {
   await page.goto('http://localhost:4500')

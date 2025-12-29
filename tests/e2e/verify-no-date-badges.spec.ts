@@ -85,7 +85,7 @@ test.describe('Verify No Confusing Date Badges in Events List', () => {
     // All "17" should be in calendar widgets (month view)
     for (const seventeen of allSeventeens) {
       const isInCalendar = await seventeen.evaluate((el) => {
-        let current = el
+        let current: HTMLElement | SVGElement | null = el
         while (current && current !== document.body) {
           const classes = current.className || ''
           // Calendar widgets have these characteristic classes

@@ -1,3 +1,4 @@
+// @ts-nocheck - Migration verification test - strict null checks disabled
 import { test, expect } from '@playwright/test'
 import { createClient } from '@supabase/supabase-js'
 
@@ -28,9 +29,9 @@ test.describe('Feedback-Task Migration Verification', () => {
 
     expect(error).toBeNull()
     expect(data).toBeTruthy()
-    expect(data.column_name).toBe('task_id')
-    expect(data.data_type).toBe('uuid')
-    expect(data.is_nullable).toBe('YES')
+    expect(data!.column_name).toBe('task_id')
+    expect(data!.data_type).toBe('uuid')
+    expect(data!.is_nullable).toBe('YES')
 
     console.log('✅ anonymous_feedback.task_id column exists:', data)
   })
@@ -45,9 +46,9 @@ test.describe('Feedback-Task Migration Verification', () => {
 
     expect(error).toBeNull()
     expect(data).toBeTruthy()
-    expect(data.column_name).toBe('status_comment')
-    expect(data.data_type).toBe('text')
-    expect(data.is_nullable).toBe('YES')
+    expect(data!.column_name).toBe('status_comment')
+    expect(data!.data_type).toBe('text')
+    expect(data!.is_nullable).toBe('YES')
 
     console.log('✅ anonymous_feedback.status_comment column exists:', data)
   })
@@ -62,9 +63,9 @@ test.describe('Feedback-Task Migration Verification', () => {
 
     expect(error).toBeNull()
     expect(data).toBeTruthy()
-    expect(data.column_name).toBe('feedback_id')
-    expect(data.data_type).toBe('uuid')
-    expect(data.is_nullable).toBe('YES')
+    expect(data!.column_name).toBe('feedback_id')
+    expect(data!.data_type).toBe('uuid')
+    expect(data!.is_nullable).toBe('YES')
 
     console.log('✅ tasks.feedback_id column exists:', data)
   })

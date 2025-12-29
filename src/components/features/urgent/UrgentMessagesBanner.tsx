@@ -96,7 +96,7 @@ export function UrgentMessagesBanner() {
                         👕 {title}
                       </h3>
                       {description && (
-                        <p className="text-blue-800 text-sm">
+                        <p className="text-blue-800 text-sm whitespace-pre-line">
                           {description}
                         </p>
                       )}
@@ -143,7 +143,7 @@ export function UrgentMessagesBanner() {
                   {title}
                 </h3>
                 {description && (
-                  <p className="text-sm mt-1 text-gray-700">{description}</p>
+                  <p className="text-sm mt-1 text-gray-700 whitespace-pre-line">{description}</p>
                 )}
               </div>
               <div className="flex items-center gap-1 flex-shrink-0">

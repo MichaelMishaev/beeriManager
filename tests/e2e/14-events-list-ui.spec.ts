@@ -181,10 +181,10 @@ test.describe('Events List UI/UX Tests', () => {
     const events = await page.locator('a[href*="/events/"]').all()
 
     if (events.length > 0) {
-      const firstEvent = events[0]
+      // const firstEvent = events[0]  // Unused - old chevron check removed
 
       // Old design had ChevronLeft icon - verify it's removed
-      const chevron = firstEvent.locator('svg').filter({ hasText: '' })
+      // chevron unused: firstEvent.locator('svg').filter({ hasText: '' })
 
       // Chevron should not be visible in the new design
       // (we may have other icons like Calendar, MapPin, but not ChevronLeft)

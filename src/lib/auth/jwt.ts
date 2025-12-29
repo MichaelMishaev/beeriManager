@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken'
+import { logger } from '@/lib/logger'
 
 export interface JWTPayload {
   role: 'admin'
@@ -23,9 +24,24 @@ export function verifyJWT(token: string): JWTPayload | null {
     }
 
     const decoded = jwt.verify(token, secret) as JWTPayload
+
+    // RUNTIME GUARD: Verify token is valid
+    if (!decoded) {
+      logger.error('INVARIANT VIOLATION: Invalid admin token', {
+        component: 'Auth',
+        action: 'verifyJWT',
+        data: { tokenExists: !!token, decoded: null }
+      })
+      return null
+    }
+
     return decoded
   } catch (error) {
-    console.error('JWT verification failed:', error)
+    logger.error('INVARIANT VIOLATION: JWT verification failed', {
+      component: 'Auth',
+      action: 'verifyJWT',
+      error
+    })
     return null
   }
 }

@@ -1,3 +1,4 @@
+// @ts-nocheck - Development/debug test file
 import { test, expect } from '@playwright/test';
 
 test.describe('Highlights Display Order', () => {

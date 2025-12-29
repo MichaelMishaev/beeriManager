@@ -131,7 +131,7 @@ test.describe('Feedback & Ideas Modal Component', () => {
 
     // Check feedback option has blue color scheme
     const feedbackOption = page.getByTestId('modal-feedback-link');
-    const feedbackIcon = feedbackOption.locator('div').first();
+    // feedbackIcon unused: feedbackOption.locator('div').first();
 
     // Check for blue color class (0D98BA is the blue-green color)
     const classList = await feedbackOption.locator('div.border-2').getAttribute('class');
@@ -276,7 +276,7 @@ test.describe('Feedback & Ideas Modal Component', () => {
   });
 
   test('should maintain RTL direction in modal', async ({ page }) => {
-    const hebrewHelper = new HebrewHelper(page);
+    // hebrewHelper unused: new HebrewHelper(page);
 
     // Open modal
     await page.getByTestId('share-feedback-ideas-button').click();

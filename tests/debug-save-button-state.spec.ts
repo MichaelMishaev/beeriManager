@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test } from '@playwright/test';
 
 test('Debug save button state for problematic highlight', async ({ page }) => {
   // Login first
@@ -65,7 +65,7 @@ test('Debug save button state for problematic highlight', async ({ page }) => {
 
       // Check all required fields
       const iconValue = await card.locator('select').nth(1).inputValue(); // Icon select
-      const titleHeValue = await card.locator('input').filter({ hasValue: /.*/ }).first().inputValue();
+      const titleHeValue = await card.locator('input').first().inputValue();
       const descHeTextarea = card.locator('textarea').first();
       const descHeValue = await descHeTextarea.inputValue();
       const categoryInput = card.locator('input').nth(2); // Category input (after title)

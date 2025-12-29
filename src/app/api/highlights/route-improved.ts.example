@@ -1,0 +1,411 @@
+/**
+ * Highlights API Route - IMPROVED VERSION WITH ALL 6 GUARDS
+ *
+ * This is an example implementation showing how to use all runtime guards.
+ * To activate: Rename to route.ts (backup original first!)
+ *
+ * GUARDS ACTIVE:
+ * ✅ Guard 1: Admin Authentication
+ * ✅ Guard 2: Required Fields Validation
+ * ✅ Guard 3: Soft Delete Enforcement
+ * ✅ Guard 4: Hebrew Text Validation
+ * ✅ Guard 5: Calendar Duplicate Prevention (N/A for highlights)
+ * ✅ Guard 6: RTL Layout Verification (automatic in layout)
+ *
+ * Created: 2025-12-16
+ * Reference: /Docs/development/runtime-guards-examples.md
+ */
+
+import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/server'
+import { verifyJWT } from '@/lib/auth/jwt'  // ✅ Guard 1
+import { validateRequiredFields, validateHebrewText } from '@/lib/utils/validators'  // ✅ Guards 2 & 4
+import { softDelete } from '@/lib/utils/db-operations'  // ✅ Guard 3
+import { logger } from '@/lib/logger'
+import { z } from 'zod'
+
+export const dynamic = 'force-dynamic'
+
+// Validation schema for highlights
+const HighlightSchema = z.object({
+  type: z.enum(['achievement', 'sports', 'award', 'event', 'announcement']),
+  icon: z.string().min(1, 'אייקון נדרש'),
+  title_he: z.string().min(2, 'כותרת בעברית חייבת להכיל לפחות 2 תווים'),
+  title_ru: z.string().optional().default(''),
+  description_he: z.string().min(10, 'תיאור בעברית חייב להכיל לפחות 10 תווים'),
+  description_ru: z.string().optional().default(''),
+  category_he: z.string().min(2, 'קטגוריה בעברית חייבת להכיל לפחות 2 תווים'),
+  category_ru: z.string().optional().default(''),
+  event_date: z.string().optional().nullable(),
+  image_url: z.string().optional().nullable(),
+  image_placeholder: z.string().optional().nullable(),
+  cta_text_he: z.string().optional().nullable(),
+  cta_text_ru: z.string().optional().nullable(),
+  cta_link: z.string().optional().nullable(),
+  badge_color: z.string().default('bg-gradient-to-r from-blue-400 to-blue-500 text-blue-900'),
+  is_active: z.boolean().default(true),
+  display_order: z.number().default(0),
+  start_date: z.string().optional().nullable(),
+  end_date: z.string().optional().nullable(),
+  share_text_he: z.string().optional().nullable(),
+  share_text_ru: z.string().optional().nullable(),
+})
+
+/**
+ * GET /api/highlights
+ * Public endpoint - returns active highlights
+ */
+export async function GET(req: NextRequest) {
+  try {
+    const supabase = await createClient()
+    const { searchParams } = new URL(req.url)
+
+    const showAll = searchParams.get('all') === 'true'
+    const limit = searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : 10
+
+    let query = supabase
+      .from('highlights')
+      .select('*')
+
+    if (!showAll) {
+      // Public view: only active, non-deleted highlights within date range
+      const now = new Date().toISOString()
+
+      query = query
+        .eq('is_active', true)
+        .eq('is_deleted', false)  // Only non-deleted
+        .or(`and(start_date.is.null,end_date.is.null),and(start_date.is.null,end_date.gte.${now}),and(start_date.lte.${now},end_date.is.null),and(start_date.lte.${now},end_date.gte.${now})`)
+    }
+
+    query = query
+      .order('display_order', { ascending: false })
+      .order('created_at', { ascending: false })
+      .limit(Math.min(limit, 50))
+
+    const { data, error } = await query
+
+    if (error) {
+      logger.error('Failed to fetch highlights', {
+        component: 'Highlights',
+        action: 'GET',
+        error
+      })
+
+      return NextResponse.json(
+        { success: false, error: 'שגיאה בטעינת ההדגשות' },
+        { status: 500 }
+      )
+    }
+
+    logger.success(`Fetched ${data?.length || 0} highlights`, {
+      component: 'Highlights',
+      action: 'GET',
+      data: { count: data?.length, showAll, limit }
+    })
+
+    return NextResponse.json({
+      success: true,
+      data: data || [],
+      count: data?.length || 0
+    })
+
+  } catch (error) {
+    logger.error('Exception fetching highlights', {
+      component: 'Highlights',
+      action: 'GET',
+      error
+    })
+
+    return NextResponse.json(
+      { success: false, error: 'שגיאה בטעינת ההדגשות' },
+      { status: 500 }
+    )
+  }
+}
+
+/**
+ * POST /api/highlights
+ * Admin only - create new highlight
+ *
+ * GUARDS ACTIVE:
+ * - Guard 1: Admin authentication
+ * - Guard 2: Required fields validation
+ * - Guard 4: Hebrew text validation
+ */
+export async function POST(req: NextRequest) {
+  try {
+    // ✅ GUARD 1: Admin Authentication
+    const token = req.cookies.get('auth-token')
+
+    if (!token) {
+      logger.warn('Unauthorized highlight creation attempt - no token', {
+        component: 'Highlights',
+        action: 'POST'
+      })
+
+      return NextResponse.json(
+        { success: false, error: 'נדרשת הרשאת מנהל' },
+        { status: 401 }
+      )
+    }
+
+    const decoded = verifyJWT(token.value)
+
+    if (!decoded) {
+      // Guard 1 already logged: "INVARIANT VIOLATION: JWT verification failed"
+      return NextResponse.json(
+        { success: false, error: 'טוכן לא תקין' },
+        { status: 401 }
+      )
+    }
+
+    logger.info('Admin creating highlight', {
+      component: 'Highlights',
+      action: 'POST',
+      data: { admin: decoded.role }
+    })
+
+    const body = await req.json()
+
+    // Zod validation (structure)
+    const validation = HighlightSchema.safeParse(body)
+
+    if (!validation.success) {
+      logger.error('Highlight validation failed', {
+        component: 'Highlights',
+        action: 'POST',
+        data: { errors: validation.error.errors }
+      })
+
+      const fieldNames: Record<string, string> = {
+        'icon': 'אייקון',
+        'title_he': 'כותרת בעברית',
+        'description_he': 'תיאור בעברית',
+        'category_he': 'קטגוריה בעברית',
+        'type': 'סוג הדגשה',
+      }
+
+      const errors = validation.error.errors.map(err => {
+        const field = err.path[0] as string
+        const hebrewName = fieldNames[field] || field
+        return `${hebrewName}: ${err.message}`
+      })
+
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'יש למלא את כל השדות החובה',
+          details: errors
+        },
+        { status: 400 }
+      )
+    }
+
+    // ✅ GUARD 2: Required Fields Validation
+    // Additional runtime check on top of Zod
+    try {
+      validateRequiredFields(
+        validation.data,
+        ['icon', 'title_he', 'description_he', 'category_he', 'type'],
+        'Highlight'
+      )
+    } catch (error) {
+      // Guard 2 logged: "INVARIANT VIOLATION: Missing required fields"
+      return NextResponse.json(
+        { success: false, error: error instanceof Error ? error.message : 'שדות חסרים' },
+        { status: 400 }
+      )
+    }
+
+    // ✅ GUARD 4: Hebrew Text Validation
+    // Validate Hebrew fields contain Hebrew characters (logs warnings)
+    validateHebrewText(validation.data.title_he, 'Highlight Title (Hebrew)')
+    validateHebrewText(validation.data.description_he, 'Highlight Description (Hebrew)')
+    validateHebrewText(validation.data.category_he, 'Highlight Category (Hebrew)')
+
+    if (validation.data.cta_text_he) {
+      validateHebrewText(validation.data.cta_text_he, 'CTA Text (Hebrew)')
+    }
+
+    if (validation.data.share_text_he) {
+      validateHebrewText(validation.data.share_text_he, 'Share Text (Hebrew)')
+    }
+
+    // Create highlight
+    const supabase = await createClient()
+
+    const { data, error } = await supabase
+      .from('highlights')
+      .insert([validation.data])
+      .select()
+      .single()
+
+    if (error) {
+      logger.error('Failed to create highlight', {
+        component: 'Highlights',
+        action: 'POST',
+        data: { title: validation.data.title_he },
+        error
+      })
+
+      return NextResponse.json(
+        { success: false, error: 'שגיאה ביצירת הדגשה', details: error.message },
+        { status: 500 }
+      )
+    }
+
+    logger.success('Highlight created successfully', {
+      component: 'Highlights',
+      action: 'POST',
+      data: { id: data.id, title: validation.data.title_he }
+    })
+
+    return NextResponse.json({
+      success: true,
+      data,
+      message: 'הדגשה נוצרה בהצלחה'
+    })
+
+  } catch (error) {
+    logger.error('Exception creating highlight', {
+      component: 'Highlights',
+      action: 'POST',
+      error
+    })
+
+    return NextResponse.json(
+      { success: false, error: 'שגיאה ביצירת הדגשה' },
+      { status: 500 }
+    )
+  }
+}
+
+/**
+ * DELETE /api/highlights
+ * Admin only - soft delete all highlights
+ *
+ * GUARDS ACTIVE:
+ * - Guard 1: Admin authentication
+ * - Guard 3: Soft delete enforcement
+ *
+ * NOTE: This deletes ALL highlights at once.
+ * Consider adding a query parameter to delete by ID instead.
+ */
+export async function DELETE(req: NextRequest) {
+  try {
+    // ✅ GUARD 1: Admin Authentication
+    const token = req.cookies.get('auth-token')
+
+    if (!token) {
+      logger.warn('Unauthorized delete attempt - no token', {
+        component: 'Highlights',
+        action: 'DELETE'
+      })
+
+      return NextResponse.json(
+        { success: false, error: 'נדרשת הרשאת מנהל' },
+        { status: 401 }
+      )
+    }
+
+    const decoded = verifyJWT(token.value)
+
+    if (!decoded) {
+      // Guard 1 already logged: "INVARIANT VIOLATION: JWT verification failed"
+      return NextResponse.json(
+        { success: false, error: 'טוכן לא תקין' },
+        { status: 401 }
+      )
+    }
+
+    logger.warn('⚠️ Admin attempting to delete all highlights', {
+      component: 'Highlights',
+      action: 'DELETE',
+      data: { admin: decoded.role }
+    })
+
+    // ✅ GUARD 3: Soft Delete Enforcement
+    // Get all non-deleted highlight IDs first
+    const supabase = await createClient()
+
+    const { data: highlights, error: fetchError } = await supabase
+      .from('highlights')
+      .select('id')
+      .eq('is_deleted', false) // Only get non-deleted highlights
+
+    if (fetchError) {
+      logger.error('Failed to fetch highlights for deletion', {
+        component: 'Highlights',
+        action: 'DELETE',
+        error: fetchError
+      })
+
+      return NextResponse.json(
+        { success: false, error: 'שגיאה במחיקת ההדגשות' },
+        { status: 500 }
+      )
+    }
+
+    if (!highlights || highlights.length === 0) {
+      logger.info('No highlights to delete', {
+        component: 'Highlights',
+        action: 'DELETE'
+      })
+
+      return NextResponse.json({
+        success: true,
+        message: 'אין הדגשות למחיקה',
+        deletedCount: 0
+      })
+    }
+
+    // Soft delete each highlight (Guard 3 logs each operation)
+    const deleteResults = await Promise.all(
+      highlights.map(highlight => softDelete('highlights', highlight.id))
+    )
+
+    const successCount = deleteResults.filter(r => r.success).length
+    const failCount = deleteResults.filter(r => !r.success).length
+
+    if (failCount > 0) {
+      logger.error('Some highlights failed to delete', {
+        component: 'Highlights',
+        action: 'DELETE',
+        data: { total: highlights.length, success: successCount, failed: failCount }
+      })
+
+      return NextResponse.json(
+        {
+          success: false,
+          error: `${failCount} הדגשות נכשלו במחיקה`,
+          details: { total: highlights.length, success: successCount, failed: failCount }
+        },
+        { status: 500 }
+      )
+    }
+
+    logger.success(`All ${successCount} highlights soft deleted`, {
+      component: 'Highlights',
+      action: 'DELETE',
+      data: { deletedCount: successCount }
+    })
+
+    return NextResponse.json({
+      success: true,
+      message: `${successCount} הדגשות נמחקו בהצלחה`,
+      deletedCount: successCount
+    })
+
+  } catch (error) {
+    logger.error('Exception deleting highlights', {
+      component: 'Highlights',
+      action: 'DELETE',
+      error
+    })
+
+    return NextResponse.json(
+      { success: false, error: 'שגיאה במחיקת ההדגשות' },
+      { status: 500 }
+    )
+  }
+}

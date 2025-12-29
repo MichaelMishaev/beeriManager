@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test } from '@playwright/test';
 
 test('Debug highlight filtering - check why new highlight not showing', async ({ page }) => {
   // Get current time

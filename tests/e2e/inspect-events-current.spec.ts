@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test'
+import { test } from '@playwright/test'
 
 test.describe('Inspect Current Events List State', () => {
   test('should capture and log current events list HTML structure', async ({ page }) => {

@@ -15,7 +15,7 @@ test('Find exact location of "17" elements', async ({ page }) => {
     // Get full ancestor chain
     const ancestors = await element.evaluate((el) => {
       const chain = []
-      let current = el
+      let current: HTMLElement | SVGElement | null = el
       while (current && current !== document.body) {
         const classes = current.className || ''
         const id = current.id ? `#${current.id}` : ''

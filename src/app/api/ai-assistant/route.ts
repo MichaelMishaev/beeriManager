@@ -1,11 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { openai, AI_CONFIG, SYSTEM_PROMPT } from '@/lib/ai/openai'
+import {
+  openai,
+  AI_CONFIG,
+  UNDERSTANDING_PROMPT,
+  getExtractionPrompt,
+} from '@/lib/ai/openai'
 import {
   AI_TOOLS,
   validateEventsArgs,
   validateUrgentMessageArgs,
 } from '@/lib/ai/tools'
 import { logAICost } from '@/lib/ai/cost-tracker'
+import { incrementAiUsage, validateMessageLength } from '@/lib/ai/rate-limiter'
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic'
@@ -19,15 +25,16 @@ interface ChatMessage {
 
 interface AIAssistantRequest {
   messages: ChatMessage[]
-  action?: 'initial' | 'select_type' | 'extract_data'
+  action?: 'initial' | 'select_type' | 'extract_data' | 'understand_message'
+  context?: string // Optional context from understanding round
 }
 
 export async function POST(req: NextRequest) {
   try {
     const body: AIAssistantRequest = await req.json()
-    const { messages, action = 'extract_data' } = body
+    const { messages, action = 'extract_data', context } = body
 
-    // Handle initial greeting
+    // Handle initial greeting (no rate limit check - doesn't use GPT)
     if (action === 'initial') {
       return NextResponse.json({
         success: true,
@@ -38,7 +45,43 @@ export async function POST(req: NextRequest) {
 1️⃣ **אירוע** - אירוע בלוח השנה של בית הספר
 2️⃣ **הודעה דחופה** - הודעה שתוצג בבאנר בדף הבית
 
-בחר אפשרות ואסביר לך מה צריך למלא.`,
+בחר אפשרות ואסביר לך מה צריך למלא.
+
+💡 מגבלה יומית: 20 שימושים ביום | מקסימום 400 תווים להודעה`,
+      })
+    }
+
+    // Check rate limit for all GPT requests
+    const rateLimitResult = await incrementAiUsage()
+
+    if (!rateLimitResult.success || rateLimitResult.stats.limitReached) {
+      console.warn('[AI Assistant] Rate limit reached:', rateLimitResult.stats)
+      return NextResponse.json({
+        success: false,
+        error: `הגעת למגבלה היומית של 20 שימושים 😔
+
+נסה שוב מחר או צור קשר עם המנהל.
+
+שימושים היום: ${rateLimitResult.stats.currentCount}/${rateLimitResult.stats.dailyLimit}`,
+        rateLimitReached: true,
+        stats: rateLimitResult.stats,
+      })
+    }
+
+    // Validate message length (400 chars max)
+    const lastUserMessage = messages[messages.length - 1]?.content || ''
+    const lengthValidation = validateMessageLength(lastUserMessage)
+
+    if (!lengthValidation.valid) {
+      return NextResponse.json({
+        success: false,
+        error: `ההודעה ארוכה מדי 📏
+
+מקסימום: ${lengthValidation.maxLength} תווים
+ההודעה שלך: ${lengthValidation.length} תווים
+
+נסה לקצר את ההודעה.`,
+        messageTooLong: true,
       })
     }
 
@@ -99,14 +142,49 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // Handle understanding check for complex messages (Round 1)
+    if (action === 'understand_message') {
+      const response = await openai.chat.completions.create({
+        model: AI_CONFIG.model,
+        max_completion_tokens: AI_CONFIG.max_completion_tokens,
+        messages: [
+          { role: 'system', content: UNDERSTANDING_PROMPT },
+          ...messages.map((msg) => ({
+            role: msg.role,
+            content: msg.content,
+          })),
+        ],
+        // No function calling for understanding - just text response
+      })
+
+      const assistantMessage = response.choices[0].message
+
+      // Log cost for analytics (Round 1)
+      logAICost(
+        response.usage,
+        'understand_message',
+        messages[messages.length - 1]?.content,
+        1 // Round number
+      )
+
+      return NextResponse.json({
+        success: true,
+        message: assistantMessage.content || 'לא הבנתי. אנא נסה שוב.',
+        understanding: assistantMessage.content, // Save for context in next round
+      })
+    }
+
     // Handle data extraction with function calling
     if (action === 'extract_data') {
+      // Use extraction prompt with optional context from understanding round
+      const systemPrompt = getExtractionPrompt(context)
+
       const response = await openai.chat.completions.create({
         model: AI_CONFIG.model,
         max_completion_tokens: AI_CONFIG.max_completion_tokens,
         // Note: temperature is not included - GPT-5 Mini only supports default value (1)
         messages: [
-          { role: 'system', content: SYSTEM_PROMPT },
+          { role: 'system', content: systemPrompt },
           ...messages.map((msg) => ({
             role: msg.role,
             content: msg.content,
@@ -119,8 +197,14 @@ export async function POST(req: NextRequest) {
 
       const assistantMessage = response.choices[0].message
 
-      // Log cost for analytics
-      logAICost(response.usage, 'extract_data', messages[messages.length - 1]?.content)
+      // Log cost for analytics (Round 2 if context exists, Round 1 if simple message)
+      const roundNumber = context ? 2 : 1
+      logAICost(
+        response.usage,
+        'extract_data',
+        messages[messages.length - 1]?.content,
+        roundNumber
+      )
 
       // Check if AI wants to call a function
       if (assistantMessage.tool_calls && assistantMessage.tool_calls.length > 0) {
@@ -157,22 +241,45 @@ export async function POST(req: NextRequest) {
             },
           })
           } else {
+            // Validation failed - return specific validation errors
             console.error('[AI Assistant] Validation failed:', {
               functionName,
               args: functionArgs,
               eventsValid: functionName === 'create_events' ? validateEventsArgs(functionArgs) : 'N/A',
               urgentValid: functionName === 'create_urgent_message' ? validateUrgentMessageArgs(functionArgs) : 'N/A',
             })
+
+            // Generate specific validation error messages
+            const validationErrors: string[] = []
+
+            if (functionName === 'create_events') {
+              if (!functionArgs.events || functionArgs.events.length === 0) {
+                validationErrors.push('לא נמצאו אירועים לייצור')
+              } else {
+                functionArgs.events.forEach((event: any, index: number) => {
+                  if (!event.title) validationErrors.push(`אירוע ${index + 1}: חסר שם`)
+                  if (!event.start_datetime) validationErrors.push(`אירוע ${index + 1}: חסר תאריך`)
+                  if (!event.title_ru) validationErrors.push(`אירוע ${index + 1}: חסר תרגום רוסי`)
+                })
+              }
+            } else if (functionName === 'create_urgent_message') {
+              if (!functionArgs.title_he) validationErrors.push('חסרה כותרת בעברית')
+              if (!functionArgs.title_ru) validationErrors.push('חסר תרגום רוסי')
+              if (!functionArgs.end_date) validationErrors.push('חסר תאריך סיום')
+            }
+
             return NextResponse.json({
               success: false,
-              error: 'AI extracted invalid data. Please try again.',
+              error: 'שגיאה באימות הנתונים שחולצו מההודעה',
+              validationErrors,
             })
           }
         }
       }
 
-      // AI responded with text (no function call)
-      console.warn('[AI Assistant] No function call - AI responded with text:', {
+      // AI responded with text (no function call) - this means it's asking for clarification
+      // This is actually SUCCESS - AI is asking for missing information
+      console.log('[AI Assistant] AI asking for clarification:', {
         content: assistantMessage.content,
         userMessage: messages[messages.length - 1]?.content,
         finishReason: response.choices[0].finish_reason,

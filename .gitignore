@@ -187,3 +187,30 @@ scripts/*-db-fix-and-test.ts
 # Vendor-specific temporary files
 scripts/*vendor*.ts
 scripts/*vendor*.js
+
+# Database backups
+backups/
+
+# ============================================
+# Old/Backup Node Modules (DO NOT COMMIT!)
+# ============================================
+node_modules_old/
+
+# ============================================
+# Debug Images & Screenshots
+# ============================================
+debug-*.png
+debug-*.jpg
+
+# ============================================
+# Service Worker Version Files (Generated)
+# ============================================
+public/sw*.js
+!public/sw.js
+public/workbox-*.js.map
+public/sw.js*.map
+
+# ============================================
+# Documentation with Potential Secrets
+# ============================================
+Docs/3rdParty/openAI/openai.md

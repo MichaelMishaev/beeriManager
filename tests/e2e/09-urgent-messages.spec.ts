@@ -1,6 +1,6 @@
-import { test, expect, devices } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 import { AuthHelper } from '../helpers/auth.helper';
-import { HebrewHelper } from '../helpers/hebrew.helper';
+// HebrewHelper removed - unused
 
 test.describe('Urgent Messages Admin', () => {
   test.beforeEach(async ({ page }) => {
@@ -56,7 +56,7 @@ test.describe('Urgent Messages Admin', () => {
     await expect(page.locator('button:has-text("+ חודש")')).toBeVisible();
   });
 
-  test('should display all controls properly on mobile', async ({ page, context }) => {
+  test('should display all controls properly on mobile', async ({ page }) => {
     // Set mobile viewport
     await page.setViewportSize({ width: 375, height: 667 }); // iPhone SE size
 
@@ -263,8 +263,6 @@ test.describe('Urgent Messages Admin', () => {
   });
 
   test('should create custom urgent message', async ({ page }) => {
-    const hebrewHelper = new HebrewHelper(page);
-
     await page.goto('/he/admin/urgent');
 
     // Click "הוסף הודעה" button
@@ -350,7 +348,7 @@ test.describe('Urgent Messages Admin', () => {
 
     // Should NOT show "פעילה כעת" badge
     const activeNowBadges = page.locator('text=פעילה כעת');
-    const count = await activeNowBadges.count();
+    await activeNowBadges.count();
     // If there were any before, should be one less now
   });
 });
