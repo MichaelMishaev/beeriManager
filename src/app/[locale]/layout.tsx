@@ -65,7 +65,7 @@ export const metadata: Metadata = {
     description: 'בארי נתניה - מערכת ניהול הנהגה הורית - אירועים, משימות, ועדות ופרוטוקולים',
     images: ['https://beeri.online/logo-square.png'],
   },
-  manifest: '/manifest.json',
+  manifest: '/manifest.json?v=4',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
