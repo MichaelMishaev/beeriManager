@@ -160,8 +160,9 @@ public/uploads/
 # One-off test scripts
 scripts/test-*.ts
 scripts/test-*.js
+scripts/test-*.mjs
 
-# One-off check/debug scripts  
+# One-off check/debug scripts
 scripts/check-*.ts
 scripts/check-*.sql
 
@@ -177,6 +178,10 @@ scripts/verify-*.sql
 # Temporary database fixes
 scripts/*-db-fix-and-test.ts
 
+# Migration scripts (temporary, run once)
+scripts/run-*-migration.*
+scripts/add-*.sql
+
 # Summary documentation (usually temporary)
 *_SUMMARY.md
 *-SUMMARY.md
@@ -187,6 +192,24 @@ scripts/*-db-fix-and-test.ts
 # Vendor-specific temporary files
 scripts/*vendor*.ts
 scripts/*vendor*.js
+scripts/*vendor*.mjs
+
+# ============================================
+# Debug Files & Pages
+# ============================================
+# Debug test files
+tests/debug-*.spec.ts
+archive/tests/debug-*.spec.ts
+
+# Debug pages
+src/app/*/debug-*/
+src/app/api/debug/
+
+# Old documentation
+Docs/development/oldFilesMD/
+
+# Test snapshots
+*-snapshots/
 
 # Database backups
 backups/
