@@ -2,13 +2,13 @@
 
 ## ✅ What Was Done
 
-Your "באר התניא - הנהגה הוראית" logo has been implemented **everywhere** in the application:
+Your "באר התניא - הנהגה הורית" logo has been implemented **everywhere** in the application:
 
 ### 1. Navigation Bar (All Pages)
 - Logo appears in top-left corner
 - Mobile: 32px height
 - Desktop: 40px height
-- Logo + text "באר התניא - הנהגה הוראית"
+- Logo + text "באר התניא - הנהגה הורית"
 
 ### 2. Login Page
 - Centered 120x120 square logo
@@ -17,7 +17,7 @@ Your "באר התניא - הנהגה הוראית" logo has been implemented **e
 
 ### 3. Browser Tab
 - Favicon shows your logo
-- Tab title: "באר התניא - הנהגה הוראית"
+- Tab title: "באר התניא - הנהגה הורית"
 
 ### 4. PWA Install
 - Home screen icon: Your logo
@@ -127,7 +127,7 @@ Quick check before considering it complete:
 - [ ] Favicon shows in browser tab
 - [ ] No broken images (check browser console)
 - [ ] Logo looks sharp and clear (not blurry)
-- [ ] Text reads "באר התניא - הנהגה הוראית"
+- [ ] Text reads "באר התניא - הנהגה הורית"
 - [ ] Works on mobile screen sizes
 - [ ] TypeScript builds without errors (`npm run type-check`)
 
@@ -187,7 +187,7 @@ For complete details, see:
 - **Original Size:** 2048x2048 pixels
 - **Design:** Circular badge with book, olive branch, gavel
 - **Colors:** Blue (#0D98BA), Gold, White
-- **Text:** "באר התניא" (center), "הנהגה הוראית" (ribbon)
+- **Text:** "באר התניא" (center), "הנהגה הורית" (ribbon)
 
 **Optimized For:**
 - Navigation bars (small)

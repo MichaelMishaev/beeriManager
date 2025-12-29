@@ -64,7 +64,7 @@ export default function LoginPage() {
             כניסת מנהל
           </CardTitle>
           <p className="text-sm text-gray-600 mt-2">
-            בארי נתניה - הנהגה הוראית
+            בארי נתניה - הנהגה הורית
           </p>
         </CardHeader>
 

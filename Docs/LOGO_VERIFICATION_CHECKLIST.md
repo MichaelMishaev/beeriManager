@@ -12,18 +12,18 @@ Visit http://localhost:4500 and verify:
 - [ ] Logo appears on desktop (40px height)
 - [ ] Logo appears on mobile (32px height)
 - [ ] Text "באר התניא" appears next to logo (desktop/tablet)
-- [ ] Subtitle "הנהגה הוראית" appears below title
+- [ ] Subtitle "הנהגה הורית" appears below title
 - [ ] Logo is clickable and links to home page
 
 #### 2. Login Page (/login)
 - [ ] Square logo (120x120) appears at top of login card
 - [ ] Title reads "כניסת מנהל"
-- [ ] Subtitle reads "באר התניא - הנהגה הוראית"
+- [ ] Subtitle reads "באר התניא - הנהגה הורית"
 - [ ] Logo is centered and looks professional
 
 #### 3. Browser Tab
 - [ ] Favicon appears in browser tab
-- [ ] Tab title reads "באר התניא - הנהגה הוראית"
+- [ ] Tab title reads "באר התניא - הנהגה הורית"
 
 #### 4. Responsive Design
 **Desktop (1920px+):**
@@ -75,15 +75,15 @@ Visit http://localhost:4500 and verify:
 
 #### 1. Meta Tags (View Page Source)
 ```html
-<title>באר התניא - הנהגה הוראית</title>
-<meta property="og:title" content="באר התניא - הנהגה הוראית">
+<title>באר התניא - הנהגה הורית</title>
+<meta property="og:title" content="באר התניא - הנהגה הורית">
 <meta property="og:site_name" content="באר התניא">
 <meta property="og:image" content="https://beeri.online/logo-square.png">
 ```
 
 #### 2. Manifest File
 Visit: http://localhost:4500/manifest.json
-- [ ] `name`: "באר התניא - הנהגה הוראית"
+- [ ] `name`: "באר התניא - הנהגה הורית"
 - [ ] `short_name`: "באר התניא"
 - [ ] All icon paths correct
 
@@ -150,7 +150,7 @@ Open DevTools → Lighthouse:
 1. Share any page URL
 2. Check preview shows:
    - [ ] Logo image
-   - [ ] Title: "באר התניא - הנהגה הוראית"
+   - [ ] Title: "באר התניא - הנהגה הורית"
    - [ ] Description
 
 #### Facebook/LinkedIn

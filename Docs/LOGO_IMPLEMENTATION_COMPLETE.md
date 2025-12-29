@@ -1,7 +1,7 @@
 # Logo Implementation - Complete Summary
 
 ## Overview
-Successfully implemented the "באר התניא - הנהגה הוראית" logo throughout the entire BeeriManager application.
+Successfully implemented the "באר התניא - הנהגה הורית" logo throughout the entire BeeriManager application.
 
 **Date:** December 27, 2025
 **Logo Source:** 2048x2048 PNG badge design with Hebrew text
@@ -36,7 +36,7 @@ Successfully implemented the "באר התניא - הנהגה הוראית" logo 
   - Mobile: 32px height (h-8)
   - Desktop: 40px height (h-10)
 - ✅ Updated branding text from "פורטל בארי" to "באר התניא"
-- ✅ Subtitle updated to "הנהגה הוראית"
+- ✅ Subtitle updated to "הנהגה הורית"
 - ✅ Logo hidden on smallest mobile screens to save space
 - ✅ Alt text: "לוגו באר התניא"
 
@@ -46,20 +46,20 @@ Successfully implemented the "באר התניא - הנהגה הוראית" logo 
 **Changes:**
 - ✅ Added Next.js `Image` import
 - ✅ Replaced Lock icon with square logo (120x120)
-- ✅ Updated page title: "באר התניא - הנהגה הוראית"
+- ✅ Updated page title: "באר התניא - הנהגה הורית"
 - ✅ Removed generic "BeeriManager" branding
 
 ### 4. Metadata & SEO
 **File:** `src/app/[locale]/layout.tsx`
 
 **Changes:**
-- ✅ Updated page title: "באר התניא - הנהגה הוראית"
+- ✅ Updated page title: "באר התניא - הנהגה הורית"
 - ✅ Updated description with new branding
-- ✅ Updated keywords: 'באר התניא', 'הנהגה הוראית'
+- ✅ Updated keywords: 'באר התניא', 'הנהגה הורית'
 - ✅ Updated authors/creator/publisher: "באר התניא"
 - ✅ Updated OpenGraph metadata:
   - Site name: "באר התניא"
-  - Title: "באר התניא - הנהגה הוראית"
+  - Title: "באר התניא - הנהגה הורית"
   - Image: `/logo-square.png` (512x512)
 - ✅ Updated Twitter card metadata
 - ✅ Updated Apple Web App title: "באר התניא"
@@ -68,7 +68,7 @@ Successfully implemented the "באר התניא - הנהגה הוראית" logo 
 **File:** `public/manifest.json`
 
 **Changes:**
-- ✅ Updated name: "באר התניא - הנהגה הוראית"
+- ✅ Updated name: "באר התניא - הנהגה הורית"
 - ✅ Updated short_name: "באר התניא"
 - ✅ Updated description with new branding
 - ✅ All icon references point to newly generated icons
@@ -121,9 +121,9 @@ public/manifest.json                       (PWA manifest)
 
 | Element | Before | After |
 |---------|--------|-------|
-| **App Name** | פורטל בארי - BeeriManager | באר התניא - הנהגה הוראית |
+| **App Name** | פורטל בארי - BeeriManager | באר התניא - הנהגה הורית |
 | **Short Name** | פורטל בארי | באר התניא |
-| **Tagline** | מופעל על ידי ועד הורים בית ספר בארי | הנהגה הוראית |
+| **Tagline** | מופעל על ידי ועד הורים בית ספר בארי | הנהגה הורית |
 | **Logo** | Text-based / Generic icon | Custom badge logo |
 | **Favicon** | Generic | Organization logo |
 | **OG Image** | Generic | Logo-based |
@@ -260,7 +260,7 @@ npm run start
 - Circular badge design with blue and gold colors
 - Central book icon with Hebrew text "באר התניא"
 - Olive branch and gavel symbols
-- Gold ribbon with text "הנהגה הוראית"
+- Gold ribbon with text "הנהגה הורית"
 - Professional, educational aesthetic
 - Works well at all sizes (16px to 512px)
 

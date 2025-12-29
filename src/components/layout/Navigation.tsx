@@ -116,7 +116,7 @@ export function Navigation() {
                 <span className="text-[8px] md:text-[10px] text-muted-foreground leading-tight truncate max-w-[140px] md:max-w-[200px]">
                   {settings?.committee_name && settings?.school_name
                     ? `${settings.committee_name}`
-                    : 'הנהגה הוראית'}
+                    : 'הנהגה הורית'}
                 </span>
               </div>
             </Link>

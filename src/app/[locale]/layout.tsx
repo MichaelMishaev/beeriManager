@@ -29,11 +29,11 @@ const roboto = Roboto({
 
 export const metadata: Metadata = {
   title: {
-    default: 'בארי נתניה - הנהגה הוראית',
+    default: 'בארי נתניה - הנהגה הורית',
     template: '%s | בארי נתניה'
   },
-  description: 'בארי נתניה - מערכת ניהול הנהגה הוראית - אירועים, משימות, הוצאות ועוד',
-  keywords: ['בארי נתניה', 'הנהגה הוראית', 'אירועים', 'משימות', 'PWA'],
+  description: 'בארי נתניה - מערכת ניהול הנהגה הורית - אירועים, משימות, הוצאות ועוד',
+  keywords: ['בארי נתניה', 'הנהגה הורית', 'אירועים', 'משימות', 'PWA'],
   authors: [{ name: 'בארי נתניה' }],
   creator: 'בארי נתניה',
   publisher: 'בארי נתניה',
@@ -47,22 +47,22 @@ export const metadata: Metadata = {
     locale: 'he_IL',
     url: 'https://beeri.online',
     siteName: 'בארי נתניה',
-    title: 'בארי נתניה - הנהגה הוראית',
-    description: 'בארי נתניה - מערכת ניהול הנהגה הוראית - אירועים, משימות, ועדות ופרוטוקולים',
+    title: 'בארי נתניה - הנהגה הורית',
+    description: 'בארי נתניה - מערכת ניהול הנהגה הורית - אירועים, משימות, ועדות ופרוטוקולים',
     images: [
       {
         url: 'https://beeri.online/logo-square.png',
         width: 512,
         height: 512,
-        alt: 'בארי נתניה - הנהגה הוראית',
+        alt: 'בארי נתניה - הנהגה הורית',
         type: 'image/png',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'בארי נתניה - הנהגה הוראית',
-    description: 'בארי נתניה - מערכת ניהול הנהגה הוראית - אירועים, משימות, ועדות ופרוטוקולים',
+    title: 'בארי נתניה - הנהגה הורית',
+    description: 'בארי נתניה - מערכת ניהול הנהגה הורית - אירועים, משימות, ועדות ופרוטוקולים',
     images: ['https://beeri.online/logo-square.png'],
   },
   manifest: '/manifest.json',
