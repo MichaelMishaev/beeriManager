@@ -11,11 +11,21 @@ export const metadata: Metadata = {
     siteName: 'בארי נתניה',
     locale: 'he_IL',
     type: 'website',
+    images: [
+      {
+        url: 'https://beeri.online/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'בארי נתניה - הנהגה הורית',
+        type: 'image/png',
+      },
+    ],
   },
   twitter: {
-    card: 'summary',
+    card: 'summary_large_image',
     title: 'הורי תלמידים למען בית הספר',
     description: 'מחפשים הורים שרוצים לעזור – בדרך שמתאימה להם. ועד ההורים בונה מאגר קטן של הורים עם תחומי ידע וניסיון שונים.',
+    images: ['https://beeri.online/og-image.png'],
   },
 }
 

@@ -51,9 +51,9 @@ export const metadata: Metadata = {
     description: 'בארי נתניה - מערכת ניהול הנהגה הורית - אירועים, משימות, ועדות ופרוטוקולים',
     images: [
       {
-        url: 'https://beeri.online/logo-square.png',
-        width: 512,
-        height: 512,
+        url: 'https://beeri.online/og-image.png',
+        width: 1200,
+        height: 630,
         alt: 'בארי נתניה - הנהגה הורית',
         type: 'image/png',
       },
@@ -63,7 +63,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'בארי נתניה - הנהגה הורית',
     description: 'בארי נתניה - מערכת ניהול הנהגה הורית - אירועים, משימות, ועדות ופרוטוקולים',
-    images: ['https://beeri.online/logo-square.png'],
+    images: ['https://beeri.online/og-image.png'],
   },
   manifest: '/manifest.json?v=5',
   appleWebApp: {
