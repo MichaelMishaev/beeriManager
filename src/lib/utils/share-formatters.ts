@@ -751,6 +751,8 @@ export function formatSkillsSurveyShareData(
 
 ⏱️ Заполнение займет 2-3 минуты
 
+🔗 ${url}
+
 📢 Заходите на портал:
 🌐 https://beeri.online/${locale}`
     : `📋 *${title}*
@@ -768,8 +770,10 @@ export function formatSkillsSurveyShareData(
 
 ⏱️ המילוי לוקח 2-3 דקות בלבד
 
+🔗 ${url}
+
 📢 בקרו בפורטל:
 🌐 https://beeri.online/${locale}`
 
-  return { title, text, url }
+  return { title, text, url: '' }
 }
