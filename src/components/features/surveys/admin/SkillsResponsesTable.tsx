@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, Fragment } from 'react'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -61,8 +61,8 @@ export function SkillsResponsesTable({ responses, isLoading }: Props) {
             </TableHeader>
             <TableBody>
               {responses.map((response) => (
-                <>
-                  <TableRow key={response.id} className="hover:bg-gray-50">
+                <Fragment key={response.id}>
+                  <TableRow className="hover:bg-gray-50">
                     <TableCell className="font-medium">
                       {response.parent_name || <span className="text-gray-400 italic">אנונימי</span>}
                     </TableCell>
@@ -146,6 +146,15 @@ export function SkillsResponsesTable({ responses, isLoading }: Props) {
                             </div>
                           </div>
 
+                          {response.other_specialty && response.skills.includes('other') && (
+                            <div>
+                              <span className="font-semibold text-sm">אחר - פרטים:</span>
+                              <p className="text-sm text-gray-700 mt-1 bg-yellow-50 p-2 rounded border border-yellow-200">
+                                {response.other_specialty}
+                              </p>
+                            </div>
+                          )}
+
                           {response.email && (
                             <div>
                               <span className="font-semibold text-sm">אימייל:</span>
@@ -173,7 +182,7 @@ export function SkillsResponsesTable({ responses, isLoading }: Props) {
                       </TableCell>
                     </TableRow>
                   )}
-                </>
+                </Fragment>
               ))}
             </TableBody>
           </Table>

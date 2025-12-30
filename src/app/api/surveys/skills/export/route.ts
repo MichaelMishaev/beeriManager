@@ -46,6 +46,7 @@ export async function GET(request: NextRequest) {
       'טלפון',
       'אימייל',
       'מיומנויות',
+      'אחר - פרטים',
       'אמצעי יצירת קשר מועדף',
       'הערות נוספות',
     ]
@@ -54,6 +55,7 @@ export async function GET(request: NextRequest) {
       const skillsHe = response.skills.map((s) => SKILL_NAMES_HE[s] || s).join(', ')
       const contactPrefHe = CONTACT_PREF_NAMES_HE[response.preferred_contact] || response.preferred_contact
       const date = new Date(response.created_at).toLocaleDateString('he-IL')
+      const otherSpecialty = response.skills.includes('other') ? (response.other_specialty || '') : ''
 
       return [
         date,
@@ -61,6 +63,7 @@ export async function GET(request: NextRequest) {
         response.phone_number || '',
         response.email || '',
         `"${skillsHe}"`, // Quoted for CSV safety (commas in content)
+        `"${otherSpecialty.replace(/"/g, '""')}"`, // Escape quotes and wrap
         contactPrefHe,
         `"${(response.additional_notes || '').replace(/"/g, '""')}"`, // Escape quotes and wrap
       ]
