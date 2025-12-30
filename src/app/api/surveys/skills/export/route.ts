@@ -4,6 +4,9 @@ import { verifyJWT } from '@/lib/auth/jwt'
 import type { ParentSkillResponse } from '@/types/parent-skills'
 import { SKILL_NAMES_HE, CONTACT_PREF_NAMES_HE } from '@/types/parent-skills'
 
+// Force dynamic rendering (uses cookies for auth)
+export const dynamic = 'force-dynamic'
+
 // Default school ID for single-tenant deployment
 const DEFAULT_SCHOOL_ID = process.env.DEFAULT_SCHOOL_ID || 'c6268dee-1fcd-42bd-8da2-1d4ac34a03db'
 
