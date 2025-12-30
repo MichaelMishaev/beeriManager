@@ -65,41 +65,42 @@ export const metadata: Metadata = {
     description: 'בארי נתניה - מערכת ניהול הנהגה הורית - אירועים, משימות, ועדות ופרוטוקולים',
     images: ['https://beeri.online/logo-square.png'],
   },
-  manifest: '/manifest.json?v=4',
+  manifest: '/manifest.json?v=5',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
     title: 'בארי נתניה',
     startupImage: [
       {
-        url: '/icons/apple-splash-2048-2732.png',
+        url: '/icons/apple-splash-2048-2732.png?v=5',
         media: '(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2)',
       },
       {
-        url: '/icons/apple-splash-1668-2388.png',
+        url: '/icons/apple-splash-1668-2388.png?v=5',
         media: '(device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2)',
       },
       {
-        url: '/icons/apple-splash-1536-2048.png',
+        url: '/icons/apple-splash-1536-2048.png?v=5',
         media: '(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2)',
       },
       {
-        url: '/icons/apple-splash-1170-2532.png',
+        url: '/icons/apple-splash-1170-2532.png?v=5',
         media: '(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3)',
       },
       {
-        url: '/icons/apple-splash-1125-2436.png',
+        url: '/icons/apple-splash-1125-2436.png?v=5',
         media: '(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3)',
       },
     ],
   },
   icons: {
     icon: [
-      { url: '/icons/icon-192x192.png?v=2', sizes: '192x192', type: 'image/png' },
-      { url: '/icons/icon-512x512.png?v=2', sizes: '512x512', type: 'image/png' },
+      { url: '/icons/icon-192x192.png?v=5', sizes: '192x192', type: 'image/png' },
+      { url: '/icons/icon-512x512.png?v=5', sizes: '512x512', type: 'image/png' },
+      { url: '/favicon.ico?v=5', sizes: '32x32', type: 'image/x-icon' },
     ],
     apple: [
-      { url: '/icons/apple-touch-icon.png?v=2', sizes: '180x180', type: 'image/png' },
+      { url: '/icons/apple-touch-icon.png?v=5', sizes: '180x180', type: 'image/png' },
     ],
   },
   other: {
