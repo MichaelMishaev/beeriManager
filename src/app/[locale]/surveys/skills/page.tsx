@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     siteName: 'בארי נתניה',
     images: [
       {
-        url: 'https://beeri.online/logo-square.png',
+        url: 'https://beeri.online/icons/icon-512x512.png',
         width: 512,
         height: 512,
         alt: 'בארי נתניה - סקר הורים',
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'הורי תלמידים למען בית הספר',
     description: 'מחפשים הורים שרוצים לעזור – בדרך שמתאימה להם',
-    images: ['https://beeri.online/logo-square.png'],
+    images: ['https://beeri.online/icons/icon-512x512.png'],
   },
 }
 
