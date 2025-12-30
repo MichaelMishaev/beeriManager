@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { CommitteeCard } from './CommitteeCard'
+import { SkillsSurveyCard } from './SkillsSurveyCard'
 import { SchoolStats } from './SchoolStats'
 import { WhatsAppCommunityCard } from '@/components/features/whatsapp/WhatsAppCommunityCard'
 import { TicketsSection } from '@/components/features/tickets/TicketsSection'
@@ -610,6 +611,9 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
         <div className="space-y-8">
           {/* Tickets Section - Placed in main content */}
           <TicketsSection tickets={tickets} />
+
+          {/* Skills Survey Card - Featured placement */}
+          <SkillsSurveyCard />
 
           {/* Committee Members Card */}
           <CommitteeCard />

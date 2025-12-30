@@ -219,6 +219,19 @@ const defaultAdminSections = [
     ]
   },
   {
+    id: 'skills',
+    title: 'מאגר מיומנויות',
+    description: 'מיומנויות הורים - מי יכול לעזור בתחומים שונים',
+    icon: Sparkles,
+    color: 'text-violet-600',
+    bgColor: 'bg-violet-50',
+    links: [
+      { href: '/surveys/skills', label: 'טופס למילוי', icon: Plus },
+      { href: '/admin/surveys/skills', label: 'צפייה בתשובות', icon: Edit },
+      { href: '/admin/surveys/skills', label: 'ייצוא לאקסל', icon: FileText }
+    ]
+  },
+  {
     id: 'settings',
     title: 'הגדרות',
     description: 'הגדרות מערכת וניהול תצורה',
