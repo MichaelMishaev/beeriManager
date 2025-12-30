@@ -25,7 +25,7 @@ export function SkillsAdminDashboard() {
   }, [debouncedSearch])
 
   // Fetch responses with filters
-  const { data, isLoading } = useQuery<SkillResponsesListResponse>({
+  const { data, isLoading, refetch } = useQuery<SkillResponsesListResponse>({
     queryKey: ['skill-responses', filters],
     queryFn: async () => {
       const params = new URLSearchParams()
@@ -162,7 +162,7 @@ export function SkillsAdminDashboard() {
       </Card>
 
       {/* Results Table */}
-      <SkillsResponsesTable responses={data?.data || []} isLoading={isLoading} />
+      <SkillsResponsesTable responses={data?.data || []} isLoading={isLoading} onResponseDeleted={() => refetch()} />
     </div>
   )
 }

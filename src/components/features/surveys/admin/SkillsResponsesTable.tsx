@@ -5,17 +5,33 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
-import { Phone, Mail, MessageCircle, ChevronDown, ChevronUp } from 'lucide-react'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import { Phone, Mail, MessageCircle, ChevronDown, ChevronUp, Trash2 } from 'lucide-react'
 import type { ParentSkillResponse } from '@/types/parent-skills'
 import { SKILL_NAMES_HE } from '@/types/parent-skills'
+import { useToast } from '@/hooks/use-toast'
 
 interface Props {
   responses: ParentSkillResponse[]
   isLoading: boolean
+  onResponseDeleted?: () => void
 }
 
-export function SkillsResponsesTable({ responses, isLoading }: Props) {
+export function SkillsResponsesTable({ responses, isLoading, onResponseDeleted }: Props) {
   const [expandedRow, setExpandedRow] = useState<string | null>(null)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [responseToDelete, setResponseToDelete] = useState<string | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
+  const { toast } = useToast()
 
   const toggleRow = (id: string) => {
     setExpandedRow(expandedRow === id ? null : id)
@@ -31,6 +47,54 @@ export function SkillsResponsesTable({ responses, isLoading }: Props) {
     return cleaned
   }
 
+  const handleDeleteClick = (responseId: string) => {
+    setResponseToDelete(responseId)
+    setDeleteDialogOpen(true)
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (!responseToDelete) return
+
+    setIsDeleting(true)
+    try {
+      const response = await fetch(`/api/surveys/skills/${responseToDelete}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+
+      const result = await response.json()
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.message || 'שגיאה במחיקת התשובה')
+      }
+
+      toast({
+        title: 'התשובה נמחקה בהצלחה',
+        variant: 'default',
+      })
+
+      // Close dialog and reset state
+      setDeleteDialogOpen(false)
+      setResponseToDelete(null)
+
+      // Notify parent component to refresh data
+      if (onResponseDeleted) {
+        onResponseDeleted()
+      }
+    } catch (error) {
+      console.error('Error deleting response:', error)
+      toast({
+        title: 'שגיאה במחיקת התשובה',
+        description: error instanceof Error ? error.message : 'אנא נסה שוב מאוחר יותר',
+        variant: 'destructive',
+      })
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
   if (isLoading) {
     return <div className="text-center py-8">טוען...</div>
   }
@@ -44,10 +108,11 @@ export function SkillsResponsesTable({ responses, isLoading }: Props) {
   }
 
   return (
-    <Card>
-      <CardContent className="p-0">
-        <div className="overflow-x-auto">
-          <Table>
+    <>
+      <Card>
+        <CardContent className="p-0">
+          <div className="overflow-x-auto">
+            <Table>
             <TableHeader>
               <TableRow>
                 <TableHead className="text-right">שם</TableHead>
@@ -121,6 +186,14 @@ export function SkillsResponsesTable({ responses, isLoading }: Props) {
                             </a>
                           </Button>
                         )}
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="bg-red-50 hover:bg-red-100"
+                          onClick={() => handleDeleteClick(response.id)}
+                        >
+                          <Trash2 className="h-4 w-4 text-red-600" />
+                        </Button>
                       </div>
                     </TableCell>
                     <TableCell>
@@ -189,5 +262,23 @@ export function SkillsResponsesTable({ responses, isLoading }: Props) {
         </div>
       </CardContent>
     </Card>
+
+    <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>האם למחוק תשובה זו?</AlertDialogTitle>
+          <AlertDialogDescription>
+            פעולה זו תמחק את התשובה מהמערכת. המחיקה היא מחיקה רכה - הנתונים יישמרו במערכת אך לא יוצגו יותר.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter className="gap-2">
+          <AlertDialogCancel disabled={isDeleting}>ביטול</AlertDialogCancel>
+          <AlertDialogAction onClick={handleDeleteConfirm} disabled={isDeleting} className="bg-red-600 hover:bg-red-700">
+            {isDeleting ? 'מוחק...' : 'מחק'}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  </>
   )
 }

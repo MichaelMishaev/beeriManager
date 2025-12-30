@@ -538,7 +538,12 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
           />
         </div>
 
-        {/* WhatsApp Community Card - After Upcoming Events */}
+        {/* Skills Survey Card - After Upcoming Events */}
+        <div className="mb-8">
+          <SkillsSurveyCard />
+        </div>
+
+        {/* WhatsApp Community Card */}
         <div className="mb-8">
           <WhatsAppCommunityCard />
         </div>
@@ -611,9 +616,6 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
         <div className="space-y-8">
           {/* Tickets Section - Placed in main content */}
           <TicketsSection tickets={tickets} />
-
-          {/* Skills Survey Card - Featured placement */}
-          <SkillsSurveyCard />
 
           {/* Committee Members Card */}
           <CommitteeCard />

@@ -24,11 +24,12 @@ export async function GET(request: NextRequest) {
 
     const supabase = await createClient()
 
-    // Fetch all responses for this school
+    // Fetch all responses for this school (excluding soft-deleted)
     const { data, error } = await supabase
       .from('parent_skill_responses')
       .select('*')
       .eq('school_id', DEFAULT_SCHOOL_ID) // NEW: Filter by school
+      .is('deleted_at', null) // Exclude soft-deleted responses
       .order('created_at', { ascending: false })
 
     if (error) {

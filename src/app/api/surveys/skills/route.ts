@@ -126,6 +126,7 @@ export async function GET(request: NextRequest) {
       .from('parent_skill_responses')
       .select('*', { count: 'exact' })
       .eq('school_id', DEFAULT_SCHOOL_ID) // NEW: Filter by school
+      .is('deleted_at', null) // Exclude soft-deleted responses
       .order('created_at', { ascending: false })
 
     // Apply filters
