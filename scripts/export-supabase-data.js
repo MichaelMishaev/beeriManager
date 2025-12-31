@@ -24,7 +24,7 @@ if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
 const { createClient } = require('@supabase/supabase-js')
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
-// Tables to export
+// Tables to export - ALL tables that exist in production
 const TABLES = [
   'events',
   'tasks',
@@ -42,6 +42,7 @@ const TABLES = [
   'push_subscriptions',
   'contacts',
   'parent_skill_responses',
+  'audit_log',  // CRITICAL: 154 records of audit data
 ]
 
 // Create backup directory
