@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Heebo } from 'next/font/google'
 import { Roboto } from 'next/font/google'
+import { Frank_Ruhl_Libre } from 'next/font/google'
 import { NextIntlClientProvider } from 'next-intl'
 import { getMessages, setRequestLocale } from 'next-intl/server'
 import { notFound } from 'next/navigation'
@@ -25,6 +26,13 @@ const roboto = Roboto({
   variable: '--font-russian',
   display: 'swap',
   weight: ['300', '400', '500', '700', '900'],
+})
+
+const frankRuhl = Frank_Ruhl_Libre({
+  subsets: ['hebrew', 'latin'],
+  variable: '--font-formal',
+  display: 'swap',
+  weight: ['400', '500', '700', '900'],
 })
 
 export const metadata: Metadata = {
@@ -138,7 +146,7 @@ export default async function LocaleLayout({
 
   const messages = await getMessages()
   const direction = localeDirections[locale as Locale]
-  const fontClass = locale === 'he' ? heebo.variable : roboto.variable
+  const fontClass = `${locale === 'he' ? heebo.variable : roboto.variable} ${frankRuhl.variable}`
   const fontFamily = locale === 'he'
     ? 'var(--font-hebrew), system-ui, sans-serif'
     : 'var(--font-russian), system-ui, sans-serif'

@@ -166,6 +166,7 @@ const config: Config = {
       },
       fontFamily: {
         sans: ['var(--font-hebrew)', 'system-ui', 'sans-serif'],
+        formal: ['var(--font-formal)', 'serif'],
       },
     },
   },

@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { formatHebrewDate } from '@/lib/utils/date'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
+import { RegulationsModal } from '@/components/features/protocols/RegulationsModal'
 
 // Disable static generation for this page to always fetch fresh data
 export const dynamic = 'force-dynamic'
@@ -234,6 +235,21 @@ export default function ProtocolsPage() {
       <Suspense fallback={<div className="h-32 bg-gray-200 rounded animate-pulse" />}>
         <ProtocolStats />
       </Suspense>
+
+      {/* Regulations Section */}
+      <Card className="bg-gradient-to-br from-blue-50 to-yellow-50 border-2 border-primary/20">
+        <CardContent className="flex flex-col md:flex-row items-center justify-between p-6 gap-4">
+          <div className="text-right">
+            <h3 className="text-2xl font-bold font-formal text-[#00509d]">
+              תקנון הנהגת הורים
+            </h3>
+            <p className="text-sm text-muted-foreground mt-1">
+              מסמך רשמי • תשפ״ה–תשפ״ו
+            </p>
+          </div>
+          <RegulationsModal />
+        </CardContent>
+      </Card>
 
       {/* Protocols List */}
       <Card>
