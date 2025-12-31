@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     type: 'website',
     images: [
       {
-        url: 'https://beeri.online/og-image.png',
+        url: 'https://beeri.online/og-image.png?v=6',
         width: 1200,
         height: 630,
         alt: 'בארי נתניה - הנהגה הורית',
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'הורי תלמידים למען בית הספר',
     description: 'מחפשים הורים שרוצים לעזור – בדרך שמתאימה להם. ועד ההורים בונה מאגר קטן של הורים עם תחומי ידע וניסיון שונים.',
-    images: ['https://beeri.online/og-image.png'],
+    images: ['https://beeri.online/og-image.png?v=6'],
   },
 }
 
