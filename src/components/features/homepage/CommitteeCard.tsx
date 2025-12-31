@@ -59,6 +59,7 @@ export function CommitteeCard() {
   const params = useParams()
   const locale = (params.locale || 'he') as Locale
   const [isExpanded, setIsExpanded] = useState(false)
+  const [showAllMembers, setShowAllMembers] = useState(false)
 
   return (
     <Card className="bg-gradient-to-br from-blue-50 to-cyan-50 border-blue-200" dir="rtl">
@@ -90,7 +91,7 @@ export function CommitteeCard() {
                   </div>
                 </div>
                 <div className="space-y-1.5">
-                  {members.map((member) => (
+                  {(showAllMembers ? members : members.slice(0, 1)).map((member) => (
                     <div
                       key={member.grade}
                       className="bg-white/80 backdrop-blur-sm rounded-lg p-2 text-center hover:bg-white transition-colors"
@@ -107,6 +108,20 @@ export function CommitteeCard() {
               </div>
             ))}
           </div>
+
+          {/* Show More / Show Less Button */}
+          {committeeMembers.length > 6 && (
+            <div className="mt-4 text-center">
+              <button
+                onClick={() => setShowAllMembers(!showAllMembers)}
+                className="text-sm font-medium text-blue-700 hover:text-blue-900 hover:underline transition-colors"
+              >
+                {showAllMembers
+                  ? t('showLess')
+                  : `${t('showAll')} (${committeeMembers.length} ${t('representatives')})`}
+              </button>
+            </div>
+          )}
 
           <div className="mt-6 pt-4 border-t border-blue-200 flex flex-col gap-3">
             <ShareButton

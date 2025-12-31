@@ -1,25 +1,24 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Calendar, ChevronLeft, Camera, ArrowLeft, ChevronDown, ChevronUp, MessageSquare, Clock, MapPin } from 'lucide-react'
+import dynamic from 'next/dynamic'
+import { Calendar, ChevronLeft, Camera, ArrowLeft, ChevronDown, ChevronUp, Clock, MapPin } from 'lucide-react'
 import { ShareButton } from '@/components/ui/share-button'
 import { formatEventShareData } from '@/lib/utils/share-formatters'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { CommitteeCard } from './CommitteeCard'
 import { SkillsSurveyCard } from './SkillsSurveyCard'
 import { SchoolStats } from './SchoolStats'
 import { WhatsAppCommunityCard } from '@/components/features/whatsapp/WhatsAppCommunityCard'
-import { TicketsSection } from '@/components/features/tickets/TicketsSection'
 import { WhiteShirtBanner } from './WhiteShirtBanner'
 import { UrgentMessagesBanner } from '@/components/features/urgent/UrgentMessagesBanner'
-import { FeedbackAndIdeasCard } from './FeedbackAndIdeasCard'
 import { HighlightsCarousel } from '@/components/features/highlights/HighlightsCarousel'
 import { NextHolidayWidget } from '@/components/features/holidays/NextHolidayWidget'
 import { HolidaysModal } from '@/components/features/holidays/HolidaysModal'
 import { MobileCalendar } from '@/components/ui/MobileCalendar'
+import { FloatingActionMenu } from '@/components/ui/FloatingActionMenu'
 import type { Event, CalendarEvent, Ticket } from '@/types'
 import Link from 'next/link'
 import { format } from 'date-fns'
@@ -27,6 +26,37 @@ import { he, ru } from 'date-fns/locale'
 import { useTranslations } from 'next-intl'
 import { useParams } from 'next/navigation'
 import type { Locale } from '@/i18n/config'
+
+// Lazy load below-fold components for better performance
+const TicketsSection = dynamic(() => import('@/components/features/tickets/TicketsSection').then(mod => ({ default: mod.TicketsSection })), {
+  loading: () => (
+    <Card className="shadow-sm">
+      <CardContent className="p-8">
+        <div className="h-40 bg-gray-100 animate-pulse rounded" />
+      </CardContent>
+    </Card>
+  )
+})
+
+const CommitteeCard = dynamic(() => import('./CommitteeCard').then(mod => ({ default: mod.CommitteeCard })), {
+  loading: () => (
+    <Card className="shadow-sm">
+      <CardContent className="p-8">
+        <div className="h-64 bg-gray-100 animate-pulse rounded" />
+      </CardContent>
+    </Card>
+  )
+})
+
+const FeedbackAndIdeasCard = dynamic(() => import('./FeedbackAndIdeasCard').then(mod => ({ default: mod.FeedbackAndIdeasCard })), {
+  loading: () => (
+    <Card className="shadow-sm">
+      <CardContent className="p-8">
+        <div className="h-48 bg-gray-100 animate-pulse rounded" />
+      </CardContent>
+    </Card>
+  )
+})
 
 interface PublicHomepageProps {
   upcomingEvents: Event[]
@@ -57,11 +87,11 @@ function UpcomingEventsCard({
   }
 
   return (
-    <Card className="shadow-md hover:shadow-lg transition-shadow border-0">
+    <Card className="group shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border-0 bg-gradient-to-br from-blue-50 to-white">
       <CardHeader className="pb-4">
-        <div className="flex items-center gap-2">
-          <Calendar className="h-6 w-6 text-[#0D98BA]" />
-          <CardTitle className="text-2xl text-[#003153]">
+        <div className="flex items-center gap-3">
+          <Calendar className="h-8 w-8 text-[#0D98BA] group-hover:scale-110 transition-transform duration-300" />
+          <CardTitle className="text-3xl text-[#003153] group-hover:text-[#0D98BA] transition-colors duration-300">
             {t('upcomingEvents')}
           </CardTitle>
         </div>
@@ -88,7 +118,7 @@ function UpcomingEventsCard({
                     variant="outline"
                     size="sm"
                     onClick={() => setIsExpanded(!isExpanded)}
-                    className="gap-2"
+                    className="gap-2 active:scale-95 transition-transform"
                   >
                     {isExpanded
                       ? (locale === 'ru' ? 'Свернуть' : 'הצג פחות')
@@ -445,13 +475,27 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
 
   return (
     <>
+      {/* Skip Links for Accessibility */}
+      <a
+        href="#events-section"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-[#0D98BA] focus:text-white focus:rounded focus:ring-4 focus:ring-[#0D98BA]/50"
+      >
+        קפיצה לאירועים
+      </a>
+      <a
+        href="#whatsapp-section"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-24 focus:z-50 focus:px-4 focus:py-2 focus:bg-green-600 focus:text-white focus:rounded focus:ring-4 focus:ring-green-600/50"
+      >
+        קפיצה לWhatsApp
+      </a>
+
       {/* Hero Section with Gradient */}
       <div className="bg-gradient-to-br from-[#0D98BA]/10 via-white to-[#003153]/5 py-12 md:py-16">
         <div className="container mx-auto px-4 text-center">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-[#003153] mb-4">
+          <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-[#003153] mb-4">
             {t('welcome')}
           </h1>
-          <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+          <p className="text-lg md:text-xl text-gray-700 mb-8 max-w-2xl mx-auto">
             {t('subtitle')}
           </p>
         </div>
@@ -460,7 +504,7 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
       {/* School Stats Cards - Overlapping Hero */}
       <SchoolStats variant="cards" />
 
-      <div className="container mx-auto px-4 py-4 max-w-6xl">
+      <main aria-label="תוכן ראשי" className="container mx-auto px-4 py-4 max-w-6xl">
         {/* Urgent Messages Banner - Always on top! */}
         <div className="mb-6">
           <UrgentMessagesBanner />
@@ -475,7 +519,7 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
         </div>
 
         {/* Calendar Action Buttons - Right under NextHolidayWidget */}
-        <div className="mb-6 relative">
+        <aside aria-label="לוח שנה וחגים" className="mb-6 relative">
           {/* Buttons in a single row, 50/50 */}
           <div className="flex gap-2 relative z-10">
             <Button
@@ -522,15 +566,15 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
               />
             </div>
           </div>
-        </div>
+        </aside>
 
         <div className="space-y-3">
           {/* White Shirt Friday Reminder - Shows Thu 9:00 AM - Fri 9:00 AM */}
           <WhiteShirtBanner />
         </div>
 
-        {/* UPCOMING EVENTS */}
-        <div className="mb-8">
+        {/* PROMOTED: UPCOMING EVENTS - High Priority */}
+        <div id="events-section" className="mb-8 scroll-mt-20">
           <UpcomingEventsCard
             upcomingEvents={upcomingEvents}
             dateLocale={dateLocale}
@@ -538,14 +582,14 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
           />
         </div>
 
-        {/* Skills Survey Card - After Upcoming Events */}
-        <div className="mb-8">
-          <SkillsSurveyCard />
+        {/* PROMOTED: WhatsApp Community Card - High Priority */}
+        <div id="whatsapp-section" className="mb-8 scroll-mt-20">
+          <WhatsAppCommunityCard />
         </div>
 
-        {/* WhatsApp Community Card */}
-        <div className="mb-8">
-          <WhatsAppCommunityCard />
+        {/* Skills Survey Card */}
+        <div id="survey-section" className="mb-8 scroll-mt-20">
+          <SkillsSurveyCard />
         </div>
 
       {/* Photos Gallery Section */}
@@ -614,71 +658,37 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
       <div className="grid gap-6 lg:grid-cols-1">
         {/* Main Content - Full width */}
         <div className="space-y-8">
-          {/* Tickets Section - Placed in main content */}
-          <TicketsSection tickets={tickets} />
+          {/* Tickets Section - Only show if there are active tickets */}
+          {tickets.length > 0 && <TicketsSection tickets={tickets} />}
 
           {/* Committee Members Card */}
           <CommitteeCard />
         </div>
       </div>
 
-      {/* Unified Feedback & Ideas Card - First */}
+      {/* Contact & Feedback - Merged Section (3 options: WhatsApp, Feedback, Ideas) */}
       <div className="mt-8">
         <FeedbackAndIdeasCard />
       </div>
-
-      {/* Info Banner - Second */}
-      <Card className="mt-8 border-muted">
-        <CardContent className="py-6">
-          <div className="flex items-start gap-4">
-            <div className="flex-shrink-0 bg-primary/10 rounded-full p-3">
-              <MessageSquare className="h-6 w-6 text-primary" />
-            </div>
-            <div className="flex-1">
-              <h3 className="font-semibold mb-2">{t('questionsOrSuggestions')}</h3>
-              <p className="text-sm text-muted-foreground mb-3">
-                {t('hereForYou')}
-              </p>
-              <div className="mb-3">
-                <Button
-                  asChild
-                  variant="outline"
-                  size="sm"
-                  className="bg-green-50 hover:bg-green-100 border-green-200 text-green-700"
-                >
-                  <a
-                    href="https://wa.me/972544345287?text=יש%20לי%20הצעה%20לשיפור%3A%0A"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <MessageSquare className="h-3 w-3 ml-2" />
-                    {t('sendWhatsApp')}
-                  </a>
-                </Button>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                {t('committeeLoginInfo')}
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+    </main>
 
     {/* Footer Credit */}
-    <div className="text-center py-8 border-t mt-8">
+    <footer className="text-center py-8 border-t mt-8">
       <p className="text-sm text-muted-foreground">
         {settings?.committee_name && settings?.school_name
           ? `נבנה באהבה על ידי ${settings.committee_name} ${settings.school_name} 💙`
           : 'נבנה באהבה על ידי ועד ההורים של בית ספר בארי 💙'}
       </p>
-    </div>
+    </footer>
 
     {/* Holidays Modal */}
     <HolidaysModal
       open={holidaysModalOpen}
       onOpenChange={setHolidaysModalOpen}
     />
+
+    {/* Floating Action Menu - Mobile Only */}
+    <FloatingActionMenu />
     </>
   )
 }

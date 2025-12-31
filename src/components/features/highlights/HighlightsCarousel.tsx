@@ -147,7 +147,7 @@ export function HighlightsCarousel() {
         if (prev >= 100) {
           return 100 // Cap at 100, don't reset here
         }
-        return prev + 2 // 2% every 100ms = 5 seconds total
+        return prev + 1.25 // 1.25% every 100ms = 8 seconds total
       })
     }, 100)
 

@@ -70,6 +70,33 @@ export function FeedbackAndIdeasCard() {
           </DialogHeader>
 
           <div className="space-y-3 mt-4">
+            {/* WhatsApp Questions Option */}
+            <a
+              href="https://wa.me/972544345287?text=יש%20לי%20שאלה%3A%0A"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block"
+              onClick={() => setIsModalOpen(false)}
+              data-testid="modal-whatsapp-link"
+            >
+              <div className="group p-4 rounded-lg border-2 border-green-300 bg-green-50 hover:bg-green-100 hover:border-green-500 transition-all cursor-pointer">
+                <div className="flex items-start gap-3">
+                  <div className="w-12 h-12 rounded-full bg-green-200 flex items-center justify-center flex-shrink-0 group-hover:bg-green-300 transition-colors">
+                    <MessageSquare className="h-6 w-6 text-green-700" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-lg text-[#003153] mb-1 group-hover:text-green-700 transition-colors">
+                      {t('whatsappTitle')}
+                    </h3>
+                    <p className="text-sm text-gray-600">
+                      {t('whatsappDescription')}
+                    </p>
+                  </div>
+                  <ChevronLeft className="h-5 w-5 text-gray-400 group-hover:text-green-700 transition-colors flex-shrink-0" />
+                </div>
+              </div>
+            </a>
+
             {/* Feedback Option */}
             <Link
               href="/complaint"

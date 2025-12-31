@@ -17,14 +17,14 @@ export function WhatsAppCommunityCard() {
   const locale = (params.locale || 'he') as Locale
 
   return (
-    <Card className="shadow-md hover:shadow-lg transition-shadow border-0">
+    <Card className="group shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border-0 bg-gradient-to-br from-green-50 to-white">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between gap-3 mb-2">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-              <MessageCircle className="h-5 w-5 text-green-600" />
+            <div className="w-12 h-12 rounded-full bg-green-100 group-hover:bg-green-200 flex items-center justify-center flex-shrink-0 transition-colors duration-300">
+              <MessageCircle className="h-7 w-7 text-green-600 group-hover:scale-110 transition-transform duration-300" />
             </div>
-            <CardTitle className="text-xl text-[#003153]">
+            <CardTitle className="text-3xl text-[#003153] group-hover:text-green-600 transition-colors duration-300">
               {t('title')}
             </CardTitle>
           </div>

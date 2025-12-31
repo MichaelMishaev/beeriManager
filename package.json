@@ -30,6 +30,8 @@
     "db:export-schema": "./scripts/export-schema.sh",
     "db:import-schema": "./scripts/import-schema.sh",
     "db:compare-schemas": "./scripts/compare-schemas.sh",
+    "supabase:backup": "./scripts/supabase-backup.sh",
+    "supabase:export": "node scripts/export-supabase-data.js",
     "type-check": "tsc --noEmit",
     "icons:generate": "node scripts/generate-icons.js",
     "logo:process": "node scripts/process-logo.js",

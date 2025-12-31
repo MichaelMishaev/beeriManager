@@ -16,7 +16,7 @@ export function SkillsSurveyCard() {
   const locale = (params.locale || 'he') as Locale
 
   return (
-    <Card className="shadow-lg hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50 relative overflow-hidden">
+    <Card className="group shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border-0 bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50 relative overflow-hidden">
       {/* Decorative accent bar */}
       <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 via-blue-500 to-indigo-500" />
 
@@ -24,10 +24,10 @@ export function SkillsSurveyCard() {
         <div className="flex items-center justify-between gap-3 mb-2">
           <div className="flex items-center gap-3">
             {/* Icon with gradient background */}
-            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-100 to-blue-100 flex items-center justify-center flex-shrink-0 shadow-sm">
-              <GraduationCap className="h-6 w-6 text-purple-600" />
+            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-100 to-blue-100 group-hover:from-purple-200 group-hover:to-blue-200 flex items-center justify-center flex-shrink-0 shadow-sm transition-colors duration-300">
+              <GraduationCap className="h-6 w-6 text-purple-600 group-hover:scale-110 transition-transform duration-300" />
             </div>
-            <CardTitle className="text-xl md:text-2xl text-[#003153] font-bold">
+            <CardTitle className="text-xl md:text-2xl text-[#003153] group-hover:text-purple-600 font-bold transition-colors duration-300">
               {t('title')}
             </CardTitle>
           </div>
@@ -56,7 +56,7 @@ export function SkillsSurveyCard() {
         {/* Key benefits list with emojis */}
         <div className="space-y-2 bg-white/60 backdrop-blur-sm rounded-lg p-3 border border-purple-100">
           <div className="flex items-start gap-2 text-sm">
-            <span className="text-lg flex-shrink-0">⚡</span>
+            <span className="text-lg flex-shrink-0">🌱</span>
             <span className="text-gray-700">{t('benefit1')}</span>
           </div>
           <div className="flex items-start gap-2 text-sm">
