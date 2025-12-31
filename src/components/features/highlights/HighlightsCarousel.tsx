@@ -1,9 +1,8 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { ChevronRight, ChevronLeft, Clock } from 'lucide-react'
+import { ChevronRight, ChevronLeft, Pause, Play } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { ShareButton } from '@/components/ui/share-button'
 import { formatHighlightShareData } from '@/lib/utils/share-formatters'
@@ -12,7 +11,6 @@ import type { Locale } from '@/i18n/config'
 import type { Highlight } from '@/types'
 import { logger } from '@/lib/logger'
 
-// Local interface for backward compatibility with mock data
 interface DisplayHighlight {
   id: string
   type: 'achievement' | 'sports' | 'award' | 'event' | 'announcement'
@@ -32,7 +30,6 @@ interface DisplayHighlight {
   created_at?: string
 }
 
-// Convert Highlight from DB to DisplayHighlight for rendering
 function convertToDisplay(highlight: Highlight): DisplayHighlight {
   return {
     id: highlight.id,
@@ -54,36 +51,22 @@ function convertToDisplay(highlight: Highlight): DisplayHighlight {
   }
 }
 
-// Loading Skeleton Component
 function HighlightsSkeleton() {
   return (
-    <div className="mb-6">
-      {/* Header Skeleton */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-gray-200 rounded-lg animate-pulse" />
-          <div>
-            <div className="h-6 w-32 bg-gray-200 rounded animate-pulse mb-1" />
-            <div className="h-4 w-48 bg-gray-100 rounded animate-pulse" />
-          </div>
+    <div className="mb-6 space-y-3">
+      <div className="relative min-h-[320px] bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 rounded-3xl overflow-hidden shadow-lg">
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="w-16 h-16 bg-white/50 rounded-2xl animate-pulse" />
         </div>
       </div>
-
-      {/* Card Skeleton */}
-      <div className="relative bg-gradient-to-br from-blue-50/50 via-white to-purple-50/30 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-100/50 p-6">
-        <div className="flex items-center gap-4">
-          <div className="w-16 h-16 bg-gray-200 rounded-2xl animate-pulse flex-shrink-0" />
-          <div className="flex-1 space-y-3">
-            <div className="h-4 w-24 bg-gray-200 rounded animate-pulse" />
-            <div className="h-6 w-3/4 bg-gray-200 rounded animate-pulse" />
-            <div className="h-4 w-full bg-gray-100 rounded animate-pulse" />
-          </div>
-        </div>
-        <div className="flex justify-center gap-2 mt-4">
-          <div className="w-2 h-2 bg-gray-200 rounded-full animate-pulse" />
+      <div className="h-1 bg-gray-200 rounded-full animate-pulse" />
+      <div className="flex items-center justify-center gap-3">
+        <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse" />
+        <div className="flex gap-2">
           <div className="w-2 h-2 bg-gray-200 rounded-full animate-pulse" />
           <div className="w-2 h-2 bg-gray-200 rounded-full animate-pulse" />
         </div>
+        <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse" />
       </div>
     </div>
   )
@@ -98,8 +81,10 @@ export function HighlightsCarousel() {
   const [isLoading, setIsLoading] = useState(true)
   const [selectedHighlight, setSelectedHighlight] = useState<DisplayHighlight | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [progress, setProgress] = useState(0)
   const touchStartX = useRef<number | null>(null)
   const touchEndX = useRef<number | null>(null)
+  const progressIntervalRef = useRef<NodeJS.Timeout | null>(null)
 
   const totalSlides = highlights.length
 
@@ -111,12 +96,10 @@ export function HighlightsCarousel() {
         const data = await response.json()
 
         if (data.success && data.data && data.data.length > 0) {
-          // Convert DB highlights to display format
           const displayHighlights = data.data.map(convertToDisplay)
           setHighlights(displayHighlights)
           logger.info('Highlights loaded from API', { count: displayHighlights.length })
         } else {
-          // No highlights in database
           logger.info('No highlights in database')
           setHighlights([])
         }
@@ -133,29 +116,56 @@ export function HighlightsCarousel() {
 
   const nextSlide = useCallback(() => {
     setCurrentSlide((prev) => (prev + 1) % totalSlides)
+    setProgress(0)
   }, [totalSlides])
 
   const prevSlide = useCallback(() => {
     setCurrentSlide((prev) => (prev - 1 + totalSlides) % totalSlides)
+    setProgress(0)
   }, [totalSlides])
 
   const goToSlide = useCallback((index: number) => {
     setCurrentSlide(index)
+    setProgress(0)
     setIsAutoPlaying(false)
   }, [])
 
-  // Auto-rotation
+  // Progress bar - increments from 0 to 100
   useEffect(() => {
-    if (!isAutoPlaying || totalSlides === 0) return
+    if (progressIntervalRef.current) {
+      clearInterval(progressIntervalRef.current)
+    }
 
-    const interval = setInterval(() => {
+    if (!isAutoPlaying || totalSlides === 0) {
+      setProgress(0)
+      return
+    }
+
+    // Increment progress every 100ms
+    progressIntervalRef.current = setInterval(() => {
+      setProgress((prev) => {
+        if (prev >= 100) {
+          return 100 // Cap at 100, don't reset here
+        }
+        return prev + 2 // 2% every 100ms = 5 seconds total
+      })
+    }, 100)
+
+    return () => {
+      if (progressIntervalRef.current) {
+        clearInterval(progressIntervalRef.current)
+      }
+    }
+  }, [isAutoPlaying, totalSlides])
+
+  // Auto-advance when progress reaches 100%
+  useEffect(() => {
+    if (progress >= 100 && isAutoPlaying) {
       nextSlide()
-    }, 6000) // 6 seconds per slide
+    }
+  }, [progress, isAutoPlaying, nextSlide])
 
-    return () => clearInterval(interval)
-  }, [isAutoPlaying, nextSlide, totalSlides])
-
-  // Touch handlers for swipe gestures
+  // Touch handlers
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartX.current = e.touches[0].clientX
   }
@@ -172,25 +182,14 @@ export function HighlightsCarousel() {
     const isRightSwipe = distance < -50
 
     if (currentLocale === 'he') {
-      if (isLeftSwipe) {
-        prevSlide()
-        setIsAutoPlaying(false)
-      }
-      if (isRightSwipe) {
-        nextSlide()
-        setIsAutoPlaying(false)
-      }
+      if (isLeftSwipe) prevSlide()
+      if (isRightSwipe) nextSlide()
     } else {
-      if (isLeftSwipe) {
-        nextSlide()
-        setIsAutoPlaying(false)
-      }
-      if (isRightSwipe) {
-        prevSlide()
-        setIsAutoPlaying(false)
-      }
+      if (isLeftSwipe) nextSlide()
+      if (isRightSwipe) prevSlide()
     }
 
+    setIsAutoPlaying(false)
     touchStartX.current = null
     touchEndX.current = null
   }
@@ -214,165 +213,195 @@ export function HighlightsCarousel() {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [nextSlide, prevSlide, currentLocale])
 
-
-  // Show loading skeleton
   if (isLoading) {
     return <HighlightsSkeleton />
   }
 
-  // Show nothing if no highlights
   if (highlights.length === 0) {
     return null
   }
 
+  const currentHighlight = highlights[currentSlide]
+
   return (
-    <div className="mb-6 animate-in fade-in-50 slide-in-from-top-5 duration-700 relative z-50">
-      {/* Enhanced Carousel Card */}
-      <div className="relative bg-gradient-to-br from-blue-50/50 via-white to-purple-50/30 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-100/50 overflow-hidden transition-all duration-300 hover:shadow-xl hover:scale-[1.01]">
-        <Card className="border-0 shadow-none overflow-hidden bg-transparent">
-          {/* Carousel Container */}
-          <div
-            className="relative overflow-hidden"
-            onTouchStart={handleTouchStart}
-            onTouchMove={handleTouchMove}
-            onTouchEnd={handleTouchEnd}
+    <>
+      <div className="mb-6 space-y-3 animate-in fade-in-50 duration-700">
+        {/* Carousel Card - Clean, no overlapping controls */}
+        <div
+          className="relative min-h-[320px] bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-500 group cursor-pointer"
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          onClick={() => {
+            setSelectedHighlight(currentHighlight)
+            setIsModalOpen(true)
+            setIsAutoPlaying(false)
+          }}
+        >
+          {/* Animated gradient background */}
+          <div className="absolute inset-0 bg-gradient-to-br from-[#0D98BA]/5 via-purple-500/5 to-pink-500/5 animate-gradient" />
+
+          {/* Navigation Arrows - On sides, not overlapping content */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              prevSlide()
+              setIsAutoPlaying(false)
+            }}
+            className="absolute top-1/2 -translate-y-1/2 left-3 z-20 bg-white/95 backdrop-blur-sm hover:bg-white rounded-full p-3 shadow-lg hover:shadow-xl transition-all hover:scale-110 active:scale-95 border border-gray-200/50"
+            aria-label={currentLocale === 'ru' ? 'Предыдущий' : 'הקודם'}
           >
-            {/* Slides */}
+            <ChevronLeft className="h-5 w-5 text-gray-900" />
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              nextSlide()
+              setIsAutoPlaying(false)
+            }}
+            className="absolute top-1/2 -translate-y-1/2 right-3 z-20 bg-white/95 backdrop-blur-sm hover:bg-white rounded-full p-3 shadow-lg hover:shadow-xl transition-all hover:scale-110 active:scale-95 border border-gray-200/50"
+            aria-label={currentLocale === 'ru' ? 'Следующий' : 'הבא'}
+          >
+            <ChevronRight className="h-5 w-5 text-gray-900" />
+          </button>
+
+          {/* Content - Centered, no controls blocking */}
+          <div className="relative min-h-[320px] flex items-center justify-center px-16 py-6">
             <div
-              className="flex transition-transform duration-500 ease-out"
+              className="flex transition-transform duration-700 ease-out w-full"
               style={{ transform: `translateX(${currentLocale === 'he' ? currentSlide * 100 : -currentSlide * 100}%)` }}
             >
               {highlights.map((highlight, index) => {
-                const slideTitle = currentLocale === 'ru' ? highlight.title_ru : highlight.title_he
-                const slideDescription = currentLocale === 'ru' ? highlight.description_ru : highlight.description_he
-                const slideCategory = currentLocale === 'ru' ? highlight.category_ru : highlight.category_he
-                const slideCtaText = currentLocale === 'ru' ? highlight.cta_text_ru : highlight.cta_text_he
+                const title = currentLocale === 'ru' ? highlight.title_ru : highlight.title_he
+                const description = currentLocale === 'ru' ? highlight.description_ru : highlight.description_he
+                const category = currentLocale === 'ru' ? highlight.category_ru : highlight.category_he
+                const ctaText = currentLocale === 'ru' ? highlight.cta_text_ru : highlight.cta_text_he
 
                 return (
                   <div
                     key={highlight.id}
-                    className="min-w-full px-12 py-5 cursor-pointer hover:bg-gray-50/50 transition-colors rounded-lg"
-                    style={{ opacity: index === currentSlide ? 1 : 0.3 }}
-                    onClick={() => {
-                      setSelectedHighlight(highlight)
-                      setIsModalOpen(true)
-                      setIsAutoPlaying(false)
+                    className="min-w-full flex flex-col items-center justify-center text-center px-4 space-y-2.5"
+                    style={{
+                      opacity: index === currentSlide ? 1 : 0,
+                      transition: 'opacity 0.7s ease-out'
                     }}
                   >
-                    {/* Badge */}
-                    <div className="flex items-center gap-2 mb-3">
-                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${highlight.badge_color} shadow-sm`}>
-                        {slideCategory}
-                      </span>
+                    {/* Category Badge */}
+                    <div className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold shadow-md ${highlight.badge_color}`}>
+                      {category}
                     </div>
 
-                    {/* Content - Responsive Layout */}
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-3">
-                      {/* Top row: Icon + Text (always together) */}
-                      <div className="flex items-start gap-4 flex-1 min-w-0 w-full">
-                        {/* Enhanced Icon */}
-                        <div className="flex-shrink-0 w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-[#0D98BA]/20 to-[#003153]/20 rounded-2xl flex items-center justify-center text-3xl sm:text-4xl shadow-sm transform transition-transform hover:scale-110">
-                          {highlight.image_placeholder || highlight.icon}
-                        </div>
-
-                        {/* Enhanced Text */}
-                        <div className="flex-1 min-w-0">
-                          <h3 className="text-lg sm:text-xl font-bold text-[#003153] mb-1 leading-tight">
-                            {slideTitle}
-                          </h3>
-                          <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed">
-                            {slideDescription}
-                          </p>
-                        </div>
-                      </div>
-
-                      {/* Bottom row on mobile, right side on desktop: Actions */}
-                      {slideCtaText && highlight.cta_link && (
-                        <div className="flex items-center gap-2 w-full sm:w-auto sm:flex-shrink-0 justify-end">
-                          <Button
-                            variant="default"
-                            size="sm"
-                            asChild
-                            className="bg-gradient-to-r from-[#0D98BA] to-[#003153] hover:from-[#0D98BA]/90 hover:to-[#003153]/90 text-sm px-4 py-2 h-auto shadow-md hover:shadow-lg transition-all flex-1 sm:flex-none"
-                          >
-                            <a
-                              href={highlight.cta_link}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              onClick={(e) => e.stopPropagation()}
-                              onTouchStart={(e) => e.stopPropagation()}
-                            >
-                              {slideCtaText}
-                            </a>
-                          </Button>
-                        </div>
-                      )}
+                    {/* Icon */}
+                    <div className="w-16 h-16 bg-white/90 backdrop-blur-sm rounded-2xl flex items-center justify-center text-4xl shadow-xl transform group-hover:scale-110 transition-transform duration-300">
+                      {highlight.image_placeholder || highlight.icon}
                     </div>
 
-                    {/* Footer with Date */}
-                    {highlight.created_at && (
-                      <div className="flex items-center justify-center pt-2 border-t border-gray-100">
-                        <span className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium" dir="ltr">
-                          <Clock className="h-3.5 w-3.5" />
-                          {new Date(highlight.created_at).toLocaleDateString(currentLocale === 'ru' ? 'ru-RU' : 'he-IL', {
-                            day: 'numeric',
-                            month: 'short',
-                            year: 'numeric'
-                          })}
-                        </span>
-                      </div>
+                    {/* Title */}
+                    <h3 className="text-xl md:text-2xl font-bold text-gray-900 leading-tight max-w-2xl px-2">
+                      {title}
+                    </h3>
+
+                    {/* Description */}
+                    <p className="text-sm md:text-base text-gray-700 line-clamp-3 max-w-xl leading-relaxed px-2">
+                      {description}
+                    </p>
+
+                    {/* CTA Button */}
+                    {ctaText && highlight.cta_link && index === currentSlide && (
+                      <Button
+                        variant="default"
+                        size="lg"
+                        asChild
+                        className="bg-gradient-to-r from-[#0D98BA] to-[#003153] hover:from-[#0D98BA]/90 hover:to-[#003153]/90 shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
+                      >
+                        <a
+                          href={highlight.cta_link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          {ctaText}
+                        </a>
+                      </Button>
                     )}
                   </div>
                 )
               })}
             </div>
-
-            {/* Navigation Arrows - Positioned outside content area */}
-            <button
-              onClick={(e) => {
-                e.stopPropagation()
-                prevSlide()
-                setIsAutoPlaying(false)
-              }}
-              onTouchStart={(e) => e.stopPropagation()}
-              className="absolute top-1/2 -translate-y-1/2 -left-4 z-10 bg-white hover:bg-gray-50 rounded-full p-3 shadow-lg hover:shadow-xl transition-all hover:scale-110 active:scale-95 border border-gray-200"
-              aria-label={currentLocale === 'ru' ? 'Предыдущий' : 'הקודם'}
-            >
-              <ChevronLeft className="h-6 w-6 text-[#003153]" />
-            </button>
-            <button
-              onClick={(e) => {
-                e.stopPropagation()
-                nextSlide()
-                setIsAutoPlaying(false)
-              }}
-              onTouchStart={(e) => e.stopPropagation()}
-              className="absolute top-1/2 -translate-y-1/2 -right-4 z-10 bg-white hover:bg-gray-50 rounded-full p-3 shadow-lg hover:shadow-xl transition-all hover:scale-110 active:scale-95 border border-gray-200"
-              aria-label={currentLocale === 'ru' ? 'Следующий' : 'הבא'}
-            >
-              <ChevronRight className="h-6 w-6 text-[#003153]" />
-            </button>
           </div>
+        </div>
 
-          {/* Enhanced Dot Indicators */}
-          <div className="flex justify-center gap-2 pb-4 pt-2">
+        {/* Linear Progress Bar - Below carousel, never overlaps */}
+        <div className="relative h-1 bg-gray-200 rounded-full overflow-hidden">
+          <div
+            className="absolute inset-y-0 left-0 bg-gradient-to-r from-[#0D98BA] via-[#FFBA00] to-[#FF8200] rounded-full transition-all duration-100 ease-linear"
+            style={{ width: `${isAutoPlaying ? progress : 0}%` }}
+          />
+        </div>
+
+        {/* Controls Row - Clean separation from content */}
+        <div className="flex items-center justify-center gap-4">
+          {/* Previous Arrow */}
+          <button
+            onClick={() => {
+              prevSlide()
+              setIsAutoPlaying(false)
+            }}
+            className="p-2 hover:bg-gray-100 rounded-full transition-colors active:scale-95"
+            aria-label={currentLocale === 'ru' ? 'Предыдущий' : 'הקודם'}
+          >
+            <ChevronLeft className="h-5 w-5 text-gray-700" />
+          </button>
+
+          {/* Dot Indicators */}
+          <div className="flex gap-2">
             {highlights.map((_, index) => (
               <button
                 key={index}
                 onClick={() => goToSlide(index)}
                 className={`h-2 rounded-full transition-all duration-300 ${
                   index === currentSlide
-                    ? 'bg-gradient-to-r from-[#0D98BA] to-[#003153] w-8 shadow-sm'
+                    ? 'bg-gradient-to-r from-[#0D98BA] to-[#003153] w-8'
                     : 'bg-gray-300 hover:bg-gray-400 w-2'
                 }`}
                 aria-label={`${currentLocale === 'ru' ? 'Слайд' : 'שקופית'} ${index + 1}`}
               />
             ))}
           </div>
-        </Card>
+
+          {/* Slide Counter */}
+          <span className="text-xs font-medium text-gray-500 min-w-[3ch] text-center">
+            {currentSlide + 1}/{totalSlides}
+          </span>
+
+          {/* Play/Pause */}
+          <button
+            onClick={() => setIsAutoPlaying(!isAutoPlaying)}
+            className="p-2 hover:bg-gray-100 rounded-full transition-colors active:scale-95"
+            aria-label={isAutoPlaying ? (currentLocale === 'ru' ? 'Пауза' : 'השהה') : (currentLocale === 'ru' ? 'Играть' : 'נגן')}
+          >
+            {isAutoPlaying ? (
+              <Pause className="h-4 w-4 text-gray-700" fill="currentColor" />
+            ) : (
+              <Play className="h-4 w-4 text-gray-700" fill="currentColor" />
+            )}
+          </button>
+
+          {/* Next Arrow */}
+          <button
+            onClick={() => {
+              nextSlide()
+              setIsAutoPlaying(false)
+            }}
+            className="p-2 hover:bg-gray-100 rounded-full transition-colors active:scale-95"
+            aria-label={currentLocale === 'ru' ? 'Следующий' : 'הבא'}
+          >
+            <ChevronRight className="h-5 w-5 text-gray-700" />
+          </button>
+        </div>
       </div>
 
-      {/* Accessibility Info - Hidden but available for screen readers */}
+      {/* Accessibility */}
       <div className="sr-only" role="status" aria-live="polite" aria-atomic="true">
         {currentLocale === 'ru'
           ? `Слайд ${currentSlide + 1} из ${totalSlides}. ${isAutoPlaying ? 'Автоматическая смена включена' : 'Автоматическая смена выключена'}.`
@@ -408,46 +437,18 @@ export function HighlightsCarousel() {
               </DialogHeader>
 
               <div className="space-y-4 pt-4">
-                {/* Category Badge */}
                 <div className="flex items-center gap-2">
                   <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-sm font-semibold ${selectedHighlight.badge_color} shadow-sm`}>
                     {currentLocale === 'ru' ? selectedHighlight.category_ru : selectedHighlight.category_he}
                   </span>
-                  {selectedHighlight.created_at && (
-                    <span className="flex items-center gap-1.5 text-sm text-muted-foreground font-medium bg-gray-100 px-3 py-1.5 rounded-md" dir="ltr">
-                      <Clock className="h-4 w-4" />
-                      {new Date(selectedHighlight.created_at).toLocaleDateString(currentLocale === 'ru' ? 'ru-RU' : 'he-IL', {
-                        day: 'numeric',
-                        month: 'long',
-                        year: 'numeric'
-                      })}
-                    </span>
-                  )}
                 </div>
 
-                {/* Full Description */}
                 <div className="prose prose-sm max-w-none">
                   <p className="text-base text-gray-700 leading-relaxed whitespace-pre-wrap">
                     {currentLocale === 'ru' ? selectedHighlight.description_ru : selectedHighlight.description_he}
                   </p>
                 </div>
 
-                {/* Event Date if exists */}
-                {selectedHighlight.event_date && (
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                    <p className="text-sm font-medium text-blue-900">
-                      {currentLocale === 'ru' ? '📅 Дата мероприятия: ' : '📅 תאריך האירוע: '}
-                      {new Date(selectedHighlight.event_date).toLocaleDateString(currentLocale === 'ru' ? 'ru-RU' : 'he-IL', {
-                        weekday: 'long',
-                        day: 'numeric',
-                        month: 'long',
-                        year: 'numeric'
-                      })}
-                    </p>
-                  </div>
-                )}
-
-                {/* CTA Button if exists */}
                 {selectedHighlight.cta_link && (currentLocale === 'ru' ? selectedHighlight.cta_text_ru : selectedHighlight.cta_text_he) && (
                   <div className="pt-4">
                     <Button
@@ -471,6 +472,16 @@ export function HighlightsCarousel() {
           )}
         </DialogContent>
       </Dialog>
-    </div>
+
+      <style jsx global>{`
+        @keyframes gradient {
+          0%, 100% { opacity: 0.3; }
+          50% { opacity: 0.6; }
+        }
+        .animate-gradient {
+          animation: gradient 8s ease-in-out infinite;
+        }
+      `}</style>
+    </>
   )
 }
