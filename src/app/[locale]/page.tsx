@@ -35,7 +35,7 @@ export default function HomePage() {
       setIsAuthenticated(isAuth)
 
       // Load events (upcoming, published)
-      const eventsResponse = await fetch('/api/events?upcoming=true&limit=10')
+      const eventsResponse = await fetch('/api/events?upcoming=true&limit=50')
       const eventsData = await eventsResponse.json()
       if (eventsData.success) {
         setEvents(eventsData.data || [])

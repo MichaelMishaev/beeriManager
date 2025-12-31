@@ -74,12 +74,13 @@ function UpcomingEventsCard({
   locale: Locale
 }) {
   const t = useTranslations('homepage')
-  const [isExpanded, setIsExpanded] = useState(false)
+  const INITIAL_EVENTS_COUNT = 5
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [showAllEventsModal, setShowAllEventsModal] = useState(false)
 
-  const displayedEvents = isExpanded ? upcomingEvents : upcomingEvents.slice(0, 3)
-  const hasMore = upcomingEvents.length > 3
+  const displayedEvents = upcomingEvents.slice(0, INITIAL_EVENTS_COUNT)
+  const hasMore = upcomingEvents.length > INITIAL_EVENTS_COUNT
 
   const handleEventClick = (event: Event) => {
     setSelectedEvent(event)
@@ -117,13 +118,14 @@ function UpcomingEventsCard({
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setIsExpanded(!isExpanded)}
+                    onClick={() => setShowAllEventsModal(true)}
                     className="gap-2 active:scale-95 transition-transform"
                   >
-                    {isExpanded
-                      ? (locale === 'ru' ? 'Свернуть' : 'הצג פחות')
-                      : `${locale === 'ru' ? 'Показать все' : 'הצג הכל'} (${upcomingEvents.length})`}
-                    <ChevronLeft className={`h-4 w-4 transition-transform ${isExpanded ? 'rotate-90' : '-rotate-90'}`} />
+                    {locale === 'ru'
+                      ? `Показать все (${upcomingEvents.length})`
+                      : `הצג הכל (${upcomingEvents.length})`
+                    }
+                    <ChevronLeft className="h-4 w-4" />
                   </Button>
                 </div>
               )}
@@ -252,6 +254,16 @@ function UpcomingEventsCard({
           </DialogContent>
         </Dialog>
       )}
+
+      {/* All Events Modal */}
+      <AllEventsModal
+        open={showAllEventsModal}
+        onOpenChange={setShowAllEventsModal}
+        events={upcomingEvents}
+        dateLocale={dateLocale}
+        locale={locale}
+        onEventClick={handleEventClick}
+      />
     </Card>
   )
 }
@@ -395,6 +407,53 @@ function EventItem({
         </div>
       </div>
     </div>
+  )
+}
+
+// All Events Modal Component
+function AllEventsModal({
+  open,
+  onOpenChange,
+  events,
+  dateLocale,
+  locale,
+  onEventClick
+}: {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  events: Event[]
+  dateLocale: typeof he | typeof ru
+  locale: Locale
+  onEventClick: (event: Event) => void
+}) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="text-2xl flex items-center gap-3">
+            <Calendar className="h-7 w-7 text-[#0D98BA]" />
+            <span>
+              {locale === 'ru' ? 'Все события' : 'כל האירועים'} ({events.length})
+            </span>
+          </DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-1 mt-4">
+          {events.map((event) => (
+            <EventItem
+              key={event.id}
+              event={event}
+              dateLocale={dateLocale}
+              locale={locale}
+              onClick={() => {
+                onEventClick(event)
+                onOpenChange(false) // Close "All Events" modal when viewing event details
+              }}
+            />
+          ))}
+        </div>
+      </DialogContent>
+    </Dialog>
   )
 }
 
