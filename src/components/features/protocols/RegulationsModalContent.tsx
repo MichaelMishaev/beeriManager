@@ -64,6 +64,9 @@ export function RegulationsModalContent({ standalone = false }: RegulationsModal
           <p className="text-xs md:text-base font-formal text-[#fdc500]">
             {regulationsContent.academicYear}
           </p>
+          <p className="text-xs md:text-sm font-formal text-white/90 mt-1">
+            {regulationsContent.chairman}
+          </p>
 
           {/* Draft Notice */}
           <div className="flex justify-center mt-3">
