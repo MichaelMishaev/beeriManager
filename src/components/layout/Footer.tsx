@@ -18,13 +18,22 @@ export function Footer() {
             <nav className="flex gap-6 order-2 md:order-1" aria-label="קישורי עזר">
               <button
                 onClick={() => setRegulationsOpen(true)}
-                className="hover:text-foreground transition-colors underline-offset-4 hover:underline font-medium cursor-pointer"
+                className="text-primary hover:text-primary-600
+                         underline underline-offset-4 decoration-primary/40
+                         hover:decoration-primary transition-all duration-200
+                         font-medium cursor-pointer
+                         focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2"
+                aria-label="פתיחת תקנון הנהגת הורים"
               >
                 תקנון הנהגת הורים
               </button>
               <Link
                 href="/help"
-                className="hover:text-foreground transition-colors underline-offset-4 hover:underline"
+                className="text-primary hover:text-primary-600
+                         underline underline-offset-4 decoration-primary/40
+                         hover:decoration-primary transition-all duration-200
+                         font-medium
+                         focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2"
               >
                 עזרה
               </Link>
