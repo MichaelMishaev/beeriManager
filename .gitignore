@@ -102,6 +102,8 @@ public/swe-worker-*.js.map
 *.bak
 *.backup
 *.log
+*-complete.json
+*-temp.json
 
 # ============================================
 # Private/Sensitive Files
@@ -140,6 +142,7 @@ robots.txt
 playwright-report/
 test-results/
 tests/screenshots/
+.playwright-mcp/
 
 # HTML test files (demo only)
 *-test-page.html
@@ -224,6 +227,11 @@ node_modules_old/
 # ============================================
 debug-*.png
 debug-*.jpg
+*-backup-*.png
+*-backup-*.jpg
+*-correct.png
+*-new.png
+*-old.png
 
 # ============================================
 # Service Worker Version Files (Generated)
