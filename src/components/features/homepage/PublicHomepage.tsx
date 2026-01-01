@@ -88,20 +88,20 @@ function UpcomingEventsCard({
   }
 
   return (
-    <Card className="group shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border-0 bg-gradient-to-br from-blue-50 to-white">
-      <CardHeader className="pb-4">
-        <div className="flex items-center gap-3">
-          <Calendar className="h-8 w-8 text-[#0D98BA] group-hover:scale-110 transition-transform duration-300" />
-          <CardTitle className="text-3xl text-[#003153] group-hover:text-[#0D98BA] transition-colors duration-300">
+    <Card className="group shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-100">
+      <CardHeader className="pb-5">
+        <div className="flex items-center gap-3 mb-2">
+          <Calendar className="h-7 w-7 text-[#0D98BA] group-hover:scale-110 transition-transform duration-300" />
+          <CardTitle className="text-2xl md:text-3xl font-bold text-[#003153] group-hover:text-[#0D98BA] transition-colors duration-300">
             {t('upcomingEvents')}
           </CardTitle>
         </div>
-        <CardDescription className="text-base mt-2">
+        <CardDescription className="text-sm md:text-base text-gray-600">
           {t('nextSchoolEvents')}
         </CardDescription>
       </CardHeader>
-      <CardContent className="p-3">
-        <div className="space-y-1">
+      <CardContent className="p-4 md:p-5">
+        <div className="space-y-2.5">
           {upcomingEvents.length > 0 ? (
             <>
               {displayedEvents.map((event) => (
@@ -177,24 +177,24 @@ function UpcomingEventsCard({
                 const isStartingSoon = !isHappeningNow && timeDiff > 0 && timeDiff <= 60 * 60 * 1000
 
                 return isHappeningNow ? (
-                  <Badge className="bg-[#FF8200] text-white text-sm">
+                  <Badge className="bg-emerald-500 text-white text-sm shadow-sm">
                     {locale === 'ru' ? '🔴 Сейчас' : '🔴 מתקיים כעת'}
                   </Badge>
                 ) : isStartingSoon ? (
-                  <Badge className="bg-[#FFBA00] text-white text-sm">
+                  <Badge className="bg-[#0D98BA] text-white text-sm shadow-sm">
                     {locale === 'ru' ? '⚡ Скоро' : '⚡ בקרוב'}
                   </Badge>
                 ) : null
               })()}
 
               {/* Date and Time */}
-              <div className="flex items-start gap-2 bg-blue-50 border border-blue-200 rounded-lg p-3">
-                <Clock className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+              <div className="flex items-start gap-2 bg-gray-50 border border-gray-200 rounded-lg p-3">
+                <Clock className="h-5 w-5 text-gray-600 flex-shrink-0 mt-0.5" />
                 <div>
-                  <p className="font-medium text-blue-900">
+                  <p className="font-medium text-gray-900">
                     {format(new Date(selectedEvent.start_datetime), 'EEEE, d MMMM yyyy', { locale: dateLocale })}
                   </p>
-                  <p className="text-sm text-blue-700">
+                  <p className="text-sm text-gray-700">
                     {format(new Date(selectedEvent.start_datetime), 'HH:mm', { locale: dateLocale })}
                     {selectedEvent.end_datetime && (
                       <span> - {format(new Date(selectedEvent.end_datetime), 'HH:mm', { locale: dateLocale })}</span>
@@ -244,8 +244,8 @@ function UpcomingEventsCard({
 
               {/* Payment Info */}
               {selectedEvent.requires_payment && selectedEvent.payment_amount && (
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                  <p className="font-medium text-yellow-900">
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                  <p className="font-medium text-gray-900">
                     {locale === 'ru' ? `💰 Стоимость: ₪${selectedEvent.payment_amount}` : `💰 עלות: ₪${selectedEvent.payment_amount}`}
                   </p>
                 </div>
@@ -304,7 +304,7 @@ function EventItem({
   const isStartingSoon = !isHappeningNow && timeDiff > 0 && timeDiff <= 60 * 60 * 1000 // Within 1 hour (future only)
   const hasEnded = now > endDate
 
-  // Get event type icon and color
+  // Get event type icon
   const getEventIcon = () => {
     switch (event.event_type) {
       case 'meeting': return '👥'
@@ -316,36 +316,26 @@ function EventItem({
     }
   }
 
-  const getEventAccentColor = () => {
-    switch (event.event_type) {
-      case 'meeting': return 'border-r-[#FF8200]'
-      case 'fundraiser': return 'border-r-[#0D98BA]'
-      case 'trip': return 'border-r-[#FFBA00]'
-      case 'workshop': return 'border-r-[#003153]'
-      default: return 'border-r-[#0D98BA]'
-    }
-  }
-
   // Status badge configuration
   const statusConfig = isHappeningNow
     ? {
         text: locale === 'ru' ? 'Сейчас' : 'מתקיים כעת',
-        bgColor: 'bg-[#FF8200]',
+        bgColor: 'bg-emerald-500',
         textColor: 'text-white',
         showPulse: true
       }
     : isStartingSoon
     ? {
         text: locale === 'ru' ? 'Скоро' : 'בקרוב',
-        bgColor: 'bg-[#FFBA00]',
+        bgColor: 'bg-[#0D98BA]',
         textColor: 'text-white',
         showPulse: false
       }
     : hasEnded
     ? {
         text: locale === 'ru' ? 'Завершено' : 'הסתיים',
-        bgColor: 'bg-gray-400',
-        textColor: 'text-white',
+        bgColor: 'bg-gray-300',
+        textColor: 'text-gray-700',
         showPulse: false
       }
     : null
@@ -355,27 +345,25 @@ function EventItem({
       onClick={onClick}
       className="block group cursor-pointer"
     >
-      <div className={`flex items-start gap-2.5 p-3 rounded-lg hover:bg-gray-50/80 transition-all duration-200 border-r-4 ${getEventAccentColor()} bg-white`}>
-        {/* Icon - Square gradient (previous style) */}
+      <div className="flex items-start gap-3 p-4 rounded-lg hover:bg-gray-50 transition-all duration-200 bg-white border border-gray-200 hover:border-gray-300 hover:shadow-md">
+        {/* Icon */}
         <div className="flex-shrink-0 mt-0.5">
-          <div className={
-            `w-8 h-8 rounded-lg bg-gradient-to-br from-[#0D98BA]/10 to-[#003153]/5 flex items-center justify-center`
-          }>
-            <span className="text-base">{getEventIcon()}</span>
+          <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center">
+            <span className="text-lg">{getEventIcon()}</span>
           </div>
         </div>
 
         {/* Event Info - Primary focus */}
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2 mb-0.5">
-            <h3 className="text-[15px] font-semibold text-[#003153] group-hover:text-[#0D98BA] transition-colors leading-tight flex-1">
+            <h3 className="text-base md:text-lg font-bold text-[#003153] group-hover:text-[#0D98BA] transition-colors leading-tight flex-1">
               {title}
             </h3>
             {statusConfig && (
               <div className="relative flex-shrink-0">
-                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium ${statusConfig.bgColor} ${statusConfig.textColor}`}>
+                <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${statusConfig.bgColor} ${statusConfig.textColor} shadow-sm`}>
                   {statusConfig.showPulse && (
-                    <span className="absolute inline-flex h-full w-full rounded-full bg-[#FF8200] opacity-75 animate-ping"></span>
+                    <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75 animate-ping"></span>
                   )}
                   <span className="relative">{statusConfig.text}</span>
                 </span>
@@ -384,12 +372,12 @@ function EventItem({
           </div>
 
           {description && (
-            <p className="text-[13px] text-gray-600 line-clamp-1 mb-1.5">
+            <p className="text-sm text-gray-600 line-clamp-2 mb-2">
               {description}
             </p>
           )}
 
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[12px] text-gray-500">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-600">
             <div className="flex items-center gap-1">
               <span className="truncate">
                 {format(startDate, 'd MMMM', { locale: dateLocale })}
@@ -549,12 +537,12 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
       </a>
 
       {/* Hero Section with Gradient */}
-      <div className="bg-gradient-to-br from-[#0D98BA]/10 via-white to-[#003153]/5 py-12 md:py-16">
+      <div className="bg-gradient-to-br from-[#0D98BA]/5 via-white to-[#003153]/5 py-16 md:py-20">
         <div className="container mx-auto px-4 text-center">
-          <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-[#003153] mb-4">
+          <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold text-[#003153] mb-6 leading-tight">
             {t('welcome')}
           </h1>
-          <p className="text-lg md:text-xl text-gray-700 mb-8 max-w-2xl mx-auto">
+          <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
             {t('subtitle')}
           </p>
         </div>
@@ -563,7 +551,7 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
       {/* School Stats Cards - Overlapping Hero */}
       <SchoolStats variant="cards" />
 
-      <main aria-label="תוכן ראשי" className="container mx-auto px-4 py-4 max-w-6xl">
+      <main aria-label="תוכן ראשי" className="container mx-auto px-4 py-8 md:py-12 max-w-6xl">
         {/* Urgent Messages Banner - Always on top! */}
         <div className="mb-6">
           <UrgentMessagesBanner />
@@ -583,26 +571,26 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
           <div className="flex gap-2 relative z-10">
             <Button
               variant="outline"
-              size="sm"
-              className="flex-1 text-sm transition-all hover:bg-blue-100/50"
+              size="default"
+              className="flex-1 text-sm md:text-base transition-all hover:bg-blue-50 hover:border-blue-300 hover:shadow-sm"
               onClick={() => setHolidaysModalOpen(true)}
             >
-              <Calendar className="h-4 w-4 ml-2" />
+              <Calendar className="h-4 w-4 md:h-5 md:w-5 ml-2" />
               {calendarT('holidaysAndEvents')}
             </Button>
 
             <Button
               variant="outline"
-              size="sm"
-              className="flex-1 text-sm transition-all hover:bg-muted"
+              size="default"
+              className="flex-1 text-sm md:text-base transition-all hover:bg-gray-50 hover:border-gray-300 hover:shadow-sm"
               onClick={() => setIsCalendarExpanded(!isCalendarExpanded)}
               title={isCalendarExpanded ? calendarT('hideCalendar') : calendarT('showCalendar')}
             >
-              <Calendar className="h-4 w-4" />
+              <Calendar className="h-4 w-4 md:h-5 md:w-5" />
               {isCalendarExpanded ? (
-                <ChevronUp className="h-4 w-4 transition-transform mr-2" />
+                <ChevronUp className="h-4 w-4 md:h-5 md:w-5 transition-transform mr-2" />
               ) : (
-                <ChevronDown className="h-4 w-4 transition-transform mr-2" />
+                <ChevronDown className="h-4 w-4 md:h-5 md:w-5 transition-transform mr-2" />
               )}
               {isCalendarExpanded ? calendarT('hideCalendar') : calendarT('showCalendar')}
             </Button>
@@ -627,13 +615,13 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
           </div>
         </aside>
 
-        <div className="space-y-3">
+        <div className="space-y-6">
           {/* White Shirt Friday Reminder - Shows Thu 9:00 AM - Fri 9:00 AM */}
           <WhiteShirtBanner />
         </div>
 
         {/* PROMOTED: UPCOMING EVENTS - High Priority */}
-        <div id="events-section" className="mb-8 scroll-mt-20">
+        <div id="events-section" className="mb-10 scroll-mt-20">
           <UpcomingEventsCard
             upcomingEvents={upcomingEvents}
             dateLocale={dateLocale}
@@ -642,18 +630,18 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
         </div>
 
         {/* PROMOTED: WhatsApp Community Card - High Priority */}
-        <div id="whatsapp-section" className="mb-8 scroll-mt-20">
+        <div id="whatsapp-section" className="mb-10 scroll-mt-20">
           <WhatsAppCommunityCard />
         </div>
 
         {/* Skills Survey Card */}
-        <div id="survey-section" className="mb-8 scroll-mt-20">
+        <div id="survey-section" className="mb-10 scroll-mt-20">
           <SkillsSurveyCard />
         </div>
 
       {/* Photos Gallery Section */}
       {eventsWithPhotos.length > 0 && (
-        <div className="mb-8">
+        <div className="mb-10">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-2xl font-bold flex items-center gap-2">
               <Camera className="h-6 w-6 text-primary" />
@@ -679,7 +667,7 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
                 return (
                   <Card
                     key={event.id}
-                    className="flex-shrink-0 w-[280px] snap-start hover:shadow-lg transition-shadow cursor-pointer"
+                    className="flex-shrink-0 w-[280px] snap-start hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer border border-gray-100"
                   >
                     <a href={event.photos_url} target="_blank" rel="noopener noreferrer">
                       <CardHeader className="pb-3">
@@ -714,7 +702,7 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
       )}
 
       {/* Main Content Grid */}
-      <div className="grid gap-6 lg:grid-cols-1">
+      <div className="grid gap-8 lg:grid-cols-1">
         {/* Main Content - Full width */}
         <div className="space-y-8">
           {/* Tickets Section - Only show if there are active tickets */}
@@ -726,13 +714,13 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
       </div>
 
       {/* Contact & Feedback - Merged Section (3 options: WhatsApp, Feedback, Ideas) */}
-      <div className="mt-8">
+      <div className="mt-12">
         <FeedbackAndIdeasCard />
       </div>
     </main>
 
     {/* Footer Credit */}
-    <footer className="text-center py-8 border-t mt-8">
+    <footer className="text-center py-12 border-t mt-16 bg-gray-50">
       <p className="text-sm text-muted-foreground">
         {settings?.committee_name && settings?.school_name
           ? `נבנה באהבה על ידי ${settings.committee_name} ${settings.school_name} 💙`

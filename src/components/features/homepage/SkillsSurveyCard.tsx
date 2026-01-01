@@ -16,29 +16,29 @@ export function SkillsSurveyCard() {
   const locale = (params.locale || 'he') as Locale
 
   return (
-    <Card className="group shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border-0 bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50 relative overflow-hidden">
-      {/* Decorative accent bar */}
-      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 via-blue-500 to-indigo-500" />
+    <Card className="group shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-100 relative overflow-hidden">
+      {/* Decorative accent bar - using brand colors */}
+      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#0D98BA] via-[#00509d] to-[#003153]" />
 
       <CardHeader className="pb-4 pt-6">
         <div className="flex items-center justify-between gap-3 mb-2">
           <div className="flex items-center gap-3">
-            {/* Icon with gradient background */}
-            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-100 to-blue-100 group-hover:from-purple-200 group-hover:to-blue-200 flex items-center justify-center flex-shrink-0 shadow-sm transition-colors duration-300">
-              <GraduationCap className="h-6 w-6 text-purple-600 group-hover:scale-110 transition-transform duration-300" />
+            {/* Icon with neutral background */}
+            <div className="w-12 h-12 rounded-full bg-gray-50 group-hover:bg-gray-100 flex items-center justify-center flex-shrink-0 shadow-sm transition-colors duration-300">
+              <GraduationCap className="h-6 w-6 text-[#0D98BA] group-hover:scale-110 transition-transform duration-300" />
             </div>
-            <CardTitle className="text-xl md:text-2xl text-[#003153] group-hover:text-purple-600 font-bold transition-colors duration-300">
+            <CardTitle className="text-xl md:text-2xl text-[#003153] group-hover:text-[#0D98BA] font-bold transition-colors duration-300">
               {t('title')}
             </CardTitle>
           </div>
 
-          {/* ShareButton - same pattern as WhatsApp Community card */}
+          {/* ShareButton - neutralized */}
           <ShareButton
             shareData={formatSkillsSurveyShareData(locale)}
             variant="ghost"
             size="icon"
             locale={locale}
-            className="p-2 rounded-full bg-purple-50 hover:bg-purple-100 text-purple-600"
+            className="p-2 rounded-full bg-gray-50 hover:bg-gray-100 text-gray-700"
           />
         </div>
 
@@ -54,7 +54,7 @@ export function SkillsSurveyCard() {
         </p>
 
         {/* Key benefits list with emojis */}
-        <div className="space-y-2 bg-white/60 backdrop-blur-sm rounded-lg p-3 border border-purple-100">
+        <div className="space-y-2 bg-gray-50 rounded-lg p-4 border border-gray-200">
           <div className="flex items-start gap-2 text-sm">
             <span className="text-lg flex-shrink-0">🌱</span>
             <span className="text-gray-700">{t('benefit1')}</span>
@@ -69,10 +69,10 @@ export function SkillsSurveyCard() {
           </div>
         </div>
 
-        {/* Primary CTA Button - gradient, prominent */}
+        {/* Primary CTA Button - brand gradient */}
         <Link href={`/${locale}/surveys/skills`} className="block">
           <Button
-            className="w-full bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 hover:from-purple-700 hover:via-blue-700 hover:to-indigo-700 text-white shadow-md hover:shadow-lg transition-all duration-300 font-semibold text-sm md:text-base"
+            className="w-full bg-gradient-to-r from-[#0D98BA] to-[#00509d] hover:from-[#00509d] hover:to-[#003153] text-white shadow-md hover:shadow-lg transition-all duration-300 font-semibold text-sm md:text-base"
             size="lg"
           >
             {t('ctaButton')}
@@ -82,7 +82,7 @@ export function SkillsSurveyCard() {
 
         {/* Time estimate badge */}
         <div className="text-center">
-          <span className="inline-flex items-center gap-1.5 text-xs text-purple-700 bg-purple-50 px-3 py-1.5 rounded-full border border-purple-200">
+          <span className="inline-flex items-center gap-1.5 text-xs text-gray-700 bg-gray-50 px-3 py-1.5 rounded-full border border-gray-200">
             <span>⏱️</span>
             <span>{t('timeEstimate')}</span>
           </span>
