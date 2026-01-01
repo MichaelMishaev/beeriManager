@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
-import { Calendar, CheckSquare, AlertTriangle, FileText, Users, DollarSign, MessageSquare, Settings, Plus, Edit, BarChart, GripVertical, HelpCircle, Ticket, Tags, Phone, Bell, Lightbulb, Sparkles, GraduationCap, Store } from 'lucide-react'
+import { Calendar, CheckSquare, AlertTriangle, FileText, Users, DollarSign, MessageSquare, Settings, Plus, Edit, BarChart, GripVertical, HelpCircle, Ticket, Tags, Phone, Bell, Sparkles, GraduationCap, Store } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
@@ -99,19 +99,6 @@ const defaultAdminSections = [
     ]
   },
   {
-    id: 'expenses',
-    title: 'כספים',
-    description: 'ניהול הוצאות ותקציבים',
-    icon: DollarSign,
-    color: 'text-emerald-600',
-    bgColor: 'bg-emerald-50',
-    links: [
-      { href: '/admin/expenses/new', label: 'הוסף הוצאה', icon: Plus },
-      { href: '/admin/expenses', label: 'רשימת הוצאות', icon: Edit },
-      { href: '/admin/expenses/reports', label: 'דוחות כספיים', icon: BarChart }
-    ]
-  },
-  {
     id: 'vendors',
     title: 'ספקים',
     description: 'ניהול ספקים ונותני שירותים',
@@ -134,18 +121,6 @@ const defaultAdminSections = [
       { href: '/admin/feedback', label: 'צפייה במשובים', icon: MessageSquare },
       { href: '/admin/feedback/stats', label: 'סטטיסטיקות', icon: BarChart },
       { href: '/admin/feedback/export', label: 'ייצוא נתונים', icon: FileText }
-    ]
-  },
-  {
-    id: 'ideas',
-    title: 'רעיונות',
-    description: 'רעיונות לשיפור ותכונות חדשות',
-    icon: Lightbulb,
-    color: 'text-amber-600',
-    bgColor: 'bg-amber-50',
-    links: [
-      { href: '/admin/ideas', label: 'צפייה ברעיונות', icon: Lightbulb },
-      { href: '/ideas', label: 'שליחת רעיון', icon: Plus }
     ]
   },
   {
@@ -594,22 +569,6 @@ export default function AdminDashboard() {
                   </ul>
                 </div>
 
-                {/* כספים */}
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <div className="bg-emerald-50 p-2 rounded-lg">
-                      <DollarSign className="h-5 w-5 text-emerald-600" />
-                    </div>
-                    <h3 className="font-bold text-lg">כספים 💰</h3>
-                  </div>
-                  <ul className="space-y-1 text-sm mr-9">
-                    <li>• <strong>הוסיפו הוצאה</strong> - תעדו כל הוצאה של הועד</li>
-                    <li>• <strong>רשימת הוצאות</strong> - צפו בכל ההוצאות</li>
-                    <li>• <strong>דוחות כספיים</strong> - קבלו דוח מסודר לשקיפות מלאה</li>
-                    <li className="text-muted-foreground mt-2">💡 טיפ: שמרו תמיד קבלות וצרפו אותן להוצאות</li>
-                  </ul>
-                </div>
-
                 {/* ספקים */}
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
@@ -641,24 +600,6 @@ export default function AdminDashboard() {
                     <li>• <strong>סטטיסטיקות</strong> - ראו מגמות במשובים</li>
                     <li>• <strong>ייצוא נתונים</strong> - הורידו את כל המשובים לקובץ</li>
                     <li className="text-muted-foreground mt-2">💡 טיפ: משוב הוא אנונימי לחלוטין - עודדו הורים לשתף</li>
-                  </ul>
-                </div>
-
-                {/* רעיונות */}
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <div className="bg-amber-50 p-2 rounded-lg">
-                      <Lightbulb className="h-5 w-5 text-amber-600" />
-                    </div>
-                    <h3 className="font-bold text-lg">רעיונות והצעות 💡</h3>
-                  </div>
-                  <ul className="space-y-1 text-sm mr-9">
-                    <li>• <strong>צפייה ברעיונות</strong> - ראו רעיונות והצעות שהורים שלחו</li>
-                    <li>• <strong>ניהול סטטוס</strong> - סמנו רעיונות כ"נבדק", "מאושר", "יושם" או "נדחה"</li>
-                    <li>• <strong>תגובות</strong> - שלחו תגובה למשלח הרעיון (אם לא אנונימי)</li>
-                    <li>• <strong>הערות פנימיות</strong> - כתבו הערות שרק מנהלים יראו</li>
-                    <li>• <strong>סינון</strong> - סננו לפי קטגוריה (שיפור, תכונה, תהליך) וסטטוס</li>
-                    <li className="text-muted-foreground mt-2">💡 טיפ: רעיונות חדשים מסומנים במסגרת צהובה - תנו עדיפות לאלו!</li>
                   </ul>
                 </div>
 

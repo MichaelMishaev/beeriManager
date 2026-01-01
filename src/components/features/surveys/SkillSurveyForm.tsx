@@ -764,7 +764,7 @@ export function SkillSurveyForm() {
                                 text-xs font-medium transition-colors duration-300
                                 ${isSelected ? 'text-white/90' : 'text-gray-600'}
                               `}>
-                                כיתה
+                                שכבה
                               </span>
                             </div>
 

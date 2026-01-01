@@ -8,6 +8,7 @@ import { notFound } from 'next/navigation'
 import { Providers } from '@/components/providers'
 import { Toaster } from '@/components/ui/toaster'
 import { Navigation } from '@/components/layout/Navigation'
+import { Footer } from '@/components/layout/Footer'
 import { GoogleAnalytics } from '@/components/analytics/GoogleAnalytics'
 import { HtmlAttributes } from '@/components/HtmlAttributes'
 import { IOSInstallPrompt } from '@/components/pwa/IOSInstallPrompt'
@@ -165,11 +166,12 @@ export default async function LocaleLayout({
     <>
       <GoogleAnalytics />
       <HtmlAttributes lang={locale} dir={direction} className={fontClass} />
-      <div className="min-h-screen bg-background font-sans antialiased" style={{ fontFamily }}>
+      <div className="min-h-screen flex flex-col bg-background font-sans antialiased" style={{ fontFamily }}>
         <NextIntlClientProvider messages={messages}>
           <Providers>
             <Navigation />
-            {children}
+            <main className="flex-1">{children}</main>
+            <Footer />
             <IOSInstallPrompt />
           </Providers>
           <Toaster />
