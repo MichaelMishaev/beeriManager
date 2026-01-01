@@ -35,11 +35,12 @@ export function RegulationsModalContent({ standalone = false }: RegulationsModal
             variant="ghost"
             size="sm"
             className="bg-white/20 hover:bg-white/30 text-white border-white/30"
+            aria-label="שיתוף התקנון"
           />
         </div>
 
         {/* School Logo */}
-        <div className="flex justify-center mb-3">
+        <div className="flex justify-center mb-2 md:mb-3">
           <Image
             src="/logo-small.png"
             alt="לוגו בית ספר בארי"
@@ -50,33 +51,38 @@ export function RegulationsModalContent({ standalone = false }: RegulationsModal
           />
         </div>
 
-        {/* Title - Compact */}
+        {/* Title - Improved hierarchy */}
         <h1 className="text-2xl md:text-4xl font-black text-center
-                     font-formal text-white drop-shadow-md leading-tight">
+                     font-formal text-white drop-shadow-lg leading-tight tracking-tight">
           {regulationsContent.title}
         </h1>
 
-        {/* Subtitle - Compact */}
-        <div className="text-center mt-2 space-y-0.5">
-          <p className="text-sm md:text-lg font-formal text-white/95">
+        {/* Subtitle - Compact with better hierarchy */}
+        <div className="text-center mt-1.5 md:mt-2 space-y-0">
+          <p className="text-sm md:text-lg font-formal font-medium text-white/80">
             {regulationsContent.subtitle}
           </p>
-          <p className="text-xs md:text-base font-formal text-[#fdc500]">
+          <p className="text-xs md:text-base font-formal font-bold text-[#fdc500]">
             {regulationsContent.academicYear}
           </p>
-          <p className="text-xs md:text-sm font-formal text-white/90 mt-1">
+          <p className="text-xs md:text-sm font-formal font-normal text-white/70 mt-0.5">
             {regulationsContent.chairman}
           </p>
 
-          {/* Draft Notice */}
-          <div className="flex justify-center mt-3">
-            <div className="inline-flex items-center gap-2 bg-[#fdc500]/20 border border-[#fdc500]/40
-                          rounded-full px-3 py-1 md:px-4 md:py-1.5">
-              <span className="text-[#fdc500] text-lg md:text-xl">📝</span>
-              <span className="text-xs md:text-sm font-medium text-[#fdc500]">
+          {/* Draft Notice - Semantic and accessible */}
+          <div className="flex justify-center mt-2 md:mt-3">
+            <aside
+              className="inline-flex items-center gap-1.5 md:gap-2 bg-[#fdc500]/20
+                       border border-[#fdc500]/40 rounded-full
+                       px-2.5 py-0.5 md:px-4 md:py-1.5"
+              role="status"
+              aria-label="סטטוס מסמך"
+            >
+              <span className="text-base md:text-xl" aria-hidden="true">📝</span>
+              <span className="text-[10px] md:text-sm font-medium text-[#fdc500]">
                 טיוטה - ממתין לאישור ועד ההורים
               </span>
-            </div>
+            </aside>
           </div>
         </div>
 
@@ -160,24 +166,31 @@ export function RegulationsModalContent({ standalone = false }: RegulationsModal
   )
 }
 
-// Section Header Component - More Compact
+// Section Header Component - Accessible and compact
 function SectionHeader({ number, title }: { number: number; title: string }) {
   return (
     <div className="mb-4">
       <div className="flex items-center gap-3 mb-3">
-        <div className="w-10 h-10 md:w-12 md:h-12 rounded-full
-                      bg-gradient-to-br from-[#00509d] to-[#00296b]
-                      flex items-center justify-center
-                      border-2 border-[#003f88] shadow-md flex-shrink-0">
+        <div
+          className="w-10 h-10 md:w-12 md:h-12 rounded-full
+                   bg-gradient-to-br from-[#00509d] to-[#00296b]
+                   flex items-center justify-center
+                   border-2 border-[#003f88] shadow-md flex-shrink-0"
+          aria-hidden="true"
+        >
           <span className="text-white font-black font-formal text-lg md:text-xl">
             {number}
           </span>
         </div>
-        <h2 className="text-xl md:text-2xl font-bold font-formal text-[#00509d]">
+        <h2
+          className="text-xl md:text-2xl font-bold font-formal text-[#00509d]"
+          id={`section-${number}`}
+        >
+          <span className="sr-only">סעיף {number}: </span>
           {title}
         </h2>
       </div>
-      <div className="h-px bg-gradient-to-l from-[#fdc500]/30 to-transparent" />
+      <div className="h-px bg-gradient-to-l from-[#fdc500]/30 to-transparent" aria-hidden="true" />
     </div>
   )
 }
