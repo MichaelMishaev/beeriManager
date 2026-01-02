@@ -26,22 +26,22 @@ export function SchoolStats({ variant = 'cards' }: SchoolStatsProps) {
 
   if (variant === 'cards') {
     return (
-      <div className="container mx-auto px-4 -mt-12 mb-12">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+      <div className="container mx-auto px-4 -mt-4 mb-3">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
           {stats.map((stat) => {
             const Icon = stat.icon
             return (
               <Card
                 key={stat.labelKey}
-                className="bg-white shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-100"
+                className="bg-white shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 border border-gray-100"
               >
-                <CardContent className="pt-6 pb-6 px-4">
+                <CardContent className="pt-2 pb-2 px-2">
                   <div className="text-center">
-                    <Icon className={`h-10 w-10 md:h-12 md:w-12 mx-auto mb-3 ${stat.color}`} />
-                    <div className="text-5xl md:text-6xl font-bold text-[#003153] mb-2">
+                    <Icon className={`h-5 w-5 mx-auto mb-1 ${stat.color}`} />
+                    <div className="text-2xl md:text-3xl font-bold text-[#003153]">
                       {stat.value}
                     </div>
-                    <div className="text-sm md:text-base text-gray-600 font-semibold">
+                    <div className="text-[10px] md:text-xs text-gray-600 font-medium">
                       {t(stat.labelKey)}
                     </div>
                   </div>

@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
-import { Calendar, CheckSquare, AlertTriangle, FileText, Users, DollarSign, MessageSquare, Settings, Plus, Edit, BarChart, GripVertical, HelpCircle, Ticket, Tags, Phone, Bell, Sparkles, GraduationCap, Store } from 'lucide-react'
+import { Calendar, CheckSquare, AlertTriangle, FileText, Users, DollarSign, MessageSquare, Settings, Plus, Edit, BarChart, HelpCircle, Ticket, Tags, Phone, Bell, Sparkles, GraduationCap, Store } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
@@ -13,25 +13,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
-import {
-  DndContext,
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  TouchSensor,
-  useSensor,
-  useSensors,
-  DragEndEvent,
-} from '@dnd-kit/core'
-import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  useSortable,
-  verticalListSortingStrategy,
-} from '@dnd-kit/sortable'
-import { CSS } from '@dnd-kit/utilities'
 import { createClient } from '@/lib/supabase/client'
+import { AdminSectionGroup } from '@/components/features/dashboard/AdminSectionGroup'
 
 const defaultAdminSections = [
   {
@@ -207,6 +190,19 @@ const defaultAdminSections = [
     ]
   },
   {
+    id: 'meetings',
+    title: 'פגישות ורעיונות',
+    description: 'איסוף רעיונות לסדר היום של פגישות ועד',
+    icon: MessageSquare,
+    color: 'text-emerald-600',
+    bgColor: 'bg-emerald-50',
+    links: [
+      { href: '/admin/meetings/new', label: 'פגישה חדשה', icon: Plus },
+      { href: '/admin/meetings', label: 'ניהול פגישות', icon: Edit },
+      { href: '/admin/meetings', label: 'רעיונות שנשלחו', icon: MessageSquare }
+    ]
+  },
+  {
     id: 'settings',
     title: 'הגדרות',
     description: 'הגדרות מערכת וניהול תצורה',
@@ -220,66 +216,44 @@ const defaultAdminSections = [
   }
 ]
 
-function SortableCard({ section }: { section: typeof defaultAdminSections[0] }) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: section.id })
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
+// Category groupings for organized dashboard
+const categoryGroups = [
+  {
+    id: 'content',
+    title: 'ניהול תוכן',
+    icon: FileText,
+    defaultOpen: true,
+    sections: ['events', 'protocols', 'highlights']
+  },
+  {
+    id: 'tasks',
+    title: 'משימות ובעיות',
+    icon: CheckSquare,
+    defaultOpen: true,
+    sections: ['tasks', 'issues', 'tickets']
+  },
+  {
+    id: 'organization',
+    title: 'ארגון ואנשים',
+    icon: Users,
+    defaultOpen: false,
+    sections: ['committees', 'contacts', 'feedback', 'meetings', 'skills']
+  },
+  {
+    id: 'external',
+    title: 'שותפים חיצוניים',
+    icon: Store,
+    defaultOpen: false,
+    sections: ['vendors', 'prom']
+  },
+  {
+    id: 'system',
+    title: 'מערכת ותקשורת',
+    icon: Settings,
+    defaultOpen: false,
+    sections: ['urgent', 'notifications', 'meetings', 'settings']
   }
-
-  const Icon = section.icon
-
-  return (
-    <div ref={setNodeRef} style={style}>
-      <Card className="hover:shadow-lg transition-shadow">
-        <CardHeader>
-          <div className="flex items-start justify-between">
-            <div className={`inline-flex p-3 rounded-lg ${section.bgColor} mb-3`}>
-              <Icon className={`h-6 w-6 ${section.color}`} />
-            </div>
-            <button
-              {...attributes}
-              {...listeners}
-              className="cursor-grab active:cursor-grabbing p-2 hover:bg-gray-100 rounded touch-none"
-              onTouchStart={(e) => e.stopPropagation()}
-            >
-              <GripVertical className="h-5 w-5 text-gray-400" />
-            </button>
-          </div>
-          <CardTitle>{section.title}</CardTitle>
-          <CardDescription>{section.description}</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-2">
-          {section.links.map((link) => {
-            const LinkIcon = link.icon
-            return (
-              <Button
-                key={link.href}
-                variant="ghost"
-                className="w-full justify-start"
-                asChild
-              >
-                <Link href={link.href}>
-                  <LinkIcon className="h-4 w-4 ml-2" />
-                  {link.label}
-                </Link>
-              </Button>
-            )
-          })}
-        </CardContent>
-      </Card>
-    </div>
-  )
-}
+]
 
 function DashboardStats() {
   const [stats, setStats] = useState({
@@ -405,63 +379,6 @@ function DashboardStats() {
 }
 
 export default function AdminDashboard() {
-  const [sections, setSections] = useState(defaultAdminSections)
-
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8,
-      },
-    }),
-    useSensor(TouchSensor, {
-      activationConstraint: {
-        delay: 200,
-        tolerance: 8,
-      },
-    }),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  )
-
-  // Load saved order from localStorage on mount
-  useEffect(() => {
-    const savedOrder = localStorage.getItem('admin-sections-order')
-    if (savedOrder) {
-      try {
-        const orderIds = JSON.parse(savedOrder)
-        const reordered = orderIds
-          .map((id: string) => defaultAdminSections.find(s => s.id === id))
-          .filter(Boolean)
-
-        // Add any new sections that weren't in saved order
-        const existingIds = new Set(orderIds)
-        const newSections = defaultAdminSections.filter(s => !existingIds.has(s.id))
-
-        setSections([...reordered, ...newSections])
-      } catch (e) {
-        console.error('Failed to load sections order:', e)
-      }
-    }
-  }, [])
-
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event
-
-    if (over && active.id !== over.id) {
-      setSections((items) => {
-        const oldIndex = items.findIndex((item) => item.id === active.id)
-        const newIndex = items.findIndex((item) => item.id === over.id)
-
-        const newOrder = arrayMove(items, oldIndex, newIndex)
-
-        // Save to localStorage
-        localStorage.setItem('admin-sections-order', JSON.stringify(newOrder.map(s => s.id)))
-
-        return newOrder
-      })
-    }
-  }
 
   return (
     <div className="space-y-6">
@@ -696,7 +613,7 @@ export default function AdminDashboard() {
                 <div className="bg-sky-50 p-4 rounded-lg border-2 border-sky-200">
                   <h3 className="font-bold text-lg mb-2">🌟 טיפים לשימוש יעיל</h3>
                   <ul className="space-y-1 text-sm">
-                    <li>✨ <strong>גררו כרטיסים</strong> - לחצו על <GripVertical className="inline h-4 w-4" /> וגררו כדי לסדר את הלוח לפי העדפתכם</li>
+                    <li>✨ <strong>קטגוריות מסודרות</strong> - הלוח מחולק לקטגוריות לוגיות - לחצו על הקטגוריה כדי להרחיב או לצמצם</li>
                     <li>✨ <strong>הסטטיסטיקות למעלה</strong> - לחצו עליהן כדי לעבור ישירות למקטע המתאים</li>
                     <li>✨ <strong>פעמון ההתראות</strong> - שימו לב לפעמון בראש העמוד - הוא יתריע על פעילות חדשה!</li>
                     <li>✨ <strong>שתפו קישורים</strong> - כל עמוד במערכת יכול להישלח בווטסאפ</li>
@@ -735,23 +652,25 @@ export default function AdminDashboard() {
       {/* Quick Stats */}
       <DashboardStats />
 
-      {/* Admin Sections - Draggable */}
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        onDragEnd={handleDragEnd}
-      >
-        <SortableContext
-          items={sections.map(s => s.id)}
-          strategy={verticalListSortingStrategy}
-        >
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {sections.map((section) => (
-              <SortableCard key={section.id} section={section} />
-            ))}
-          </div>
-        </SortableContext>
-      </DndContext>
+      {/* Admin Sections - Grouped by Category */}
+      <div className="space-y-4">
+        {categoryGroups.map((group) => {
+          const groupSections = defaultAdminSections.filter(section =>
+            group.sections.includes(section.id)
+          )
+
+          return (
+            <AdminSectionGroup
+              key={group.id}
+              id={group.id}
+              title={group.title}
+              icon={group.icon}
+              sections={groupSections}
+              defaultOpen={group.defaultOpen}
+            />
+          )
+        })}
+      </div>
 
       {/* Quick Actions */}
       <Card>

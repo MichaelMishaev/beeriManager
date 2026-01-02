@@ -601,3 +601,45 @@ export interface Highlight {
   created_at: string
   updated_at: string
 }
+
+// Meeting Ideas Submission System
+export interface Meeting {
+  id: string
+  title: string
+  meeting_date: string
+  description?: string
+
+  // Status
+  status: 'draft' | 'open' | 'closed' | 'completed'
+  is_open: boolean
+
+  // Metadata
+  created_at: string
+  updated_at: string
+  created_by?: string
+  closed_at?: string
+
+  // Stats
+  ideas_count: number
+  version: number
+}
+
+export interface MeetingIdea {
+  id: string
+  meeting_id: string
+
+  // Content
+  title: string
+  description?: string
+
+  // Submitter
+  submitter_name?: string
+  is_anonymous: boolean
+
+  // Locale
+  submission_locale: string
+
+  // Timestamps
+  created_at: string
+  updated_at: string
+}

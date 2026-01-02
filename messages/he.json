@@ -314,5 +314,49 @@
     "successTitle": "תודה רבה!",
     "successMessage": "התשובות שלך נשמרו בהצלחה. נשמח ליצור איתך קשר במידת הצורך.",
     "errorMessage": "שגיאה בשמירת התשובות. אנא נסה שוב"
+  },
+  "Meetings": {
+    "title": "פגישות",
+    "meetingIdeas": "רעיונות לפגישה",
+    "submitIdea": "שליחת רעיון",
+    "viewIdeas": "צפה ברעיונות",
+    "createMeeting": "פגישה חדשה",
+    "manageMeetings": "ניהול פגישות",
+    "form": {
+      "ideaTitle": "נושא",
+      "ideaTitlePlaceholder": "על מה תרצו לדבר?",
+      "description": "פירוט",
+      "descriptionPlaceholder": "פרטו את הרעיון שלכם...",
+      "submitterName": "שם",
+      "submitterNamePlaceholder": "שם מלא",
+      "anonymous": "שליחה אנונימית",
+      "anonymousDescription": "שליחת הרעיון ללא חשיפת שם",
+      "meetingTitle": "כותרת הפגישה",
+      "meetingDate": "תאריך הפגישה",
+      "meetingDescription": "תיאור"
+    },
+    "status": {
+      "draft": "טיוטה",
+      "open": "פתוח",
+      "closed": "סגור",
+      "completed": "הושלם"
+    },
+    "messages": {
+      "ideaSubmitted": "הרעיון נשלח בהצלחה. תודה על השיתוף!",
+      "meetingCreated": "הפגישה נוצרה בהצלחה",
+      "meetingClosed": "הפגישה סגורה לשליחת רעיונות חדשים",
+      "noIdeas": "עדיין לא נשלחו רעיונות. היו הראשונים!",
+      "thankYou": "תודה על הרעיון!",
+      "ideaReceived": "הרעיון שלך נשלח בהצלחה ונראה ברשימה",
+      "shareLink": "שתפו את הקישור עם הורים נוספים",
+      "copiedLink": "הקישור הועתק"
+    },
+    "stats": {
+      "totalMeetings": "סה\"כ פגישות",
+      "openMeetings": "פגישות פתוחות",
+      "closedMeetings": "פגישות סגורות",
+      "totalIdeas": "סה\"כ רעיונות",
+      "ideasCount": "{count} רעיונות"
+    }
   }
 }

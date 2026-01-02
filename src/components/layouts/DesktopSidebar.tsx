@@ -3,7 +3,7 @@
 import React from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, Calendar, CheckSquare, AlertCircle, FileText, Settings, LogOut, Users, Tags } from 'lucide-react'
+import { Home, Calendar, CheckSquare, AlertCircle, FileText, Settings, LogOut, Users, Tags, MessageSquare } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import { Button } from '@/components/ui/button'
 
@@ -29,6 +29,7 @@ const adminNavItems: NavItem[] = [
   { href: '/admin/events', label: 'ניהול אירועים', icon: Calendar, adminOnly: true },
   { href: '/admin/expenses', label: 'ניהול הוצאות', icon: FileText, adminOnly: true },
   { href: '/admin/vendors', label: 'ספקים', icon: Users, adminOnly: true },
+  { href: '/admin/meetings', label: 'פגישות ורעיונות', icon: MessageSquare, adminOnly: true },
 ]
 
 interface DesktopSidebarProps {

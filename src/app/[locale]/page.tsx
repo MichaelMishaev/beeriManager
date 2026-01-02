@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { Loader2 } from 'lucide-react'
 import { Dashboard } from '@/components/features/dashboard/Dashboard'
 import { PublicHomepage } from '@/components/features/homepage/PublicHomepage'
+import { ThankYouPopup } from '@/components/features/meetings/ThankYouPopup'
 import { eachDayOfInterval, parseISO } from 'date-fns'
 import type { DashboardStats, Event, Task, CalendarEvent, Holiday } from '@/types'
 
@@ -114,20 +115,26 @@ export default function HomePage() {
   if (isAuthenticated) {
     // Committee member - show full dashboard
     return (
-      <Dashboard
-        stats={stats}
-        upcomingEvents={events}
-        pendingTasks={tasks}
-        calendarEvents={calendarEvents}
-      />
+      <>
+        <ThankYouPopup />
+        <Dashboard
+          stats={stats}
+          upcomingEvents={events}
+          pendingTasks={tasks}
+          calendarEvents={calendarEvents}
+        />
+      </>
     )
   }
 
   // Regular parent - show public homepage
   return (
-    <PublicHomepage
-      upcomingEvents={events}
-      calendarEvents={calendarEvents}
-    />
+    <>
+      <ThankYouPopup />
+      <PublicHomepage
+        upcomingEvents={events}
+        calendarEvents={calendarEvents}
+      />
+    </>
   )
 }
