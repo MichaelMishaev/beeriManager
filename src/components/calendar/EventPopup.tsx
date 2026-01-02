@@ -23,7 +23,7 @@ interface Event {
   location?: string
   event_type: 'general' | 'meeting' | 'fundraiser' | 'trip' | 'workshop'
   priority: 'low' | 'normal' | 'high' | 'urgent'
-  status: 'draft' | 'published' | 'cancelled'
+  status: 'draft' | 'published' | 'ongoing' | 'completed' | 'cancelled'
   registration_enabled: boolean
   max_attendees?: number
   current_attendees?: number

@@ -456,7 +456,7 @@ export default function BeeriCalendar({
         )}
       </div>
 
-      {publishedEvents.length === 0 ? (
+      {visibleEvents.length === 0 ? (
         <Card>
           <CardContent className="text-center py-8">
             <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
@@ -465,7 +465,7 @@ export default function BeeriCalendar({
         </Card>
       ) : (
         <div className="space-y-3">
-          {publishedEvents
+          {visibleEvents
             .sort((a, b) => new Date(a.start_datetime).getTime() - new Date(b.start_datetime).getTime())
             .map((event) => (
               <Card key={event.id} className="cursor-pointer hover:bg-accent transition-colors">
