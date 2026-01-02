@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { verifyJWT } from '@/lib/auth/jwt'
 import type { CreateEventArgs, CreateUrgentMessageArgs, CreateHighlightArgs } from '@/lib/ai/tools'
+import { aiLogger } from '@/lib/ai/logger'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -35,6 +36,7 @@ export async function POST(req: NextRequest) {
 
     if (type === 'event') {
       const eventData = data as CreateEventArgs
+      const startTime = Date.now()
 
       // Insert event
       const { data: insertedEvent, error } = await supabase
@@ -66,11 +68,23 @@ export async function POST(req: NextRequest) {
 
       if (error) {
         console.error('[AI Insert] Event insert error:', error)
+        aiLogger.logInsert({
+          extractedDataType: 'event',
+          success: false,
+          errorMessage: error.message,
+          durationMs: Date.now() - startTime,
+        })
         return NextResponse.json(
           { success: false, error: 'שגיאה ביצירת האירוע' },
           { status: 500 }
         )
       }
+
+      aiLogger.logInsert({
+        extractedDataType: 'event',
+        success: true,
+        durationMs: Date.now() - startTime,
+      })
 
       return NextResponse.json({
         success: true,

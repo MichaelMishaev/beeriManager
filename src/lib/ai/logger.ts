@@ -3,8 +3,10 @@
  *
  * Logs all AI assistant interactions for debugging, analysis, and monitoring.
  * Logs to console with structured format for easy parsing and analysis.
- * Can be extended to log to database or external service.
+ * Logs to database (ai_chat_logs table) for persistent storage and analysis.
  */
+
+import { supabase } from '@/lib/supabase/client'
 
 export type AILogLevel = 'info' | 'success' | 'warning' | 'error'
 
@@ -88,13 +90,49 @@ class AILogger {
       JSON.stringify(fullEntry, null, 2)
     )
 
-    // TODO: Add database logging here if needed
-    // await this.logToDatabase(fullEntry)
+    // Save to database asynchronously (don't wait to avoid blocking)
+    this.logToDatabase(fullEntry).catch((error) => {
+      console.error('[AI Logger] Failed to save log to database:', error)
+    })
+  }
 
-    // TODO: Add external service logging (e.g., Sentry, LogRocket)
-    // if (fullEntry.level === 'error') {
-    //   this.logToSentry(fullEntry)
-    // }
+  /**
+   * Save log entry to database
+   */
+  private async logToDatabase(entry: AILogEntry) {
+    try {
+      const { error } = await supabase.from('ai_chat_logs').insert({
+        session_id: entry.sessionId,
+        level: entry.level,
+        action: entry.action,
+        user_message: entry.userMessage,
+        message_length: entry.messageLength,
+        gpt_model: entry.gptModel,
+        gpt_round_number: entry.gptRoundNumber,
+        gpt_prompt_tokens: entry.gptPromptTokens,
+        gpt_completion_tokens: entry.gptCompletionTokens,
+        gpt_total_tokens: entry.gptTotalTokens,
+        gpt_cost: entry.gptCost,
+        response_type: entry.responseType,
+        function_name: entry.functionName,
+        extracted_data_type: entry.extractedDataType,
+        validation_success: entry.validationSuccess,
+        validation_errors: entry.validationErrors,
+        usage_count: entry.usageCount,
+        daily_limit: entry.dailyLimit,
+        rate_limit_reached: entry.rateLimitReached,
+        error_message: entry.errorMessage,
+        error_stack: entry.errorStack,
+        duration_ms: entry.durationMs,
+        metadata: entry.metadata,
+      })
+
+      if (error) {
+        console.error('[AI Logger] Database insert error:', error)
+      }
+    } catch (error) {
+      console.error('[AI Logger] Database logging failed:', error)
+    }
   }
 
   /**

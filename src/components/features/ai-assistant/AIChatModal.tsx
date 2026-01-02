@@ -11,6 +11,7 @@ import { getContextualExamples, type Example } from '@/lib/ai/examples'
 import ManualEventForm from './ManualEventForm'
 import { RATE_LIMITS, type UsageStats } from '@/lib/ai/rate-limiter'
 import { trackAIInteraction, EventAction } from '@/lib/analytics'
+import { logger } from '@/lib/logger'
 
 interface Message {
   role: 'user' | 'assistant'
@@ -239,16 +240,23 @@ export default function AIChatModal({ isOpen, onClose }: AIChatModalProps) {
         }
       } else if (chatPhase === 'understanding_check') {
         // User responded to understanding check
-        console.log('[AIChatModal] Understanding check phase:', {
-          userMessage: userMessage.content,
-          isConfirmation: isConfirmation(userMessage.content),
-          understanding: conversationContext.understanding,
-          originalMessage: conversationContext.originalMessage,
+        logger.debug('Understanding check phase', {
+          component: 'AIChatModal',
+          action: 'understanding_check',
+          data: {
+            userMessage: userMessage.content,
+            isConfirmation: isConfirmation(userMessage.content),
+            understanding: conversationContext.understanding?.substring(0, 100),
+            originalMessage: conversationContext.originalMessage?.substring(0, 100),
+          }
         })
 
         if (isConfirmation(userMessage.content)) {
           // User confirmed → Extract with context (Round 2)
-          console.log('[AIChatModal] User confirmed! Proceeding to extraction')
+          logger.success('User confirmed understanding!', {
+            component: 'AIChatModal',
+            action: 'confirmation_detected'
+          })
           action = 'extract_data'
           context = conversationContext.understanding
         } else {
@@ -300,10 +308,14 @@ export default function AIChatModal({ isOpen, onClose }: AIChatModalProps) {
       if (action === 'extract_data' && context && conversationContext.originalMessage) {
         // Send explicit extraction request with context inline
         // This makes it crystal clear to the AI what to do
-        console.log('[AIChatModal] Preparing extraction with context:', {
-          action,
-          context: context?.substring(0, 100) + '...',
-          originalMessage: conversationContext.originalMessage.substring(0, 100) + '...',
+        logger.info('Preparing extraction with context', {
+          component: 'AIChatModal',
+          action: 'prepare_extraction',
+          data: {
+            hasContext: true,
+            contextPreview: context?.substring(0, 100),
+            originalMessagePreview: conversationContext.originalMessage.substring(0, 100),
+          }
         })
 
         // Create an explicit extraction request that includes the understanding
@@ -321,7 +333,7 @@ ${conversationContext.originalMessage}
         ]
       }
 
-      console.log('[AIChatModal] Calling API:', {
+      logger.apiCall('POST', '/api/ai-assistant', {
         action,
         hasContext: !!context,
         messageCount: apiMessages.length,

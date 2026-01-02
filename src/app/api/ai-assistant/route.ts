@@ -11,7 +11,6 @@ import {
   validateUrgentMessageArgs,
   validateHighlightArgs,
 } from '@/lib/ai/tools'
-import { logAICost } from '@/lib/ai/cost-tracker'
 import { incrementAiUsage, validateMessageLength } from '@/lib/ai/rate-limiter'
 import { aiLogger } from '@/lib/ai/logger'
 
@@ -102,6 +101,7 @@ export async function POST(req: NextRequest) {
       const userInput = lastMessage.content.toLowerCase()
 
       if (userInput.includes('אירוע') || userInput === '1') {
+        aiLogger.logTypeSelection(userInput, true)
         return NextResponse.json({
           success: true,
           message: `מעולה! בוא ניצור אירוע חדש 📅
@@ -126,6 +126,7 @@ export async function POST(req: NextRequest) {
         userInput.includes('דחוף') ||
         userInput === '2'
       ) {
+        aiLogger.logTypeSelection(userInput, true)
         return NextResponse.json({
           success: true,
           message: `מעולה! בוא ניצור הודעה דחופה 📢
@@ -151,6 +152,7 @@ export async function POST(req: NextRequest) {
         userInput.includes('פרס') ||
         userInput === '3'
       ) {
+        aiLogger.logTypeSelection(userInput, true)
         return NextResponse.json({
           success: true,
           message: `מעולה! בוא ניצור הדגשה מיוחדת ✨
@@ -174,6 +176,7 @@ export async function POST(req: NextRequest) {
 • תאריכי תצוגה (עד מתי להציג בקרוסלה)`,
         })
       } else {
+        aiLogger.logTypeSelection(userInput, false)
         return NextResponse.json({
           success: true,
           message: 'לא הבנתי את הבחירה שלך 😕\n\nאנא בחר:\n1️⃣ אירוע\n2️⃣ הודעה דחופה\n3️⃣ הדגשה',
@@ -183,6 +186,17 @@ export async function POST(req: NextRequest) {
 
     // Handle understanding check for complex messages (Round 1)
     if (action === 'understand_message') {
+      const userMessage = messages[messages.length - 1]?.content || ''
+      const startTime = Date.now()
+
+      // Log GPT request
+      aiLogger.logGPTRequest({
+        action: 'understand_message',
+        userMessage,
+        gptModel: AI_CONFIG.model,
+        roundNumber: 1,
+      })
+
       const response = await openai.chat.completions.create({
         model: AI_CONFIG.model,
         max_completion_tokens: AI_CONFIG.max_completion_tokens,
@@ -197,14 +211,19 @@ export async function POST(req: NextRequest) {
       })
 
       const assistantMessage = response.choices[0].message
+      const duration = Date.now() - startTime
 
-      // Log cost for analytics (Round 1)
-      logAICost(
-        response.usage,
-        'understand_message',
-        messages[messages.length - 1]?.content,
-        1 // Round number
-      )
+      // Log GPT response
+      aiLogger.logGPTResponse({
+        action: 'understand_message',
+        responseType: 'text',
+        promptTokens: response.usage?.prompt_tokens || 0,
+        completionTokens: response.usage?.completion_tokens || 0,
+        totalTokens: response.usage?.total_tokens || 0,
+        cost: ((response.usage?.total_tokens || 0) * 0.000001), // GPT-5 Mini pricing
+        roundNumber: 1,
+        durationMs: duration,
+      })
 
       return NextResponse.json({
         success: true,
@@ -215,14 +234,20 @@ export async function POST(req: NextRequest) {
 
     // Handle data extraction with function calling
     if (action === 'extract_data') {
+      const userMessage = messages[messages.length - 1]?.content || ''
+      const roundNumber = context ? 2 : 1
+      const startTime = Date.now()
+
       // Use extraction prompt with optional context from understanding round
       const systemPrompt = getExtractionPrompt(context)
 
-      console.log('[AI API] Extraction request:', {
-        hasContext: !!context,
-        contextPreview: context?.substring(0, 100),
-        messageCount: messages.length,
-        lastMessage: messages[messages.length - 1]?.content.substring(0, 100),
+      // Log GPT request
+      aiLogger.logGPTRequest({
+        action: 'extract_data',
+        userMessage,
+        gptModel: AI_CONFIG.model,
+        roundNumber,
+        context,
       })
 
       const response = await openai.chat.completions.create({
@@ -243,22 +268,28 @@ export async function POST(req: NextRequest) {
       })
 
       const assistantMessage = response.choices[0].message
+      const duration = Date.now() - startTime
 
-      // Log cost for analytics (Round 2 if context exists, Round 1 if simple message)
-      const roundNumber = context ? 2 : 1
-      logAICost(
-        response.usage,
-        'extract_data',
-        messages[messages.length - 1]?.content,
-        roundNumber
-      )
+      // Determine response type
+      const responseType = assistantMessage.tool_calls?.length
+        ? 'function_call'
+        : assistantMessage.content
+        ? 'text'
+        : 'error'
 
-      console.log('[AI API] GPT Response:', {
-        hasToolCalls: !!assistantMessage.tool_calls,
-        toolCallCount: assistantMessage.tool_calls?.length || 0,
-        hasContent: !!assistantMessage.content,
-        contentPreview: assistantMessage.content?.substring(0, 100),
-        finishReason: response.choices[0].finish_reason,
+      // Log GPT response
+      aiLogger.logGPTResponse({
+        action: 'extract_data',
+        responseType,
+        functionName: assistantMessage.tool_calls?.[0]?.type === 'function'
+          ? assistantMessage.tool_calls[0].function.name
+          : undefined,
+        promptTokens: response.usage?.prompt_tokens || 0,
+        completionTokens: response.usage?.completion_tokens || 0,
+        totalTokens: response.usage?.total_tokens || 0,
+        cost: ((response.usage?.total_tokens || 0) * 0.000001), // GPT-5 Mini pricing
+        roundNumber,
+        durationMs: duration,
       })
 
       // Check if AI wants to call a function
@@ -268,13 +299,25 @@ export async function POST(req: NextRequest) {
           const functionName = toolCall.function.name
           const functionArgs = JSON.parse(toolCall.function.arguments)
 
-          console.log('[AI Assistant] Function call detected:', {
+          // Log function call detection
+          aiLogger.log({
+            level: 'info',
+            action: 'extract_data',
+            responseType: 'function_call',
             functionName,
-            args: functionArgs,
+            metadata: {
+              argsPreview: JSON.stringify(functionArgs).substring(0, 200),
+            },
           })
 
           // Validate and return extracted data
           if (functionName === 'create_events' && validateEventsArgs(functionArgs)) {
+            aiLogger.logValidation({
+              action: 'extract_data',
+              functionName,
+              validationSuccess: true,
+              extractedDataType: 'events',
+            })
             return NextResponse.json({
               success: true,
               needsConfirmation: true,
@@ -287,6 +330,12 @@ export async function POST(req: NextRequest) {
           functionName === 'create_urgent_message' &&
           validateUrgentMessageArgs(functionArgs)
         ) {
+          aiLogger.logValidation({
+            action: 'extract_data',
+            functionName,
+            validationSuccess: true,
+            extractedDataType: 'urgent_message',
+          })
           return NextResponse.json({
             success: true,
             needsConfirmation: true,
@@ -299,6 +348,12 @@ export async function POST(req: NextRequest) {
           functionName === 'create_highlight' &&
           validateHighlightArgs(functionArgs)
         ) {
+          aiLogger.logValidation({
+            action: 'extract_data',
+            functionName,
+            validationSuccess: true,
+            extractedDataType: 'highlight',
+          })
           return NextResponse.json({
             success: true,
             needsConfirmation: true,
@@ -341,6 +396,14 @@ export async function POST(req: NextRequest) {
               if (!functionArgs.category_he || functionArgs.category_he.length < 2) validationErrors.push('קטגוריה בעברית חייבת להכיל לפחות 2 תווים')
             }
 
+            // Log validation failure
+            aiLogger.logValidation({
+              action: 'extract_data',
+              functionName,
+              validationSuccess: false,
+              validationErrors,
+            })
+
             return NextResponse.json({
               success: false,
               error: 'שגיאה באימות הנתונים שחולצו מההודעה',
@@ -352,10 +415,16 @@ export async function POST(req: NextRequest) {
 
       // AI responded with text (no function call) - this means it's asking for clarification
       // This is actually SUCCESS - AI is asking for missing information
-      console.log('[AI Assistant] AI asking for clarification:', {
-        content: assistantMessage.content,
+      aiLogger.log({
+        level: 'info',
+        action: 'extract_data',
+        responseType: 'text',
         userMessage: messages[messages.length - 1]?.content,
-        finishReason: response.choices[0].finish_reason,
+        metadata: {
+          aiResponse: assistantMessage.content?.substring(0, 200),
+          finishReason: response.choices[0].finish_reason,
+          clarificationNeeded: true,
+        },
       })
 
       return NextResponse.json({
@@ -370,6 +439,14 @@ export async function POST(req: NextRequest) {
     })
   } catch (error) {
     console.error('[AI Assistant] Error:', error)
+
+    // Log error to database
+    aiLogger.logError({
+      action: 'extract_data', // Default to extract_data since most errors happen there
+      errorMessage: error instanceof Error ? error.message : 'Unknown error',
+      errorStack: error instanceof Error ? error.stack : undefined,
+    })
+
     return NextResponse.json(
       {
         success: false,
