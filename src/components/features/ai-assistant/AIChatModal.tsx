@@ -3,13 +3,14 @@
 import { useState, useRef, useEffect } from 'react'
 import { X, Send, Loader2 } from 'lucide-react'
 import AIConfirmationPreview from './AIConfirmationPreview'
-import type { CreateEventArgs, CreateUrgentMessageArgs } from '@/lib/ai/tools'
+import type { CreateEventArgs, CreateUrgentMessageArgs, CreateHighlightArgs } from '@/lib/ai/tools'
 import { isComplexMessage, isConfirmation } from '@/lib/ai/complexity-detector'
 import { validateInput } from '@/lib/ai/input-validator'
 import { analyzeFailure, formatErrorMessage, type FailureType } from '@/lib/ai/error-analyzer'
 import { getContextualExamples, type Example } from '@/lib/ai/examples'
 import ManualEventForm from './ManualEventForm'
 import { RATE_LIMITS, type UsageStats } from '@/lib/ai/rate-limiter'
+import { trackAIInteraction, EventAction } from '@/lib/analytics'
 
 interface Message {
   role: 'user' | 'assistant'
@@ -17,8 +18,8 @@ interface Message {
 }
 
 interface ExtractedData {
-  type: 'event' | 'events' | 'urgent_message'
-  data: CreateEventArgs | CreateEventArgs[] | CreateUrgentMessageArgs
+  type: 'event' | 'events' | 'urgent_message' | 'highlight'
+  data: CreateEventArgs | CreateEventArgs[] | CreateUrgentMessageArgs | CreateHighlightArgs
 }
 
 interface AIChatModalProps {
@@ -26,8 +27,8 @@ interface AIChatModalProps {
   onClose: () => void
 }
 
-// Max GPT rounds safety limit
-const MAX_GPT_ROUNDS = 4
+// Max GPT rounds safety limit (increased for complex highlights)
+const MAX_GPT_ROUNDS = 6
 
 export default function AIChatModal({ isOpen, onClose }: AIChatModalProps) {
   const [messages, setMessages] = useState<Message[]>([])
@@ -75,6 +76,7 @@ export default function AIChatModal({ isOpen, onClose }: AIChatModalProps) {
   // Initialize chat when modal opens
   useEffect(() => {
     if (isOpen && messages.length === 0) {
+      trackAIInteraction(EventAction.AI_CHAT_OPEN, 'AI Chat Modal Opened')
       initializeChat()
       fetchUsageStats()
     }
@@ -164,14 +166,14 @@ export default function AIChatModal({ isOpen, onClose }: AIChatModalProps) {
         ...prev,
         {
           role: 'assistant',
-          content: `נראה שיש בעיית תקשורת אחרי 4 ניסיונות 😔
+          content: `נראה שיש בעיית תקשורת אחרי 6 ניסיונות 😔
 
 אני מאפס את השיחה. בואו ננסה שוב מההתחלה.
 
 💡 טיפ: כתוב בפשטות:
-"[שם האירוע] ב-[תאריך]"
+"[שם האירוע/הדגשה] ב-[תאריך]"
 
-דוגמה: "מסיבת פורים ב-15/03/2025 בשעה 17:00"`,
+דוגמה: "הישג בכדורסל - מקום ראשון ב-15/03/2025"`,
         },
       ])
 
@@ -205,6 +207,12 @@ export default function AIChatModal({ isOpen, onClose }: AIChatModalProps) {
     setInput('')
     setIsLoading(true)
 
+    // Track message send
+    trackAIInteraction(EventAction.AI_CHAT_SEND, 'User sent message to AI', {
+      messageLength: input.trim().length,
+      phase: chatPhase,
+    })
+
     try {
       // Determine action based on chat phase
       let action: 'select_type' | 'extract_data' | 'understand_message' =
@@ -231,8 +239,16 @@ export default function AIChatModal({ isOpen, onClose }: AIChatModalProps) {
         }
       } else if (chatPhase === 'understanding_check') {
         // User responded to understanding check
+        console.log('[AIChatModal] Understanding check phase:', {
+          userMessage: userMessage.content,
+          isConfirmation: isConfirmation(userMessage.content),
+          understanding: conversationContext.understanding,
+          originalMessage: conversationContext.originalMessage,
+        })
+
         if (isConfirmation(userMessage.content)) {
           // User confirmed → Extract with context (Round 2)
+          console.log('[AIChatModal] User confirmed! Proceeding to extraction')
           action = 'extract_data'
           context = conversationContext.understanding
         } else {
@@ -282,12 +298,35 @@ export default function AIChatModal({ isOpen, onClose }: AIChatModalProps) {
 
       // If extracting after confirmation, send original message for extraction
       if (action === 'extract_data' && context && conversationContext.originalMessage) {
-        // Send only the original message for extraction (clean slate)
-        // The context from understanding round is in the system prompt
+        // Send explicit extraction request with context inline
+        // This makes it crystal clear to the AI what to do
+        console.log('[AIChatModal] Preparing extraction with context:', {
+          action,
+          context: context?.substring(0, 100) + '...',
+          originalMessage: conversationContext.originalMessage.substring(0, 100) + '...',
+        })
+
+        // Create an explicit extraction request that includes the understanding
+        const extractionRequest = `המשתמש אישר את ההבנה הבאה:
+"${context}"
+
+עכשיו אנא חלץ את הנתונים המדויקים מההודעה המקורית הבאה:
+
+${conversationContext.originalMessage}
+
+חשוב: קרא לפונקציה המתאימה עם כל הנתונים שחילצת.`
+
         apiMessages = [
-          { role: 'user', content: conversationContext.originalMessage },
+          { role: 'user', content: extractionRequest },
         ]
       }
+
+      console.log('[AIChatModal] Calling API:', {
+        action,
+        hasContext: !!context,
+        messageCount: apiMessages.length,
+        phase: chatPhase,
+      })
 
       const response = await fetch('/api/ai-assistant', {
         method: 'POST',
@@ -344,6 +383,11 @@ export default function AIChatModal({ isOpen, onClose }: AIChatModalProps) {
         if (data.needsConfirmation && data.extractedData) {
           // AI extracted data - show confirmation
           setExtractedData(data.extractedData)
+          // Track successful extraction
+          trackAIInteraction('extraction_success', 'AI successfully extracted data', {
+            dataType: data.extractedData.type,
+            gptCallCount: conversationContext.gptCallCount + 1,
+          })
           // Reset failure count on successful extraction
           setConversationContext((prev) => ({
             ...prev,
@@ -376,6 +420,13 @@ export default function AIChatModal({ isOpen, onClose }: AIChatModalProps) {
           : 'extraction_failed'
 
         const newFailureCount = conversationContext.failureCount + 1
+
+        // Track extraction failure
+        trackAIInteraction('extraction_failed', 'AI failed to extract data', {
+          failureType,
+          failureCount: newFailureCount,
+          error: data.error,
+        })
 
         const analysis = analyzeFailure(
           userMessage.content,

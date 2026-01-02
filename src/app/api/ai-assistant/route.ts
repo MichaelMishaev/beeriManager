@@ -9,9 +9,11 @@ import {
   AI_TOOLS,
   validateEventsArgs,
   validateUrgentMessageArgs,
+  validateHighlightArgs,
 } from '@/lib/ai/tools'
 import { logAICost } from '@/lib/ai/cost-tracker'
 import { incrementAiUsage, validateMessageLength } from '@/lib/ai/rate-limiter'
+import { aiLogger } from '@/lib/ai/logger'
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic'
@@ -36,6 +38,7 @@ export async function POST(req: NextRequest) {
 
     // Handle initial greeting (no rate limit check - doesn't use GPT)
     if (action === 'initial') {
+      aiLogger.logInitial()
       return NextResponse.json({
         success: true,
         message: `שלום! 👋
@@ -44,15 +47,23 @@ export async function POST(req: NextRequest) {
 
 1️⃣ **אירוע** - אירוע בלוח השנה של בית הספר
 2️⃣ **הודעה דחופה** - הודעה שתוצג בבאנר בדף הבית
+3️⃣ **הדגשה** - הישג/פרס/אירוע מיוחד לקרוסלת דף הבית
 
 בחר אפשרות ואסביר לך מה צריך למלא.
 
-💡 מגבלה יומית: 20 שימושים ביום | מקסימום 400 תווים להודעה`,
+💡 מגבלה יומית: 20 שימושים ביום | מקסימום 1500 תווים להודעה`,
       })
     }
 
     // Check rate limit for all GPT requests
     const rateLimitResult = await incrementAiUsage()
+
+    // Log rate limit check
+    aiLogger.logRateLimit({
+      usageCount: rateLimitResult.stats.currentCount,
+      dailyLimit: rateLimitResult.stats.dailyLimit,
+      rateLimitReached: rateLimitResult.stats.limitReached,
+    })
 
     if (!rateLimitResult.success || rateLimitResult.stats.limitReached) {
       console.warn('[AI Assistant] Rate limit reached:', rateLimitResult.stats)
@@ -134,10 +145,38 @@ export async function POST(req: NextRequest) {
 **💡 טיפ:** אפשר להשתמש בתאריכים יחסיים:
 • "5 ימים", "שבוע", "עד סוף החודש"`,
         })
+      } else if (
+        userInput.includes('הדגשה') ||
+        userInput.includes('הישג') ||
+        userInput.includes('פרס') ||
+        userInput === '3'
+      ) {
+        return NextResponse.json({
+          success: true,
+          message: `מעולה! בוא ניצור הדגשה מיוחדת ✨
+
+**תאר את ההדגשה**, כולל:
+• **נושא וסוג:** הישג/ספורט/פרס/אירוע/הודעה
+• **כותרת קצרה:** מה קרה? (למשל: "מקום ראשון באליפות")
+• **תיאור מפורט:** פרטים נוספים על ההישג/אירוע
+• **תאריך:** מתי זה קרה? (אם לא תציין - אשאל!)
+• **קטגוריה:** (כדורסל, שחייה, אמנות וכו' - אוטומטי אם לא תציין)
+
+**דוגמאות:**
+"הישג בכדורסל - זכינו במקום הראשון באליפות המחוז ב-15 במרץ 2025"
+
+"פרס למורה מצטיינת - הגב' רחל כהן זכתה בפרס מצטיינות חינוכית"
+
+"הישג בשחייה - התלמיד יוסי לוי שבר שיא בית הספר במשך 100 מטר חופשי ב-20/03"
+
+**💡 ניתן גם להוסיף:**
+• קישור למאמר/תמונה
+• תאריכי תצוגה (עד מתי להציג בקרוסלה)`,
+        })
       } else {
         return NextResponse.json({
           success: true,
-          message: 'לא הבנתי את הבחירה שלך 😕\n\nאנא בחר:\n1️⃣ אירוע\n2️⃣ הודעה דחופה',
+          message: 'לא הבנתי את הבחירה שלך 😕\n\nאנא בחר:\n1️⃣ אירוע\n2️⃣ הודעה דחופה\n3️⃣ הדגשה',
         })
       }
     }
@@ -179,6 +218,13 @@ export async function POST(req: NextRequest) {
       // Use extraction prompt with optional context from understanding round
       const systemPrompt = getExtractionPrompt(context)
 
+      console.log('[AI API] Extraction request:', {
+        hasContext: !!context,
+        contextPreview: context?.substring(0, 100),
+        messageCount: messages.length,
+        lastMessage: messages[messages.length - 1]?.content.substring(0, 100),
+      })
+
       const response = await openai.chat.completions.create({
         model: AI_CONFIG.model,
         max_completion_tokens: AI_CONFIG.max_completion_tokens,
@@ -191,8 +237,9 @@ export async function POST(req: NextRequest) {
           })),
         ],
         tools: AI_TOOLS,
-        // Use 'required' to force function calling when user provides event/message data
-        tool_choice: 'required',
+        // Use 'auto' instead of 'required' to allow AI to ask for clarification if needed
+        // The explicit instructions in the user message guide the AI to call functions
+        tool_choice: 'auto',
       })
 
       const assistantMessage = response.choices[0].message
@@ -205,6 +252,14 @@ export async function POST(req: NextRequest) {
         messages[messages.length - 1]?.content,
         roundNumber
       )
+
+      console.log('[AI API] GPT Response:', {
+        hasToolCalls: !!assistantMessage.tool_calls,
+        toolCallCount: assistantMessage.tool_calls?.length || 0,
+        hasContent: !!assistantMessage.content,
+        contentPreview: assistantMessage.content?.substring(0, 100),
+        finishReason: response.choices[0].finish_reason,
+      })
 
       // Check if AI wants to call a function
       if (assistantMessage.tool_calls && assistantMessage.tool_calls.length > 0) {
@@ -240,6 +295,18 @@ export async function POST(req: NextRequest) {
               data: functionArgs,
             },
           })
+          } else if (
+          functionName === 'create_highlight' &&
+          validateHighlightArgs(functionArgs)
+        ) {
+          return NextResponse.json({
+            success: true,
+            needsConfirmation: true,
+            extractedData: {
+              type: 'highlight',
+              data: functionArgs,
+            },
+          })
           } else {
             // Validation failed - return specific validation errors
             console.error('[AI Assistant] Validation failed:', {
@@ -266,6 +333,12 @@ export async function POST(req: NextRequest) {
               if (!functionArgs.title_he) validationErrors.push('חסרה כותרת בעברית')
               if (!functionArgs.title_ru) validationErrors.push('חסר תרגום רוסי')
               if (!functionArgs.end_date) validationErrors.push('חסר תאריך סיום')
+            } else if (functionName === 'create_highlight') {
+              if (!functionArgs.type) validationErrors.push('חסר סוג הדגשה')
+              if (!functionArgs.icon) validationErrors.push('חסר אייקון')
+              if (!functionArgs.title_he || functionArgs.title_he.length < 2) validationErrors.push('כותרת בעברית חייבת להכיל לפחות 2 תווים')
+              if (!functionArgs.description_he || functionArgs.description_he.length < 10) validationErrors.push('תיאור בעברית חייב להכיל לפחות 10 תווים')
+              if (!functionArgs.category_he || functionArgs.category_he.length < 2) validationErrors.push('קטגוריה בעברית חייבת להכיל לפחות 2 תווים')
             }
 
             return NextResponse.json({

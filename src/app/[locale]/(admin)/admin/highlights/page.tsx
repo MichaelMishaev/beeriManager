@@ -10,6 +10,7 @@ import { toast } from 'sonner'
 import type { Highlight } from '@/types'
 import { logger } from '@/lib/logger'
 import { Textarea } from '@/components/ui/textarea'
+import { trackAdminAction, trackPageView, EventAction } from '@/lib/analytics'
 
 const highlightTypes = [
   { value: 'achievement', label: '🏆 הישג', icon: '🏆' },
@@ -106,6 +107,8 @@ export default function AdminHighlightsPage() {
 
   useEffect(() => {
     loadHighlights()
+    // Track page view
+    trackPageView('/admin/highlights', 'Admin Highlights Management')
   }, [])
 
   async function translateToRussian(highlightId: string) {
@@ -119,6 +122,7 @@ export default function AdminHighlightsPage() {
     }
 
     setIsTranslating(highlightId)
+    trackAdminAction(EventAction.CLICK, 'Translate highlight to Russian', 'AdminHighlightsPage', { highlightId })
     try {
       const textsToTranslate = [
         { key: 'title_ru', value: highlight.title_he || '' },
@@ -147,12 +151,15 @@ export default function AdminHighlightsPage() {
           return h
         }))
         toast.success('תורגם לרוסית בהצלחה!')
+        trackAdminAction('translate_success', 'Highlight translated successfully', 'AdminHighlightsPage', { highlightId })
       } else {
         toast.error(data.error || 'שגיאה בתרגום')
+        trackAdminAction('translate_error', 'Highlight translation failed', 'AdminHighlightsPage', { highlightId, error: data.error })
       }
     } catch (error) {
       console.error('Translation error:', error)
       toast.error('שגיאה בתרגום')
+      trackAdminAction('translate_error', 'Highlight translation failed', 'AdminHighlightsPage', { highlightId, error })
     } finally {
       setIsTranslating(null)
     }
@@ -184,6 +191,7 @@ export default function AdminHighlightsPage() {
 
   async function createHighlight(highlight: Omit<Highlight, 'id' | 'created_at' | 'updated_at'>) {
     setIsSaving(true)
+    trackAdminAction(EventAction.CREATE, 'Create new highlight', 'AdminHighlightsPage', { type: highlight.type })
     try {
       const response = await fetch('/api/highlights', {
         method: 'POST',
@@ -195,6 +203,7 @@ export default function AdminHighlightsPage() {
       if (data.success) {
         toast.success('הדגשה נוצרה בהצלחה')
         logger.success('Highlight created', { id: data.data.id })
+        trackAdminAction('create_success', 'Highlight created successfully', 'AdminHighlightsPage', { id: data.data.id, type: highlight.type })
         await loadHighlights()
         setEditingId(null)
       } else {
@@ -205,6 +214,7 @@ export default function AdminHighlightsPage() {
         } else {
           toast.error(data.error || 'שגיאה ביצירת הדגשה')
         }
+        trackAdminAction('create_error', 'Highlight creation failed', 'AdminHighlightsPage', { error: data.error })
         throw new Error(data.error)
       }
     } catch (error) {
@@ -217,6 +227,7 @@ export default function AdminHighlightsPage() {
 
   async function updateHighlight(id: string, updates: Partial<Highlight>) {
     setIsSaving(true)
+    trackAdminAction(EventAction.UPDATE, 'Update highlight', 'AdminHighlightsPage', { id })
     try {
       const response = await fetch(`/api/highlights/${id}`, {
         method: 'PATCH',
@@ -228,6 +239,7 @@ export default function AdminHighlightsPage() {
       if (data.success) {
         toast.success('הדגשה עודכנה בהצלחה')
         logger.success('Highlight updated', { id })
+        trackAdminAction('update_success', 'Highlight updated successfully', 'AdminHighlightsPage', { id })
         await loadHighlights()
         setEditingId(null)
       } else {
@@ -238,6 +250,7 @@ export default function AdminHighlightsPage() {
         } else {
           toast.error(data.error || 'שגיאה בעדכון הדגשה')
         }
+        trackAdminAction('update_error', 'Highlight update failed', 'AdminHighlightsPage', { id, error: data.error })
         throw new Error(data.error)
       }
     } catch (error) {
@@ -249,6 +262,7 @@ export default function AdminHighlightsPage() {
   }
 
   function addHighlight() {
+    trackAdminAction(EventAction.CLICK, 'Add new highlight button clicked', 'AdminHighlightsPage')
     // Calculate highest display_order and add 1 so new item appears first
     const maxOrder = highlights.length > 0
       ? Math.max(...highlights.map(h => h.display_order || 0))
@@ -346,6 +360,7 @@ export default function AdminHighlightsPage() {
 
   async function deleteHighlight(id: string) {
     console.log('[Delete] Starting delete for id:', id)
+    trackAdminAction(EventAction.DELETE, 'Delete highlight initiated', 'AdminHighlightsPage', { id })
     if (confirm('האם למחוק הדגשה זו?')) {
       console.log('[Delete] User confirmed')
 
@@ -353,6 +368,7 @@ export default function AdminHighlightsPage() {
       if (id.startsWith('temp-')) {
         setHighlights(highlights.filter(h => h.id !== id))
         toast.success('ההדגשה הוסרה')
+        trackAdminAction('delete_temp', 'Temporary highlight cancelled', 'AdminHighlightsPage', { id })
         return
       }
 
@@ -375,10 +391,12 @@ export default function AdminHighlightsPage() {
         if (data.success) {
           toast.success('ההדגשה נמחקה')
           logger.success('Highlight deleted', { id })
+          trackAdminAction('delete_success', 'Highlight deleted successfully', 'AdminHighlightsPage', { id })
           console.log('[Delete] Reloading highlights...')
           await loadHighlights()
           console.log('[Delete] ✅ Delete complete')
         } else {
+          trackAdminAction('delete_error', 'Highlight deletion failed', 'AdminHighlightsPage', { id, error: data.error })
           throw new Error(data.error)
         }
       } catch (error) {
@@ -392,6 +410,7 @@ export default function AdminHighlightsPage() {
       }
     } else {
       console.log('[Delete] User cancelled')
+      trackAdminAction('delete_cancelled', 'Highlight deletion cancelled', 'AdminHighlightsPage', { id })
     }
   }
 
@@ -439,8 +458,8 @@ export default function AdminHighlightsPage() {
               data-testid="highlight-card"
             >
               <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <Badge className="text-sm">
                       {typeInfo?.label}
                     </Badge>
@@ -463,7 +482,7 @@ export default function AdminHighlightsPage() {
                       </Badge>
                     )}
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 shrink-0">
                     {isEditing ? (
                       <>
                         <Button
@@ -540,9 +559,10 @@ export default function AdminHighlightsPage() {
                     </div>
 
                     {/* Type and Icon */}
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {/* Type Selector */}
                       <div className="relative">
-                        <label className="text-sm font-medium block mb-1">
+                        <label className="text-sm font-medium block mb-2">
                           סוג הדגשה <span className="text-red-500 font-bold text-base" title="שדה חובה">*</span>
                         </label>
                         <select
@@ -557,8 +577,8 @@ export default function AdminHighlightsPage() {
                                 : h
                             ))
                           }}
-                          className="w-full border border-gray-300 rounded-md px-3 py-2 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer appearance-none"
-                          style={{ minHeight: '42px' }}
+                          className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer appearance-none text-base"
+                          style={{ minHeight: '48px' }}
                         >
                           {highlightTypes.map((type) => (
                             <option key={type.value} value={type.value}>
@@ -566,86 +586,95 @@ export default function AdminHighlightsPage() {
                             </option>
                           ))}
                         </select>
-                        <div className="pointer-events-none absolute right-3 top-[38px] flex items-center">
-                          <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div className="pointer-events-none absolute left-3 top-[46px] flex items-center">
+                          <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                           </svg>
                         </div>
                       </div>
-                      <div className="relative">
-                        <label className="text-sm font-medium block mb-1">
+
+                      {/* Icon Selector with Preview */}
+                      <div>
+                        <label className="text-sm font-medium block mb-2">
                           אייקון <span className="text-red-500 font-bold text-base" title="שדה חובה">*</span>
                         </label>
-                        <select
-                          value={highlight.icon}
-                          onChange={(e) => updateLocalHighlight(highlight.id, 'icon', e.target.value)}
-                          className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 bg-gradient-to-br from-white to-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-gray-400 cursor-pointer appearance-none font-medium shadow-sm transition-all"
-                          style={{ minHeight: '48px', fontSize: '16px' }}
-                        >
-                          <optgroup label="🏆 הישגים ופרסים">
-                            {emojiOptions.filter(e => e.category === 'achievements').map((emoji) => (
-                              <option key={emoji.value} value={emoji.value} style={{ fontSize: '16px', padding: '8px' }}>
-                                {emoji.label}
-                              </option>
-                            ))}
-                          </optgroup>
-                          <optgroup label="⚽ ספורט כדורים">
-                            {emojiOptions.filter(e => e.category === 'sports' && ['⚽', '🏀', '🏐', '🎾', '🏈', '⚾', '🥎', '🏓', '🏸'].includes(e.value)).map((emoji) => (
-                              <option key={emoji.value} value={emoji.value} style={{ fontSize: '16px', padding: '8px' }}>
-                                {emoji.label}
-                              </option>
-                            ))}
-                          </optgroup>
-                          <optgroup label="🏄 ספורט מים">
-                            {emojiOptions.filter(e => e.category === 'sports' && ['🏄', '🏊', '🤽', '🚣'].includes(e.value)).map((emoji) => (
-                              <option key={emoji.value} value={emoji.value} style={{ fontSize: '16px', padding: '8px' }}>
-                                {emoji.label}
-                              </option>
-                            ))}
-                          </optgroup>
-                          <optgroup label="🤸 ספורט אחר">
-                            {emojiOptions.filter(e => e.category === 'sports' && !['⚽', '🏀', '🏐', '🎾', '🏈', '⚾', '🥎', '🏓', '🏸', '🏄', '🏊', '🤽', '🚣'].includes(e.value)).map((emoji) => (
-                              <option key={emoji.value} value={emoji.value} style={{ fontSize: '16px', padding: '8px' }}>
-                                {emoji.label}
-                              </option>
-                            ))}
-                          </optgroup>
-                          <optgroup label="🎉 אירועים">
-                            {emojiOptions.filter(e => e.category === 'events').map((emoji) => (
-                              <option key={emoji.value} value={emoji.value} style={{ fontSize: '16px', padding: '8px' }}>
-                                {emoji.label}
-                              </option>
-                            ))}
-                          </optgroup>
-                          <optgroup label="📢 הודעות">
-                            {emojiOptions.filter(e => e.category === 'announcements').map((emoji) => (
-                              <option key={emoji.value} value={emoji.value} style={{ fontSize: '16px', padding: '8px' }}>
-                                {emoji.label}
-                              </option>
-                            ))}
-                          </optgroup>
-                          <optgroup label="🎓 חינוך ואמנות">
-                            {emojiOptions.filter(e => e.category === 'education').map((emoji) => (
-                              <option key={emoji.value} value={emoji.value} style={{ fontSize: '16px', padding: '8px' }}>
-                                {emoji.label}
-                              </option>
-                            ))}
-                          </optgroup>
-                          <optgroup label="💪 אחר">
-                            {emojiOptions.filter(e => e.category === 'other').map((emoji) => (
-                              <option key={emoji.value} value={emoji.value} style={{ fontSize: '16px', padding: '8px' }}>
-                                {emoji.label}
-                              </option>
-                            ))}
-                          </optgroup>
-                        </select>
-                        <div className="pointer-events-none absolute left-4 top-[42px] flex items-center">
-                          <span className="text-3xl">{highlight.icon}</span>
-                        </div>
-                        <div className="pointer-events-none absolute right-3 top-[44px] flex items-center">
-                          <svg className="h-5 w-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                          </svg>
+                        <div className="flex gap-3 items-start">
+                          {/* Icon Preview Box */}
+                          <div className="flex-shrink-0 w-16 h-16 border-2 border-gray-300 rounded-lg bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center">
+                            <span className="text-4xl">{highlight.icon}</span>
+                          </div>
+
+                          {/* Icon Dropdown */}
+                          <div className="flex-1 relative">
+                            <select
+                              value={highlight.icon}
+                              onChange={(e) => updateLocalHighlight(highlight.id, 'icon', e.target.value)}
+                              className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer appearance-none text-base"
+                              style={{ minHeight: '48px' }}
+                            >
+                              <optgroup label="🏆 הישגים ופרסים">
+                                {emojiOptions.filter(e => e.category === 'achievements').map((emoji) => (
+                                  <option key={emoji.value} value={emoji.value}>
+                                    {emoji.label}
+                                  </option>
+                                ))}
+                              </optgroup>
+                              <optgroup label="⚽ ספורט כדורים">
+                                {emojiOptions.filter(e => e.category === 'sports' && ['⚽', '🏀', '🏐', '🎾', '🏈', '⚾', '🥎', '🏓', '🏸'].includes(e.value)).map((emoji) => (
+                                  <option key={emoji.value} value={emoji.value}>
+                                    {emoji.label}
+                                  </option>
+                                ))}
+                              </optgroup>
+                              <optgroup label="🏄 ספורט מים">
+                                {emojiOptions.filter(e => e.category === 'sports' && ['🏄', '🏊', '🤽', '🚣'].includes(e.value)).map((emoji) => (
+                                  <option key={emoji.value} value={emoji.value}>
+                                    {emoji.label}
+                                  </option>
+                                ))}
+                              </optgroup>
+                              <optgroup label="🤸 ספורט אחר">
+                                {emojiOptions.filter(e => e.category === 'sports' && !['⚽', '🏀', '🏐', '🎾', '🏈', '⚾', '🥎', '🏓', '🏸', '🏄', '🏊', '🤽', '🚣'].includes(e.value)).map((emoji) => (
+                                  <option key={emoji.value} value={emoji.value}>
+                                    {emoji.label}
+                                  </option>
+                                ))}
+                              </optgroup>
+                              <optgroup label="🎉 אירועים">
+                                {emojiOptions.filter(e => e.category === 'events').map((emoji) => (
+                                  <option key={emoji.value} value={emoji.value}>
+                                    {emoji.label}
+                                  </option>
+                                ))}
+                              </optgroup>
+                              <optgroup label="📢 הודעות">
+                                {emojiOptions.filter(e => e.category === 'announcements').map((emoji) => (
+                                  <option key={emoji.value} value={emoji.value}>
+                                    {emoji.label}
+                                  </option>
+                                ))}
+                              </optgroup>
+                              <optgroup label="🎓 חינוך ואמנות">
+                                {emojiOptions.filter(e => e.category === 'education').map((emoji) => (
+                                  <option key={emoji.value} value={emoji.value}>
+                                    {emoji.label}
+                                  </option>
+                                ))}
+                              </optgroup>
+                              <optgroup label="💪 אחר">
+                                {emojiOptions.filter(e => e.category === 'other').map((emoji) => (
+                                  <option key={emoji.value} value={emoji.value}>
+                                    {emoji.label}
+                                  </option>
+                                ))}
+                              </optgroup>
+                            </select>
+                            <div className="pointer-events-none absolute left-3 top-3 flex items-center">
+                              <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                              </svg>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -758,42 +787,60 @@ export default function AdminHighlightsPage() {
 
 
                     {/* Display Settings */}
-                    <div className="grid grid-cols-3 gap-4">
+                    <div className="space-y-4">
+                      {/* Display Order */}
                       <div>
-                        <label className="text-sm font-medium">
-                          סדר תצוגה <span className="text-xs text-gray-500">(מספר גבוה יותר = מוצג ראשון)</span>
+                        <label className="text-sm font-medium block mb-2">
+                          סדר תצוגה
                         </label>
+                        <p className="text-xs text-gray-500 mb-2">
+                          מספר גבוה יותר = מוצג ראשון
+                        </p>
                         <Input
                           type="number"
                           value={highlight.display_order}
                           onChange={(e) => updateLocalHighlight(highlight.id, 'display_order', parseInt(e.target.value) || 0)}
                           min={0}
-                          placeholder="0"
+                          placeholder="100"
+                          className="text-base"
                         />
                       </div>
-                      <div>
-                        <label className="text-sm font-medium">תאריך התחלה</label>
-                        <p className="text-xs text-gray-500 mb-1">
-                          🟢 מתי להתחיל להציג - ריק = מיד
-                        </p>
-                        <Input
-                          type="date"
-                          value={highlight.start_date ? highlight.start_date.split('T')[0] : ''}
-                          onChange={(e) => updateLocalHighlight(highlight.id, 'start_date', e.target.value || null)}
-                          placeholder="dd/mm/yyyy"
-                        />
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium">תאריך סיום</label>
-                        <p className="text-xs text-gray-500 mb-1">
-                          🔴 מתי להפסיק להציג - ריק = לעולם
-                        </p>
-                        <Input
-                          type="date"
-                          value={highlight.end_date ? highlight.end_date.split('T')[0] : ''}
-                          onChange={(e) => updateLocalHighlight(highlight.id, 'end_date', e.target.value || null)}
-                          placeholder="dd/mm/yyyy"
-                        />
+
+                      {/* Date Range */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {/* Start Date */}
+                        <div>
+                          <label className="text-sm font-medium block mb-2 flex items-center gap-2">
+                            <span className="text-green-600">🟢</span>
+                            תאריך התחלה
+                          </label>
+                          <p className="text-xs text-gray-500 mb-2">
+                            ריק = מוצג מיד
+                          </p>
+                          <Input
+                            type="date"
+                            value={highlight.start_date ? highlight.start_date.split('T')[0] : ''}
+                            onChange={(e) => updateLocalHighlight(highlight.id, 'start_date', e.target.value || null)}
+                            className="text-base"
+                          />
+                        </div>
+
+                        {/* End Date */}
+                        <div>
+                          <label className="text-sm font-medium block mb-2 flex items-center gap-2">
+                            <span className="text-red-600">🔴</span>
+                            תאריך סיום
+                          </label>
+                          <p className="text-xs text-gray-500 mb-2">
+                            ריק = מוצג לעולם
+                          </p>
+                          <Input
+                            type="date"
+                            value={highlight.end_date ? highlight.end_date.split('T')[0] : ''}
+                            onChange={(e) => updateLocalHighlight(highlight.id, 'end_date', e.target.value || null)}
+                            className="text-base"
+                          />
+                        </div>
                       </div>
                     </div>
 
