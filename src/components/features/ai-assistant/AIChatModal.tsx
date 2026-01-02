@@ -282,9 +282,9 @@ export default function AIChatModal({ isOpen, onClose }: AIChatModalProps) {
 
       // If extracting after confirmation, send original message for extraction
       if (action === 'extract_data' && context && conversationContext.originalMessage) {
-        // Replace last message (confirmation) with original complex message
+        // Send only the original message for extraction (clean slate)
+        // The context from understanding round is in the system prompt
         apiMessages = [
-          ...messages,
           { role: 'user', content: conversationContext.originalMessage },
         ]
       }

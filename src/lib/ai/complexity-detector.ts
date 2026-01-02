@@ -76,17 +76,53 @@ export function isConfirmation(text: string): boolean {
   const normalized = text.trim().toLowerCase()
 
   const confirmations = [
-    'כן',
-    'נכון',
-    'בדיוק',
-    'מצוין',
-    'טוב',
-    'אוקי',
+    // Standard Hebrew confirmations
+    'כן',           // ken - yes
+    'אכן',          // akhen - indeed
+    'נכון',         // nakhon - correct
+    'בדיוק',        // bediyuk - exactly
+    'מצוין',        // metzuyan - excellent
+    'בטח',          // betakh - sure
+    'בוודאי',       // bevadai - certainly
+    'ברור',         // barur - obvious
+    'סבבה',         // sababa - OK/cool (slang)
+    'יפה',          // yafe - nice/good
+    'בסדר',         // beseder - OK/alright
+    'בסדר גמור',    // beseder gamur - completely OK
+    'וואלה',        // walla - really/agreement (slang)
+    'חד משמעית',    // khad mashma'it - definitely
+    'ממש',          // mamash - really/indeed
+    'כמובן',        // kamuvan - of course
+    'יאללה',        // yalla - let's go/OK (slang)
+    'קדימה',        // kadima - forward/go ahead
+    'מסכים',        // maskim - agree
+    'מאה אחוז',     // me'a akhuz - 100%
+    'בטוח',         // batuakh - sure
+    'אישור',        // ishur - confirmation
+    'כמו שצריך',    // kmo shetsarikh - as it should be
+    'מדויק',        // meduyak - accurate
+    'זה זה',        // ze ze - that's it
+    'בול',          // bul - spot on (slang)
+    'מושלם',        // mushlam - perfect
+    'רגיל',         // ragil - normal/OK (slang context)
+
+    // Single letter shortcuts
+    'כ',            // k - short for כן
+
+    // English/Latin
     'ok',
+    'okay',
     'yes',
-    'כ',
+    'yep',
+    'yeah',
+    'sure',
+
+    // Emojis
     '✓',
-    '👍'
+    '✔',
+    '👍',
+    '👌',
+    '💯',
   ]
 
   return confirmations.some(conf => normalized.includes(conf))
@@ -105,14 +141,49 @@ export function isCorrection(text: string): boolean {
   const normalized = text.trim().toLowerCase()
 
   const corrections = [
-    'לא',
-    'לא נכון',
-    'תקן',
-    'שגוי',
-    'טעות',
+    // Standard Hebrew negations
+    'לא',           // lo - no
+    'לא נכון',      // lo nakhon - not correct
+    'לא לא',        // lo lo - no no
+    'שגוי',         // shaguy - wrong
+    'שגויה',        // shaguya - wrong (feminine)
+    'טעות',         // ta'ut - mistake/error
+    'תקן',          // taken - fix/correct
+    'תקני',         // takni - fix it (feminine)
+    'תתקן',         // tetaken - fix it
+    'לא בדיוק',     // lo bediyuk - not exactly
+    'כמעט',         // kim'at - almost/not quite
+    'לא ממש',       // lo mamash - not really
+    'בכלל לא',      // bikhlal lo - not at all
+    'אין מצב',      // ein matsav - no way (slang)
+    'בלי סיכוי',    // bli sikuy - no chance
+    'לא רוצה',      // lo rotze - don't want
+    'לא כך',        // lo kakh - not so
+    'זה לא נכון',   // ze lo nakhon - that's not correct
+    'שינוי',        // shinuy - change
+    'שנה',          // shne - change (imperative)
+    'תשנה',         // teshane - change it
+    'מוטעה',        // mut'e - mistaken
+    'מטעה',         // mat'e - misleading
+    'שגוי לחלוטין', // shaguy lekhlutin - completely wrong
+    'לא מסכים',     // lo maskim - disagree
+    'נו',           // nu - can express disagreement
+    'אחרת',         // akheret - different/otherwise
+    'לא זה',        // lo ze - not this
+
+    // English/Latin negations
     'no',
-    'לא בדיוק',
-    'כמעט'
+    'nope',
+    'wrong',
+    'incorrect',
+    'fix',
+    'change',
+
+    // Emojis
+    '❌',
+    '✖',
+    '👎',
+    '⛔',
   ]
 
   return corrections.some(corr => normalized.includes(corr))
