@@ -114,18 +114,22 @@ export function AdminSectionGroup({
         className="w-full"
       >
         <AccordionItem value={id} className="border-0">
-          <AccordionTrigger className="px-4 py-4 hover:bg-muted/50 hover:no-underline transition-colors">
+          <AccordionTrigger className="px-4 py-4 hover:bg-muted/50 hover:no-underline transition-colors group">
             <div className="flex items-center gap-3 text-right flex-1">
-              <Icon className="h-5 w-5 text-primary shrink-0" />
-              <span className="font-semibold text-lg">{title}</span>
-              <span className="text-sm text-muted-foreground mr-auto">
-                ({sections.length})
-              </span>
+              <div className="bg-primary/10 p-2 rounded-lg group-hover:bg-primary/20 transition-colors">
+                <Icon className="h-5 w-5 text-primary shrink-0" />
+              </div>
+              <div className="flex flex-col items-start flex-1">
+                <span className="font-semibold text-lg">{title}</span>
+                <span className="text-xs text-muted-foreground">
+                  {sections.length} {sections.length === 1 ? 'מערכת' : 'מערכות'}
+                </span>
+              </div>
             </div>
           </AccordionTrigger>
 
-          <AccordionContent className="pb-2">
-            <div className="space-y-1 px-2">
+          <AccordionContent className="pb-4 pt-2">
+            <div className="space-y-3 px-3">
               {sections.map((section) => (
                 <AdminSectionListItem key={section.id} section={section} />
               ))}

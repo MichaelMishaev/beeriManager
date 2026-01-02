@@ -1,12 +1,14 @@
 'use client'
 
 import { useState } from 'react'
-import { CheckCircle2, XCircle, Calendar, MapPin, AlertCircle } from 'lucide-react'
-import type { CreateEventArgs, CreateUrgentMessageArgs } from '@/lib/ai/tools'
+import { CheckCircle2, XCircle, Calendar, MapPin, AlertCircle, Sparkles, ExternalLink } from 'lucide-react'
+import type { CreateEventArgs, CreateUrgentMessageArgs, CreateHighlightArgs } from '@/lib/ai/tools'
+import { Badge } from '@/components/ui/badge'
+import { trackAIInteraction, EventAction } from '@/lib/analytics'
 
 interface ExtractedData {
-  type: 'event' | 'events' | 'urgent_message'
-  data: CreateEventArgs | CreateEventArgs[] | CreateUrgentMessageArgs
+  type: 'event' | 'events' | 'urgent_message' | 'highlight'
+  data: CreateEventArgs | CreateEventArgs[] | CreateUrgentMessageArgs | CreateHighlightArgs
 }
 
 interface AIConfirmationPreviewProps {
@@ -26,6 +28,11 @@ export default function AIConfirmationPreview({
     setIsSubmitting(true)
     setError(null)
 
+    // Track AI suggestion acceptance
+    trackAIInteraction(EventAction.AI_SUGGESTION_ACCEPT, 'User accepted AI suggestion', {
+      dataType: extractedData.type,
+    })
+
     try {
       const response = await fetch('/api/ai-assistant/insert', {
         method: 'POST',
@@ -38,19 +45,38 @@ export default function AIConfirmationPreview({
       if (result.success) {
         // Show success state
         setSuccess(true)
+        trackAIInteraction('insert_success', 'AI suggestion saved successfully', {
+          dataType: extractedData.type,
+        })
         // Close after 2 seconds
         setTimeout(() => {
           onClose()
         }, 2000)
       } else {
         setError(result.error || 'שגיאה בשמירה')
+        trackAIInteraction('insert_error', 'AI suggestion save failed', {
+          dataType: extractedData.type,
+          error: result.error,
+        })
       }
     } catch (err) {
       console.error('Failed to insert data:', err)
       setError('שגיאה בחיבור לשרת')
+      trackAIInteraction('insert_error', 'AI suggestion save failed', {
+        dataType: extractedData.type,
+        error: err,
+      })
     } finally {
       setIsSubmitting(false)
     }
+  }
+
+  const handleReject = () => {
+    // Track AI suggestion rejection
+    trackAIInteraction(EventAction.AI_SUGGESTION_REJECT, 'User rejected AI suggestion', {
+      dataType: extractedData.type,
+    })
+    onClose()
   }
 
   // Success state - beautiful confirmation
@@ -74,6 +100,8 @@ export default function AIConfirmationPreview({
                 ? `${(extractedData.data as CreateEventArgs[]).length} אירועים נוצרו בהצלחה!`
                 : extractedData.type === 'event'
                 ? 'האירוע נוצר בהצלחה!'
+                : extractedData.type === 'highlight'
+                ? 'ההדגשה נוצרה בהצלחה!'
                 : 'ההודעה נוצרה בהצלחה!'}
             </h3>
             <p className="text-base text-gray-600">
@@ -81,6 +109,8 @@ export default function AIConfirmationPreview({
                 ? 'כל האירועים נשמרו במערכת ונוספו ללוח השנה'
                 : extractedData.type === 'event'
                 ? 'האירוע נשמר במערכת ונוסף ללוח השנה'
+                : extractedData.type === 'highlight'
+                ? 'ההדגשה נוספה לקרוסלת דף הבית'
                 : 'ההודעה הדחופה פורסמה בהצלחה'}
             </p>
 
@@ -123,6 +153,8 @@ export default function AIConfirmationPreview({
             <EventPreview data={extractedData.data as CreateEventArgs} />
           ) : extractedData.type === 'events' ? (
             <MultipleEventsPreview data={extractedData.data as CreateEventArgs[]} />
+          ) : extractedData.type === 'highlight' ? (
+            <HighlightPreview data={extractedData.data as CreateHighlightArgs} />
           ) : (
             <UrgentMessagePreview data={extractedData.data as CreateUrgentMessageArgs} />
           )}
@@ -146,7 +178,7 @@ export default function AIConfirmationPreview({
               <span>{isSubmitting ? 'שומר...' : 'אישור ויצירה'}</span>
             </button>
             <button
-              onClick={onClose}
+              onClick={handleReject}
               disabled={isSubmitting}
               className="flex items-center justify-center gap-2 rounded-lg border-2 border-gray-300 bg-white px-4 py-3 font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
             >
@@ -335,6 +367,150 @@ function MultipleEventsPreview({ data }: { data: CreateEventArgs[] }) {
             </div>
           </div>
         ))}
+      </div>
+    </div>
+  )
+}
+
+function HighlightPreview({ data }: { data: CreateHighlightArgs }) {
+  const typeLabels = {
+    achievement: 'הישג',
+    sports: 'ספורט',
+    award: 'פרס',
+    event: 'אירוע',
+    announcement: 'הודעה',
+  }
+
+  // Default badge color if not provided
+  const badgeColor = data.badge_color || 'bg-gradient-to-r from-yellow-400 to-yellow-500 text-yellow-900'
+
+  return (
+    <div className="space-y-4">
+      {/* Header */}
+      <div className="rounded-xl bg-gradient-to-br from-purple-50 to-pink-50 p-4">
+        <div className="mb-2 flex items-center gap-2 text-sm font-medium text-gray-600">
+          <Sparkles className="h-4 w-4" />
+          <span>הדגשה חדשה</span>
+        </div>
+        <div className="flex items-start gap-3">
+          <span className="text-5xl">{data.icon}</span>
+          <div className="flex-1">
+            <h4 className="text-xl font-bold text-gray-900">{data.title_he}</h4>
+            {data.title_ru && (
+              <p className="mt-1 text-sm text-gray-600">{data.title_ru}</p>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Details */}
+      <div className="space-y-3 rounded-xl border-2 border-gray-100 bg-gray-50 p-4">
+        {/* Type and Category */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <Badge variant="outline" className="text-xs">
+            {typeLabels[data.type]}
+          </Badge>
+          <Badge className={badgeColor}>
+            {data.category_he}
+          </Badge>
+          {data.category_ru && (
+            <Badge variant="outline" className="text-xs">
+              {data.category_ru}
+            </Badge>
+          )}
+        </div>
+
+        {/* Description */}
+        <div className="rounded-lg bg-white p-3">
+          <p className="text-sm leading-relaxed text-gray-800 whitespace-pre-line">
+            {data.description_he}
+          </p>
+          {data.description_ru && (
+            <p className="mt-2 text-sm leading-relaxed text-gray-600 whitespace-pre-line">
+              {data.description_ru}
+            </p>
+          )}
+        </div>
+
+        {/* Event Date */}
+        {data.event_date && (
+          <div className="flex items-center gap-2 text-sm">
+            <Calendar className="h-4 w-4 text-blue-600" />
+            <span className="font-medium text-gray-700">
+              תאריך האירוע:
+            </span>
+            <span className="text-gray-900">
+              {new Date(data.event_date).toLocaleDateString('he-IL')}
+            </span>
+          </div>
+        )}
+
+        {/* Display Dates */}
+        {(data.start_date || data.end_date) && (
+          <div className="flex items-center justify-between rounded-lg bg-blue-50 p-3 text-xs">
+            {data.start_date ? (
+              <div>
+                <p className="font-medium text-gray-600">תצוגה מ-</p>
+                <p className="text-gray-900">
+                  {new Date(data.start_date).toLocaleDateString('he-IL')}
+                </p>
+              </div>
+            ) : (
+              <div>
+                <p className="text-gray-600">תצוגה מיידית</p>
+              </div>
+            )}
+            {data.end_date && (
+              <>
+                <div className="h-8 w-px bg-gray-300" />
+                <div>
+                  <p className="font-medium text-gray-600">תצוגה עד</p>
+                  <p className="text-gray-900">
+                    {new Date(data.end_date).toLocaleDateString('he-IL')}
+                  </p>
+                </div>
+              </>
+            )}
+          </div>
+        )}
+
+        {/* CTA Button Preview */}
+        {data.cta_text_he && (
+          <div className="rounded-lg bg-gradient-to-r from-emerald-50 to-teal-50 p-3">
+            <div className="flex items-center gap-2 text-sm">
+              <ExternalLink className="h-4 w-4 text-emerald-600" />
+              <span className="font-medium text-gray-700">כפתור קריאה לפעולה:</span>
+            </div>
+            <div className="mt-2 flex items-center gap-2 flex-wrap">
+              <Badge variant="outline" className="text-xs bg-white">
+                {data.cta_text_he}
+              </Badge>
+              {data.cta_text_ru && (
+                <Badge variant="outline" className="text-xs bg-white">
+                  {data.cta_text_ru}
+                </Badge>
+              )}
+            </div>
+            {data.cta_link && (
+              <p className="mt-2 text-xs text-gray-600 truncate">
+                קישור: {data.cta_link}
+              </p>
+            )}
+          </div>
+        )}
+
+        {/* Image URL */}
+        {data.image_url && (
+          <div className="rounded-lg bg-purple-50 p-3">
+            <div className="flex items-center gap-2 text-sm">
+              <span className="text-lg">🖼️</span>
+              <span className="font-medium text-gray-700">תמונה:</span>
+            </div>
+            <p className="mt-1 text-xs text-gray-600 truncate">
+              {data.image_url}
+            </p>
+          </div>
+        )}
       </div>
     </div>
   )

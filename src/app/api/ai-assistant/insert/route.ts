@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { verifyJWT } from '@/lib/auth/jwt'
-import type { CreateEventArgs, CreateUrgentMessageArgs } from '@/lib/ai/tools'
+import type { CreateEventArgs, CreateUrgentMessageArgs, CreateHighlightArgs } from '@/lib/ai/tools'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
 interface InsertRequest {
-  type: 'event' | 'events' | 'urgent_message'
-  data: CreateEventArgs | CreateEventArgs[] | CreateUrgentMessageArgs
+  type: 'event' | 'events' | 'urgent_message' | 'highlight'
+  data: CreateEventArgs | CreateEventArgs[] | CreateUrgentMessageArgs | CreateHighlightArgs
 }
 
 export async function POST(req: NextRequest) {
@@ -160,6 +160,58 @@ export async function POST(req: NextRequest) {
         success: true,
         message: '✅ ההודעה הדחופה נוצרה בהצלחה!',
         data: insertedMessage,
+      })
+    } else if (type === 'highlight') {
+      const highlightData = data as CreateHighlightArgs
+
+      // Get the highest display_order to make new highlight appear first
+      const { data: existingHighlights } = await supabase
+        .from('highlights')
+        .select('display_order')
+        .order('display_order', { ascending: false })
+        .limit(1)
+
+      const maxOrder = existingHighlights?.[0]?.display_order || 0
+      const newDisplayOrder = maxOrder + 1
+
+      // Insert highlight
+      const { data: insertedHighlight, error } = await supabase
+        .from('highlights')
+        .insert({
+          type: highlightData.type,
+          icon: highlightData.icon,
+          title_he: highlightData.title_he,
+          title_ru: highlightData.title_ru || '',
+          description_he: highlightData.description_he,
+          description_ru: highlightData.description_ru || '',
+          category_he: highlightData.category_he,
+          category_ru: highlightData.category_ru || '',
+          event_date: highlightData.event_date || null,
+          start_date: highlightData.start_date || null,
+          end_date: highlightData.end_date || null,
+          cta_text_he: highlightData.cta_text_he || null,
+          cta_text_ru: highlightData.cta_text_ru || null,
+          cta_link: highlightData.cta_link || null,
+          image_url: highlightData.image_url || null,
+          badge_color: highlightData.badge_color || 'bg-gradient-to-r from-yellow-400 to-yellow-500 text-yellow-900',
+          is_active: true,
+          display_order: newDisplayOrder,
+        })
+        .select()
+        .single()
+
+      if (error) {
+        console.error('[AI Insert] Highlight insert error:', error)
+        return NextResponse.json(
+          { success: false, error: 'שגיאה ביצירת ההדגשה' },
+          { status: 500 }
+        )
+      }
+
+      return NextResponse.json({
+        success: true,
+        message: '✅ ההדגשה נוצרה בהצלחה!',
+        data: insertedHighlight,
       })
     }
 
