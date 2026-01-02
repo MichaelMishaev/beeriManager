@@ -20,7 +20,7 @@ interface Event {
   location?: string
   event_type: 'general' | 'meeting' | 'fundraiser' | 'trip' | 'workshop'
   priority: 'low' | 'normal' | 'high' | 'urgent'
-  status: 'draft' | 'published' | 'cancelled'
+  status: 'draft' | 'published' | 'ongoing' | 'completed' | 'cancelled'
   registration_enabled: boolean
   max_attendees?: number
   current_attendees?: number
@@ -91,11 +91,13 @@ export default function BeeriCalendar({
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null)
   const [eventPopupOpen, setEventPopupOpen] = useState(false)
 
-  // Filter events to only show published ones
-  const publishedEvents = events.filter(e => e.status === 'published')
+  // Show published, ongoing, and completed events (exclude draft, cancelled)
+  const visibleEvents = events.filter(e =>
+    ['published', 'ongoing', 'completed'].includes(e.status)
+  )
 
   // Group events by date
-  const eventsByDate = publishedEvents.reduce((acc, event) => {
+  const eventsByDate = visibleEvents.reduce((acc, event) => {
     const dateKey = format(new Date(event.start_datetime), 'yyyy-MM-dd')
     if (!acc[dateKey]) {
       acc[dateKey] = []

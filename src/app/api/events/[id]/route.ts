@@ -38,6 +38,7 @@ export async function GET(
       .from('events')
       .select('*')
       .eq('id', params.id)
+      .is('archived_at', null) // ✅ Archived events return 404
       .single()
 
     if (error || !data) {

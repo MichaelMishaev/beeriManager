@@ -40,13 +40,14 @@ export async function GET(req: NextRequest) {
       .from('events')
       .select('*')
       .eq('visibility', 'public') // Only public events for non-admin users
+      .is('archived_at', null) // ✅ Exclude soft-deleted events
 
     // Apply filters
     if (status && status !== 'all') {
       query = query.eq('status', status)
     } else if (!status) {
-      // Default to published events for public access when no status param provided
-      query = query.eq('status', 'published')
+      // Show published, ongoing, and completed events (exclude draft, cancelled)
+      query = query.in('status', ['published', 'ongoing', 'completed'])
     }
     // If status === 'all', don't filter by status at all (show all statuses)
 

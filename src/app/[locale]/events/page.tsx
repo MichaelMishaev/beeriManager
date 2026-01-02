@@ -50,6 +50,8 @@ function EventsList({
   }
 
   const now = new Date()
+  const startOfToday = new Date()
+  startOfToday.setHours(0, 0, 0, 0) // Start of today at midnight
 
   const filteredEvents = allEvents.filter(event => {
     const eventDate = new Date(event.start_datetime)
@@ -57,7 +59,7 @@ function EventsList({
 
     switch (filter) {
       case 'upcoming':
-        return eventDate > now
+        return eventDate >= startOfToday // ✅ Include events happening today
       case 'past':
         return eventEnd < now
       case 'photos':
