@@ -67,7 +67,6 @@ export async function POST(req: NextRequest) {
         .single()
 
       if (error) {
-        console.error('[AI Insert] Event insert error:', error)
         aiLogger.logInsert({
           extractedDataType: 'event',
           success: false,
@@ -125,7 +124,6 @@ export async function POST(req: NextRequest) {
         .select()
 
       if (error) {
-        console.error('[AI Insert] Multiple events insert error:', error)
         return NextResponse.json(
           { success: false, error: 'שגיאה ביצירת האירועים' },
           { status: 500 }
@@ -163,7 +161,6 @@ export async function POST(req: NextRequest) {
         .single()
 
       if (error) {
-        console.error('[AI Insert] Urgent message insert error:', error)
         return NextResponse.json(
           { success: false, error: 'שגיאה ביצירת ההודעה הדחופה' },
           { status: 500 }
@@ -215,7 +212,6 @@ export async function POST(req: NextRequest) {
         .single()
 
       if (error) {
-        console.error('[AI Insert] Highlight insert error:', error)
         return NextResponse.json(
           { success: false, error: 'שגיאה ביצירת ההדגשה' },
           { status: 500 }
@@ -234,7 +230,6 @@ export async function POST(req: NextRequest) {
       { status: 400 }
     )
   } catch (error) {
-    console.error('[AI Insert] Error:', error)
     return NextResponse.json(
       { success: false, error: 'שגיאה בשמירה למערכת' },
       { status: 500 }

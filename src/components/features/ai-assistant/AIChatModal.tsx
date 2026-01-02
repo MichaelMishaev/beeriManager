@@ -92,7 +92,11 @@ export default function AIChatModal({ isOpen, onClose }: AIChatModalProps) {
         setUsageStats(data.stats)
       }
     } catch (error) {
-      console.error('Failed to fetch usage stats:', error)
+      logger.error('Failed to fetch usage stats', {
+        component: 'AIChatModal',
+        action: 'fetch_stats',
+        error,
+      })
     }
   }
 
@@ -127,7 +131,11 @@ export default function AIChatModal({ isOpen, onClose }: AIChatModalProps) {
         setChatPhase('type_selection')
       }
     } catch (error) {
-      console.error('Failed to initialize chat:', error)
+      logger.error('Failed to initialize chat', {
+        component: 'AIChatModal',
+        action: 'initialize',
+        error,
+      })
       setMessages([
         {
           role: 'assistant',
@@ -490,7 +498,12 @@ ${conversationContext.originalMessage}
         }))
       }
     } catch (error) {
-      console.error('Failed to send message:', error)
+      logger.error('Failed to send message', {
+        component: 'AIChatModal',
+        action: 'send_message',
+        error,
+        data: { userMessage: userMessage.content.substring(0, 100) }
+      })
 
       const analysis = analyzeFailure(
         userMessage.content,
@@ -649,7 +662,12 @@ ${conversationContext.originalMessage}
           ])
         }
       } catch (error) {
-        console.error('Failed to send example:', error)
+        logger.error('Failed to send example', {
+          component: 'AIChatModal',
+          action: 'send_example',
+          error,
+          data: { example: example.text.substring(0, 100) }
+        })
         setMessages((prev) => [
           ...prev,
           { role: 'assistant', content: 'שגיאה בחיבור לשרת. אנא נסה שוב.' },

@@ -65,7 +65,11 @@ export async function POST(req: NextRequest) {
     })
 
     if (!rateLimitResult.success || rateLimitResult.stats.limitReached) {
-      console.warn('[AI Assistant] Rate limit reached:', rateLimitResult.stats)
+      aiLogger.logRateLimit({
+        usageCount: rateLimitResult.stats.currentCount,
+        dailyLimit: rateLimitResult.stats.dailyLimit,
+        rateLimitReached: true,
+      })
       return NextResponse.json({
         success: false,
         error: `הגעת למגבלה היומית של 20 שימושים 😔
@@ -364,13 +368,6 @@ export async function POST(req: NextRequest) {
           })
           } else {
             // Validation failed - return specific validation errors
-            console.error('[AI Assistant] Validation failed:', {
-              functionName,
-              args: functionArgs,
-              eventsValid: functionName === 'create_events' ? validateEventsArgs(functionArgs) : 'N/A',
-              urgentValid: functionName === 'create_urgent_message' ? validateUrgentMessageArgs(functionArgs) : 'N/A',
-            })
-
             // Generate specific validation error messages
             const validationErrors: string[] = []
 
@@ -438,9 +435,7 @@ export async function POST(req: NextRequest) {
       error: 'Invalid action',
     })
   } catch (error) {
-    console.error('[AI Assistant] Error:', error)
-
-    // Log error to database
+    // Log error using AI logger
     aiLogger.logError({
       action: 'extract_data', // Default to extract_data since most errors happen there
       errorMessage: error instanceof Error ? error.message : 'Unknown error',

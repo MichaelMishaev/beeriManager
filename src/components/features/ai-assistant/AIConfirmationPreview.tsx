@@ -5,6 +5,7 @@ import { CheckCircle2, XCircle, Calendar, MapPin, AlertCircle, Sparkles, Externa
 import type { CreateEventArgs, CreateUrgentMessageArgs, CreateHighlightArgs } from '@/lib/ai/tools'
 import { Badge } from '@/components/ui/badge'
 import { trackAIInteraction, EventAction } from '@/lib/analytics'
+import { logger } from '@/lib/logger'
 
 interface ExtractedData {
   type: 'event' | 'events' | 'urgent_message' | 'highlight'
@@ -60,7 +61,12 @@ export default function AIConfirmationPreview({
         })
       }
     } catch (err) {
-      console.error('Failed to insert data:', err)
+      logger.error('Failed to insert data', {
+        component: 'AIConfirmationPreview',
+        action: 'insert',
+        error: err,
+        data: { dataType: extractedData.type }
+      })
       setError('שגיאה בחיבור לשרת')
       trackAIInteraction('insert_error', 'AI suggestion save failed', {
         dataType: extractedData.type,
