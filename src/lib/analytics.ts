@@ -134,13 +134,6 @@ function isGtagAvailable(): boolean {
  * })
  */
 export function trackEvent(params: EventParams): void {
-  if (!isGtagAvailable()) {
-    if (process.env.NODE_ENV === 'development') {
-      console.log('[Analytics] Event tracked:', params)
-    }
-    return
-  }
-
   const {
     category,
     action,
@@ -170,13 +163,18 @@ export function trackEvent(params: EventParams): void {
     ...(metadata && metadata),
   }
 
-  // Send event to Google Analytics
-  window.gtag!('event', eventName, eventParams)
-
-  // Log in development
+  // In development: only log to console
   if (process.env.NODE_ENV === 'development') {
-    console.log('[Analytics] Event sent:', eventName, eventParams)
+    console.log('[Analytics] Event tracked (dev mode - not sent to GA):', eventName, eventParams)
+    return
   }
+
+  // In production: send to Google Analytics
+  if (!isGtagAvailable()) {
+    return
+  }
+
+  window.gtag!('event', eventName, eventParams)
 }
 
 /**
@@ -191,10 +189,14 @@ export function trackPageView(
   pageTitle?: string,
   userType?: UserType
 ): void {
+  // In development: only log to console
+  if (process.env.NODE_ENV === 'development') {
+    console.log('[Analytics] Page view tracked (dev mode - not sent to GA):', { pagePath, pageTitle, userType })
+    return
+  }
+
+  // In production: send to Google Analytics
   if (!isGtagAvailable()) {
-    if (process.env.NODE_ENV === 'development') {
-      console.log('[Analytics] Page view tracked:', { pagePath, pageTitle, userType })
-    }
     return
   }
 
@@ -203,10 +205,6 @@ export function trackPageView(
     page_title: pageTitle,
     user_type: userType,
   })
-
-  if (process.env.NODE_ENV === 'development') {
-    console.log('[Analytics] Page view sent:', { pagePath, pageTitle, userType })
-  }
 }
 
 /**
@@ -223,6 +221,13 @@ export function trackTiming(
   category?: string,
   label?: string
 ): void {
+  // In development: only log to console
+  if (process.env.NODE_ENV === 'development') {
+    console.log('[Analytics] Timing tracked (dev mode - not sent to GA):', { name, value, category, label })
+    return
+  }
+
+  // In production: send to Google Analytics
   if (!isGtagAvailable()) return
 
   window.gtag!('event', 'timing_complete', {
