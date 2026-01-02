@@ -22,6 +22,8 @@ export function ThankYouPopup() {
 
       return () => clearTimeout(timer)
     }
+
+    return undefined
   }, [])
 
   if (!show) return null

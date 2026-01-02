@@ -19,7 +19,6 @@ import { NextHolidayWidget } from '@/components/features/holidays/NextHolidayWid
 import { HolidaysModal } from '@/components/features/holidays/HolidaysModal'
 import { MobileCalendar } from '@/components/ui/MobileCalendar'
 import { FloatingActionMenu } from '@/components/ui/FloatingActionMenu'
-import { toast } from '@/hooks/use-toast'
 import type { Event, CalendarEvent, Ticket } from '@/types'
 import Link from 'next/link'
 import { format } from 'date-fns'

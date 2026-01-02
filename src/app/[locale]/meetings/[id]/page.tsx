@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
-import { Send, CheckCircle, Users, Calendar, Lock, LockOpen, Lightbulb, Sparkles } from 'lucide-react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Send, Calendar, Lock, LockOpen, Lightbulb, Sparkles } from 'lucide-react'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
