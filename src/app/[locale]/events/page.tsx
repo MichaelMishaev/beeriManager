@@ -9,15 +9,28 @@ import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
 import Link from 'next/link'
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, useParams } from 'next/navigation'
 import type { Event } from '@/types'
+
+// Map app locale to date format locale
+const getDateLocale = (locale: string) => {
+  const localeMap: Record<string, string> = {
+    he: 'he-IL',
+    ru: 'ru-RU',
+    ar: 'ar-SA',
+    en: 'en-US'
+  }
+  return localeMap[locale] || 'he-IL'
+}
 
 function EventsList({
   filter,
-  showDrafts
+  showDrafts,
+  locale
 }: {
   filter: 'all' | 'upcoming' | 'past' | 'photos'
   showDrafts: boolean
+  locale: string
 }) {
   const [allEvents, setAllEvents] = useState<Event[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -105,7 +118,7 @@ function EventsList({
                 </div>
               </div>
               <div className="text-sm text-muted-foreground">
-                {new Date(event.start_datetime).toLocaleDateString('he-IL')}
+                {new Date(event.start_datetime).toLocaleDateString(getDateLocale(locale))}
                 {event.location && ` • ${event.location}`}
               </div>
             </CardHeader>
@@ -137,6 +150,8 @@ function EventsList({
 }
 
 export default function EventsPage() {
+  const params = useParams()
+  const locale = (params.locale as string) || 'he'
   const searchParams = useSearchParams()
   const showDraftsParam = searchParams.get('showDrafts') === 'true'
 
@@ -200,19 +215,19 @@ export default function EventsPage() {
         </TabsList>
 
         <TabsContent value="all" className="mt-6">
-          <EventsList filter="all" showDrafts={showDrafts} />
+          <EventsList filter="all" showDrafts={showDrafts} locale={locale} />
         </TabsContent>
 
         <TabsContent value="upcoming" className="mt-6">
-          <EventsList filter="upcoming" showDrafts={showDrafts} />
+          <EventsList filter="upcoming" showDrafts={showDrafts} locale={locale} />
         </TabsContent>
 
         <TabsContent value="past" className="mt-6">
-          <EventsList filter="past" showDrafts={showDrafts} />
+          <EventsList filter="past" showDrafts={showDrafts} locale={locale} />
         </TabsContent>
 
         <TabsContent value="photos" className="mt-6">
-          <EventsList filter="photos" showDrafts={showDrafts} />
+          <EventsList filter="photos" showDrafts={showDrafts} locale={locale} />
         </TabsContent>
       </Tabs>
     </div>
