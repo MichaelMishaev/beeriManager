@@ -63,7 +63,7 @@ export function FloatingActionMenu() {
           className="rounded-full gap-1 bg-green-600 hover:bg-green-700 text-white px-3 py-2 h-auto"
         >
           <MessageCircle className="h-4 w-4" />
-          <span className="text-xs font-medium">WhatsApp</span>
+          <span className="text-xs font-medium">{t('whatsapp')}</span>
         </Button>
 
         <Button
