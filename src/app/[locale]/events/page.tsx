@@ -10,6 +10,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
 import Link from 'next/link'
 import { useSearchParams, useParams } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import type { Event } from '@/types'
 
 // Map app locale to date format locale
@@ -32,6 +33,7 @@ function EventsList({
   showDrafts: boolean
   locale: string
 }) {
+  const t = useTranslations('Events')
   const [allEvents, setAllEvents] = useState<Event[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
@@ -104,13 +106,13 @@ function EventsList({
                 <CardTitle className="text-lg flex-1">{event.title}</CardTitle>
                 <div className="flex items-center gap-2 flex-shrink-0">
                   {event.status === 'draft' && (
-                    <Badge className="text-xs bg-yellow-100 text-yellow-800 border-yellow-300">טיוטה</Badge>
+                    <Badge className="text-xs bg-yellow-100 text-yellow-800 border-yellow-300">{t('badgeDraft')}</Badge>
                   )}
                   {event.status === 'published' && (
-                    <Badge className="text-xs bg-green-100 text-green-800 border-green-300">פורסם</Badge>
+                    <Badge className="text-xs bg-green-100 text-green-800 border-green-300">{t('badgePublished')}</Badge>
                   )}
                   {event.status === 'cancelled' && (
-                    <Badge className="text-xs bg-red-100 text-red-800 border-red-300">בוטל</Badge>
+                    <Badge className="text-xs bg-red-100 text-red-800 border-red-300">{t('badgeCancelled')}</Badge>
                   )}
                   {event.photos_url && (
                     <Camera className="h-5 w-5 text-primary" />
@@ -132,16 +134,16 @@ function EventsList({
               </p>
               <div className="mt-3 flex items-center gap-2">
                 <Badge variant="secondary" className="text-xs">
-                  {event.event_type === 'meeting' && 'ישיבה'}
-                  {event.event_type === 'fundraiser' && 'גיוס כספים'}
-                  {event.event_type === 'general' && 'כללי'}
-                  {event.event_type === 'trip' && 'טיול'}
-                  {event.event_type === 'workshop' && 'סדנה'}
+                  {event.event_type === 'meeting' && t('typeMeeting')}
+                  {event.event_type === 'fundraiser' && t('typeFundraiser')}
+                  {event.event_type === 'general' && t('typeGeneral')}
+                  {event.event_type === 'trip' && t('typeTrip')}
+                  {event.event_type === 'workshop' && t('typeWorkshop')}
                 </Badge>
                 {event.photos_url && (
                   <Badge variant="outline" className="text-xs gap-1">
                     <Camera className="h-3 w-3" />
-                    תמונות
+                    {t('badgePhotos')}
                   </Badge>
                 )}
               </div>
@@ -158,6 +160,7 @@ export default function EventsPage() {
   const locale = (params.locale as string) || 'he'
   const searchParams = useSearchParams()
   const showDraftsParam = searchParams.get('showDrafts') === 'true'
+  const t = useTranslations('Events')
 
   const [activeTab, setActiveTab] = useState<'all' | 'upcoming' | 'past' | 'photos'>('all')
   const [showDrafts, setShowDrafts] = useState(showDraftsParam)
@@ -168,25 +171,25 @@ export default function EventsPage() {
         <div>
           <h1 className="text-2xl md:text-3xl font-bold text-foreground flex items-center gap-2">
             <Calendar className="h-6 w-6 md:h-8 md:w-8" />
-            אירועים
+            {t('title')}
           </h1>
           <p className="text-base md:text-lg text-muted-foreground mt-2">
-            כל האירועים והפעילויות של ועד ההורים
+            {t('subtitle')}
           </p>
         </div>
         <div className="flex gap-2 w-full sm:w-auto">
           <Button variant="outline" asChild size="sm" className="flex-1 sm:flex-initial">
             <Link href="/calendar">
               <Calendar className="h-4 w-4 ml-2" />
-              <span className="hidden sm:inline">תצוגת לוח שנה</span>
-              <span className="sm:hidden">לוח שנה</span>
+              <span className="hidden sm:inline">{t('calendarView')}</span>
+              <span className="sm:hidden">{t('calendarViewShort')}</span>
             </Link>
           </Button>
           <Button asChild size="sm" className="flex-1 sm:flex-initial">
             <Link href="/admin/events/new">
               <Plus className="h-4 w-4 ml-2" />
-              <span className="hidden sm:inline">אירוע חדש</span>
-              <span className="sm:hidden">חדש</span>
+              <span className="hidden sm:inline">{t('newEvent')}</span>
+              <span className="sm:hidden">{t('newEventShort')}</span>
             </Link>
           </Button>
         </div>
@@ -202,19 +205,19 @@ export default function EventsPage() {
           htmlFor="show-drafts"
           className="text-sm cursor-pointer select-none"
         >
-          הצג אירועים בטיוטה (מנהלים בלבד)
+          {t('showDrafts')}
         </Label>
       </div>
 
       <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as any)} className="w-full">
         <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="all">הכל</TabsTrigger>
-          <TabsTrigger value="upcoming">קרובים</TabsTrigger>
-          <TabsTrigger value="past">עבר</TabsTrigger>
+          <TabsTrigger value="all">{t('tabAll')}</TabsTrigger>
+          <TabsTrigger value="upcoming">{t('tabUpcoming')}</TabsTrigger>
+          <TabsTrigger value="past">{t('tabPast')}</TabsTrigger>
           <TabsTrigger value="photos" className="gap-1">
             <Camera className="h-4 w-4" />
-            <span className="hidden sm:inline">עם תמונות</span>
-            <span className="sm:hidden">תמונות</span>
+            <span className="hidden sm:inline">{t('tabPhotos')}</span>
+            <span className="sm:hidden">{t('tabPhotosShort')}</span>
           </TabsTrigger>
         </TabsList>
 

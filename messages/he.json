@@ -358,5 +358,28 @@
       "totalIdeas": "סה\"כ רעיונות",
       "ideasCount": "{count} רעיונות"
     }
+  },
+  "Events": {
+    "title": "אירועים",
+    "subtitle": "כל האירועים והפעילויות של ועד ההורים",
+    "calendarView": "תצוגת לוח שנה",
+    "calendarViewShort": "לוח שנה",
+    "newEvent": "אירוע חדש",
+    "newEventShort": "חדש",
+    "showDrafts": "הצג אירועים בטיוטה (מנהלים בלבד)",
+    "tabAll": "הכל",
+    "tabUpcoming": "קרובים",
+    "tabPast": "עבר",
+    "tabPhotos": "עם תמונות",
+    "tabPhotosShort": "תמונות",
+    "typeGeneral": "כללי",
+    "typeMeeting": "ישיבה",
+    "typeFundraiser": "גיוס כספים",
+    "typeTrip": "טיול",
+    "typeWorkshop": "סדנה",
+    "badgePhotos": "תמונות",
+    "badgeCancelled": "בוטל",
+    "badgePublished": "פורסם",
+    "badgeDraft": "טיוטה"
   }
 }

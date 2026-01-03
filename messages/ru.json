@@ -305,5 +305,28 @@
     "successTitle": "Большое спасибо!",
     "successMessage": "Ваши ответы успешно сохранены. Мы свяжемся с вами при необходимости.",
     "errorMessage": "Ошибка сохранения ответов. Пожалуйста, попробуйте снова"
+  },
+  "Events": {
+    "title": "События",
+    "subtitle": "Все события и мероприятия родительского комитета",
+    "calendarView": "Календарь",
+    "calendarViewShort": "Календарь",
+    "newEvent": "Новое событие",
+    "newEventShort": "Новый",
+    "showDrafts": "Показать черновики (только администраторы)",
+    "tabAll": "Все",
+    "tabUpcoming": "Предстоящие",
+    "tabPast": "Прошедшие",
+    "tabPhotos": "С фотографиями",
+    "tabPhotosShort": "Фото",
+    "typeGeneral": "Общий",
+    "typeMeeting": "Собрание",
+    "typeFundraiser": "Сбор средств",
+    "typeTrip": "Поездка",
+    "typeWorkshop": "Мастер-класс",
+    "badgePhotos": "Фото",
+    "badgeCancelled": "Отменено",
+    "badgePublished": "Опубликовано",
+    "badgeDraft": "Черновик"
   }
 }
