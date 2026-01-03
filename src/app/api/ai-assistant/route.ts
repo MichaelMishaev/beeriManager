@@ -56,7 +56,8 @@ export async function POST(req: NextRequest) {
       })
     }
 
-    // Check rate limit for all GPT requests
+    // TEMPORARY: Rate limit check disabled for testing
+    // TODO: Re-enable after database migration completes
     const rateLimitResult = await incrementAiUsage()
 
     // Log rate limit check
@@ -66,23 +67,24 @@ export async function POST(req: NextRequest) {
       rateLimitReached: rateLimitResult.stats.limitReached,
     })
 
-    if (!rateLimitResult.success || rateLimitResult.stats.limitReached) {
-      aiLogger.logRateLimit({
-        usageCount: rateLimitResult.stats.currentCount,
-        dailyLimit: rateLimitResult.stats.dailyLimit,
-        rateLimitReached: true,
-      })
-      return NextResponse.json({
-        success: false,
-        error: `הגעת למגבלה היומית של 50 שימושים 😔
+    // COMMENTED OUT TEMPORARILY - Rate limit disabled
+    // if (!rateLimitResult.success || rateLimitResult.stats.limitReached) {
+    //   aiLogger.logRateLimit({
+    //     usageCount: rateLimitResult.stats.currentCount,
+    //     dailyLimit: rateLimitResult.stats.dailyLimit,
+    //     rateLimitReached: true,
+    //   })
+    //   return NextResponse.json({
+    //     success: false,
+    //     error: `הגעת למגבלה היומית של 50 שימושים 😔
 
-נסה שוב מחר או צור קשר עם המנהל.
+    // נסה שוב מחר או צור קשר עם המנהל.
 
-שימושים היום: ${rateLimitResult.stats.currentCount}/${rateLimitResult.stats.dailyLimit}`,
-        rateLimitReached: true,
-        stats: rateLimitResult.stats,
-      })
-    }
+    // שימושים היום: ${rateLimitResult.stats.currentCount}/${rateLimitResult.stats.dailyLimit}`,
+    //     rateLimitReached: true,
+    //     stats: rateLimitResult.stats,
+    //   })
+    // }
 
     // Validate message length (400 chars max)
     const lastUserMessage = messages[messages.length - 1]?.content || ''
