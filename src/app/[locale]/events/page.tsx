@@ -103,7 +103,9 @@ function EventsList({
           <Card className="hover:shadow-lg transition-shadow cursor-pointer">
             <CardHeader>
               <div className="flex items-start justify-between gap-2">
-                <CardTitle className="text-lg flex-1">{event.title}</CardTitle>
+                <CardTitle className="text-lg flex-1">
+                  {locale === 'ru' && event.title_ru ? event.title_ru : event.title}
+                </CardTitle>
                 <div className="flex items-center gap-2 flex-shrink-0">
                   {event.status === 'draft' && (
                     <Badge className="text-xs bg-yellow-100 text-yellow-800 border-yellow-300">{t('badgeDraft')}</Badge>
@@ -130,7 +132,7 @@ function EventsList({
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground line-clamp-2">
-                {event.description}
+                {locale === 'ru' && event.description_ru ? event.description_ru : event.description}
               </p>
               <div className="mt-3 flex items-center gap-2">
                 <Badge variant="secondary" className="text-xs">
