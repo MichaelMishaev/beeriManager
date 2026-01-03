@@ -65,6 +65,9 @@ export default function AIChatModal({ isOpen, onClose }: AIChatModalProps) {
   const [usageStats, setUsageStats] = useState<UsageStats | null>(null)
   const [characterCount, setCharacterCount] = useState(0)
 
+  // Track user's selected content type (1=event, 2=urgent, 3=highlight)
+  const [selectedType, setSelectedType] = useState<'event' | 'urgent' | 'highlight' | null>(null)
+
   useEffect(() => {
     setIsMobile(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent))
   }, [])
@@ -230,6 +233,16 @@ export default function AIChatModal({ isOpen, onClose }: AIChatModalProps) {
 
       if (chatPhase === 'type_selection') {
         action = 'select_type'
+
+        // Detect and store which type was selected
+        const userInput = userMessage.content.toLowerCase().trim()
+        if (userInput === '1' || userInput.includes('אירוע')) {
+          setSelectedType('event')
+        } else if (userInput === '2' || userInput.includes('הודעה') || userInput.includes('דחוף')) {
+          setSelectedType('urgent')
+        } else if (userInput === '3' || userInput.includes('הדגשה') || userInput.includes('הישג') || userInput.includes('פרס')) {
+          setSelectedType('highlight')
+        }
       } else if (chatPhase === 'data_entry') {
         // Check if message is complex
         const isComplex = isComplexMessage(userMessage.content)
@@ -245,6 +258,16 @@ export default function AIChatModal({ isOpen, onClose }: AIChatModalProps) {
         } else {
           // Simple message → Direct extraction (existing flow)
           action = 'extract_data'
+
+          // Pass selected type as context for simple messages too
+          if (selectedType) {
+            const typeNames = {
+              event: 'אירוע',
+              urgent: 'הודעה דחופה',
+              highlight: 'הדגשה (קרוסלה)',
+            }
+            context = `המשתמש בחר ליצור: ${typeNames[selectedType]}`
+          }
         }
       } else if (chatPhase === 'understanding_check') {
         // User responded to understanding check
@@ -266,7 +289,24 @@ export default function AIChatModal({ isOpen, onClose }: AIChatModalProps) {
             action: 'confirmation_detected'
           })
           action = 'extract_data'
-          context = conversationContext.understanding
+
+          // Build context with selected type + understanding
+          const contextParts: string[] = []
+
+          if (selectedType) {
+            const typeNames = {
+              event: 'אירוע',
+              urgent: 'הודעה דחופה',
+              highlight: 'הדגשה (קרוסלה)',
+            }
+            contextParts.push(`המשתמש בחר ליצור: ${typeNames[selectedType]}`)
+          }
+
+          if (conversationContext.understanding) {
+            contextParts.push(`ההבנה שאושרה: ${conversationContext.understanding}`)
+          }
+
+          context = contextParts.join('\n\n')
         } else {
           // User said "no" or is correcting
           // Check if it's a simple "no" or actual correction
