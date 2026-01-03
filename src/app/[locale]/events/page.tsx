@@ -118,7 +118,11 @@ function EventsList({
                 </div>
               </div>
               <div className="text-sm text-muted-foreground">
-                {new Date(event.start_datetime).toLocaleDateString(getDateLocale(locale))}
+                {new Date(event.start_datetime).toLocaleDateString(getDateLocale(locale), {
+                  day: 'numeric',
+                  month: 'long',
+                  year: 'numeric'
+                })}
                 {event.location && ` • ${event.location}`}
               </div>
             </CardHeader>
