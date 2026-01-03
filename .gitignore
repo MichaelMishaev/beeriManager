@@ -167,6 +167,7 @@ scripts/test-*.mjs
 
 # One-off check/debug scripts
 scripts/check-*.ts
+scripts/check-*.js
 scripts/check-*.sql
 
 # One-off fix scripts
@@ -176,6 +177,8 @@ scripts/fix-*.sql
 # Discovery/inspection scripts
 scripts/discover-*.ts
 scripts/inspect-*.ts
+scripts/investigate-*.js
+scripts/show-*.js
 scripts/verify-*.sql
 
 # Temporary database fixes
@@ -188,6 +191,13 @@ scripts/add-*.sql
 # Summary documentation (usually temporary)
 *_SUMMARY.md
 *-SUMMARY.md
+
+# Diagnostic/investigation documentation
+AI_CAROUSEL_ISSUE_DIAGNOSIS.md
+MIGRATION_REQUIRED.md
+
+# Monitoring/diagnostic tools
+monitoring/
 
 # Vendor automation test files (keep in tests/)
 # (This is commented - vendors-automation.spec.ts is a real test)
