@@ -71,7 +71,7 @@ npm run icons:generate   # Generate PWA icons from source
 ```
 src/
 ├── app/
-│   ├── [locale]/              # Internationalized routes (he, ru, ar, en)
+│   ├── [locale]/              # Internationalized routes (he, ru)
 │   │   ├── (admin)/          # Admin-only routes (middleware protected)
 │   │   │   └── admin/        # Admin dashboard and management
 │   │   ├── (auth)/           # Authentication routes
@@ -335,11 +335,14 @@ export function TaskForm() {
 ## Development Guidelines
 
 ### 1. Hebrew-First Development
-- All UI text in Hebrew
-- RTL layout throughout (use `dir="rtl"`)
-- Error messages in Hebrew
-- Use `text-right` instead of `text-left`
+- **CRITICAL: NEVER use hard-coded text** - All UI text MUST use translation keys via `useTranslations()` or `getTranslations()`
+- All translation keys must exist in ALL language files: `messages/he.json`, `messages/ru.json`
+- When adding new UI text, ALWAYS add the translation key to ALL language files simultaneously (both Hebrew and Russian)
+- RTL layout throughout (use `dir="rtl"` for Hebrew)
+- Error messages must use translation keys (never hard-coded)
+- Use `text-right` instead of `text-left` for Hebrew
 - Date formatting: Hebrew locale via date-fns
+- Currently supported locales: Hebrew (he), Russian (ru)
 
 ### 2. Mobile-First Design
 - Design for mobile screens first (375px baseline)

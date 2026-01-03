@@ -217,11 +217,11 @@ export function SkillSurveyForm() {
       if (result.success) {
         setIsSubmitted(true)
       } else {
-        alert(result.message || 'שגיאה בשמירת התשובות')
+        alert(result.message || t('errorSaving'))
       }
     } catch (error) {
       console.error('Submission error:', error)
-      alert('שגיאה בשמירת התשובות. אנא נסה שוב')
+      alert(t('errorSavingRetry'))
     }
   }
 
@@ -240,7 +240,7 @@ export function SkillSurveyForm() {
     if (selectedSkills.includes('other')) {
       const otherSpecialtyValue = otherSpecialty?.trim()
       if (!otherSpecialtyValue || otherSpecialtyValue.length === 0) {
-        setOtherSpecialtyError('יש לפרט את התחום בו תוכלו לעזור')
+        setOtherSpecialtyError(t('otherSkillRequired'))
         // Scroll to the input to show the error
         if (otherSpecialtyRef.current) {
           otherSpecialtyRef.current.scrollIntoView({
@@ -305,10 +305,10 @@ export function SkillSurveyForm() {
                 className="space-y-3"
               >
                 <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-[#003153] to-[#0D98BA] bg-clip-text text-transparent">
-                  מאגר המיומנויות שלנו
+                  {t('welcomeTitle')}
                 </h1>
                 <p className="text-lg text-gray-600 leading-relaxed">
-                  כל אחד מאיתנו מביא כישורים ייחודיים ומיוחדים
+                  {t('welcomeSubtitle')}
                 </p>
               </motion.div>
 
@@ -320,10 +320,10 @@ export function SkillSurveyForm() {
                 className="bg-gradient-to-r from-[#FFBA00]/10 to-[#FF8200]/10 rounded-2xl p-6 space-y-3"
               >
                 <p className="text-gray-700 text-base leading-relaxed">
-                  שתפו אותנו במיומנויות המקצועיות שלכם, וביחד נוכל ליצור רשת תמיכה חזקה עבור בית הספר והקהילה שלנו.
+                  {t('welcomeDescription')}
                 </p>
                 <p className="text-sm text-gray-600">
-                  📱 הטופס קצר ופשוט • 🔒 המידע מאובטח • ⏱️ לוקח פחות מ-3 דקות
+                  {t('welcomeFeatures')}
                 </p>
               </motion.div>
 
@@ -339,7 +339,7 @@ export function SkillSurveyForm() {
                   size="lg"
                   className="w-full md:w-auto px-12 py-6 text-lg font-semibold bg-gradient-to-r from-[#0D98BA] to-[#003153] hover:from-[#003153] hover:to-[#0D98BA] text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 active:scale-95"
                 >
-                  בואו נתחיל!
+                  {t('startButton')}
                   <ArrowLeft className="mr-2 h-5 w-5" />
                 </Button>
               </motion.div>
@@ -351,7 +351,7 @@ export function SkillSurveyForm() {
                 transition={{ delay: 1 }}
                 className="text-xs text-gray-500 pt-4"
               >
-                🔒 המידע שלכם נשמר באופן מאובטח ומשמש אך ורק לצרכי הועד
+                {t('privacyNote')}
               </motion.p>
             </div>
           </Card>
@@ -394,10 +394,10 @@ export function SkillSurveyForm() {
                 className="space-y-4"
               >
                 <h2 className="text-3xl md:text-4xl font-bold text-green-700">
-                  תודה רבה! 🎉
+                  {t('successTitle')}
                 </h2>
                 <p className="text-xl text-gray-700 leading-relaxed">
-                  הפרטים שלכם נקלטו בהצלחה במערכת
+                  {t('successMessage')}
                 </p>
               </motion.div>
 
@@ -408,11 +408,11 @@ export function SkillSurveyForm() {
                 className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl p-6 space-y-3"
               >
                 <p className="text-gray-600 text-base">
-                  ניצור איתכם קשר במידת הצורך - אתם חלק חשוב מהקהילה שלנו! 💚
+                  {t('successDescription')}
                 </p>
                 <div className="flex items-center justify-center gap-2 text-sm text-gray-500 pt-2">
                   <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                  <span>כל תרומה, קטנה כגדולה, עושה הבדל</span>
+                  <span>{t('successNote')}</span>
                   <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
                 </div>
               </motion.div>
@@ -429,7 +429,7 @@ export function SkillSurveyForm() {
                   variant="outline"
                   className="px-8 py-6 text-base font-semibold border-2 border-green-500 text-green-700 hover:bg-green-50"
                 >
-                  חזרה לדף הבית
+                  {t('backToHome')}
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </motion.div>
@@ -460,7 +460,7 @@ export function SkillSurveyForm() {
           </div>
           <div className="flex justify-between items-center mt-2 px-2">
             <span className="text-xs font-medium text-gray-600">
-              שלב {currentStepIndex + 1} מתוך {steps.length}
+              {t('step')} {currentStepIndex + 1} {t('of')} {steps.length}
             </span>
             <span className="text-xs font-medium text-[#0D98BA]">
               {Math.round(progress)}%
@@ -485,10 +485,10 @@ export function SkillSurveyForm() {
                   >
                     <div className="text-center space-y-3 mb-8">
                       <h2 className="text-2xl md:text-3xl font-bold text-gray-900">
-                        באילו תחומים תוכלו לעזור?
+                        {t('skillsTitle')}
                       </h2>
                       <p className="text-gray-600">
-                        בחרו אחד או יותר מהתחומים (ניתן לבחור מספר אפשרויות)
+                        {t('skillsSubtitle')}
                       </p>
                     </div>
 
@@ -498,7 +498,7 @@ export function SkillSurveyForm() {
                         <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
                         <Input
                           type="text"
-                          placeholder="חיפוש מיומנות... (לדוגמה: צילום, רפואי, IT)"
+                          placeholder={t('searchPlaceholder')}
                           value={searchQuery}
                           onChange={(e) => setSearchQuery(e.target.value)}
                           className="pr-10 text-right text-base py-6 border-2 focus:border-[#0D98BA] focus:ring-4 focus:ring-[#0D98BA]/20 transition-all"
@@ -508,14 +508,14 @@ export function SkillSurveyForm() {
                             onClick={() => setSearchQuery('')}
                             type="button"
                             className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                            aria-label="נקה חיפוש"
+                            aria-label={t('clearSearch')}
                           >
                             <X className="h-5 w-5" />
                           </button>
                         )}
                       </div>
                       <p className="text-xs text-gray-500 mt-2 text-center">
-                        {filteredSkills.length} מתוך {sortedSkills.length} מיומנויות
+                        {t('skillsCount', { filtered: filteredSkills.length, total: sortedSkills.length })}
                       </p>
                     </div>
 
@@ -596,15 +596,15 @@ export function SkillSurveyForm() {
                         <div className="col-span-2 md:col-span-3 text-center py-12">
                           <div className="text-gray-400 space-y-3">
                             <Search className="h-12 w-12 mx-auto text-gray-300" />
-                            <p className="text-lg font-medium text-gray-600">לא נמצאו תוצאות</p>
-                            <p className="text-sm text-gray-500">נסו לחפש במילים אחרות</p>
+                            <p className="text-lg font-medium text-gray-600">{t('noResults')}</p>
+                            <p className="text-sm text-gray-500">{t('noResultsDescription')}</p>
                             <Button
                               type="button"
                               variant="outline"
                               onClick={() => setSearchQuery('')}
                               className="mt-4"
                             >
-                              נקה חיפוש
+                              {t('clearSearch')}
                             </Button>
                           </div>
                         </div>
@@ -634,11 +634,11 @@ export function SkillSurveyForm() {
                           <div className="bg-gradient-to-r from-[#FFBA00]/10 to-[#FF8200]/10 rounded-2xl p-6 space-y-3 border-2 border-[#FFBA00]/30">
                             <div className="flex items-center gap-2 text-[#FF8200] mb-3">
                               <MoreHorizontal className="w-5 h-5" />
-                              <h3 className="font-semibold text-base">באיזה תחום תוכלו לעזור?</h3>
+                              <h3 className="font-semibold text-base">{t('otherSkillTitle')}</h3>
                             </div>
                             <div className="space-y-2">
                               <Label htmlFor="other_specialty" className="text-sm font-medium text-gray-700">
-                                פרטו את התחום או המיומנות שלכם <span className="text-red-500">*</span>
+                                {t('otherSkillLabel')} <span className="text-red-500">*</span>
                               </Label>
                               <Input
                                 id="other_specialty"
@@ -656,7 +656,7 @@ export function SkillSurveyForm() {
                                   // @ts-ignore - We need to assign to .current for scrollIntoView
                                   otherSpecialtyRef.current = element
                                 }}
-                                placeholder="לדוגמה: עורך דין תעבורה, פיזיותרפיסט, מעצב פנים..."
+                                placeholder={t('otherSkillPlaceholder')}
                                 className="text-right text-base py-3 border-2 focus:border-[#FF8200] focus:ring-4 focus:ring-[#FF8200]/20 transition-all bg-white"
                               />
                               {(errors.other_specialty || otherSpecialtyError) && (
@@ -669,7 +669,7 @@ export function SkillSurveyForm() {
                                 </motion.p>
                               )}
                               <p className="text-xs text-gray-600">
-                                💡 נא לפרט כמה שיותר - זה יעזור לנו להבין איך תוכלו לתרום
+                                {t('otherSkillHint')}
                               </p>
                             </div>
                           </div>
@@ -687,7 +687,7 @@ export function SkillSurveyForm() {
                         className="w-full sm:flex-1 border-2 order-2 sm:order-1"
                       >
                         <ArrowRight className="ml-2 h-4 md:h-5 w-4 md:w-5" />
-                        <span className="text-sm md:text-base">חזרה</span>
+                        <span className="text-sm md:text-base">{t('back')}</span>
                       </Button>
                       <Button
                         type="button"
@@ -696,7 +696,7 @@ export function SkillSurveyForm() {
                         disabled={selectedSkills.length === 0}
                         className="w-full sm:flex-1 bg-gradient-to-r from-[#0D98BA] to-[#003153] hover:from-[#003153] hover:to-[#0D98BA] text-white order-1 sm:order-2"
                       >
-                        <span className="text-sm md:text-base">המשך</span>
+                        <span className="text-sm md:text-base">{t('continue')}</span>
                         <ArrowLeft className="mr-2 h-4 md:h-5 w-4 md:w-5" />
                       </Button>
                     </div>
@@ -707,7 +707,10 @@ export function SkillSurveyForm() {
                         animate={{ opacity: 1 }}
                         className="text-xs md:text-sm text-center text-gray-500"
                       >
-                        נבחרו {selectedSkills.length} {selectedSkills.length === 1 ? 'תחום' : 'תחומים'}
+                        {t('selectedCount', {
+                          count: selectedSkills.length,
+                          label: selectedSkills.length === 1 ? t('selectedCountSingular') : t('selectedCountPlural')
+                        })}
                       </motion.p>
                     )}
                   </motion.div>
@@ -764,7 +767,7 @@ export function SkillSurveyForm() {
                                 text-xs font-medium transition-colors duration-300
                                 ${isSelected ? 'text-white/90' : 'text-gray-600'}
                               `}>
-                                שכבה
+                                {t('gradeLabel')}
                               </span>
                             </div>
 
@@ -806,7 +809,7 @@ export function SkillSurveyForm() {
                         className="w-full sm:flex-1 border-2 order-2 sm:order-1"
                       >
                         <ArrowRight className="ml-2 h-4 md:h-5 w-4 md:w-5" />
-                        <span className="text-sm md:text-base">חזרה</span>
+                        <span className="text-sm md:text-base">{t('back')}</span>
                       </Button>
                       <Button
                         type="button"
@@ -815,7 +818,7 @@ export function SkillSurveyForm() {
                         disabled={!selectedGrade}
                         className="w-full sm:flex-1 bg-gradient-to-r from-[#0D98BA] to-[#003153] hover:from-[#003153] hover:to-[#0D98BA] text-white order-1 sm:order-2"
                       >
-                        <span className="text-sm md:text-base">המשך</span>
+                        <span className="text-sm md:text-base">{t('continue')}</span>
                         <ArrowLeft className="mr-2 h-4 md:h-5 w-4 md:w-5" />
                       </Button>
                     </div>
@@ -833,20 +836,20 @@ export function SkillSurveyForm() {
                     className="space-y-6"
                   >
                     <div className="text-center space-y-2 md:space-y-3 mb-6 md:mb-8">
-                      <h2 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900">פרטי יצירת קשר</h2>
-                      <p className="text-sm md:text-base text-gray-600">השאירו את הפרטים שלכם כדי שנוכל ליצור קשר</p>
+                      <h2 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900">{t('detailsTitle')}</h2>
+                      <p className="text-sm md:text-base text-gray-600">{t('detailsSubtitle')}</p>
                     </div>
 
                     <div className="space-y-4 md:space-y-5">
                       {/* Phone - Required */}
                       <div className="space-y-2">
                         <Label htmlFor="phone_number" className="text-sm md:text-base font-semibold text-gray-700">
-                          מספר טלפון <span className="text-red-500">*</span>
+                          {t('phoneLabel')} <span className="text-red-500">{t('phoneRequired')}</span>
                         </Label>
                         <Input
                           id="phone_number"
                           {...register('phone_number')}
-                          placeholder="050-1234567"
+                          placeholder={t('phonePlaceholder')}
                           dir="ltr"
                           className="text-left text-base md:text-lg py-3 md:py-6 border-2 focus:border-[#0D98BA] focus:ring-4 focus:ring-[#0D98BA]/20 transition-all"
                         />
@@ -858,12 +861,12 @@ export function SkillSurveyForm() {
                       {/* Name - Optional */}
                       <div className="space-y-2">
                         <Label htmlFor="parent_name" className="text-sm md:text-base font-semibold text-gray-700">
-                          שם מלא <span className="text-gray-400 text-xs md:text-sm font-normal">(אופציונלי)</span>
+                          {t('nameLabel')} <span className="text-gray-400 text-xs md:text-sm font-normal">{t('nameOptional')}</span>
                         </Label>
                         <Input
                           id="parent_name"
                           {...register('parent_name')}
-                          placeholder="השאירו ריק לשליחה אנונימית"
+                          placeholder={t('namePlaceholder')}
                           className="text-right text-base md:text-lg py-3 md:py-6 border-2 focus:border-[#0D98BA] focus:ring-4 focus:ring-[#0D98BA]/20 transition-all"
                         />
                         {errors.parent_name && (
@@ -874,13 +877,13 @@ export function SkillSurveyForm() {
                       {/* Email - Optional */}
                       <div className="space-y-2">
                         <Label htmlFor="email" className="text-sm md:text-base font-semibold text-gray-700">
-                          אימייל <span className="text-gray-400 text-xs md:text-sm font-normal">(אופציונלי)</span>
+                          {t('emailLabel')} <span className="text-gray-400 text-xs md:text-sm font-normal">{t('emailOptional')}</span>
                         </Label>
                         <Input
                           id="email"
                           type="email"
                           {...register('email')}
-                          placeholder="example@email.com"
+                          placeholder={t('emailPlaceholder')}
                           dir="ltr"
                           className="text-left text-base md:text-lg py-3 md:py-6 border-2 focus:border-[#0D98BA] focus:ring-4 focus:ring-[#0D98BA]/20 transition-all"
                         />
@@ -890,12 +893,12 @@ export function SkillSurveyForm() {
                       {/* Additional Notes - Optional */}
                       <div className="space-y-2">
                         <Label htmlFor="additional_notes" className="text-sm md:text-base font-semibold text-gray-700">
-                          הערות נוספות <span className="text-gray-400 text-xs md:text-sm font-normal">(אופציונלי)</span>
+                          {t('notesLabel')} <span className="text-gray-400 text-xs md:text-sm font-normal">{t('notesOptional')}</span>
                         </Label>
                         <Textarea
                           id="additional_notes"
                           {...register('additional_notes')}
-                          placeholder="למשל: זמינות, פרטים נוספים על המיומנויות, הערות מיוחדות..."
+                          placeholder={t('notesPlaceholder')}
                           rows={4}
                           className="text-right text-sm md:text-base border-2 focus:border-[#0D98BA] focus:ring-4 focus:ring-[#0D98BA]/20 transition-all resize-none"
                         />
@@ -916,7 +919,7 @@ export function SkillSurveyForm() {
                         disabled={isSubmitting}
                       >
                         <ArrowRight className="ml-2 h-4 md:h-5 w-4 md:w-5" />
-                        <span className="text-sm md:text-base">חזרה</span>
+                        <span className="text-sm md:text-base">{t('back')}</span>
                       </Button>
                       <Button
                         type="submit"
@@ -927,11 +930,11 @@ export function SkillSurveyForm() {
                         {isSubmitting ? (
                           <>
                             <Loader2 className="ml-2 h-4 md:h-5 w-4 md:w-5 animate-spin" />
-                            <span className="text-sm md:text-base">שולח...</span>
+                            <span className="text-sm md:text-base">{t('submitting')}</span>
                           </>
                         ) : (
                           <>
-                            <span className="text-sm md:text-base">שלח תשובות</span>
+                            <span className="text-sm md:text-base">{t('submitButton')}</span>
                             <CheckCircle2 className="mr-2 h-4 md:h-5 w-4 md:w-5" />
                           </>
                         )}
@@ -940,7 +943,7 @@ export function SkillSurveyForm() {
 
                     {/* Privacy reminder */}
                     <p className="text-[10px] md:text-xs text-center text-gray-500 pt-3 md:pt-4">
-                      🔒 הפרטים שלכם מאובטחים ולא ישותפו עם גורמים חיצוניים
+                      {t('securityNote')}
                     </p>
                   </motion.div>
                 )}

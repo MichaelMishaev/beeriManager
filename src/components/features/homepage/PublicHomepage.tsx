@@ -568,12 +568,12 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
 
         {/* Calendar Action Buttons - Right under NextHolidayWidget */}
         <aside aria-label="לוח שנה וחגים" className="mb-3 relative">
-          {/* Buttons in a single row, 50/50 */}
-          <div className="flex gap-2 relative z-10">
+          {/* Buttons: vertical on mobile, horizontal on md+ */}
+          <div className="flex flex-col sm:flex-row gap-2 relative z-10">
             <Button
               variant="outline"
               size="default"
-              className="flex-1 text-sm md:text-base transition-all hover:bg-blue-50 hover:border-blue-300 hover:shadow-sm"
+              className="flex-1 text-xs sm:text-sm md:text-base transition-all hover:bg-blue-50 hover:border-blue-300 hover:shadow-sm"
               onClick={() => setHolidaysModalOpen(true)}
             >
               <Calendar className="h-4 w-4 md:h-5 md:w-5 ml-2" />
@@ -583,7 +583,7 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
             <Button
               variant="outline"
               size="default"
-              className="flex-1 text-sm md:text-base transition-all hover:bg-gray-50 hover:border-gray-300 hover:shadow-sm"
+              className="flex-1 text-xs sm:text-sm md:text-base transition-all hover:bg-gray-50 hover:border-gray-300 hover:shadow-sm"
               onClick={() => setIsCalendarExpanded(!isCalendarExpanded)}
               title={isCalendarExpanded ? calendarT('hideCalendar') : calendarT('showCalendar')}
             >

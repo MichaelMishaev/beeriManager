@@ -37,7 +37,7 @@ export interface AILogEntry {
   gptCost?: number
 
   // Response data
-  responseType?: 'text' | 'function_call' | 'error'
+  responseType?: 'request' | 'text' | 'function_call' | 'error'
   functionName?: string
   extractedDataType?: 'event' | 'events' | 'urgent_message' | 'highlight'
 
@@ -161,7 +161,7 @@ class AILogger {
   }
 
   /**
-   * Log GPT API call
+   * Log GPT API call (request to OpenAI)
    */
   logGPTRequest(params: {
     action: AILogAction
@@ -174,6 +174,7 @@ class AILogger {
     this.log({
       level: 'info',
       action: params.action,
+      responseType: 'request', // Mark as request log
       userMessage: params.userMessage,
       messageLength: params.userMessage.length,
       gptModel: params.gptModel,
@@ -187,11 +188,11 @@ class AILogger {
   }
 
   /**
-   * Log GPT API response
+   * Log GPT API response (response from OpenAI)
    */
   logGPTResponse(params: {
     action: AILogAction
-    responseType: 'text' | 'function_call' | 'error'
+    responseType: 'request' | 'text' | 'function_call' | 'error'
     functionName?: string
     extractedDataType?: 'event' | 'events' | 'urgent_message' | 'highlight'
     promptTokens: number
