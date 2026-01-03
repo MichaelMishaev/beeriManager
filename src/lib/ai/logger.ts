@@ -6,7 +6,7 @@
  * Logs to database (ai_chat_logs table) for persistent storage and analysis.
  */
 
-import { supabase } from '@/lib/supabase/client'
+import { createClient } from '@/lib/supabase/server'
 
 export type AILogLevel = 'info' | 'success' | 'warning' | 'error'
 
@@ -101,6 +101,7 @@ class AILogger {
    */
   private async logToDatabase(entry: AILogEntry) {
     try {
+      const supabase = createClient() // Use service role client for logging
       const { error } = await supabase.from('ai_chat_logs').insert({
         session_id: entry.sessionId,
         level: entry.level,
@@ -168,6 +169,7 @@ class AILogger {
     gptModel: string
     roundNumber: number
     context?: string
+    metadata?: Record<string, any>
   }) {
     this.log({
       level: 'info',
@@ -179,6 +181,7 @@ class AILogger {
       metadata: {
         hasContext: !!params.context,
         contextLength: params.context?.length,
+        ...(params.metadata || {}), // Merge custom metadata
       },
     })
   }
@@ -197,6 +200,7 @@ class AILogger {
     cost: number
     roundNumber: number
     durationMs: number
+    metadata?: Record<string, any>
   }) {
     this.log({
       level: 'success',
@@ -210,6 +214,7 @@ class AILogger {
       gptCost: params.cost,
       gptRoundNumber: params.roundNumber,
       durationMs: params.durationMs,
+      metadata: params.metadata,
     })
   }
 
@@ -270,7 +275,7 @@ class AILogger {
   }
 
   /**
-   * Log errors
+   * Log errors with full details
    */
   logError(params: {
     action: AILogAction
@@ -287,6 +292,13 @@ class AILogger {
       userMessage: params.userMessage,
       responseType: 'error',
       metadata: params.metadata,
+    })
+
+    // Also log to console for immediate visibility
+    console.error('[AI Logger] Error logged to database:', {
+      action: params.action,
+      error: params.errorMessage,
+      timestamp: new Date().toISOString(),
     })
   }
 

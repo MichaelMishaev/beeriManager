@@ -31,9 +31,11 @@ interface AIAssistantRequest {
 }
 
 export async function POST(req: NextRequest) {
+  let requestBody: AIAssistantRequest | null = null
   try {
-    const body: AIAssistantRequest = await req.json()
-    const { messages, action = 'extract_data', context } = body
+    requestBody = await req.json()
+    if (!requestBody) throw new Error('Request body is required')
+    const { messages, action = 'extract_data', context } = requestBody
 
     // Handle initial greeting (no rate limit check - doesn't use GPT)
     if (action === 'initial') {
@@ -193,31 +195,42 @@ export async function POST(req: NextRequest) {
       const userMessage = messages[messages.length - 1]?.content || ''
       const startTime = Date.now()
 
-      // Log GPT request
+      const requestMessages = [
+        { role: 'system' as const, content: UNDERSTANDING_PROMPT },
+        ...messages.map((msg: ChatMessage) => ({
+          role: msg.role,
+          content: msg.content,
+        })),
+      ]
+
+      // Log GPT request with FULL details
       aiLogger.logGPTRequest({
         action: 'understand_message',
         userMessage,
         gptModel: AI_CONFIG.model,
         roundNumber: 1,
+        context: undefined,
+        metadata: {
+          fullRequest: {
+            model: AI_CONFIG.model,
+            max_completion_tokens: AI_CONFIG.max_completion_tokens,
+            messages: requestMessages, // FULL request messages
+            timestamp: new Date().toISOString(),
+          },
+        },
       })
 
       const response = await openai.chat.completions.create({
         model: AI_CONFIG.model,
         max_completion_tokens: AI_CONFIG.max_completion_tokens,
-        messages: [
-          { role: 'system', content: UNDERSTANDING_PROMPT },
-          ...messages.map((msg) => ({
-            role: msg.role,
-            content: msg.content,
-          })),
-        ],
+        messages: requestMessages,
         // No function calling for understanding - just text response
       })
 
       const assistantMessage = response.choices[0].message
       const duration = Date.now() - startTime
 
-      // Log GPT response
+      // Log GPT response with FULL details
       aiLogger.logGPTResponse({
         action: 'understand_message',
         responseType: 'text',
@@ -227,6 +240,14 @@ export async function POST(req: NextRequest) {
         cost: ((response.usage?.total_tokens || 0) * 0.000001), // GPT-5 Mini pricing
         roundNumber: 1,
         durationMs: duration,
+        metadata: {
+          fullResponse: {
+            message: assistantMessage, // FULL assistant message
+            finishReason: response.choices[0].finish_reason,
+            usage: response.usage,
+            timestamp: new Date().toISOString(),
+          },
+        },
       })
 
       return NextResponse.json({
@@ -245,26 +266,41 @@ export async function POST(req: NextRequest) {
       // Use extraction prompt with optional context from understanding round
       const systemPrompt = getExtractionPrompt(context)
 
-      // Log GPT request
+      const requestMessages = [
+        { role: 'system' as const, content: systemPrompt },
+        ...messages.map((msg: ChatMessage) => ({
+          role: msg.role,
+          content: msg.content,
+        })),
+      ]
+
+      // Log GPT request with FULL details
       aiLogger.logGPTRequest({
         action: 'extract_data',
         userMessage,
         gptModel: AI_CONFIG.model,
         roundNumber,
         context,
+        metadata: {
+          fullRequest: {
+            model: AI_CONFIG.model,
+            max_completion_tokens: AI_CONFIG.max_completion_tokens,
+            messages: requestMessages, // FULL request messages
+            tools: AI_TOOLS, // FULL tools definition
+            tool_choice: 'auto',
+            systemPrompt, // FULL system prompt (with context if exists)
+            hasContext: !!context,
+            contextPreview: context?.substring(0, 200),
+            timestamp: new Date().toISOString(),
+          },
+        },
       })
 
       const response = await openai.chat.completions.create({
         model: AI_CONFIG.model,
         max_completion_tokens: AI_CONFIG.max_completion_tokens,
         // Note: temperature is not included - GPT-5 Mini only supports default value (1)
-        messages: [
-          { role: 'system', content: systemPrompt },
-          ...messages.map((msg) => ({
-            role: msg.role,
-            content: msg.content,
-          })),
-        ],
+        messages: requestMessages,
         tools: AI_TOOLS,
         // Use 'auto' instead of 'required' to allow AI to ask for clarification if needed
         // The explicit instructions in the user message guide the AI to call functions
@@ -281,19 +317,35 @@ export async function POST(req: NextRequest) {
         ? 'text'
         : 'error'
 
-      // Log GPT response
+      // Extract function call details if present
+      const toolCall = assistantMessage.tool_calls?.[0]
+      const functionName = toolCall?.type === 'function' && 'function' in toolCall ? toolCall.function.name : undefined
+      const functionArgs = functionName && toolCall?.type === 'function' && 'function' in toolCall
+        ? JSON.parse(toolCall.function.arguments)
+        : undefined
+
+      // Log GPT response with FULL details
       aiLogger.logGPTResponse({
         action: 'extract_data',
         responseType,
-        functionName: assistantMessage.tool_calls?.[0]?.type === 'function'
-          ? assistantMessage.tool_calls[0].function.name
-          : undefined,
+        functionName,
         promptTokens: response.usage?.prompt_tokens || 0,
         completionTokens: response.usage?.completion_tokens || 0,
         totalTokens: response.usage?.total_tokens || 0,
         cost: ((response.usage?.total_tokens || 0) * 0.000001), // GPT-5 Mini pricing
         roundNumber,
         durationMs: duration,
+        metadata: {
+          fullResponse: {
+            message: assistantMessage, // FULL assistant message
+            toolCalls: assistantMessage.tool_calls, // FULL tool calls
+            functionName,
+            functionArguments: functionArgs, // Parsed function arguments
+            finishReason: response.choices[0].finish_reason,
+            usage: response.usage,
+            timestamp: new Date().toISOString(),
+          },
+        },
       })
 
       // Check if AI wants to call a function
@@ -435,12 +487,31 @@ export async function POST(req: NextRequest) {
       error: 'Invalid action',
     })
   } catch (error) {
-    // Log error using AI logger
+    // Log error using AI logger with FULL details
     aiLogger.logError({
       action: 'extract_data', // Default to extract_data since most errors happen there
       errorMessage: error instanceof Error ? error.message : 'Unknown error',
       errorStack: error instanceof Error ? error.stack : undefined,
+      metadata: {
+        fullError: {
+          name: error instanceof Error ? error.name : 'UnknownError',
+          message: error instanceof Error ? error.message : String(error),
+          stack: error instanceof Error ? error.stack : undefined,
+          // Capture OpenAI API errors specifically
+          openAIError: error && typeof error === 'object' && 'status' in error ? {
+            status: (error as any).status,
+            code: (error as any).code,
+            type: (error as any).type,
+            param: (error as any).param,
+          } : undefined,
+          timestamp: new Date().toISOString(),
+        },
+        requestBody, // Full request body
+      },
     })
+
+    console.error('[AI Assistant] Critical error:', error)
+    console.error('[AI Assistant] Error details:', JSON.stringify(error, null, 2))
 
     return NextResponse.json(
       {
