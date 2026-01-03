@@ -115,7 +115,7 @@ export async function GET(req: NextRequest) {
         },
         sampleEvents: sampleEvents || []
       },
-      message: 'Diagnostic report generated successfully'
+      message: 'Диагностический отчет успешно создан'
     })
 
   } catch (error) {
