@@ -18,7 +18,7 @@ export async function GET() {
       success: true,
       stats,
       message: stats.limitReached
-        ? 'הגעת למגבלה היומית של 20 שימושים. נסה שוב מחר.'
+        ? 'הגעת למגבלה היומית של 50 שימושים. נסה שוב מחר.'
         : `נותרו ${stats.remaining} שימושים היום`,
     })
   } catch (error) {

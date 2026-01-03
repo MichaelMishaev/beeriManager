@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
 
 בחר אפשרות ואסביר לך מה צריך למלא.
 
-💡 מגבלה יומית: 20 שימושים ביום | מקסימום 1500 תווים להודעה`,
+💡 מגבלה יומית: 50 שימושים ביום | מקסימום 1500 תווים להודעה`,
       })
     }
 
@@ -74,7 +74,7 @@ export async function POST(req: NextRequest) {
       })
       return NextResponse.json({
         success: false,
-        error: `הגעת למגבלה היומית של 20 שימושים 😔
+        error: `הגעת למגבלה היומית של 50 שימושים 😔
 
 נסה שוב מחר או צור קשר עם המנהל.
 
