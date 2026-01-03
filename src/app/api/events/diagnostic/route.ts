@@ -13,7 +13,14 @@ export async function GET(req: NextRequest) {
     const token = req.cookies.get('auth-token')
     if (!token || !verifyJWT(token.value)) {
       return NextResponse.json(
-        { success: false, error: 'נדרשת הרשאת מנהל' },
+        {
+          success: false,
+          error: {
+            he: 'נדרשת הרשאת מנהל',
+            ru: 'Требуется авторизация администратора',
+            en: 'Admin authorization required'
+          }
+        },
         { status: 401 }
       )
     }
@@ -115,13 +122,24 @@ export async function GET(req: NextRequest) {
         },
         sampleEvents: sampleEvents || []
       },
-      message: 'Диагностический отчет успешно создан'
+      message: {
+        he: 'דוח אבחון נוצר בהצלחה',
+        ru: 'Диагностический отчет успешно создан',
+        en: 'Diagnostic report generated successfully'
+      }
     })
 
   } catch (error) {
     console.error('Diagnostic error:', error)
     return NextResponse.json(
-      { success: false, error: 'שגיאה ביצירת דוח אבחון' },
+      {
+        success: false,
+        error: {
+          he: 'שגיאה ביצירת דוח אבחון',
+          ru: 'Ошибка при создании диагностического отчета',
+          en: 'Error generating diagnostic report'
+        }
+      },
       { status: 500 }
     )
   }
