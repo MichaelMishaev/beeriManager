@@ -1,12 +1,12 @@
 // AI Assistant Rate Limiting
-// Daily limit: 20 requests
+// Daily limit: 50 requests
 // Character limit: 1500 characters per message (expanded for detailed highlights)
 // Excludes development environment
 
 import { supabase } from '@/lib/supabase/client'
 
 export const RATE_LIMITS = {
-  DAILY_REQUESTS: 20,
+  DAILY_REQUESTS: 50,
   MAX_MESSAGE_LENGTH: 1500,
 } as const
 
@@ -53,7 +53,7 @@ export async function getAiUsageStats(): Promise<UsageStats> {
       }
     }
 
-    const stats = data?.[0] || { current_count: 0, daily_limit: 20, remaining: 20 }
+    const stats = data?.[0] || { current_count: 0, daily_limit: 50, remaining: 50 }
 
     return {
       currentCount: stats.current_count || 0,
