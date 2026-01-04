@@ -38,17 +38,8 @@ const TicketsSection = dynamic(() => import('@/components/features/tickets/Ticke
   )
 })
 
-const CommitteeCard = dynamic(() => import('./CommitteeCard').then(mod => ({ default: mod.CommitteeCard })), {
-  loading: () => (
-    <Card className="shadow-sm">
-      <CardContent className="p-8">
-        <div className="h-64 bg-gray-100 animate-pulse rounded" />
-      </CardContent>
-    </Card>
-  )
-})
-
-const FeedbackAndIdeasCard = dynamic(() => import('./FeedbackAndIdeasCard').then(mod => ({ default: mod.FeedbackAndIdeasCard })), {
+// 2025 Enhancement: Bento Box Layout - Connect With Us Card
+const ConnectWithUsCard = dynamic(() => import('./ConnectWithUsCard').then(mod => ({ default: mod.ConnectWithUsCard })), {
   loading: () => (
     <Card className="shadow-sm">
       <CardContent className="p-8">
@@ -63,7 +54,7 @@ interface PublicHomepageProps {
   calendarEvents: CalendarEvent[]
 }
 
-// Upcoming Events Card Component with Collapse/Expand
+// Upcoming Events Card Component with 2025 Enhancements
 function UpcomingEventsCard({
   upcomingEvents,
   dateLocale,
@@ -74,7 +65,7 @@ function UpcomingEventsCard({
   locale: Locale
 }) {
   const t = useTranslations('homepage')
-  const INITIAL_EVENTS_COUNT = 2
+  const INITIAL_EVENTS_COUNT = 3 // Increased from 2 → 3 (2025: Show more options)
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [showAllEventsModal, setShowAllEventsModal] = useState(false)
@@ -88,7 +79,13 @@ function UpcomingEventsCard({
   }
 
   return (
-    <Card className="group shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 border border-gray-100">
+    <Card className="group relative overflow-hidden
+                   shadow-md shadow-blue-100/30 hover:shadow-xl hover:shadow-blue-200/40
+                   hover:-translate-y-1
+                   transition-all duration-300 ease-out
+                   border border-[#0D98BA]/20
+                   hover:border-[#0D98BA]/60
+                   bg-gradient-to-br from-white via-white to-[#87CEEB]/5">
       <CardHeader className="pb-3">
         <div className="flex items-center gap-2 mb-1">
           <Calendar className="h-5 w-5 text-[#0D98BA] group-hover:scale-110 transition-transform duration-200" />
@@ -298,11 +295,18 @@ function EventItem({
     ? endDateTime!
     : new Date(startDate.getTime() + 2 * 60 * 60 * 1000) // Fallback: start + 2 hours
 
-  // Determine event status
+  // Determine event status with countdown timers
   const isHappeningNow = now >= startDate && now <= endDate
   const timeDiff = startDate.getTime() - now.getTime()
-  const isStartingSoon = !isHappeningNow && timeDiff > 0 && timeDiff <= 60 * 60 * 1000 // Within 1 hour (future only)
   const hasEnded = now > endDate
+
+  // 2025 Enhancement: Countdown Timer Logic
+  const hoursUntil = Math.floor(timeDiff / (1000 * 60 * 60))
+  const daysUntil = Math.floor(timeDiff / (1000 * 60 * 60 * 24))
+
+  const isStartingVerySoon = !isHappeningNow && timeDiff > 0 && timeDiff <= 3 * 60 * 60 * 1000 // Within 3 hours
+  const isStartingToday = !isHappeningNow && timeDiff > 0 && timeDiff <= 24 * 60 * 60 * 1000 // Within 24 hours
+  const isStartingThisWeek = !isHappeningNow && timeDiff > 0 && timeDiff <= 7 * 24 * 60 * 60 * 1000 // Within 7 days
 
   // Get event type icon
   const getEventIcon = () => {
@@ -316,17 +320,31 @@ function EventItem({
     }
   }
 
-  // Status badge configuration
+  // Countdown timers (pulse animation removed per user request)
   const statusConfig = isHappeningNow
     ? {
-        text: locale === 'ru' ? 'Сейчас' : 'מתקיים כעת',
+        text: locale === 'ru' ? '🔴 Сейчас' : '🔴 מתקיים כעת',
         bgColor: 'bg-emerald-500',
         textColor: 'text-white',
-        showPulse: true
+        showPulse: false
       }
-    : isStartingSoon
+    : isStartingVerySoon
     ? {
-        text: locale === 'ru' ? 'Скоро' : 'בקרוב',
+        text: locale === 'ru' ? `🔥 Через ${hoursUntil}ч` : `🔥 בעוד ${hoursUntil} שעות`,
+        bgColor: 'bg-[#FFBA00]',
+        textColor: 'text-white',
+        showPulse: false
+      }
+    : isStartingToday
+    ? {
+        text: locale === 'ru' ? '⚡ Сегодня!' : '⚡ היום!',
+        bgColor: 'bg-[#FFBA00]',
+        textColor: 'text-white',
+        showPulse: false
+      }
+    : isStartingThisWeek
+    ? {
+        text: locale === 'ru' ? `📅 Через ${daysUntil} дн.` : `📅 בעוד ${daysUntil} ימים`,
         bgColor: 'bg-[#0D98BA]',
         textColor: 'text-white',
         showPulse: false
@@ -345,7 +363,14 @@ function EventItem({
       onClick={onClick}
       className="block group cursor-pointer"
     >
-      <div className="flex items-start gap-3 p-4 rounded-lg hover:bg-gray-50 transition-all duration-200 bg-white border border-gray-200 hover:border-gray-300 hover:shadow-md">
+      <div className="relative flex items-start gap-3 p-4 rounded-lg
+                    transition-all duration-200 ease-out
+                    bg-white border border-gray-200
+                    hover:bg-gradient-to-br hover:from-gray-50 hover:to-blue-50/30
+                    hover:border-[#0D98BA] hover:shadow-lg
+                    active:scale-[0.98] active:shadow-md
+                    focus-within:ring-4 focus-within:ring-[#0D98BA]/20
+                    min-h-[56px]">
         {/* Icon */}
         <div className="flex-shrink-0 mt-0.5">
           <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center">
@@ -537,19 +562,48 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
         קפיצה לWhatsApp
       </a>
 
-      {/* Hero Section with Gradient */}
-      <div className="bg-gradient-to-br from-[#0D98BA]/5 via-white to-[#003153]/5 py-6 md:py-8">
-        <div className="container mx-auto px-4 text-center">
-          <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-[#003153] mb-2 leading-tight">
-            {t('welcome')}
+      {/* Hero Section - 2025 Enhanced with Single Focused CTA */}
+      <div className="bg-gradient-to-br from-[#0D98BA]/5 via-white to-[#003153]/5 py-8 md:py-12">
+        <div className="container mx-auto px-4 text-center max-w-4xl">
+          {/* Value Proposition - Clear & Outcome-Focused */}
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-[#003153] mb-3 leading-tight">
+            {t('heroTitle')}
           </h1>
-          <p className="text-sm md:text-base text-gray-600 max-w-3xl mx-auto leading-snug">
-            {t('subtitle')}
+
+          {/* Benefits - Scannable Bullet Format */}
+          <p className="text-base md:text-lg text-gray-700 mb-6 leading-relaxed">
+            {t('heroBenefits')}
           </p>
+
+          {/* Primary CTA - Single Focused Action (Z-Pattern) */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-2">
+            <Button
+              onClick={() => {
+                const eventsSection = document.getElementById('events-section')
+                eventsSection?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+              }}
+              size="lg"
+              className="min-h-[56px] px-8 py-3
+                       bg-[#0D98BA] hover:bg-[#003153]
+                       text-white font-semibold text-base
+                       rounded-xl
+                       shadow-lg shadow-[#0D98BA]/30 hover:shadow-xl hover:shadow-[#003153]/40
+                       hover:-translate-y-0.5
+                       active:scale-[0.98]
+                       transition-all duration-200 ease-out
+                       focus:outline-none focus:ring-4 focus:ring-[#0D98BA]/40
+                       border-none"
+              aria-label={t('heroCtaLabel')}
+            >
+              📅 {t('heroCta')}
+            </Button>
+          </div>
+
+
         </div>
       </div>
 
-      {/* School Stats Cards - Overlapping Hero */}
+      {/* School Stats - Restored per user request */}
       <SchoolStats variant="cards" />
 
       <main aria-label="תוכן ראשי" className="container mx-auto px-4 py-4 md:py-6 max-w-6xl">
@@ -566,34 +620,29 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
           <NextHolidayWidget onClick={() => setHolidaysModalOpen(true)} />
         </div>
 
-        {/* Calendar Action Buttons - Right under NextHolidayWidget */}
+        {/* Calendar Toggle - Single Button (2025: Reduce Choices) */}
         <aside aria-label="לוח שנה וחגים" className="mb-3 relative">
-          {/* Buttons: vertical on mobile, horizontal on md+ */}
-          <div className="flex flex-col sm:flex-row gap-2 relative z-10">
+          {/* Single Unified Button - Reduces Decision Fatigue */}
+          <div className="relative z-10">
             <Button
               variant="outline"
               size="default"
-              className="flex-1 text-xs sm:text-sm md:text-base transition-all hover:bg-blue-50 hover:border-blue-300 hover:shadow-sm"
-              onClick={() => setHolidaysModalOpen(true)}
-            >
-              <Calendar className="h-4 w-4 md:h-5 md:w-5 ml-2" />
-              {calendarT('holidaysAndEvents')}
-            </Button>
-
-            <Button
-              variant="outline"
-              size="default"
-              className="flex-1 text-xs sm:text-sm md:text-base transition-all hover:bg-gray-50 hover:border-gray-300 hover:shadow-sm"
               onClick={() => setIsCalendarExpanded(!isCalendarExpanded)}
+              className="w-full min-h-[44px] text-sm md:text-base
+                       transition-all duration-200
+                       hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50
+                       hover:border-[#0D98BA] hover:shadow-md
+                       active:scale-[0.98]
+                       focus:outline-none focus:ring-4 focus:ring-[#0D98BA]/30"
               title={isCalendarExpanded ? calendarT('hideCalendar') : calendarT('showCalendar')}
             >
-              <Calendar className="h-4 w-4 md:h-5 md:w-5" />
+              <Calendar className="h-5 w-5 ml-2" />
+              <span className="font-medium">📅 {calendarT('calendarAndHolidays')}</span>
               {isCalendarExpanded ? (
-                <ChevronUp className="h-4 w-4 md:h-5 md:w-5 transition-transform mr-2" />
+                <ChevronUp className="h-5 w-5 mr-2 transition-transform duration-300" />
               ) : (
-                <ChevronDown className="h-4 w-4 md:h-5 md:w-5 transition-transform mr-2" />
+                <ChevronDown className="h-5 w-5 mr-2 transition-transform duration-300" />
               )}
-              {isCalendarExpanded ? calendarT('hideCalendar') : calendarT('showCalendar')}
             </Button>
           </div>
 
@@ -633,11 +682,6 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
         {/* PROMOTED: WhatsApp Community Card - High Priority */}
         <div id="whatsapp-section" className="mb-4 scroll-mt-20">
           <WhatsAppCommunityCard />
-        </div>
-
-        {/* Skills Survey Card */}
-        <div id="survey-section" className="mb-4 scroll-mt-20">
-          <SkillsSurveyCard />
         </div>
 
       {/* Photos Gallery Section */}
@@ -708,15 +752,17 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
         <div className="space-y-4">
           {/* Tickets Section - Only show if there are active tickets */}
           {tickets.length > 0 && <TicketsSection tickets={tickets} />}
-
-          {/* Committee Members Card */}
-          <CommitteeCard />
         </div>
       </div>
 
-      {/* Contact & Feedback - Merged Section (3 options: WhatsApp, Feedback, Ideas) */}
+      {/* 2025: Contact & Feedback - Consolidated Bento Box (WhatsApp + Feedback + Ideas) */}
       <div className="mt-6">
-        <FeedbackAndIdeasCard />
+        <ConnectWithUsCard />
+      </div>
+
+      {/* 2025: Skills Survey - Moved to Bottom 30% (Progressive Disclosure) */}
+      <div id="survey-section" className="mt-6 scroll-mt-20">
+        <SkillsSurveyCard />
       </div>
     </main>
 
