@@ -206,8 +206,8 @@ export function UrgentMessagesBanner() {
 
                 {/* Main content */}
                 <div className="relative">
-                  {/* Mobile-first: Header with buttons (RTL: buttons on left in Hebrew) */}
-                  <div className="absolute top-3 left-3 z-10 flex items-center gap-1">
+                  {/* Mobile-first: Header with buttons (RTL-aware positioning) */}
+                  <div className="absolute top-3 right-3 z-10 flex items-center gap-1">
                     <ShareButton
                       shareData={formatUrgentMessageShareData(message, currentLocale)}
                       variant="ghost"
