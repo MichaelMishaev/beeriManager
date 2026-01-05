@@ -13,7 +13,7 @@ import { logger } from '@/lib/logger'
  * Convert URLs in text to prominent CTA buttons
  * Detects URLs starting with http://, https://, or www.
  */
-function linkifyText(text: string, buttonGradient: string): JSX.Element[] {
+function linkifyText(text: string, accentColor: string): JSX.Element[] {
   // Regex to detect URLs
   const urlRegex = /(https?:\/\/[^\s]+|www\.[^\s]+)/g
   const parts: JSX.Element[] = []
@@ -41,29 +41,19 @@ function linkifyText(text: string, buttonGradient: string): JSX.Element[] {
         target="_blank"
         rel="noopener noreferrer"
         className={`
-          group
-          mt-3 mb-2
-          flex items-center justify-center gap-2
-          px-5 py-3.5 sm:px-6 sm:py-4
-          ${buttonGradient}
-          text-white font-bold
-          rounded-xl
-          shadow-lg hover:shadow-xl
-          transition-all duration-300 ease-out
-          hover:scale-[1.02] active:scale-[0.98]
-          focus:outline-none focus:ring-4 focus:ring-white/50
-          border-2 border-white/20
-          backdrop-blur-sm
-          relative overflow-hidden
+          group inline-flex items-center gap-2
+          mt-2 px-4 py-2
+          ${accentColor}
+          text-white text-sm font-semibold
+          rounded-md
+          hover:opacity-90
+          transition-all duration-200
+          focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-current
         `}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Shimmer effect on hover */}
-        <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-
-        {/* Icon */}
         <svg
-          className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0 relative z-10"
+          className="w-4 h-4 flex-shrink-0"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -71,30 +61,11 @@ function linkifyText(text: string, buttonGradient: string): JSX.Element[] {
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
-            strokeWidth={2.5}
-            d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
-          />
-        </svg>
-
-        {/* Text */}
-        <span className="text-sm sm:text-base font-bold truncate relative z-10">
-          לחץ לפתיחת הקישור
-        </span>
-
-        {/* External link arrow */}
-        <svg
-          className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 group-hover:translate-x-[-2px] group-hover:translate-y-[2px] transition-transform relative z-10"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2.5}
+            strokeWidth={2}
             d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
           />
         </svg>
+        <span>לחץ לפתיחת הקישור</span>
       </a>
     )
 
@@ -169,56 +140,48 @@ export function UrgentMessagesBanner() {
   }
 
   return (
-    <div className="space-y-4 mb-6">
+    <div className="space-y-3 mb-6">
       {visibleMessages.map((message) => {
         const title = currentLocale === 'ru' ? message.title_ru : message.title_he
         const description = currentLocale === 'ru' ? message.description_ru : message.description_he
 
-        // Design configurations based on message type
+        // Banner-style design configurations based on message type
         const typeConfig = {
           urgent: {
-            bgGradient: 'from-red-50 via-orange-50 to-red-50',
-            borderColor: 'border-red-400',
-            iconBg: 'bg-gradient-to-br from-red-500 to-orange-500',
-            iconColor: 'text-white',
-            textColor: 'text-red-950',
-            descColor: 'text-red-900',
+            borderColor: 'border-red-500',
+            bgColor: 'bg-red-50',
+            iconColor: 'text-red-600',
+            textColor: 'text-red-900',
+            descColor: 'text-red-800',
+            accentColor: 'bg-red-600',
             Icon: AlertCircle,
-            pulseColor: 'rgba(239, 68, 68, 0.4)', // red-500
-            glowColor: 'shadow-red-200',
           },
           warning: {
-            bgGradient: 'from-orange-50 via-amber-50 to-orange-50',
-            borderColor: 'border-orange-400',
-            iconBg: 'bg-gradient-to-br from-orange-500 to-amber-500',
-            iconColor: 'text-white',
-            textColor: 'text-orange-950',
-            descColor: 'text-orange-900',
+            borderColor: 'border-orange-500',
+            bgColor: 'bg-orange-50',
+            iconColor: 'text-orange-600',
+            textColor: 'text-orange-900',
+            descColor: 'text-orange-800',
+            accentColor: 'bg-orange-600',
             Icon: AlertTriangle,
-            pulseColor: 'rgba(249, 115, 22, 0.4)', // orange-500
-            glowColor: 'shadow-orange-200',
           },
           white_shirt: {
-            bgGradient: 'from-blue-50 via-sky-50 to-blue-50',
-            borderColor: 'border-blue-400',
-            iconBg: 'bg-gradient-to-br from-blue-500 to-sky-500',
-            iconColor: 'text-white',
-            textColor: 'text-blue-950',
-            descColor: 'text-blue-900',
+            borderColor: 'border-blue-500',
+            bgColor: 'bg-blue-50',
+            iconColor: 'text-blue-600',
+            textColor: 'text-blue-900',
+            descColor: 'text-blue-800',
+            accentColor: 'bg-blue-600',
             Icon: Shirt,
-            pulseColor: 'rgba(59, 130, 246, 0.4)', // blue-500
-            glowColor: 'shadow-blue-200',
           },
           info: {
-            bgGradient: 'from-sky-50 via-blue-50 to-sky-50',
-            borderColor: 'border-sky-400',
-            iconBg: 'bg-gradient-to-br from-sky-500 to-blue-500',
-            iconColor: 'text-white',
-            textColor: 'text-sky-950',
-            descColor: 'text-sky-900',
+            borderColor: 'border-sky-500',
+            bgColor: 'bg-sky-50',
+            iconColor: 'text-sky-600',
+            textColor: 'text-sky-900',
+            descColor: 'text-sky-800',
+            accentColor: 'bg-sky-600',
             Icon: Info,
-            pulseColor: 'rgba(14, 165, 233, 0.4)', // sky-500
-            glowColor: 'shadow-sky-200',
           }
         }
 
@@ -228,103 +191,80 @@ export function UrgentMessagesBanner() {
         return (
           <div
             key={message.id}
-            className="animate-in slide-in-from-top-4 duration-500"
+            className="animate-slide-down"
           >
-            {/* Outer container with pulsing border */}
+            {/* Banner strip with strong left border */}
             <div
               className={`
-                relative rounded-xl p-[3px] ${config.glowColor} shadow-lg
-                animate-pulse-border
+                relative overflow-hidden
+                border-l-4 ${config.borderColor}
+                ${config.bgColor}
+                shadow-md
+                rounded-sm
               `}
-              style={{
-                background: `linear-gradient(135deg, ${config.pulseColor}, transparent, ${config.pulseColor})`,
-                backgroundSize: '200% 200%',
-              }}
             >
-              {/* Inner content card */}
-              <div className={`
-                relative bg-gradient-to-r ${config.bgGradient}
-                rounded-lg overflow-hidden
-              `}>
-                {/* Animated background pattern */}
-                <div className="absolute inset-0 opacity-[0.03] pointer-events-none">
-                  <div className="absolute top-0 right-0 w-64 h-64 rounded-full blur-3xl bg-current animate-blob" />
-                  <div className="absolute bottom-0 left-0 w-64 h-64 rounded-full blur-3xl bg-current animate-blob animation-delay-2000" />
-                  <div className="absolute top-1/2 left-1/2 w-64 h-64 rounded-full blur-3xl bg-current animate-blob animation-delay-4000" />
+              {/* Banner content - compact horizontal layout */}
+              <div className="flex items-start gap-3 px-4 py-3">
+                {/* Icon - inline, not in bubble */}
+                <IconComponent
+                  className={`
+                    w-5 h-5 sm:w-6 sm:h-6
+                    flex-shrink-0 mt-0.5
+                    ${config.iconColor}
+                  `}
+                  strokeWidth={2}
+                />
+
+                {/* Content - flexible width */}
+                <div className="flex-1 min-w-0 text-right">
+                  {/* Title */}
+                  <h4 className={`
+                    font-bold text-sm sm:text-base
+                    ${config.textColor}
+                    leading-tight
+                  `}>
+                    {title}
+                  </h4>
+
+                  {/* Description */}
+                  {description && (
+                    <div className={`
+                      text-sm mt-1.5
+                      ${config.descColor}
+                      leading-relaxed
+                    `}>
+                      {linkifyText(description, config.accentColor)}
+                    </div>
+                  )}
                 </div>
 
-                {/* Main content */}
-                <div className="relative">
-                  {/* Mobile-first: Header with buttons (RTL-aware positioning) */}
-                  <div className="absolute top-2 right-2 z-10 flex items-center gap-0.5">
-                    <ShareButton
-                      shareData={formatUrgentMessageShareData(message, currentLocale)}
-                      variant="ghost"
-                      size="icon"
-                      locale={currentLocale}
-                      className={`
-                        h-9 w-9
-                        text-gray-600 hover:text-gray-800
-                        hover:bg-white/60 active:scale-95
-                        transition-all duration-200
-                        rounded-lg
-                      `}
-                    />
-                    <button
-                      onClick={() => dismissMessage(message.id)}
-                      className={`
-                        h-9 w-9 rounded-lg p-2
-                        text-gray-600 hover:text-gray-800
-                        hover:bg-white/60
-                        transition-all duration-200
-                        active:scale-95
-                        focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-gray-400
-                      `}
-                      aria-label={currentLocale === 'ru' ? 'Закрыть' : 'סגור'}
-                    >
-                      <X className="h-5 w-5" />
-                    </button>
-                  </div>
-
-                  {/* Content container */}
-                  <div className="px-4 pt-12 pb-4 sm:px-5 sm:pt-14 sm:pb-5">
-                    {/* Title section with icon - Mobile optimized */}
-                    <div className="flex items-start gap-3 mb-3">
-                      {/* Compact icon for mobile, larger for desktop */}
-                      <div className="flex-shrink-0">
-                        <div className={`
-                          ${config.iconBg} ${config.iconColor}
-                          rounded-full shadow-lg
-                          animate-bounce-subtle
-                          p-2 sm:p-2.5
-                        `}>
-                          <IconComponent className="h-5 w-5 sm:h-6 sm:w-6" strokeWidth={2.5} />
-                        </div>
-                      </div>
-
-                      {/* Title - RTL aligned for Hebrew */}
-                      <div className="flex-1 min-w-0 pt-0.5">
-                        <h3 className={`
-                          text-lg sm:text-xl font-bold ${config.textColor}
-                          leading-tight text-right
-                        `}>
-                          {title}
-                        </h3>
-                      </div>
-                    </div>
-
-                    {/* Description - RTL aligned for Hebrew */}
-                    {description && (
-                      <div className={`
-                        text-sm sm:text-base ${config.descColor}
-                        leading-relaxed whitespace-pre-line
-                        text-right
-                        pr-0 sm:pr-2
-                      `}>
-                        {linkifyText(description, config.iconBg)}
-                      </div>
-                    )}
-                  </div>
+                {/* Actions - compact right-aligned */}
+                <div className="flex items-start gap-1 flex-shrink-0">
+                  <ShareButton
+                    shareData={formatUrgentMessageShareData(message, currentLocale)}
+                    variant="ghost"
+                    size="icon"
+                    locale={currentLocale}
+                    className={`
+                      h-8 w-8
+                      text-gray-500 hover:text-gray-700
+                      hover:bg-white/60
+                      transition-colors
+                    `}
+                  />
+                  <button
+                    onClick={() => dismissMessage(message.id)}
+                    className={`
+                      h-8 w-8 rounded p-1.5
+                      text-gray-500 hover:text-gray-700
+                      hover:bg-white/60
+                      transition-colors
+                      focus:outline-none focus:ring-2 focus:ring-gray-400
+                    `}
+                    aria-label={currentLocale === 'ru' ? 'Закрыть' : 'סגור'}
+                  >
+                    <X className="w-full h-full" strokeWidth={2} />
+                  </button>
                 </div>
               </div>
             </div>
@@ -333,61 +273,24 @@ export function UrgentMessagesBanner() {
       })}
 
       <style jsx global>{`
-        @keyframes pulse-border {
-          0%, 100% {
-            background-position: 0% 50%;
+        @keyframes slide-down {
+          from {
+            opacity: 0;
+            transform: translateY(-12px);
           }
-          50% {
-            background-position: 100% 50%;
-          }
-        }
-
-        @keyframes blob {
-          0%, 100% {
-            transform: translate(0, 0) scale(1);
-          }
-          33% {
-            transform: translate(30px, -50px) scale(1.1);
-          }
-          66% {
-            transform: translate(-20px, 20px) scale(0.9);
-          }
-        }
-
-        @keyframes bounce-subtle {
-          0%, 100% {
+          to {
+            opacity: 1;
             transform: translateY(0);
           }
-          50% {
-            transform: translateY(-4px);
-          }
         }
 
-        .animate-pulse-border {
-          animation: pulse-border 3s ease-in-out infinite;
-        }
-
-        .animate-blob {
-          animation: blob 7s ease-in-out infinite;
-        }
-
-        .animation-delay-2000 {
-          animation-delay: 2s;
-        }
-
-        .animation-delay-4000 {
-          animation-delay: 4s;
-        }
-
-        .animate-bounce-subtle {
-          animation: bounce-subtle 2s ease-in-out infinite;
+        .animate-slide-down {
+          animation: slide-down 0.3s ease-out;
         }
 
         /* Respect reduced motion preferences */
         @media (prefers-reduced-motion: reduce) {
-          .animate-pulse-border,
-          .animate-blob,
-          .animate-bounce-subtle {
+          .animate-slide-down {
             animation: none;
           }
         }
