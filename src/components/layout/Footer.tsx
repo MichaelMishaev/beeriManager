@@ -46,10 +46,13 @@ export function Footer() {
               </Link>
             </nav>
 
-            {/* Left Side - Copyright (RTL: appears on left) */}
-            <p className="text-center md:text-right order-1 md:order-2">
-              © {new Date().getFullYear()} בית ספר בארי, נתניה
-            </p>
+            {/* Left Side - Copyright + School Stats (RTL: appears on left) */}
+            <div className="text-center md:text-right order-1 md:order-2 space-y-1">
+              <p>© {new Date().getFullYear()} בית ספר בארי, נתניה</p>
+              <p className="text-xs text-muted-foreground/80">
+                562 תלמידים • 22 כיתות
+              </p>
+            </div>
           </div>
         </div>
       </footer>

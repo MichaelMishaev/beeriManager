@@ -56,13 +56,12 @@ export async function GET(req: NextRequest) {
     }
 
     if (upcoming) {
-      // Show events from today onwards (start of day in local timezone)
-      // This ensures events happening today remain visible even after they start
-      const today = new Date()
-      today.setHours(0, 0, 0, 0) // Start of today
+      // Show events that haven't ended yet (use current time, not start of day)
+      // Filter by end_datetime if available, otherwise by start_datetime
+      const now = new Date()
 
       query = query
-        .gte('start_datetime', today.toISOString())
+        .or(`end_datetime.gte.${now.toISOString()},and(end_datetime.is.null,start_datetime.gte.${now.toISOString()})`)
         .order('start_datetime', { ascending: true })
     } else {
       query = query.order('created_at', { ascending: false })

@@ -1,15 +1,13 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Calendar, Plus, Camera, Loader2 } from 'lucide-react'
+import { Calendar, Camera, Loader2 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Label } from '@/components/ui/label'
 import Link from 'next/link'
-import { useSearchParams, useParams } from 'next/navigation'
+import { useParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import type { Event } from '@/types'
 
@@ -160,12 +158,10 @@ function EventsList({
 export default function EventsPage() {
   const params = useParams()
   const locale = (params.locale as string) || 'he'
-  const searchParams = useSearchParams()
-  const showDraftsParam = searchParams.get('showDrafts') === 'true'
   const t = useTranslations('Events')
 
   const [activeTab, setActiveTab] = useState<'all' | 'upcoming' | 'past' | 'photos'>('all')
-  const [showDrafts, setShowDrafts] = useState(showDraftsParam)
+  const showDrafts = false // Only show published events
 
   return (
     <div className="container mx-auto px-4 py-6 space-y-6">
@@ -179,36 +175,13 @@ export default function EventsPage() {
             {t('subtitle')}
           </p>
         </div>
-        <div className="flex gap-2 w-full sm:w-auto">
-          <Button variant="outline" asChild size="sm" className="flex-1 sm:flex-initial">
-            <Link href="/calendar">
-              <Calendar className="h-4 w-4 ml-2" />
-              <span className="hidden sm:inline">{t('calendarView')}</span>
-              <span className="sm:hidden">{t('calendarViewShort')}</span>
-            </Link>
-          </Button>
-          <Button asChild size="sm" className="flex-1 sm:flex-initial">
-            <Link href="/admin/events/new">
-              <Plus className="h-4 w-4 ml-2" />
-              <span className="hidden sm:inline">{t('newEvent')}</span>
-              <span className="sm:hidden">{t('newEventShort')}</span>
-            </Link>
-          </Button>
-        </div>
-      </div>
-
-      <div className="flex items-center gap-2 bg-muted/50 p-3 rounded-lg">
-        <Checkbox
-          id="show-drafts"
-          checked={showDrafts}
-          onCheckedChange={(checked) => setShowDrafts(checked as boolean)}
-        />
-        <Label
-          htmlFor="show-drafts"
-          className="text-sm cursor-pointer select-none"
-        >
-          {t('showDrafts')}
-        </Label>
+        <Button variant="outline" asChild size="sm">
+          <Link href="/calendar">
+            <Calendar className="h-4 w-4 ml-2" />
+            <span className="hidden sm:inline">{t('calendarView')}</span>
+            <span className="sm:hidden">{t('calendarViewShort')}</span>
+          </Link>
+        </Button>
       </div>
 
       <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as any)} className="w-full">

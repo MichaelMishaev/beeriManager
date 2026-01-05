@@ -287,7 +287,7 @@ export function UrgentMessagesBanner() {
                   </div>
 
                   {/* Content container */}
-                  <div className="px-4 py-4 sm:px-5 sm:py-5">
+                  <div className="px-4 pt-12 pb-4 sm:px-5 sm:pt-14 sm:pb-5">
                     {/* Title section with icon - Mobile optimized */}
                     <div className="flex items-start gap-3 mb-3">
                       {/* Compact icon for mobile, larger for desktop */}
