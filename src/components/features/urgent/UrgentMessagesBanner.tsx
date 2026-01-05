@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { X, Shirt, AlertCircle, AlertTriangle, Info, Bell } from 'lucide-react'
+import { X, Shirt, AlertCircle, AlertTriangle, Info } from 'lucide-react'
 import { ShareButton } from '@/components/ui/share-button'
 import { formatUrgentMessageShareData } from '@/lib/utils/share-formatters'
 import { useParams } from 'next/navigation'
@@ -304,18 +304,12 @@ export function UrgentMessagesBanner() {
 
                       {/* Title - RTL aligned for Hebrew */}
                       <div className="flex-1 min-w-0 pt-0.5">
-                        <div className="flex items-start gap-2 text-right">
-                          <h3 className={`
-                            text-lg sm:text-xl font-bold ${config.textColor}
-                            leading-tight flex-1
-                          `}>
-                            {title}
-                          </h3>
-                          <Bell className={`
-                            h-5 w-5 sm:h-6 sm:w-6 ${config.textColor}
-                            animate-ring flex-shrink-0 mt-0.5
-                          `} />
-                        </div>
+                        <h3 className={`
+                          text-lg sm:text-xl font-bold ${config.textColor}
+                          leading-tight text-right
+                        `}>
+                          {title}
+                        </h3>
                       </div>
                     </div>
 
@@ -369,21 +363,6 @@ export function UrgentMessagesBanner() {
           }
         }
 
-        @keyframes ring {
-          0%, 100% {
-            transform: rotate(0deg);
-          }
-          10%, 30% {
-            transform: rotate(-10deg);
-          }
-          20%, 40% {
-            transform: rotate(10deg);
-          }
-          50% {
-            transform: rotate(0deg);
-          }
-        }
-
         .animate-pulse-border {
           animation: pulse-border 3s ease-in-out infinite;
         }
@@ -404,16 +383,11 @@ export function UrgentMessagesBanner() {
           animation: bounce-subtle 2s ease-in-out infinite;
         }
 
-        .animate-ring {
-          animation: ring 2s ease-in-out infinite;
-        }
-
         /* Respect reduced motion preferences */
         @media (prefers-reduced-motion: reduce) {
           .animate-pulse-border,
           .animate-blob,
-          .animate-bounce-subtle,
-          .animate-ring {
+          .animate-bounce-subtle {
             animation: none;
           }
         }
