@@ -10,10 +10,10 @@ import type { Locale } from '@/i18n/config'
 import { logger } from '@/lib/logger'
 
 /**
- * Convert URLs in text to clickable links
+ * Convert URLs in text to prominent CTA buttons
  * Detects URLs starting with http://, https://, or www.
  */
-function linkifyText(text: string): JSX.Element[] {
+function linkifyText(text: string, buttonGradient: string): JSX.Element[] {
   // Regex to detect URLs
   const urlRegex = /(https?:\/\/[^\s]+|www\.[^\s]+)/g
   const parts: JSX.Element[] = []
@@ -30,21 +30,70 @@ function linkifyText(text: string): JSX.Element[] {
       )
     }
 
-    // Add the clickable URL
+    // Add the clickable URL as a prominent CTA button
     const url = match[0]
     const href = url.startsWith('www.') ? `https://${url}` : url
+
     parts.push(
       <a
         key={`link-${match.index}`}
         href={href}
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 underline font-semibold transition-colors"
+        className={`
+          group
+          mt-3 mb-2
+          flex items-center justify-center gap-2
+          px-5 py-3.5 sm:px-6 sm:py-4
+          ${buttonGradient}
+          text-white font-bold
+          rounded-xl
+          shadow-lg hover:shadow-xl
+          transition-all duration-300 ease-out
+          hover:scale-[1.02] active:scale-[0.98]
+          focus:outline-none focus:ring-4 focus:ring-white/50
+          border-2 border-white/20
+          backdrop-blur-sm
+          relative overflow-hidden
+        `}
         onClick={(e) => e.stopPropagation()}
       >
-        {url}
-        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+        {/* Shimmer effect on hover */}
+        <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+
+        {/* Icon */}
+        <svg
+          className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0 relative z-10"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2.5}
+            d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
+          />
+        </svg>
+
+        {/* Text */}
+        <span className="text-sm sm:text-base font-bold truncate relative z-10">
+          לחץ לפתיחת הקישור
+        </span>
+
+        {/* External link arrow */}
+        <svg
+          className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 group-hover:translate-x-[-2px] group-hover:translate-y-[2px] transition-transform relative z-10"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2.5}
+            d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+          />
         </svg>
       </a>
     )
@@ -277,15 +326,8 @@ export function UrgentMessagesBanner() {
                         leading-relaxed whitespace-pre-line
                         text-right
                         pr-0 sm:pr-2
-                        [&_a]:inline-flex [&_a]:items-center [&_a]:gap-1
-                        [&_a]:px-2 [&_a]:py-1.5 [&_a]:-mx-1
-                        [&_a]:bg-white/70 [&_a]:rounded-md
-                        [&_a]:transition-all [&_a]:duration-200
-                        [&_a]:text-sm [&_a]:sm:text-base
-                        [&_a:hover]:bg-white [&_a:hover]:shadow-md
-                        [&_a]:my-1 [&_a]:block [&_a]:sm:inline-flex
                       `}>
-                        {linkifyText(description)}
+                        {linkifyText(description, config.iconBg)}
                       </div>
                     )}
                   </div>
