@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { X, Shirt, AlertCircle, AlertTriangle, Info } from 'lucide-react'
+import { X, Shirt, AlertCircle, AlertTriangle, Info, Bell } from 'lucide-react'
 import { ShareButton } from '@/components/ui/share-button'
 import { formatUrgentMessageShareData } from '@/lib/utils/share-formatters'
 import { useParams } from 'next/navigation'
@@ -10,18 +10,15 @@ import type { Locale } from '@/i18n/config'
 import { logger } from '@/lib/logger'
 
 /**
- * Convert URLs in text to prominent CTA buttons
- * Detects URLs starting with http://, https://, or www.
+ * Convert URLs in text to prominent inline CTA buttons
  */
-function linkifyText(text: string, accentColor: string): JSX.Element[] {
-  // Regex to detect URLs
+function linkifyText(text: string, buttonBg: string): JSX.Element[] {
   const urlRegex = /(https?:\/\/[^\s]+|www\.[^\s]+)/g
   const parts: JSX.Element[] = []
   let lastIndex = 0
   let match
 
   while ((match = urlRegex.exec(text)) !== null) {
-    // Add text before the URL
     if (match.index > lastIndex) {
       parts.push(
         <span key={`text-${lastIndex}`}>
@@ -30,7 +27,6 @@ function linkifyText(text: string, accentColor: string): JSX.Element[] {
       )
     }
 
-    // Add the clickable URL as a prominent CTA button
     const url = match[0]
     const href = url.startsWith('www.') ? `https://${url}` : url
 
@@ -41,30 +37,20 @@ function linkifyText(text: string, accentColor: string): JSX.Element[] {
         target="_blank"
         rel="noopener noreferrer"
         className={`
-          group inline-flex items-center gap-2
-          mt-2 px-4 py-2.5
-          ${accentColor}
-          text-white text-sm font-bold
+          inline-flex items-center gap-1.5
+          mt-3 px-4 py-2
+          ${buttonBg}
+          text-white font-bold text-sm
           rounded-lg
-          shadow-md hover:shadow-lg
-          transform hover:scale-[1.02] active:scale-[0.98]
+          shadow-md hover:shadow-xl
+          transform hover:scale-105 active:scale-95
           transition-all duration-200
-          focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white/50
+          focus:outline-none focus:ring-4 focus:ring-white/30
         `}
         onClick={(e) => e.stopPropagation()}
       >
-        <svg
-          className="w-4 h-4 flex-shrink-0"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-          />
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
         </svg>
         <span>לחץ לפתיחת הקישור</span>
       </a>
@@ -73,7 +59,6 @@ function linkifyText(text: string, accentColor: string): JSX.Element[] {
     lastIndex = match.index + match[0].length
   }
 
-  // Add remaining text after last URL
   if (lastIndex < text.length) {
     parts.push(
       <span key={`text-${lastIndex}`}>
@@ -82,7 +67,6 @@ function linkifyText(text: string, accentColor: string): JSX.Element[] {
     )
   }
 
-  // If no URLs found, return original text
   return parts.length > 0 ? parts : [<span key="text-0">{text}</span>]
 }
 
@@ -99,12 +83,9 @@ export function UrgentMessagesBanner() {
 
   async function loadMessages() {
     try {
-      // Add cache-busting timestamp to ensure fresh data
       const response = await fetch(`/api/urgent-messages?_t=${Date.now()}`, {
         cache: 'no-store',
-        headers: {
-          'Cache-Control': 'no-cache'
-        }
+        headers: { 'Cache-Control': 'no-cache' }
       })
       const data = await response.json()
       if (data.success) {
@@ -133,7 +114,6 @@ export function UrgentMessagesBanner() {
     logger.userAction('Dismiss urgent message', { messageId: id })
   }
 
-  // Filter out dismissed messages
   const visibleMessages = messages.filter(m => !dismissedIds.includes(m.id))
 
   if (visibleMessages.length === 0) {
@@ -141,257 +121,251 @@ export function UrgentMessagesBanner() {
   }
 
   return (
-    <div className="space-y-3 mb-6">
+    <div className="space-y-4 mb-6">
       {visibleMessages.map((message) => {
         const title = currentLocale === 'ru' ? message.title_ru : message.title_he
         const description = currentLocale === 'ru' ? message.description_ru : message.description_he
 
-        // Modern notification banner design
+        // Professional elevated card design with strong urgency indicators
         const typeConfig = {
           urgent: {
-            borderGradient: 'from-red-500 via-red-400 to-red-500',
-            bgGradient: 'from-red-50/90 via-orange-50/90 to-red-50/90',
-            iconBg: 'bg-gradient-to-br from-red-500 to-orange-500',
-            iconRing: 'ring-red-200',
-            textColor: 'text-red-950',
-            descColor: 'text-red-900',
-            accentColor: 'bg-gradient-to-r from-red-600 to-orange-600',
+            borderColor: 'border-l-red-600',
+            bg: 'bg-white',
+            badgeBg: 'bg-red-600',
+            badgeText: 'text-white',
+            iconBg: 'bg-red-100',
+            iconColor: 'text-red-600',
+            textColor: 'text-gray-900',
+            descColor: 'text-gray-700',
+            buttonBg: 'bg-red-600 hover:bg-red-700',
+            shadowColor: 'shadow-red-500/20',
+            stripeBg: 'bg-gradient-to-b from-red-600 to-red-700',
             Icon: AlertCircle,
-            shadowColor: 'shadow-red-100',
+            badge: 'דחוף',
+            badgeRu: 'СРОЧНО',
           },
           warning: {
-            borderGradient: 'from-orange-500 via-amber-400 to-orange-500',
-            bgGradient: 'from-orange-50/90 via-amber-50/90 to-orange-50/90',
-            iconBg: 'bg-gradient-to-br from-orange-500 to-amber-500',
-            iconRing: 'ring-orange-200',
-            textColor: 'text-orange-950',
-            descColor: 'text-orange-900',
-            accentColor: 'bg-gradient-to-r from-orange-600 to-amber-600',
+            borderColor: 'border-l-orange-600',
+            bg: 'bg-white',
+            badgeBg: 'bg-orange-600',
+            badgeText: 'text-white',
+            iconBg: 'bg-orange-100',
+            iconColor: 'text-orange-600',
+            textColor: 'text-gray-900',
+            descColor: 'text-gray-700',
+            buttonBg: 'bg-orange-600 hover:bg-orange-700',
+            shadowColor: 'shadow-orange-500/20',
+            stripeBg: 'bg-gradient-to-b from-orange-600 to-orange-700',
             Icon: AlertTriangle,
-            shadowColor: 'shadow-orange-100',
+            badge: 'אזהרה',
+            badgeRu: 'ВНИМАНИЕ',
           },
           white_shirt: {
-            borderGradient: 'from-blue-500 via-sky-400 to-blue-500',
-            bgGradient: 'from-blue-50/90 via-sky-50/90 to-blue-50/90',
-            iconBg: 'bg-gradient-to-br from-blue-500 to-sky-500',
-            iconRing: 'ring-blue-200',
-            textColor: 'text-blue-950',
-            descColor: 'text-blue-900',
-            accentColor: 'bg-gradient-to-r from-blue-600 to-sky-600',
+            borderColor: 'border-l-blue-600',
+            bg: 'bg-white',
+            badgeBg: 'bg-blue-600',
+            badgeText: 'text-white',
+            iconBg: 'bg-blue-100',
+            iconColor: 'text-blue-600',
+            textColor: 'text-gray-900',
+            descColor: 'text-gray-700',
+            buttonBg: 'bg-blue-600 hover:bg-blue-700',
+            shadowColor: 'shadow-blue-500/20',
+            stripeBg: 'bg-gradient-to-b from-blue-600 to-blue-700',
             Icon: Shirt,
-            shadowColor: 'shadow-blue-100',
+            badge: 'חשוב',
+            badgeRu: 'ВАЖНО',
           },
           info: {
-            borderGradient: 'from-sky-500 via-blue-400 to-sky-500',
-            bgGradient: 'from-sky-50/90 via-blue-50/90 to-sky-50/90',
-            iconBg: 'bg-gradient-to-br from-sky-500 to-blue-500',
-            iconRing: 'ring-sky-200',
-            textColor: 'text-sky-950',
-            descColor: 'text-sky-900',
-            accentColor: 'bg-gradient-to-r from-sky-600 to-blue-600',
+            borderColor: 'border-l-sky-600',
+            bg: 'bg-white',
+            badgeBg: 'bg-sky-600',
+            badgeText: 'text-white',
+            iconBg: 'bg-sky-100',
+            iconColor: 'text-sky-600',
+            textColor: 'text-gray-900',
+            descColor: 'text-gray-700',
+            buttonBg: 'bg-sky-600 hover:bg-sky-700',
+            shadowColor: 'shadow-sky-500/20',
+            stripeBg: 'bg-gradient-to-b from-sky-600 to-sky-700',
             Icon: Info,
-            shadowColor: 'shadow-sky-100',
+            badge: 'הודעה',
+            badgeRu: 'СООБЩЕНИЕ',
           }
         }
 
         const config = typeConfig[message.type as keyof typeof typeConfig] || typeConfig.info
         const IconComponent = config.Icon
+        const badgeLabel = currentLocale === 'ru' ? config.badgeRu : config.badge
 
         return (
           <div
             key={message.id}
-            className="animate-slide-in-down"
+            className="animate-attention-bounce"
           >
-            {/* Modern notification banner with gradient border */}
-            <div className="relative group">
-              {/* Gradient border effect */}
-              <div className={`
-                absolute inset-0
-                bg-gradient-to-r ${config.borderGradient}
-                rounded-lg
-                opacity-100
-                animate-border-flow
-              `} />
-
-              {/* Main content container */}
-              <div className={`
-                relative
-                bg-gradient-to-r ${config.bgGradient}
-                backdrop-blur-sm
-                rounded-lg
-                m-[2px]
-                ${config.shadowColor} shadow-lg
-                overflow-hidden
-              `}>
-                {/* Animated shimmer overlay */}
-                <div className="absolute inset-0 opacity-30 pointer-events-none">
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer" />
-                </div>
-
-                {/* Content */}
-                <div className="relative flex items-start gap-3 px-4 py-4">
-                  {/* Animated icon with glow */}
-                  <div className="flex-shrink-0 mt-0.5">
-                    <div className={`
-                      relative
-                      ${config.iconBg}
-                      rounded-full
-                      p-2.5
-                      ring-4 ${config.iconRing}
-                      ${config.shadowColor} shadow-lg
-                      animate-icon-pulse
-                    `}>
-                      <IconComponent
-                        className="w-5 h-5 sm:w-6 sm:h-6 text-white"
-                        strokeWidth={2.5}
-                      />
-
-                      {/* Pulsing ring effect */}
-                      <div className={`
-                        absolute inset-0
-                        ${config.iconBg}
-                        rounded-full
-                        animate-ping-slow
-                        opacity-20
-                      `} />
-                    </div>
-                  </div>
-
-                  {/* Content - flexible width */}
-                  <div className="flex-1 min-w-0 text-right pt-0.5">
-                    {/* Title */}
-                    <h4 className={`
-                      font-bold text-base sm:text-lg
-                      ${config.textColor}
-                      leading-tight
-                    `}>
-                      {title}
-                    </h4>
-
-                    {/* Description */}
-                    {description && (
-                      <div className={`
-                        text-sm sm:text-base mt-2
-                        ${config.descColor}
-                        leading-relaxed
-                      `}>
-                        {linkifyText(description, config.accentColor)}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Actions - compact buttons */}
-                  <div className="flex items-start gap-1 flex-shrink-0">
-                    <ShareButton
-                      shareData={formatUrgentMessageShareData(message, currentLocale)}
-                      variant="ghost"
-                      size="icon"
-                      locale={currentLocale}
-                      className={`
-                        h-8 w-8
-                        text-gray-600 hover:text-gray-800
-                        hover:bg-white/70
-                        rounded-lg
-                        transition-all duration-200
-                        hover:scale-110 active:scale-95
-                      `}
-                    />
-                    <button
-                      onClick={() => dismissMessage(message.id)}
-                      className={`
-                        h-8 w-8 rounded-lg p-1.5
-                        text-gray-600 hover:text-gray-800
-                        hover:bg-white/70
-                        transition-all duration-200
-                        hover:scale-110 active:scale-95
-                        focus:outline-none focus:ring-2 focus:ring-gray-400
-                      `}
-                      aria-label={currentLocale === 'ru' ? 'Закрыть' : 'סגור'}
-                    >
-                      <X className="w-full h-full" strokeWidth={2} />
-                    </button>
-                  </div>
+            {/* Elevated professional card with strong left border */}
+            <div className={`
+              relative
+              ${config.bg}
+              border-l-[6px] ${config.borderColor}
+              rounded-xl
+              shadow-2xl ${config.shadowColor}
+              overflow-hidden
+              transform hover:scale-[1.01]
+              transition-all duration-300 ease-out
+            `}>
+              {/* Diagonal stripe pattern on left edge */}
+              <div className="absolute left-0 top-0 bottom-0 w-[6px] overflow-hidden">
+                <div className={`
+                  absolute inset-0 ${config.stripeBg}
+                  opacity-20
+                `}>
+                  <div className="absolute inset-0" style={{
+                    backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,255,255,0.1) 10px, rgba(255,255,255,0.1) 20px)'
+                  }} />
                 </div>
               </div>
+
+              {/* Status badge - top corner */}
+              <div className="absolute top-4 left-4 z-10">
+                <div className={`
+                  flex items-center gap-1.5
+                  ${config.badgeBg} ${config.badgeText}
+                  px-3 py-1
+                  rounded-full
+                  shadow-lg
+                  text-xs font-bold uppercase tracking-wide
+                  animate-subtle-pulse
+                `}>
+                  <Bell className="w-3 h-3" strokeWidth={2.5} />
+                  <span>{badgeLabel}</span>
+                </div>
+              </div>
+
+              {/* Action buttons - top right */}
+              <div className="absolute top-4 right-4 z-10 flex items-center gap-1">
+                <ShareButton
+                  shareData={formatUrgentMessageShareData(message, currentLocale)}
+                  variant="ghost"
+                  size="icon"
+                  locale={currentLocale}
+                  className="
+                    h-9 w-9
+                    bg-white/80 backdrop-blur-sm
+                    text-gray-700 hover:text-gray-900
+                    hover:bg-white
+                    rounded-lg
+                    shadow-md hover:shadow-lg
+                    transition-all duration-200
+                    hover:scale-110 active:scale-95
+                  "
+                />
+                <button
+                  onClick={() => dismissMessage(message.id)}
+                  className="
+                    h-9 w-9 rounded-lg p-2
+                    bg-white/80 backdrop-blur-sm
+                    text-gray-700 hover:text-gray-900
+                    hover:bg-white
+                    shadow-md hover:shadow-lg
+                    transition-all duration-200
+                    hover:scale-110 active:scale-95
+                    focus:outline-none focus:ring-2 focus:ring-gray-400
+                  "
+                  aria-label={currentLocale === 'ru' ? 'Закрыть' : 'סגור'}
+                >
+                  <X className="w-full h-full" strokeWidth={2} />
+                </button>
+              </div>
+
+              {/* Main content */}
+              <div className="flex items-start gap-4 px-6 pt-16 pb-6">
+                {/* Large prominent icon */}
+                <div className="flex-shrink-0 mt-1">
+                  <div className={`
+                    ${config.iconBg}
+                    rounded-2xl
+                    p-4
+                    shadow-lg
+                    transform hover:rotate-6
+                    transition-transform duration-300
+                  `}>
+                    <IconComponent
+                      className={`w-8 h-8 ${config.iconColor}`}
+                      strokeWidth={2}
+                    />
+                  </div>
+                </div>
+
+                {/* Content area */}
+                <div className="flex-1 min-w-0 text-right">
+                  {/* Title */}
+                  <h3 className={`
+                    font-extrabold text-xl sm:text-2xl
+                    ${config.textColor}
+                    leading-tight
+                    mb-2
+                  `}>
+                    {title}
+                  </h3>
+
+                  {/* Description */}
+                  {description && (
+                    <div className={`
+                      text-sm sm:text-base
+                      ${config.descColor}
+                      leading-relaxed
+                    `}>
+                      {linkifyText(description, config.buttonBg)}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Bottom glow effect */}
+              <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
             </div>
           </div>
         )
       })}
 
       <style jsx global>{`
-        @keyframes slide-in-down {
-          from {
-            opacity: 0;
-            transform: translateY(-20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        @keyframes shimmer {
+        @keyframes attention-bounce {
           0% {
-            transform: translateX(-100%);
-          }
-          100% {
-            transform: translateX(100%);
-          }
-        }
-
-        @keyframes border-flow {
-          0%, 100% {
-            background-position: 0% 50%;
+            opacity: 0;
+            transform: translateY(-20px) scale(0.95);
           }
           50% {
-            background-position: 100% 50%;
+            transform: translateY(-5px) scale(1.01);
+          }
+          100% {
+            opacity: 1;
+            transform: translateY(0) scale(1);
           }
         }
 
-        @keyframes icon-pulse {
+        @keyframes subtle-pulse {
           0%, 100% {
+            opacity: 1;
             transform: scale(1);
           }
           50% {
-            transform: scale(1.05);
+            opacity: 0.9;
+            transform: scale(1.02);
           }
         }
 
-        @keyframes ping-slow {
-          75%, 100% {
-            transform: scale(1.5);
-            opacity: 0;
-          }
+        .animate-attention-bounce {
+          animation: attention-bounce 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
-        .animate-slide-in-down {
-          animation: slide-in-down 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        .animate-subtle-pulse {
+          animation: subtle-pulse 2s ease-in-out infinite;
         }
 
-        .animate-shimmer {
-          animation: shimmer 3s infinite;
-        }
-
-        .animate-border-flow {
-          background-size: 200% 200%;
-          animation: border-flow 3s ease-in-out infinite;
-        }
-
-        .animate-icon-pulse {
-          animation: icon-pulse 2s ease-in-out infinite;
-        }
-
-        .animate-ping-slow {
-          animation: ping-slow 2s cubic-bezier(0, 0, 0.2, 1) infinite;
-        }
-
-        /* Respect reduced motion preferences */
         @media (prefers-reduced-motion: reduce) {
-          .animate-slide-in-down,
-          .animate-shimmer,
-          .animate-border-flow,
-          .animate-icon-pulse,
-          .animate-ping-slow {
+          .animate-attention-bounce,
+          .animate-subtle-pulse {
             animation: none;
           }
         }
