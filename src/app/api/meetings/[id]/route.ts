@@ -11,6 +11,39 @@ const UpdateMeetingSchema = z.object({
   is_open: z.boolean().optional()
 })
 
+export async function GET(
+  _req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const supabase = await createClient()
+
+    const { data, error } = await supabase
+      .from('meetings')
+      .select('*')
+      .eq('id', params.id)
+      .single()
+
+    if (error || !data) {
+      return NextResponse.json(
+        { success: false, error: 'הפגישה לא נמצאה' },
+        { status: 404 }
+      )
+    }
+
+    return NextResponse.json({
+      success: true,
+      data
+    })
+  } catch (error) {
+    console.error('Meeting GET error:', error)
+    return NextResponse.json(
+      { success: false, error: 'שגיאה בטעינת הפגישה' },
+      { status: 500 }
+    )
+  }
+}
+
 export async function PATCH(
   req: NextRequest,
   { params }: { params: { id: string } }
