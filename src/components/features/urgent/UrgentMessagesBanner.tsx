@@ -42,13 +42,14 @@ function linkifyText(text: string, accentColor: string): JSX.Element[] {
         rel="noopener noreferrer"
         className={`
           group inline-flex items-center gap-2
-          mt-2 px-4 py-2
+          mt-2 px-4 py-2.5
           ${accentColor}
-          text-white text-sm font-semibold
-          rounded-md
-          hover:opacity-90
+          text-white text-sm font-bold
+          rounded-lg
+          shadow-md hover:shadow-lg
+          transform hover:scale-[1.02] active:scale-[0.98]
           transition-all duration-200
-          focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-current
+          focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white/50
         `}
         onClick={(e) => e.stopPropagation()}
       >
@@ -145,43 +146,51 @@ export function UrgentMessagesBanner() {
         const title = currentLocale === 'ru' ? message.title_ru : message.title_he
         const description = currentLocale === 'ru' ? message.description_ru : message.description_he
 
-        // Banner-style design configurations based on message type
+        // Modern notification banner design
         const typeConfig = {
           urgent: {
-            borderColor: 'border-red-500',
-            bgColor: 'bg-red-50',
-            iconColor: 'text-red-600',
-            textColor: 'text-red-900',
-            descColor: 'text-red-800',
-            accentColor: 'bg-red-600',
+            borderGradient: 'from-red-500 via-red-400 to-red-500',
+            bgGradient: 'from-red-50/90 via-orange-50/90 to-red-50/90',
+            iconBg: 'bg-gradient-to-br from-red-500 to-orange-500',
+            iconRing: 'ring-red-200',
+            textColor: 'text-red-950',
+            descColor: 'text-red-900',
+            accentColor: 'bg-gradient-to-r from-red-600 to-orange-600',
             Icon: AlertCircle,
+            shadowColor: 'shadow-red-100',
           },
           warning: {
-            borderColor: 'border-orange-500',
-            bgColor: 'bg-orange-50',
-            iconColor: 'text-orange-600',
-            textColor: 'text-orange-900',
-            descColor: 'text-orange-800',
-            accentColor: 'bg-orange-600',
+            borderGradient: 'from-orange-500 via-amber-400 to-orange-500',
+            bgGradient: 'from-orange-50/90 via-amber-50/90 to-orange-50/90',
+            iconBg: 'bg-gradient-to-br from-orange-500 to-amber-500',
+            iconRing: 'ring-orange-200',
+            textColor: 'text-orange-950',
+            descColor: 'text-orange-900',
+            accentColor: 'bg-gradient-to-r from-orange-600 to-amber-600',
             Icon: AlertTriangle,
+            shadowColor: 'shadow-orange-100',
           },
           white_shirt: {
-            borderColor: 'border-blue-500',
-            bgColor: 'bg-blue-50',
-            iconColor: 'text-blue-600',
-            textColor: 'text-blue-900',
-            descColor: 'text-blue-800',
-            accentColor: 'bg-blue-600',
+            borderGradient: 'from-blue-500 via-sky-400 to-blue-500',
+            bgGradient: 'from-blue-50/90 via-sky-50/90 to-blue-50/90',
+            iconBg: 'bg-gradient-to-br from-blue-500 to-sky-500',
+            iconRing: 'ring-blue-200',
+            textColor: 'text-blue-950',
+            descColor: 'text-blue-900',
+            accentColor: 'bg-gradient-to-r from-blue-600 to-sky-600',
             Icon: Shirt,
+            shadowColor: 'shadow-blue-100',
           },
           info: {
-            borderColor: 'border-sky-500',
-            bgColor: 'bg-sky-50',
-            iconColor: 'text-sky-600',
-            textColor: 'text-sky-900',
-            descColor: 'text-sky-800',
-            accentColor: 'bg-sky-600',
+            borderGradient: 'from-sky-500 via-blue-400 to-sky-500',
+            bgGradient: 'from-sky-50/90 via-blue-50/90 to-sky-50/90',
+            iconBg: 'bg-gradient-to-br from-sky-500 to-blue-500',
+            iconRing: 'ring-sky-200',
+            textColor: 'text-sky-950',
+            descColor: 'text-sky-900',
+            accentColor: 'bg-gradient-to-r from-sky-600 to-blue-600',
             Icon: Info,
+            shadowColor: 'shadow-sky-100',
           }
         }
 
@@ -191,80 +200,117 @@ export function UrgentMessagesBanner() {
         return (
           <div
             key={message.id}
-            className="animate-slide-down"
+            className="animate-slide-in-down"
           >
-            {/* Banner strip with strong left border */}
-            <div
-              className={`
-                relative overflow-hidden
-                border-l-4 ${config.borderColor}
-                ${config.bgColor}
-                shadow-md
-                rounded-sm
-              `}
-            >
-              {/* Banner content - compact horizontal layout */}
-              <div className="flex items-start gap-3 px-4 py-3">
-                {/* Icon - inline, not in bubble */}
-                <IconComponent
-                  className={`
-                    w-5 h-5 sm:w-6 sm:h-6
-                    flex-shrink-0 mt-0.5
-                    ${config.iconColor}
-                  `}
-                  strokeWidth={2}
-                />
+            {/* Modern notification banner with gradient border */}
+            <div className="relative group">
+              {/* Gradient border effect */}
+              <div className={`
+                absolute inset-0
+                bg-gradient-to-r ${config.borderGradient}
+                rounded-lg
+                opacity-100
+                animate-border-flow
+              `} />
 
-                {/* Content - flexible width */}
-                <div className="flex-1 min-w-0 text-right">
-                  {/* Title */}
-                  <h4 className={`
-                    font-bold text-sm sm:text-base
-                    ${config.textColor}
-                    leading-tight
-                  `}>
-                    {title}
-                  </h4>
-
-                  {/* Description */}
-                  {description && (
-                    <div className={`
-                      text-sm mt-1.5
-                      ${config.descColor}
-                      leading-relaxed
-                    `}>
-                      {linkifyText(description, config.accentColor)}
-                    </div>
-                  )}
+              {/* Main content container */}
+              <div className={`
+                relative
+                bg-gradient-to-r ${config.bgGradient}
+                backdrop-blur-sm
+                rounded-lg
+                m-[2px]
+                ${config.shadowColor} shadow-lg
+                overflow-hidden
+              `}>
+                {/* Animated shimmer overlay */}
+                <div className="absolute inset-0 opacity-30 pointer-events-none">
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer" />
                 </div>
 
-                {/* Actions - compact right-aligned */}
-                <div className="flex items-start gap-1 flex-shrink-0">
-                  <ShareButton
-                    shareData={formatUrgentMessageShareData(message, currentLocale)}
-                    variant="ghost"
-                    size="icon"
-                    locale={currentLocale}
-                    className={`
-                      h-8 w-8
-                      text-gray-500 hover:text-gray-700
-                      hover:bg-white/60
-                      transition-colors
-                    `}
-                  />
-                  <button
-                    onClick={() => dismissMessage(message.id)}
-                    className={`
-                      h-8 w-8 rounded p-1.5
-                      text-gray-500 hover:text-gray-700
-                      hover:bg-white/60
-                      transition-colors
-                      focus:outline-none focus:ring-2 focus:ring-gray-400
-                    `}
-                    aria-label={currentLocale === 'ru' ? 'Закрыть' : 'סגור'}
-                  >
-                    <X className="w-full h-full" strokeWidth={2} />
-                  </button>
+                {/* Content */}
+                <div className="relative flex items-start gap-3 px-4 py-4">
+                  {/* Animated icon with glow */}
+                  <div className="flex-shrink-0 mt-0.5">
+                    <div className={`
+                      relative
+                      ${config.iconBg}
+                      rounded-full
+                      p-2.5
+                      ring-4 ${config.iconRing}
+                      ${config.shadowColor} shadow-lg
+                      animate-icon-pulse
+                    `}>
+                      <IconComponent
+                        className="w-5 h-5 sm:w-6 sm:h-6 text-white"
+                        strokeWidth={2.5}
+                      />
+
+                      {/* Pulsing ring effect */}
+                      <div className={`
+                        absolute inset-0
+                        ${config.iconBg}
+                        rounded-full
+                        animate-ping-slow
+                        opacity-20
+                      `} />
+                    </div>
+                  </div>
+
+                  {/* Content - flexible width */}
+                  <div className="flex-1 min-w-0 text-right pt-0.5">
+                    {/* Title */}
+                    <h4 className={`
+                      font-bold text-base sm:text-lg
+                      ${config.textColor}
+                      leading-tight
+                    `}>
+                      {title}
+                    </h4>
+
+                    {/* Description */}
+                    {description && (
+                      <div className={`
+                        text-sm sm:text-base mt-2
+                        ${config.descColor}
+                        leading-relaxed
+                      `}>
+                        {linkifyText(description, config.accentColor)}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Actions - compact buttons */}
+                  <div className="flex items-start gap-1 flex-shrink-0">
+                    <ShareButton
+                      shareData={formatUrgentMessageShareData(message, currentLocale)}
+                      variant="ghost"
+                      size="icon"
+                      locale={currentLocale}
+                      className={`
+                        h-8 w-8
+                        text-gray-600 hover:text-gray-800
+                        hover:bg-white/70
+                        rounded-lg
+                        transition-all duration-200
+                        hover:scale-110 active:scale-95
+                      `}
+                    />
+                    <button
+                      onClick={() => dismissMessage(message.id)}
+                      className={`
+                        h-8 w-8 rounded-lg p-1.5
+                        text-gray-600 hover:text-gray-800
+                        hover:bg-white/70
+                        transition-all duration-200
+                        hover:scale-110 active:scale-95
+                        focus:outline-none focus:ring-2 focus:ring-gray-400
+                      `}
+                      aria-label={currentLocale === 'ru' ? 'Закрыть' : 'סגור'}
+                    >
+                      <X className="w-full h-full" strokeWidth={2} />
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -273,10 +319,10 @@ export function UrgentMessagesBanner() {
       })}
 
       <style jsx global>{`
-        @keyframes slide-down {
+        @keyframes slide-in-down {
           from {
             opacity: 0;
-            transform: translateY(-12px);
+            transform: translateY(-20px);
           }
           to {
             opacity: 1;
@@ -284,13 +330,68 @@ export function UrgentMessagesBanner() {
           }
         }
 
-        .animate-slide-down {
-          animation: slide-down 0.3s ease-out;
+        @keyframes shimmer {
+          0% {
+            transform: translateX(-100%);
+          }
+          100% {
+            transform: translateX(100%);
+          }
+        }
+
+        @keyframes border-flow {
+          0%, 100% {
+            background-position: 0% 50%;
+          }
+          50% {
+            background-position: 100% 50%;
+          }
+        }
+
+        @keyframes icon-pulse {
+          0%, 100% {
+            transform: scale(1);
+          }
+          50% {
+            transform: scale(1.05);
+          }
+        }
+
+        @keyframes ping-slow {
+          75%, 100% {
+            transform: scale(1.5);
+            opacity: 0;
+          }
+        }
+
+        .animate-slide-in-down {
+          animation: slide-in-down 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .animate-shimmer {
+          animation: shimmer 3s infinite;
+        }
+
+        .animate-border-flow {
+          background-size: 200% 200%;
+          animation: border-flow 3s ease-in-out infinite;
+        }
+
+        .animate-icon-pulse {
+          animation: icon-pulse 2s ease-in-out infinite;
+        }
+
+        .animate-ping-slow {
+          animation: ping-slow 2s cubic-bezier(0, 0, 0.2, 1) infinite;
         }
 
         /* Respect reduced motion preferences */
         @media (prefers-reduced-motion: reduce) {
-          .animate-slide-down {
+          .animate-slide-in-down,
+          .animate-shimmer,
+          .animate-border-flow,
+          .animate-icon-pulse,
+          .animate-ping-slow {
             animation: none;
           }
         }
