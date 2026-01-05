@@ -256,33 +256,33 @@ export function UrgentMessagesBanner() {
                 {/* Main content */}
                 <div className="relative">
                   {/* Mobile-first: Header with buttons (RTL-aware positioning) */}
-                  <div className="absolute top-3 right-3 z-10 flex items-center gap-1">
+                  <div className="absolute top-2 right-2 z-10 flex items-center gap-0.5">
                     <ShareButton
                       shareData={formatUrgentMessageShareData(message, currentLocale)}
                       variant="ghost"
                       size="icon"
                       locale={currentLocale}
                       className={`
-                        h-11 w-11 ${config.textColor}
-                        hover:bg-white/70 active:scale-95
+                        h-9 w-9
+                        text-gray-600 hover:text-gray-800
+                        hover:bg-white/60 active:scale-95
                         transition-all duration-200
-                        rounded-full shadow-sm
+                        rounded-lg
                       `}
                     />
                     <button
                       onClick={() => dismissMessage(message.id)}
                       className={`
-                        h-11 w-11 rounded-full p-2.5
-                        text-gray-500 hover:text-gray-700
-                        hover:bg-white/70
+                        h-9 w-9 rounded-lg p-2
+                        text-gray-600 hover:text-gray-800
+                        hover:bg-white/60
                         transition-all duration-200
                         active:scale-95
-                        focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400
-                        shadow-sm
+                        focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-gray-400
                       `}
                       aria-label={currentLocale === 'ru' ? 'Закрыть' : 'סגור'}
                     >
-                      <X className="h-6 w-6" />
+                      <X className="h-5 w-5" />
                     </button>
                   </div>
 
