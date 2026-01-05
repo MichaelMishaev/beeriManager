@@ -10,6 +10,59 @@ import type { UrgentMessage } from '@/types'
 import type { Locale } from '@/i18n/config'
 import { logger } from '@/lib/logger'
 
+/**
+ * Convert URLs in text to clickable links
+ * Detects URLs starting with http://, https://, or www.
+ */
+function linkifyText(text: string): JSX.Element[] {
+  // Regex to detect URLs
+  const urlRegex = /(https?:\/\/[^\s]+|www\.[^\s]+)/g
+  const parts: JSX.Element[] = []
+  let lastIndex = 0
+  let match
+
+  while ((match = urlRegex.exec(text)) !== null) {
+    // Add text before the URL
+    if (match.index > lastIndex) {
+      parts.push(
+        <span key={`text-${lastIndex}`}>
+          {text.substring(lastIndex, match.index)}
+        </span>
+      )
+    }
+
+    // Add the clickable URL
+    const url = match[0]
+    const href = url.startsWith('www.') ? `https://${url}` : url
+    parts.push(
+      <a
+        key={`link-${match.index}`}
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-blue-600 hover:text-blue-800 underline font-medium"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {url}
+      </a>
+    )
+
+    lastIndex = match.index + match[0].length
+  }
+
+  // Add remaining text after last URL
+  if (lastIndex < text.length) {
+    parts.push(
+      <span key={`text-${lastIndex}`}>
+        {text.substring(lastIndex)}
+      </span>
+    )
+  }
+
+  // If no URLs found, return original text
+  return parts.length > 0 ? parts : [<span key="text-0">{text}</span>]
+}
+
 export function UrgentMessagesBanner() {
   const [messages, setMessages] = useState<UrgentMessage[]>([])
   const [dismissedIds, setDismissedIds] = useState<string[]>([])
@@ -97,7 +150,7 @@ export function UrgentMessagesBanner() {
                       </h3>
                       {description && (
                         <p className="text-blue-800 text-sm whitespace-pre-line">
-                          {description}
+                          {linkifyText(description)}
                         </p>
                       )}
                     </div>
@@ -143,7 +196,7 @@ export function UrgentMessagesBanner() {
                   {title}
                 </h3>
                 {description && (
-                  <p className="text-sm mt-1 text-gray-700 whitespace-pre-line">{description}</p>
+                  <p className="text-sm mt-1 text-gray-700 whitespace-pre-line">{linkifyText(description)}</p>
                 )}
               </div>
               <div className="flex items-center gap-1 flex-shrink-0">
