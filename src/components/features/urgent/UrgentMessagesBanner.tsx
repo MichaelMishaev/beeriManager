@@ -205,73 +205,89 @@ export function UrgentMessagesBanner() {
                 </div>
 
                 {/* Main content */}
-                <div className="relative p-5">
-                  <div className="flex items-start gap-4">
-                    {/* Animated Icon */}
-                    <div className="flex-shrink-0">
-                      <div className={`
-                        ${config.iconBg} ${config.iconColor}
-                        rounded-full p-3 shadow-lg
-                        animate-bounce-subtle
-                      `}>
-                        <IconComponent className="h-7 w-7" strokeWidth={2.5} />
-                      </div>
-                    </div>
+                <div className="relative">
+                  {/* Mobile-first: Header with buttons (RTL: buttons on left in Hebrew) */}
+                  <div className="absolute top-3 left-3 z-10 flex items-center gap-1">
+                    <ShareButton
+                      shareData={formatUrgentMessageShareData(message, currentLocale)}
+                      variant="ghost"
+                      size="icon"
+                      locale={currentLocale}
+                      className={`
+                        h-11 w-11 ${config.textColor}
+                        hover:bg-white/70 active:scale-95
+                        transition-all duration-200
+                        rounded-full shadow-sm
+                      `}
+                    />
+                    <button
+                      onClick={() => dismissMessage(message.id)}
+                      className={`
+                        h-11 w-11 rounded-full p-2.5
+                        text-gray-500 hover:text-gray-700
+                        hover:bg-white/70
+                        transition-all duration-200
+                        active:scale-95
+                        focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400
+                        shadow-sm
+                      `}
+                      aria-label={currentLocale === 'ru' ? 'Закрыть' : 'סגור'}
+                    >
+                      <X className="h-6 w-6" />
+                    </button>
+                  </div>
 
-                    {/* Content */}
-                    <div className="flex-1 min-w-0 pt-1">
-                      {/* Title with icon */}
-                      <div className="flex items-center gap-2 mb-2">
-                        <Bell className={`h-5 w-5 ${config.textColor} animate-ring`} />
-                        <h3 className={`text-xl font-bold ${config.textColor} leading-tight`}>
-                          {title}
-                        </h3>
-                      </div>
-
-                      {/* Description */}
-                      {description && (
+                  {/* Content container */}
+                  <div className="px-4 py-4 sm:px-5 sm:py-5">
+                    {/* Title section with icon - Mobile optimized */}
+                    <div className="flex items-start gap-3 mb-3">
+                      {/* Compact icon for mobile, larger for desktop */}
+                      <div className="flex-shrink-0">
                         <div className={`
-                          text-base ${config.descColor}
-                          leading-relaxed whitespace-pre-line
-                          [&_a]:inline-flex [&_a]:items-center [&_a]:gap-1
-                          [&_a]:px-2 [&_a]:py-1 [&_a]:-mx-1
-                          [&_a]:bg-white/60 [&_a]:rounded
-                          [&_a]:transition-all [&_a]:duration-200
-                          [&_a:hover]:bg-white [&_a:hover]:shadow-sm
+                          ${config.iconBg} ${config.iconColor}
+                          rounded-full shadow-lg
+                          animate-bounce-subtle
+                          p-2 sm:p-2.5
                         `}>
-                          {linkifyText(description)}
+                          <IconComponent className="h-5 w-5 sm:h-6 sm:w-6" strokeWidth={2.5} />
                         </div>
-                      )}
+                      </div>
+
+                      {/* Title - RTL aligned for Hebrew */}
+                      <div className="flex-1 min-w-0 pt-0.5">
+                        <div className="flex items-start gap-2 text-right">
+                          <h3 className={`
+                            text-lg sm:text-xl font-bold ${config.textColor}
+                            leading-tight flex-1
+                          `}>
+                            {title}
+                          </h3>
+                          <Bell className={`
+                            h-5 w-5 sm:h-6 sm:w-6 ${config.textColor}
+                            animate-ring flex-shrink-0 mt-0.5
+                          `} />
+                        </div>
+                      </div>
                     </div>
 
-                    {/* Action buttons */}
-                    <div className="flex items-start gap-1 flex-shrink-0">
-                      <ShareButton
-                        shareData={formatUrgentMessageShareData(message, currentLocale)}
-                        variant="ghost"
-                        size="icon"
-                        locale={currentLocale}
-                        className={`
-                          h-9 w-9 ${config.textColor}
-                          hover:bg-white/50 active:scale-95
-                          transition-all duration-200
-                        `}
-                      />
-                      <button
-                        onClick={() => dismissMessage(message.id)}
-                        className={`
-                          h-9 w-9 rounded-lg p-2
-                          text-gray-400 hover:text-gray-600
-                          hover:bg-white/50
-                          transition-all duration-200
-                          active:scale-95
-                          focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400
-                        `}
-                        aria-label={currentLocale === 'ru' ? 'Закрыть' : 'סגור'}
-                      >
-                        <X className="h-5 w-5" />
-                      </button>
-                    </div>
+                    {/* Description - RTL aligned for Hebrew */}
+                    {description && (
+                      <div className={`
+                        text-sm sm:text-base ${config.descColor}
+                        leading-relaxed whitespace-pre-line
+                        text-right
+                        pr-0 sm:pr-2
+                        [&_a]:inline-flex [&_a]:items-center [&_a]:gap-1
+                        [&_a]:px-2 [&_a]:py-1.5 [&_a]:-mx-1
+                        [&_a]:bg-white/70 [&_a]:rounded-md
+                        [&_a]:transition-all [&_a]:duration-200
+                        [&_a]:text-sm [&_a]:sm:text-base
+                        [&_a:hover]:bg-white [&_a:hover]:shadow-md
+                        [&_a]:my-1 [&_a]:block [&_a]:sm:inline-flex
+                      `}>
+                        {linkifyText(description)}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
