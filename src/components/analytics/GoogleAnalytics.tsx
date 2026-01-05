@@ -3,13 +3,22 @@
 import Script from 'next/script'
 
 export function GoogleAnalytics() {
-  // Hardcode for testing - env vars don't work in client components the same way
-  const measurementId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || 'G-9RS38VPXEZ'
+  const measurementId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID
 
-  if (!measurementId) {
+  // CRITICAL: Don't load GA in development environment
+  // This prevents localhost:4500 traffic from being tracked
+  if (process.env.NODE_ENV === 'development') {
+    console.log('[GA] Skipping GA in development mode')
     return null
   }
 
+  // Don't load GA if no measurement ID configured
+  if (!measurementId) {
+    console.warn('[GA] No NEXT_PUBLIC_GA_MEASUREMENT_ID found - GA disabled')
+    return null
+  }
+
+  // Only load GA in production with proper domain restriction
   return (
     <>
       <Script
@@ -21,8 +30,15 @@ export function GoogleAnalytics() {
           window.dataLayer = window.dataLayer || [];
           function gtag(){dataLayer.push(arguments);}
           gtag('js', new Date());
+
+          // Configure GA with production domain restriction
           gtag('config', '${measurementId}', {
             page_path: window.location.pathname,
+            // Restrict tracking to production domain only
+            cookie_domain: 'beeri.online',
+            cookie_flags: 'SameSite=None;Secure',
+            // Additional bot filtering hints
+            send_page_view: true
           });
         `}
       </Script>
