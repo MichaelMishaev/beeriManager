@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { ArrowRight, Trash2, Calendar, Users, Copy, Check } from 'lucide-react'
+import { ArrowRight, Trash2, Calendar, Users, Copy, Check, FileDown } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -10,6 +10,7 @@ import { toast } from 'sonner'
 import { format } from 'date-fns'
 import { he } from 'date-fns/locale'
 import Link from 'next/link'
+import * as XLSX from 'xlsx'
 import type { Meeting, MeetingIdea } from '@/types'
 
 interface PageProps {
@@ -81,6 +82,46 @@ export default function ManageMeetingPage({ params }: PageProps) {
     setTimeout(() => setCopied(false), 2000)
   }
 
+  function exportToExcel() {
+    if (!meeting || ideas.length === 0) {
+      toast.error('אין רעיונות לייצוא')
+      return
+    }
+
+    // Prepare data for Excel
+    const excelData = ideas.map((idea, index) => ({
+      'מספר': index + 1,
+      'כותרת': idea.title,
+      'תיאור': idea.description || '',
+      'שם השולח': idea.is_anonymous ? 'אנונימי' : (idea.submitter_name || 'אנונימי'),
+      'תאריך ושעה': format(new Date(idea.created_at), 'dd/MM/yyyy HH:mm')
+    }))
+
+    // Create worksheet
+    const worksheet = XLSX.utils.json_to_sheet(excelData)
+
+    // Set column widths
+    worksheet['!cols'] = [
+      { wch: 8 },   // מספר
+      { wch: 30 },  // כותרת
+      { wch: 50 },  // תיאור
+      { wch: 20 },  // שם השולח
+      { wch: 18 }   // תאריך ושעה
+    ]
+
+    // Create workbook
+    const workbook = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'רעיונות')
+
+    // Generate filename with meeting title and date
+    const fileName = `${meeting.title}_רעיונות_${format(new Date(), 'dd-MM-yyyy')}.xlsx`
+
+    // Export to Excel
+    XLSX.writeFile(workbook, fileName)
+
+    toast.success('הקובץ יוצא בהצלחה')
+  }
+
   if (isLoading || !meeting) {
     return (
       <div className="space-y-6">
@@ -148,7 +189,20 @@ export default function ManageMeetingPage({ params }: PageProps) {
 
       <Card>
         <CardHeader>
-          <CardTitle>רעיונות שנשלחו ({ideas.length})</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle>רעיונות שנשלחו ({ideas.length})</CardTitle>
+            {ideas.length > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={exportToExcel}
+                className="gap-2"
+              >
+                <FileDown className="h-4 w-4" />
+                ייצוא לאקסל
+              </Button>
+            )}
+          </div>
         </CardHeader>
         <CardContent>
           {ideas.length === 0 ? (
