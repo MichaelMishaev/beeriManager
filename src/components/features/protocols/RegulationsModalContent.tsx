@@ -1,8 +1,14 @@
 'use client'
 
+import { useRef } from 'react'
 import Image from 'next/image'
+import { FileDown } from 'lucide-react'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { ShareButton } from '@/components/ui/share-button'
+import { Button } from '@/components/ui/button'
+import { toast } from 'sonner'
+import html2canvas from 'html2canvas'
+import jsPDF from 'jspdf'
 import { regulationsContent } from './regulations-content'
 
 interface RegulationsModalContentProps {
@@ -10,12 +16,74 @@ interface RegulationsModalContentProps {
 }
 
 export function RegulationsModalContent({ standalone = false }: RegulationsModalContentProps) {
+  const printRef = useRef<HTMLDivElement>(null)
+
   const shareUrl = typeof window !== 'undefined'
     ? window.location.origin + '/he/regulations'
     : 'https://beeri.online/he/regulations'
 
   const shareTitle = 'תקנון הנהגת הורים - בית ספר בארי נתניה'
   const shareText = 'צפו בתקנון הרשמי של הנהגת ההורים | מסמך מלא ומעודכן לשנת תשפ״ה-תשפ״ו'
+
+  async function exportToPDF() {
+    if (!printRef.current) {
+      toast.error('שגיאה בטעינת התוכן')
+      return
+    }
+
+    try {
+      toast.loading('מכין PDF...')
+
+      // Capture the print content as canvas
+      const canvas = await html2canvas(printRef.current, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff'
+      })
+
+      const imgData = canvas.toDataURL('image/png')
+      const imgWidth = 210 // A4 width in mm (portrait)
+      const imgHeight = (canvas.height * imgWidth) / canvas.width
+
+      // Create PDF in portrait mode
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      })
+
+      const pageHeight = pdf.internal.pageSize.getHeight()
+      const pageWidth = pdf.internal.pageSize.getWidth()
+      let heightLeft = imgHeight
+      let position = 0
+
+      // Add first page
+      pdf.addImage(imgData, 'PNG', 0, position, pageWidth, imgHeight)
+      heightLeft -= pageHeight
+
+      // Add additional pages if needed
+      while (heightLeft > 0) {
+        position = heightLeft - imgHeight
+        pdf.addPage()
+        pdf.addImage(imgData, 'PNG', 0, position, pageWidth, imgHeight)
+        heightLeft -= pageHeight
+      }
+
+      // Generate filename
+      const fileName = `תקנון_הנהגת_הורים_בית_ספר_בארי_${new Date().getFullYear()}.pdf`
+
+      // Save PDF
+      pdf.save(fileName)
+
+      toast.dismiss()
+      toast.success('הקובץ יוצא בהצלחה')
+    } catch (error) {
+      console.error('Error generating PDF:', error)
+      toast.dismiss()
+      toast.error('שגיאה ביצירת PDF')
+    }
+  }
 
   return (
     <div className={standalone ? '' : 'h-full max-h-full flex flex-col overflow-hidden'}>
@@ -24,8 +92,17 @@ export function RegulationsModalContent({ standalone = false }: RegulationsModal
                         border-t-4 border-[#fdc500]
                         p-4 md:p-6 text-white">
 
-        {/* Share Button - Top Right (RTL) */}
-        <div className="absolute right-4 top-4 z-10">
+        {/* Action Buttons - Top Right (RTL) */}
+        <div className="absolute right-4 top-4 z-10 flex gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={exportToPDF}
+            className="bg-white/20 hover:bg-white/30 text-white border-white/30"
+            aria-label="ייצוא ל-PDF"
+          >
+            <FileDown className="h-4 w-4" />
+          </Button>
           <ShareButton
             shareData={{
               title: shareTitle,
@@ -162,6 +239,73 @@ export function RegulationsModalContent({ standalone = false }: RegulationsModal
           </div>
         </div>
       </ScrollArea>
+
+      {/* Hidden print content for PDF export */}
+      <div ref={printRef} className="fixed -left-[9999px] top-0 w-[800px] bg-white p-12" dir="rtl">
+        {/* Header */}
+        <div className="text-center mb-8 border-b-4 border-[#fdc500] pb-6">
+          <h1 className="text-4xl font-black text-[#00509d] mb-3">{regulationsContent.title}</h1>
+          <p className="text-lg font-medium text-gray-700">{regulationsContent.subtitle}</p>
+          <p className="text-base font-bold text-[#fdc500] mt-1">{regulationsContent.academicYear}</p>
+          <p className="text-sm text-gray-600 mt-1">{regulationsContent.chairman}</p>
+        </div>
+
+        {/* Sections */}
+        <div className="space-y-6">
+          {regulationsContent.sections.map((section) => (
+            <div key={section.number} className="mb-6">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-full bg-[#00509d] flex items-center justify-center flex-shrink-0">
+                  <span className="text-white font-bold text-lg">{section.number}</span>
+                </div>
+                <h2 className="text-xl font-bold text-[#00509d]">{section.title}</h2>
+              </div>
+              <div className="space-y-2 text-sm leading-relaxed">
+                {section.content.map((paragraph, idx) => (
+                  <p key={idx}>{paragraph}</p>
+                ))}
+                {section.subsections?.map((subsection, idx) => (
+                  <div key={idx} className="mr-6 space-y-1">
+                    {subsection.title && <p className="font-bold text-[#00509d]">{subsection.title}</p>}
+                    {subsection.content.map((content, contentIdx) => (
+                      <p key={contentIdx}>{content}</p>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Appendix */}
+        <div className="bg-[#fdc500]/10 border-r-4 border-[#fdc500] rounded p-6 mt-8">
+          <h2 className="text-2xl font-bold text-[#00509d] mb-4 text-center">
+            {regulationsContent.appendix.title}
+          </h2>
+          <div className="space-y-4">
+            {regulationsContent.appendix.sections.map((section) => (
+              <div key={section.number}>
+                <h3 className="text-lg font-bold text-[#00296b] mb-2 flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-full bg-[#fdc500] text-white flex items-center justify-center text-xs font-bold">
+                    {section.number}
+                  </span>
+                  {section.title}
+                </h3>
+                <div className="mr-8 space-y-1 text-sm">
+                  {section.content.map((paragraph, idx) => (
+                    <p key={idx}>{paragraph}</p>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="pt-4 mt-6 border-t-2 border-[#fdc500]/30">
+          <p className="text-center text-xs text-gray-600 italic">{regulationsContent.footer}</p>
+        </div>
+      </div>
     </div>
   )
 }
