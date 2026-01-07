@@ -242,33 +242,32 @@ export function RegulationsModalContent({ standalone = false }: RegulationsModal
 
       {/* Hidden print content for PDF export */}
       <div ref={printRef} className="fixed -left-[9999px] top-0 w-[800px] bg-white p-12" dir="rtl">
-        {/* Header */}
-        <div className="text-center mb-8 border-b-4 border-[#fdc500] pb-6">
-          <h1 className="text-4xl font-black text-[#00509d] mb-3">{regulationsContent.title}</h1>
-          <p className="text-lg font-medium text-gray-700">{regulationsContent.subtitle}</p>
-          <p className="text-base font-bold text-[#fdc500] mt-1">{regulationsContent.academicYear}</p>
-          <p className="text-sm text-gray-600 mt-1">{regulationsContent.chairman}</p>
+        {/* Header - Formal Document Style */}
+        <div className="text-center mb-10 pb-6 border-b-2 border-black">
+          <h1 className="text-3xl font-bold text-black mb-2">{regulationsContent.title}</h1>
+          <p className="text-base text-black mt-2">{regulationsContent.subtitle}</p>
+          <p className="text-base text-black mt-1">{regulationsContent.academicYear}</p>
+          <p className="text-sm text-black mt-1">{regulationsContent.chairman}</p>
         </div>
 
-        {/* Sections */}
+        {/* Sections - Clean Formal Style */}
         <div className="space-y-6">
           {regulationsContent.sections.map((section) => (
             <div key={section.number} className="mb-6">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-full bg-[#00509d] flex items-center justify-center flex-shrink-0">
-                  <span className="text-white font-bold text-lg">{section.number}</span>
-                </div>
-                <h2 className="text-xl font-bold text-[#00509d]">{section.title}</h2>
-              </div>
-              <div className="space-y-2 text-sm leading-relaxed">
+              <h2 className="text-lg font-bold text-black mb-3">
+                {section.number}. {section.title}
+              </h2>
+              <div className="space-y-2 text-sm leading-relaxed mr-4">
                 {section.content.map((paragraph, idx) => (
-                  <p key={idx}>{paragraph}</p>
+                  <p key={idx} className="text-black">{paragraph}</p>
                 ))}
                 {section.subsections?.map((subsection, idx) => (
-                  <div key={idx} className="mr-6 space-y-1">
-                    {subsection.title && <p className="font-bold text-[#00509d]">{subsection.title}</p>}
+                  <div key={idx} className="mr-4 space-y-2 mt-2">
+                    {subsection.title && (
+                      <p className="font-bold text-black">{subsection.title}</p>
+                    )}
                     {subsection.content.map((content, contentIdx) => (
-                      <p key={contentIdx}>{content}</p>
+                      <p key={contentIdx} className="text-black">{content}</p>
                     ))}
                   </div>
                 ))}
@@ -277,23 +276,20 @@ export function RegulationsModalContent({ standalone = false }: RegulationsModal
           ))}
         </div>
 
-        {/* Appendix */}
-        <div className="bg-[#fdc500]/10 border-r-4 border-[#fdc500] rounded p-6 mt-8">
-          <h2 className="text-2xl font-bold text-[#00509d] mb-4 text-center">
+        {/* Appendix - Formal Style */}
+        <div className="mt-10 pt-6 border-t-2 border-black">
+          <h2 className="text-xl font-bold text-black mb-6 text-center">
             {regulationsContent.appendix.title}
           </h2>
           <div className="space-y-4">
             {regulationsContent.appendix.sections.map((section) => (
-              <div key={section.number}>
-                <h3 className="text-lg font-bold text-[#00296b] mb-2 flex items-center gap-2">
-                  <span className="w-6 h-6 rounded-full bg-[#fdc500] text-white flex items-center justify-center text-xs font-bold">
-                    {section.number}
-                  </span>
-                  {section.title}
+              <div key={section.number} className="mb-4">
+                <h3 className="text-base font-bold text-black mb-2">
+                  {section.number}. {section.title}
                 </h3>
-                <div className="mr-8 space-y-1 text-sm">
+                <div className="mr-4 space-y-2 text-sm">
                   {section.content.map((paragraph, idx) => (
-                    <p key={idx}>{paragraph}</p>
+                    <p key={idx} className="text-black">{paragraph}</p>
                   ))}
                 </div>
               </div>
@@ -301,9 +297,9 @@ export function RegulationsModalContent({ standalone = false }: RegulationsModal
           </div>
         </div>
 
-        {/* Footer */}
-        <div className="pt-4 mt-6 border-t-2 border-[#fdc500]/30">
-          <p className="text-center text-xs text-gray-600 italic">{regulationsContent.footer}</p>
+        {/* Footer - Formal */}
+        <div className="pt-6 mt-8 border-t border-gray-400">
+          <p className="text-center text-xs text-gray-700">{regulationsContent.footer}</p>
         </div>
       </div>
     </div>
