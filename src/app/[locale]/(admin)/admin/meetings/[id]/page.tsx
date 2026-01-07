@@ -10,7 +10,8 @@ import { toast } from 'sonner'
 import { format } from 'date-fns'
 import { he } from 'date-fns/locale'
 import Link from 'next/link'
-import * as XLSX from 'xlsx'
+import jsPDF from 'jspdf'
+import autoTable from 'jspdf-autotable'
 import type { Meeting, MeetingIdea } from '@/types'
 
 interface PageProps {
@@ -82,42 +83,93 @@ export default function ManageMeetingPage({ params }: PageProps) {
     setTimeout(() => setCopied(false), 2000)
   }
 
-  function exportToExcel() {
+  function exportToPDF() {
     if (!meeting || ideas.length === 0) {
       toast.error('אין רעיונות לייצוא')
       return
     }
 
-    // Prepare data for Excel
-    const excelData = ideas.map((idea, index) => ({
-      'מספר': index + 1,
-      'כותרת': idea.title,
-      'תיאור': idea.description || '',
-      'שם השולח': idea.is_anonymous ? 'אנונימי' : (idea.submitter_name || 'אנונימי'),
-      'תאריך ושעה': format(new Date(idea.created_at), 'dd/MM/yyyy HH:mm')
-    }))
+    // Create PDF document in landscape for better fit
+    const doc = new jsPDF({
+      orientation: 'landscape',
+      unit: 'mm',
+      format: 'a4'
+    })
 
-    // Create worksheet
-    const worksheet = XLSX.utils.json_to_sheet(excelData)
+    const meetingDate = format(new Date(meeting.meeting_date), 'dd/MM/yyyy', { locale: he })
+    const exportDate = format(new Date(), 'dd/MM/yyyy')
 
-    // Set column widths
-    worksheet['!cols'] = [
-      { wch: 8 },   // מספר
-      { wch: 30 },  // כותרת
-      { wch: 50 },  // תיאור
-      { wch: 20 },  // שם השולח
-      { wch: 18 }   // תאריך ושעה
-    ]
+    // Add title and header (RTL)
+    doc.setFontSize(18)
+    doc.setFont('helvetica', 'bold')
 
-    // Create workbook
-    const workbook = XLSX.utils.book_new()
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'רעיונות')
+    // Title in center (Hebrew text - will display LTR but content is RTL)
+    const title = meeting.title
+    doc.text(title, doc.internal.pageSize.width / 2, 20, { align: 'center' })
 
-    // Generate filename with meeting title and date
-    const fileName = `${meeting.title}_רעיונות_${format(new Date(), 'dd-MM-yyyy')}.xlsx`
+    // Meeting details
+    doc.setFontSize(11)
+    doc.setFont('helvetica', 'normal')
+    doc.text(`תאריך פגישה: ${meetingDate}`, doc.internal.pageSize.width - 20, 30, { align: 'right' })
+    doc.text(`תאריך ייצוא: ${exportDate}`, doc.internal.pageSize.width - 20, 36, { align: 'right' })
+    doc.text(`סה"כ רעיונות: ${ideas.length}`, doc.internal.pageSize.width - 20, 42, { align: 'right' })
 
-    // Export to Excel
-    XLSX.writeFile(workbook, fileName)
+    // Prepare table data
+    const tableData = ideas.map((idea, index) => [
+      format(new Date(idea.created_at), 'dd/MM/yyyy HH:mm'),
+      idea.is_anonymous ? 'אנונימי' : (idea.submitter_name || 'אנונימי'),
+      idea.description || '',
+      idea.title,
+      String(index + 1)
+    ])
+
+    // Generate table with Hebrew headers (RTL order)
+    autoTable(doc, {
+      startY: 50,
+      head: [['תאריך ושעה', 'שם השולח', 'תיאור', 'כותרת', 'מספר']],
+      body: tableData,
+      styles: {
+        font: 'helvetica',
+        fontSize: 10,
+        cellPadding: 3,
+        lineColor: [200, 200, 200],
+        lineWidth: 0.1
+      },
+      headStyles: {
+        fillColor: [41, 128, 185],
+        textColor: 255,
+        fontStyle: 'bold',
+        halign: 'right'
+      },
+      bodyStyles: {
+        halign: 'right',
+        valign: 'top'
+      },
+      columnStyles: {
+        0: { cellWidth: 35 },  // תאריך ושעה
+        1: { cellWidth: 40 },  // שם השולח
+        2: { cellWidth: 90 },  // תיאור
+        3: { cellWidth: 65 },  // כותרת
+        4: { cellWidth: 20 }   // מספר
+      },
+      margin: { top: 50, right: 15, bottom: 20, left: 15 },
+      theme: 'grid',
+      tableWidth: 'auto',
+      didDrawPage: (data) => {
+        // Footer with page numbers
+        const pageCount = doc.getNumberOfPages()
+        doc.setFontSize(9)
+        doc.setFont('helvetica', 'normal')
+        const footerText = `עמוד ${data.pageNumber} מתוך ${pageCount}`
+        doc.text(footerText, doc.internal.pageSize.width / 2, doc.internal.pageSize.height - 10, { align: 'center' })
+      }
+    })
+
+    // Generate filename
+    const fileName = `${meeting.title}_רעיונות_${format(new Date(), 'dd-MM-yyyy')}.pdf`
+
+    // Save PDF
+    doc.save(fileName)
 
     toast.success('הקובץ יוצא בהצלחה')
   }
@@ -195,11 +247,11 @@ export default function ManageMeetingPage({ params }: PageProps) {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={exportToExcel}
+                onClick={exportToPDF}
                 className="gap-2"
               >
                 <FileDown className="h-4 w-4" />
-                ייצוא לאקסל
+                ייצוא ל-PDF
               </Button>
             )}
           </div>
