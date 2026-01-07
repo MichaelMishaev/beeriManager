@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { ArrowRight, Trash2, Calendar, Users, Copy, Check, FileDown } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -10,8 +10,8 @@ import { toast } from 'sonner'
 import { format } from 'date-fns'
 import { he } from 'date-fns/locale'
 import Link from 'next/link'
+import html2canvas from 'html2canvas'
 import jsPDF from 'jspdf'
-import autoTable from 'jspdf-autotable'
 import type { Meeting, MeetingIdea } from '@/types'
 
 interface PageProps {
@@ -23,6 +23,7 @@ export default function ManageMeetingPage({ params }: PageProps) {
   const [ideas, setIdeas] = useState<MeetingIdea[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [copied, setCopied] = useState(false)
+  const printRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     fetchMeetingData()
@@ -83,95 +84,64 @@ export default function ManageMeetingPage({ params }: PageProps) {
     setTimeout(() => setCopied(false), 2000)
   }
 
-  function exportToPDF() {
-    if (!meeting || ideas.length === 0) {
+  async function exportToPDF() {
+    if (!meeting || ideas.length === 0 || !printRef.current) {
       toast.error('אין רעיונות לייצוא')
       return
     }
 
-    // Create PDF document in landscape for better fit
-    const doc = new jsPDF({
-      orientation: 'landscape',
-      unit: 'mm',
-      format: 'a4'
-    })
+    try {
+      toast.loading('מכין PDF...')
 
-    const meetingDate = format(new Date(meeting.meeting_date), 'dd/MM/yyyy', { locale: he })
-    const exportDate = format(new Date(), 'dd/MM/yyyy')
+      // Capture the print content as canvas
+      const canvas = await html2canvas(printRef.current, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff'
+      })
 
-    // Add title and header (RTL)
-    doc.setFontSize(18)
-    doc.setFont('helvetica', 'bold')
+      const imgData = canvas.toDataURL('image/png')
+      const imgWidth = 297 // A4 width in mm (landscape)
+      const imgHeight = (canvas.height * imgWidth) / canvas.width
 
-    // Title in center (Hebrew text - will display LTR but content is RTL)
-    const title = meeting.title
-    doc.text(title, doc.internal.pageSize.width / 2, 20, { align: 'center' })
+      // Create PDF in landscape mode
+      const pdf = new jsPDF({
+        orientation: imgHeight > 210 ? 'landscape' : 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      })
 
-    // Meeting details
-    doc.setFontSize(11)
-    doc.setFont('helvetica', 'normal')
-    doc.text(`תאריך פגישה: ${meetingDate}`, doc.internal.pageSize.width - 20, 30, { align: 'right' })
-    doc.text(`תאריך ייצוא: ${exportDate}`, doc.internal.pageSize.width - 20, 36, { align: 'right' })
-    doc.text(`סה"כ רעיונות: ${ideas.length}`, doc.internal.pageSize.width - 20, 42, { align: 'right' })
+      const pageHeight = pdf.internal.pageSize.getHeight()
+      const pageWidth = pdf.internal.pageSize.getWidth()
+      let heightLeft = imgHeight
+      let position = 0
 
-    // Prepare table data
-    const tableData = ideas.map((idea, index) => [
-      format(new Date(idea.created_at), 'dd/MM/yyyy HH:mm'),
-      idea.is_anonymous ? 'אנונימי' : (idea.submitter_name || 'אנונימי'),
-      idea.description || '',
-      idea.title,
-      String(index + 1)
-    ])
+      // Add first page
+      pdf.addImage(imgData, 'PNG', 0, position, pageWidth, imgHeight)
+      heightLeft -= pageHeight
 
-    // Generate table with Hebrew headers (RTL order)
-    autoTable(doc, {
-      startY: 50,
-      head: [['תאריך ושעה', 'שם השולח', 'תיאור', 'כותרת', 'מספר']],
-      body: tableData,
-      styles: {
-        font: 'helvetica',
-        fontSize: 10,
-        cellPadding: 3,
-        lineColor: [200, 200, 200],
-        lineWidth: 0.1
-      },
-      headStyles: {
-        fillColor: [41, 128, 185],
-        textColor: 255,
-        fontStyle: 'bold',
-        halign: 'right'
-      },
-      bodyStyles: {
-        halign: 'right',
-        valign: 'top'
-      },
-      columnStyles: {
-        0: { cellWidth: 35 },  // תאריך ושעה
-        1: { cellWidth: 40 },  // שם השולח
-        2: { cellWidth: 90 },  // תיאור
-        3: { cellWidth: 65 },  // כותרת
-        4: { cellWidth: 20 }   // מספר
-      },
-      margin: { top: 50, right: 15, bottom: 20, left: 15 },
-      theme: 'grid',
-      tableWidth: 'auto',
-      didDrawPage: (data) => {
-        // Footer with page numbers
-        const pageCount = doc.getNumberOfPages()
-        doc.setFontSize(9)
-        doc.setFont('helvetica', 'normal')
-        const footerText = `עמוד ${data.pageNumber} מתוך ${pageCount}`
-        doc.text(footerText, doc.internal.pageSize.width / 2, doc.internal.pageSize.height - 10, { align: 'center' })
+      // Add additional pages if needed
+      while (heightLeft > 0) {
+        position = heightLeft - imgHeight
+        pdf.addPage()
+        pdf.addImage(imgData, 'PNG', 0, position, pageWidth, imgHeight)
+        heightLeft -= pageHeight
       }
-    })
 
-    // Generate filename
-    const fileName = `${meeting.title}_רעיונות_${format(new Date(), 'dd-MM-yyyy')}.pdf`
+      // Generate filename
+      const fileName = `${meeting.title}_רעיונות_${format(new Date(), 'dd-MM-yyyy')}.pdf`
 
-    // Save PDF
-    doc.save(fileName)
+      // Save PDF
+      pdf.save(fileName)
 
-    toast.success('הקובץ יוצא בהצלחה')
+      toast.dismiss()
+      toast.success('הקובץ יוצא בהצלחה')
+    } catch (error) {
+      console.error('Error generating PDF:', error)
+      toast.dismiss()
+      toast.error('שגיאה ביצירת PDF')
+    }
   }
 
   if (isLoading || !meeting) {
@@ -314,6 +284,45 @@ export default function ManageMeetingPage({ params }: PageProps) {
           )}
         </CardContent>
       </Card>
+
+      {/* Hidden print content for PDF export */}
+      <div ref={printRef} className="fixed -left-[9999px] top-0 w-[1200px] bg-white p-8" dir="rtl">
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold text-center mb-4">{meeting.title}</h1>
+          <div className="text-sm text-gray-600 text-right space-y-1">
+            <p>תאריך פגישה: {format(new Date(meeting.meeting_date), 'dd/MM/yyyy', { locale: he })}</p>
+            <p>תאריך ייצוא: {format(new Date(), 'dd/MM/yyyy')}</p>
+            <p>סה״כ רעיונות: {ideas.length}</p>
+          </div>
+        </div>
+
+        <table className="w-full border-collapse border border-gray-300">
+          <thead>
+            <tr className="bg-blue-600 text-white">
+              <th className="border border-gray-300 p-3 text-right">מספר</th>
+              <th className="border border-gray-300 p-3 text-right">כותרת</th>
+              <th className="border border-gray-300 p-3 text-right">תיאור</th>
+              <th className="border border-gray-300 p-3 text-right">שם השולח</th>
+              <th className="border border-gray-300 p-3 text-right">תאריך ושעה</th>
+            </tr>
+          </thead>
+          <tbody>
+            {ideas.map((idea, index) => (
+              <tr key={idea.id} className="hover:bg-gray-50">
+                <td className="border border-gray-300 p-3 text-right">{index + 1}</td>
+                <td className="border border-gray-300 p-3 text-right font-semibold">{idea.title}</td>
+                <td className="border border-gray-300 p-3 text-right">{idea.description || '-'}</td>
+                <td className="border border-gray-300 p-3 text-right">
+                  {idea.is_anonymous ? 'אנונימי' : (idea.submitter_name || 'אנונימי')}
+                </td>
+                <td className="border border-gray-300 p-3 text-right">
+                  {format(new Date(idea.created_at), 'dd/MM/yyyy HH:mm')}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   )
 }
