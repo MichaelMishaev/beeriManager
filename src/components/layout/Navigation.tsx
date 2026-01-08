@@ -5,7 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { Menu, X, Home, Users, HelpCircle, LogOut, LogIn, Phone } from 'lucide-react'
+import { Menu, X, Home, Users, HelpCircle, LogOut, LogIn, Phone, MessageCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { LanguageSwitcher } from '@/components/ui/language-switcher'
 import { InstallButton } from '@/components/pwa/InstallButton'
@@ -23,6 +23,7 @@ function useNavItems() {
     committee: [
       { href: '/admin', label: t('adminHome'), icon: Home },
       { href: '/', label: t('parentsHome'), icon: Users },
+      { href: '/groups', label: t('groups'), icon: MessageCircle },
       { href: '/help', label: t('help'), icon: HelpCircle },
     ]
   }

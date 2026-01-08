@@ -8,6 +8,7 @@ import { formatWhatsAppLinksShareData } from '@/lib/utils/share-formatters'
 import { WHATSAPP_COMMUNITY } from './WhatsAppCommunityLinks'
 import { useTranslations } from 'next-intl'
 import { useParams } from 'next/navigation'
+import Link from 'next/link'
 import type { Locale } from '@/i18n/config'
 
 export function WhatsAppCommunityCard() {
@@ -37,7 +38,13 @@ export function WhatsAppCommunityCard() {
           />
         </div>
         <CardDescription className="text-sm text-gray-600">
-          {t('subtitle')}
+          {t('subtitle')}{' '}
+          <Link
+            href={`/${locale}/groups/explanation`}
+            className="text-blue-600 hover:text-blue-700 underline underline-offset-2 font-medium transition-colors"
+          >
+            {t('explanationLink')}
+          </Link>
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
