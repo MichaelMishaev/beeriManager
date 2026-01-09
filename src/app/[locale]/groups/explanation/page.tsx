@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useTranslations, useLocale } from 'next-intl'
 import { MessageCircle, ChevronDown, ExternalLink, Shield, Clock, Users, Megaphone } from 'lucide-react'
 import Link from 'next/link'
@@ -9,6 +9,39 @@ import { cn } from '@/lib/utils'
 import { ShareButton } from '@/components/ui/share-button'
 import { formatWhatsAppGroupsExplanationShareData } from '@/lib/utils/share-formatters'
 import type { Locale } from '@/i18n/config'
+
+// Custom hook for scroll-triggered animations
+function useScrollAnimation() {
+  const ref = useRef<HTMLDivElement>(null)
+  const [isVisible, setIsVisible] = useState(false)
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true)
+        }
+      },
+      {
+        threshold: 0.1,
+        rootMargin: '0px 0px -100px 0px'
+      }
+    )
+
+    const currentRef = ref.current
+    if (currentRef) {
+      observer.observe(currentRef)
+    }
+
+    return () => {
+      if (currentRef) {
+        observer.unobserve(currentRef)
+      }
+    }
+  }, [])
+
+  return { ref, isVisible }
+}
 
 // WhatsApp group data
 const grades = [
@@ -79,6 +112,13 @@ export default function GroupsExplanationPage() {
   // Share data for this page
   const shareData = formatWhatsAppGroupsExplanationShareData(locale)
 
+  // Scroll animation hooks for different sections
+  const benefitsAnimation = useScrollAnimation()
+  const socialProofAnimation = useScrollAnimation()
+  const gradeSelectionAnimation = useScrollAnimation()
+  const noSpamAnimation = useScrollAnimation()
+  const trustBadgeAnimation = useScrollAnimation()
+
   // Track conversion for analytics
   const trackConversion = (gradeId: string) => {
     // Could be integrated with Google Analytics or custom analytics
@@ -87,8 +127,21 @@ export default function GroupsExplanationPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-green-50 via-white to-green-50 pb-[100px]">
-      {/* Skip to main content link for accessibility */}
+    <>
+      {/* Respect prefers-reduced-motion for accessibility */}
+      <style jsx global>{`
+        @media (prefers-reduced-motion: reduce) {
+          * {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+            scroll-behavior: auto !important;
+          }
+        }
+      `}</style>
+
+      <div className="min-h-screen bg-gradient-to-b from-green-50 via-white to-green-50 pb-[100px]">
+        {/* Skip to main content link for accessibility */}
       <a
         href="#grade-selection"
         className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:right-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-white focus:text-gray-900 focus:rounded-lg focus:shadow-lg focus:outline-none focus:ring-4 focus:ring-green-500"
@@ -190,10 +243,23 @@ export default function GroupsExplanationPage() {
         <div className="bg-white rounded-t-3xl shadow-xl">
           <div className="max-w-lg mx-auto px-4 pt-8 pb-6 space-y-6">
 
-        {/* Quick Benefits - Bento Grid Layout (varied sizes) */}
-        <div className="grid grid-cols-4 gap-3 auto-rows-[80px]">
+        {/* Quick Benefits - Bento Grid Layout (varied sizes) - ANIMATED: Fade-in with stagger */}
+        <div
+          ref={benefitsAnimation.ref}
+          className={cn(
+            "grid grid-cols-4 gap-3 auto-rows-[80px] transition-all duration-700",
+            benefitsAnimation.isVisible
+              ? "opacity-100 translate-y-0"
+              : "opacity-0 translate-y-8"
+          )}
+        >
           {/* Benefit 1 - Spans 2 columns */}
-          <div className="col-span-2 bg-white/80 backdrop-blur-sm rounded-xl p-4 shadow-sm border border-gray-100 text-center transform hover:scale-[1.02] active:scale-[0.98] transition-transform duration-200">
+          <div
+            className="col-span-2 bg-white/80 backdrop-blur-sm rounded-xl p-4 shadow-sm border border-gray-100 text-center transform hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
+            style={{
+              transitionDelay: benefitsAnimation.isVisible ? '100ms' : '0ms'
+            }}
+          >
             <div className="inline-flex items-center justify-center w-10 h-10 bg-blue-50 rounded-full mb-1">
               <Clock className="h-5 w-5 text-blue-600" />
             </div>
@@ -201,7 +267,12 @@ export default function GroupsExplanationPage() {
           </div>
 
           {/* Benefit 2 - Spans 2 columns */}
-          <div className="col-span-2 bg-white/80 backdrop-blur-sm rounded-xl p-4 shadow-sm border border-gray-100 text-center transform hover:scale-[1.02] active:scale-[0.98] transition-transform duration-200">
+          <div
+            className="col-span-2 bg-white/80 backdrop-blur-sm rounded-xl p-4 shadow-sm border border-gray-100 text-center transform hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
+            style={{
+              transitionDelay: benefitsAnimation.isVisible ? '200ms' : '0ms'
+            }}
+          >
             <div className="inline-flex items-center justify-center w-10 h-10 bg-purple-50 rounded-full mb-1">
               <Users className="h-5 w-5 text-purple-600" />
             </div>
@@ -209,7 +280,12 @@ export default function GroupsExplanationPage() {
           </div>
 
           {/* Benefit 3 - Spans 2 columns */}
-          <div className="col-span-2 bg-white/80 backdrop-blur-sm rounded-xl p-4 shadow-sm border border-gray-100 text-center transform hover:scale-[1.02] active:scale-[0.98] transition-transform duration-200">
+          <div
+            className="col-span-2 bg-white/80 backdrop-blur-sm rounded-xl p-4 shadow-sm border border-gray-100 text-center transform hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
+            style={{
+              transitionDelay: benefitsAnimation.isVisible ? '300ms' : '0ms'
+            }}
+          >
             <div className="inline-flex items-center justify-center w-10 h-10 bg-amber-50 rounded-full mb-1">
               <Megaphone className="h-5 w-5 text-amber-600" />
             </div>
@@ -217,7 +293,12 @@ export default function GroupsExplanationPage() {
           </div>
 
           {/* Benefit 4 - Spans 2 columns */}
-          <div className="col-span-2 bg-white/80 backdrop-blur-sm rounded-xl p-4 shadow-sm border border-gray-100 text-center transform hover:scale-[1.02] active:scale-[0.98] transition-transform duration-200">
+          <div
+            className="col-span-2 bg-white/80 backdrop-blur-sm rounded-xl p-4 shadow-sm border border-gray-100 text-center transform hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
+            style={{
+              transitionDelay: benefitsAnimation.isVisible ? '400ms' : '0ms'
+            }}
+          >
             <div className="inline-flex items-center justify-center w-10 h-10 bg-green-50 rounded-full mb-1">
               <Shield className="h-5 w-5 text-green-600" />
             </div>
@@ -225,12 +306,29 @@ export default function GroupsExplanationPage() {
           </div>
         </div>
 
-        {/* Call to Action - Choose Your Grade */}
-        <div id="grade-selection" className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border-2 border-gray-100 p-6 space-y-4">
-          {/* FEATURE: Social Proof Counter - Drives urgency */}
-          <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-center mb-4">
+        {/* Call to Action - Choose Your Grade - ANIMATED: Fade-in */}
+        <div
+          ref={gradeSelectionAnimation.ref}
+          id="grade-selection"
+          className={cn(
+            "bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border-2 border-gray-100 p-6 space-y-4 transition-all duration-700",
+            gradeSelectionAnimation.isVisible
+              ? "opacity-100 translate-y-0"
+              : "opacity-0 translate-y-8"
+          )}
+        >
+          {/* FEATURE: Social Proof Counter - Drives urgency - ANIMATED: Scale-in */}
+          <div
+            ref={socialProofAnimation.ref}
+            className={cn(
+              "bg-green-50 border border-green-200 rounded-lg p-3 text-center mb-4 transition-all duration-500",
+              socialProofAnimation.isVisible
+                ? "opacity-100 scale-100"
+                : "opacity-0 scale-95"
+            )}
+          >
             <p className="text-sm font-semibold text-green-900">
-              🎉 <span className="font-bold">1,247+ הורים</span> הצטרפו השבוע!
+              🎉 <span className="font-bold">400+ הורים</span> כבר הצטרפו!
             </p>
           </div>
 
@@ -328,8 +426,16 @@ export default function GroupsExplanationPage() {
           )}
         </div>
 
-        {/* No Spam Guarantee - IMPROVED: Lighter visual weight, moved after CTA */}
-        <div className="bg-yellow-50/50 rounded-xl border border-yellow-200 p-4 shadow-sm">
+        {/* No Spam Guarantee - IMPROVED: Lighter visual weight, moved after CTA - ANIMATED: Fade-in */}
+        <div
+          ref={noSpamAnimation.ref}
+          className={cn(
+            "bg-yellow-50/50 rounded-xl border border-yellow-200 p-4 shadow-sm transition-all duration-700",
+            noSpamAnimation.isVisible
+              ? "opacity-100 translate-y-0"
+              : "opacity-0 translate-y-8"
+          )}
+        >
           <div className="flex items-start gap-3">
             <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center flex-shrink-0">
               <span className="text-xl" role="img" aria-label="No spam">📵</span>
@@ -410,8 +516,16 @@ export default function GroupsExplanationPage() {
           )}
         </div>
 
-        {/* Trust Badge - IMPROVED: Enhanced visual credibility */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-gray-200 p-5 shadow-sm">
+        {/* Trust Badge - IMPROVED: Enhanced visual credibility - ANIMATED: Scale-in */}
+        <div
+          ref={trustBadgeAnimation.ref}
+          className={cn(
+            "bg-white/80 backdrop-blur-sm rounded-xl border border-gray-200 p-5 shadow-sm transition-all duration-700",
+            trustBadgeAnimation.isVisible
+              ? "opacity-100 scale-100"
+              : "opacity-0 scale-95"
+          )}
+        >
           {/* Trust indicators row */}
           <div className="flex items-center justify-center gap-3 mb-3">
             <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
@@ -476,6 +590,7 @@ export default function GroupsExplanationPage() {
           </button>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   )
 }
