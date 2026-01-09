@@ -778,3 +778,52 @@ export function formatSkillsSurveyShareData(
 
   return { title, text, url: '' }
 }
+
+// WhatsApp Groups Explanation page share data formatter
+export function formatWhatsAppGroupsExplanationShareData(
+  locale: 'he' | 'ru' = 'he'
+): ShareData {
+  const url = `https://beeri.online/${locale}/groups/explanation`
+
+  const title = locale === 'ru'
+    ? '📱 Присоединяйтесь к группам WhatsApp по классам!'
+    : '📱 הצטרפו לקבוצות WhatsApp לפי שכבות!'
+
+  const text = locale === 'ru'
+    ? `*${title}*
+
+🎯 Официальные обновления от родительского комитета
+⏰ Никакого спама - только важные обновления!
+🏫 Школа Беэри, Нетания
+
+✨ Что вы получите:
+• Важные обновления о школьных событиях
+• Информацию о мероприятиях и поездках
+• Прямую связь с комитетом
+• Только проверенная информация
+
+📌 Присоединяйтесь к группе вашего класса:
+🔗 ${url}
+
+📢 Не пропустите обновления! Заходите на портал:
+🌐 https://beeri.online/${locale}`
+    : `*${title}*
+
+🎯 עדכונים רשמיים מועד ההורים
+⏰ ללא ספאם - רק עדכונים חשובים!
+🏫 בית ספר בארי, נתניה
+
+✨ מה תקבלו:
+• עדכונים חשובים על אירועי בית הספר
+• מידע על פעילויות וטיולים
+• קשר ישיר עם ועד ההורים
+• מידע מהימן ומאומת בלבד
+
+📌 הצטרפו לקבוצה של שכבת ילדכם:
+🔗 ${url}
+
+📢 אל תפספסו שום עדכון! בקרו בפורטל:
+🌐 https://beeri.online/${locale}`
+
+  return { title, text, url }
+}

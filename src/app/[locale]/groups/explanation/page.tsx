@@ -5,6 +5,9 @@ import { useTranslations, useLocale } from 'next-intl'
 import { MessageCircle, ChevronDown, ExternalLink, Shield, Clock, Users, Megaphone } from 'lucide-react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
+import { ShareButton } from '@/components/ui/share-button'
+import { formatWhatsAppGroupsExplanationShareData } from '@/lib/utils/share-formatters'
+import type { Locale } from '@/i18n/config'
 
 // WhatsApp group data
 const grades = [
@@ -69,8 +72,11 @@ const russianGroup = {
 export default function GroupsExplanationPage() {
   const t = useTranslations('groups')
   const tExp = useTranslations('groupsExplanation')
-  const locale = useLocale()
+  const locale = useLocale() as Locale
   const [showDetails, setShowDetails] = useState(false)
+
+  // Share data for this page
+  const shareData = formatWhatsAppGroupsExplanationShareData(locale)
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-green-50 via-white to-green-50 pb-24">
@@ -79,6 +85,17 @@ export default function GroupsExplanationPage() {
         {/* Decorative background elements for depth */}
         <div className="absolute top-0 left-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
         <div className="absolute bottom-0 right-0 w-48 h-48 bg-white/5 rounded-full blur-2xl translate-x-1/3 translate-y-1/3" />
+
+        {/* Share Button - Top Right */}
+        <div className="absolute top-4 left-4 z-10">
+          <ShareButton
+            shareData={shareData}
+            variant="ghost"
+            size="icon"
+            locale={locale}
+            className="bg-white/20 backdrop-blur-xl hover:bg-white/30 border border-white/30 text-white hover:text-white shadow-lg"
+          />
+        </div>
 
         <div className="relative max-w-lg mx-auto text-center space-y-4">
           {/* WhatsApp Icon with enhanced glassmorphism */}
