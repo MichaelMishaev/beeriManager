@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useTranslations, useLocale } from 'next-intl'
 import { MessageCircle, ChevronDown, ExternalLink, Shield, Clock, Users, Megaphone } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { cn } from '@/lib/utils'
 import { ShareButton } from '@/components/ui/share-button'
 import { formatWhatsAppGroupsExplanationShareData } from '@/lib/utils/share-formatters'
@@ -63,7 +64,7 @@ const grades = [
 
 const russianGroup = {
   id: 'russian-group',
-  emoji: '🇷🇺',
+  iconUrl: '/images/ru-icon.png',
   nameKey: 'russianGroup',
   url: 'https://chat.whatsapp.com/G9bcGHURhgiLp8TgVLQomn',
   color: '#0088cc'
@@ -252,7 +253,15 @@ export default function GroupsExplanationPage() {
                          shadow-lg hover:shadow-xl"
             >
               <div className="flex items-center gap-4">
-                <span className="text-4xl group-hover:scale-110 group-active:scale-95 transition-transform duration-200">{russianGroup.emoji}</span>
+                <div className="relative w-14 h-14 flex-shrink-0 group-hover:scale-110 group-active:scale-95 transition-transform duration-200">
+                  <Image
+                    src={russianGroup.iconUrl}
+                    alt="RU"
+                    width={56}
+                    height={56}
+                    className="rounded-lg object-cover"
+                  />
+                </div>
                 <div>
                   <p className="font-bold text-lg">{t(russianGroup.nameKey)}</p>
                   <p className="text-sm text-blue-100">{t('russianGroupSubtitle')}</p>
