@@ -101,7 +101,7 @@ export default function GroupsExplanationPage() {
         <div className="absolute top-0 left-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
         <div className="absolute bottom-0 right-0 w-48 h-48 bg-white/5 rounded-full blur-2xl translate-x-1/3 translate-y-1/3" />
 
-        {/* Share Button - Top Right */}
+        {/* Share Button - Top Right - FIXED: Added focus indicators */}
         <div className="absolute top-4 left-4 z-10">
           <ShareButton
             shareData={shareData}
@@ -110,7 +110,7 @@ export default function GroupsExplanationPage() {
             locale={locale}
             aria-label="שתף את הדף"
             title="שתף את הדף"
-            className="bg-white/20 backdrop-blur-xl hover:bg-white/30 border border-white/30 text-white hover:text-white shadow-lg"
+            className="bg-white/20 backdrop-blur-xl hover:bg-white/30 border border-white/30 text-white hover:text-white shadow-lg focus:outline-none focus:ring-4 focus:ring-white/60 focus:ring-offset-2 focus:ring-offset-green-500"
           />
         </div>
 
@@ -120,8 +120,8 @@ export default function GroupsExplanationPage() {
             <MessageCircle className="h-10 w-10 drop-shadow-lg" />
           </div>
 
-          {/* Headline */}
-          <h1 className="text-2xl md:text-3xl font-bold leading-tight drop-shadow-md">
+          {/* Headline - FIXED: Stronger text shadow for better legibility */}
+          <h1 className="text-2xl md:text-3xl font-bold leading-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.4)]">
             {tExp('title')}
           </h1>
 
@@ -137,8 +137,18 @@ export default function GroupsExplanationPage() {
             {tExp('subtitle')}
           </p>
 
-          {/* FEATURE: Grade Preview - Shows first 3 grades above fold */}
-          <div className="flex justify-center gap-2 mt-6 px-4">
+          {/* FEATURE: Explicit CTA - Tells users what to do */}
+          <div className="bg-white/20 backdrop-blur-xl rounded-2xl p-3 border border-white/30 mt-4">
+            <p className="text-white text-center font-bold text-sm mb-1">
+              👇 בחרו את שכבת ילדכם
+            </p>
+            <p className="text-white/90 text-xs text-center">
+              הצטרפות מהירה בלחיצה אחת
+            </p>
+          </div>
+
+          {/* FEATURE: Grade Preview - Shows first 3 grades above fold - FIXED: Better contrast */}
+          <div className="flex justify-center gap-4 mt-6 px-4">
             {grades.slice(0, 3).map(grade => (
               <a
                 key={grade.id}
@@ -146,11 +156,11 @@ export default function GroupsExplanationPage() {
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => trackConversion(grade.id)}
-                className="w-16 h-16 bg-white/30 backdrop-blur-sm rounded-xl flex flex-col items-center justify-center hover:scale-110 active:scale-95 transition-all duration-200 border border-white/40 shadow-lg hover:shadow-xl"
+                className="w-16 h-16 bg-white rounded-xl flex flex-col items-center justify-center hover:scale-105 active:scale-95 transition-all duration-200 shadow-lg hover:shadow-2xl focus:outline-none focus:ring-4 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-green-500"
                 aria-label={`${t(grade.nameKey)} - הצטרפות מהירה`}
               >
-                <span className="text-2xl">{grade.emoji}</span>
-                <span className="text-xs text-white font-bold mt-1">{grade.gradeHe}</span>
+                <span className="text-2xl" aria-hidden="true">{grade.emoji}</span>
+                <span className="text-xs text-gray-900 font-bold mt-0.5">{grade.gradeHe}</span>
               </a>
             ))}
             <button
@@ -158,10 +168,11 @@ export default function GroupsExplanationPage() {
                 const gradeSection = document.getElementById('grade-selection')
                 gradeSection?.scrollIntoView({ behavior: 'smooth', block: 'center' })
               }}
-              className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center text-white font-bold text-lg hover:scale-110 active:scale-95 transition-all duration-200 border border-white/40"
-              aria-label="הצג את כל הכיתות"
+              className="w-16 h-16 bg-white rounded-xl flex flex-col items-center justify-center hover:scale-105 active:scale-95 transition-all duration-200 shadow-lg hover:shadow-2xl focus:outline-none focus:ring-4 focus:ring-white/50"
+              aria-label="הצג את כל 6 הכיתות"
             >
-              +3
+              <ChevronDown className="h-6 w-6 text-gray-700" />
+              <span className="text-[10px] text-gray-600 font-bold mt-0.5">עוד 3</span>
             </button>
           </div>
         </div>
