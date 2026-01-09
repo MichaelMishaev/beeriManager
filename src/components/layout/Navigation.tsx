@@ -23,7 +23,7 @@ function useNavItems() {
     committee: [
       { href: '/admin', label: t('adminHome'), icon: Home },
       { href: '/', label: t('parentsHome'), icon: Users },
-      { href: '/groups', label: t('groups'), icon: MessageCircle },
+      { href: '/groups/explanation', label: t('groups'), icon: MessageCircle },
       { href: '/help', label: t('help'), icon: HelpCircle },
     ]
   }

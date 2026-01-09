@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useTranslations, useLocale } from 'next-intl'
 import { MessageCircle, ChevronDown, ExternalLink, Shield, Clock, Users, Megaphone } from 'lucide-react'
-import Link from 'next/link'
 import Image from 'next/image'
 import { cn } from '@/lib/utils'
 import { ShareButton } from '@/components/ui/share-button'
@@ -550,15 +549,6 @@ export default function GroupsExplanationPage() {
           </p>
         </div>
 
-        {/* Footer Link */}
-        <div className="text-center pt-4 pb-8">
-          <Link
-            href="/groups"
-            className="text-sm text-gray-600 hover:text-gray-900 underline underline-offset-4 transition-colors duration-200"
-          >
-            חזרה לעמוד הקבוצות
-          </Link>
-        </div>
           </div>
         </div>
       </div>
