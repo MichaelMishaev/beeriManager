@@ -96,10 +96,17 @@ export default function GroupsExplanationPage() {
         דלג לבחירת כיתה
       </a>
       {/* Hero Section - Above the fold with Glassmorphism */}
-      <div className="relative bg-[#25D366] text-white pt-8 pb-6 px-4 overflow-hidden">
+      <div className="relative bg-[#25D366] text-white pt-8 pb-12 px-4 overflow-hidden">
         {/* Decorative background elements for depth */}
         <div className="absolute top-0 left-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
         <div className="absolute bottom-0 right-0 w-48 h-48 bg-white/5 rounded-full blur-2xl translate-x-1/3 translate-y-1/3" />
+
+        {/* School Logo Watermark - Subtle brand identity */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.07] pointer-events-none">
+          <div className="w-48 h-48 bg-white rounded-3xl flex items-center justify-center transform rotate-12">
+            <span className="text-[#25D366] font-bold text-[120px]">ב</span>
+          </div>
+        </div>
 
         {/* Share Button - Top Right - FIXED: Added focus indicators */}
         <div className="absolute top-4 left-4 z-10">
@@ -114,10 +121,10 @@ export default function GroupsExplanationPage() {
           />
         </div>
 
-        <div className="relative max-w-lg mx-auto text-center space-y-4">
-          {/* WhatsApp Icon with enhanced glassmorphism */}
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-white/20 backdrop-blur-xl rounded-full border border-white/30 shadow-lg transform hover:scale-105 transition-transform duration-300">
-            <MessageCircle className="h-10 w-10 drop-shadow-lg" />
+        <div className="relative max-w-lg mx-auto text-center space-y-4 z-10">
+          {/* WhatsApp Icon with enhanced glassmorphism - IMPROVED: Reduced size for better balance */}
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-white/20 backdrop-blur-xl rounded-full border border-white/30 shadow-lg transform hover:scale-105 transition-transform duration-300">
+            <MessageCircle className="h-8 w-8 drop-shadow-lg" />
           </div>
 
           {/* Headline - FIXED: Stronger text shadow for better legibility */}
@@ -178,8 +185,10 @@ export default function GroupsExplanationPage() {
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="max-w-lg mx-auto px-4 py-6 space-y-6">
+      {/* Main Content - IMPROVED: White section with rounded corners breaks up green monotony */}
+      <div className="relative -mt-8">
+        <div className="bg-white rounded-t-3xl shadow-xl">
+          <div className="max-w-lg mx-auto px-4 pt-8 pb-6 space-y-6">
 
         {/* Quick Benefits - Bento Grid Layout (varied sizes) */}
         <div className="grid grid-cols-4 gap-3 auto-rows-[80px]">
@@ -435,6 +444,8 @@ export default function GroupsExplanationPage() {
           >
             חזרה לעמוד הקבוצות
           </Link>
+        </div>
+          </div>
         </div>
       </div>
 
