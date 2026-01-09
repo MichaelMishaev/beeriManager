@@ -16,6 +16,8 @@ export type AILogAction =
   | 'understand_message'
   | 'extract_data'
   | 'insert_data'
+  | 'summarize_protocol'  // Protocol summarization
+  | 'refine_summary'       // Summary refinement
 
 export interface AILogEntry {
   timestamp: string
@@ -314,6 +316,67 @@ class AILogger {
       error: '\x1b[31m[AI ERROR]\x1b[0m',     // Red
     }
     return colors[level]
+  }
+
+  /**
+   * Log protocol summarization request
+   */
+  logProtocolSummary(params: {
+    protocolId: string
+    isRefinement: boolean
+    refinementType?: string
+    gptModel: string
+    userMessage?: string
+    metadata?: Record<string, any>
+  }) {
+    this.log({
+      level: 'info',
+      action: params.isRefinement ? 'refine_summary' : 'summarize_protocol',
+      responseType: 'request',
+      userMessage: params.userMessage,
+      gptModel: params.gptModel,
+      metadata: {
+        protocolId: params.protocolId,
+        isRefinement: params.isRefinement,
+        refinementType: params.refinementType,
+        ...(params.metadata || {}),
+      },
+    })
+  }
+
+  /**
+   * Log protocol summarization response
+   */
+  logProtocolSummaryResponse(params: {
+    protocolId: string
+    isRefinement: boolean
+    success: boolean
+    promptTokens: number
+    completionTokens: number
+    totalTokens: number
+    cost: number
+    durationMs: number
+    summaryLength?: number
+    errorMessage?: string
+    metadata?: Record<string, any>
+  }) {
+    this.log({
+      level: params.success ? 'success' : 'error',
+      action: params.isRefinement ? 'refine_summary' : 'summarize_protocol',
+      responseType: params.success ? 'text' : 'error',
+      gptPromptTokens: params.promptTokens,
+      gptCompletionTokens: params.completionTokens,
+      gptTotalTokens: params.totalTokens,
+      gptCost: params.cost,
+      durationMs: params.durationMs,
+      errorMessage: params.errorMessage,
+      metadata: {
+        protocolId: params.protocolId,
+        isRefinement: params.isRefinement,
+        summaryLength: params.summaryLength,
+        ...(params.metadata || {}),
+      },
+    })
   }
 
   /**

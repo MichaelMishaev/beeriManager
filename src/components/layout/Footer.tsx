@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { usePathname } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { RegulationsModalContent } from '@/components/features/protocols/RegulationsModalContent'
@@ -9,6 +10,7 @@ import { RegulationsModalContent } from '@/components/features/protocols/Regulat
 export function Footer() {
   const [regulationsOpen, setRegulationsOpen] = useState(false)
   const pathname = usePathname()
+  const t = useTranslations('footer')
 
   // Hide regulations link when already on regulations page
   const isOnRegulationsPage = pathname?.includes('/regulations')
@@ -31,7 +33,7 @@ export function Footer() {
                            focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2"
                   aria-label="פתיחת תקנון הנהגת הורים"
                 >
-                  תקנון הנהגת הורים
+                  {t('parentCommitteeConstitution')}
                 </button>
               )}
               <Link
@@ -42,15 +44,15 @@ export function Footer() {
                          font-medium
                          focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2"
               >
-                עזרה
+                {t('help')}
               </Link>
             </nav>
 
             {/* Left Side - Copyright + School Stats (RTL: appears on left) */}
             <div className="text-center md:text-right order-1 md:order-2 space-y-1">
-              <p>© {new Date().getFullYear()} בית ספר בארי, נתניה</p>
+              <p>© {new Date().getFullYear()} {t('copyright')}</p>
               <p className="text-xs text-muted-foreground/80">
-                562 תלמידים • 22 כיתות
+                {t('studentsAndClasses')}
               </p>
             </div>
           </div>

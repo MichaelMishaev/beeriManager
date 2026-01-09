@@ -7,9 +7,8 @@ export const openai = new OpenAI({
 
 // Model configuration
 export const AI_CONFIG = {
-  model: 'gpt-5-mini', // GPT-5 Mini for cost-effective, high-quality responses
-  // Note: GPT-5 Mini only supports temperature: 1 (default), cannot be customized
-  max_completion_tokens: 5000, // Extra headroom for GPT-5 Mini reasoning tokens + complex responses
+  model: 'gpt-4o-mini', // GPT-4o Mini for cost-effective, high-quality responses
+  max_completion_tokens: 5000, // Extra headroom for complex responses
 } as const
 
 // Get current date for system prompt (dynamic)

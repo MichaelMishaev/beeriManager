@@ -1,15 +1,17 @@
 'use client'
 
-import { useRef } from 'react'
+import { useRef, useMemo } from 'react'
 import Image from 'next/image'
-import { FileDown } from 'lucide-react'
+import { FileDown, CheckCircle } from 'lucide-react'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { ShareButton } from '@/components/ui/share-button'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
 import html2canvas from 'html2canvas'
 import jsPDF from 'jspdf'
-import { regulationsContent } from './regulations-content'
+import { useTranslations, useLocale } from 'next-intl'
+import { getRegulationsByLocale, regulationsStatus } from './regulations-content'
 
 interface RegulationsModalContentProps {
   standalone?: boolean
@@ -17,22 +19,40 @@ interface RegulationsModalContentProps {
 
 export function RegulationsModalContent({ standalone = false }: RegulationsModalContentProps) {
   const printRef = useRef<HTMLDivElement>(null)
+  const t = useTranslations('regulations')
+  const locale = useLocale()
+
+  // Get locale-specific content
+  const regulationsContent = useMemo(() => getRegulationsByLocale(locale), [locale])
 
   const shareUrl = typeof window !== 'undefined'
-    ? window.location.origin + '/he/regulations'
-    : 'https://beeri.online/he/regulations'
+    ? window.location.origin + `/${locale}/regulations`
+    : `https://beeri.online/${locale}/regulations`
 
-  const shareTitle = 'תקנון הנהגת הורים - בית ספר בארי נתניה'
-  const shareText = 'צפו בתקנון הרשמי של הנהגת ההורים | מסמך מלא ומעודכן לשנת תשפ״ה-תשפ״ו'
+  const shareTitle = locale === 'ru'
+    ? 'Устав родительского комитета - Школа Баари Нетания'
+    : 'תקנון הנהגת הורים - בית ספר בארי נתניה'
+
+  const shareText = locale === 'ru'
+    ? 'Ознакомьтесь с официальным уставом родительского комитета | Полный и обновлённый документ на 2025 учебный год'
+    : 'צפו בתקנון הרשמי של הנהגת ההורים | מסמך מלא ומעודכן לשנת תשפ״ה-תשפ״ו'
+
+  // Format approval date based on locale
+  const formatApprovalDate = (isoDate: string) => {
+    const date = new Date(isoDate)
+    return locale === 'he'
+      ? date.toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' })
+      : date.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' })
+  }
 
   async function exportToPDF() {
     if (!printRef.current) {
-      toast.error('שגיאה בטעינת התוכן')
+      toast.error(locale === 'ru' ? 'Ошибка загрузки содержимого' : 'שגיאה בטעינת התוכן')
       return
     }
 
     try {
-      toast.loading('מכין PDF...')
+      toast.loading(locale === 'ru' ? 'Создание PDF...' : 'מכין PDF...')
 
       // Capture the print content as canvas
       const canvas = await html2canvas(printRef.current, {
@@ -70,18 +90,20 @@ export function RegulationsModalContent({ standalone = false }: RegulationsModal
         heightLeft -= pageHeight
       }
 
-      // Generate filename
-      const fileName = `תקנון_הנהגת_הורים_בית_ספר_בארי_${new Date().getFullYear()}.pdf`
+      // Generate filename based on locale
+      const fileName = locale === 'ru'
+        ? `ustav_roditelskogo_komiteta_shkola_baari_${new Date().getFullYear()}.pdf`
+        : `תקנון_הנהגת_הורים_בית_ספר_בארי_${new Date().getFullYear()}.pdf`
 
       // Save PDF
       pdf.save(fileName)
 
       toast.dismiss()
-      toast.success('הקובץ יוצא בהצלחה')
+      toast.success(locale === 'ru' ? 'Файл успешно экспортирован' : 'הקובץ יוצא בהצלחה')
     } catch (error) {
       console.error('Error generating PDF:', error)
       toast.dismiss()
-      toast.error('שגיאה ביצירת PDF')
+      toast.error(locale === 'ru' ? 'Ошибка при создании PDF' : 'שגיאה ביצירת PDF')
     }
   }
 
@@ -146,20 +168,37 @@ export function RegulationsModalContent({ standalone = false }: RegulationsModal
             {regulationsContent.chairman}
           </p>
 
-          {/* Draft Notice - Semantic and accessible */}
+          {/* Approval Status Badge - Semantic and accessible */}
           <div className="flex justify-center mt-2 md:mt-3">
-            <aside
-              className="inline-flex items-center gap-1.5 md:gap-2 bg-[#fdc500]/20
-                       border border-[#fdc500]/40 rounded-full
-                       px-2.5 py-0.5 md:px-4 md:py-1.5"
-              role="status"
-              aria-label="סטטוס מסמך"
-            >
-              <span className="text-base md:text-xl" aria-hidden="true">📝</span>
-              <span className="text-[10px] md:text-sm font-medium text-[#fdc500]">
-                טיוטה - ממתין לאישור ועד ההורים
-              </span>
-            </aside>
+            {regulationsStatus.isApproved ? (
+              <Badge
+                variant="default"
+                className="inline-flex items-center gap-1.5 md:gap-2 px-3 py-1.5 md:px-4 md:py-2
+                         bg-green-500/90 hover:bg-green-600 border-green-600"
+                role="status"
+                aria-label={locale === 'ru' ? "Статус документа: утверждён" : "סטטוס מסמך מאושר"}
+              >
+                <CheckCircle className="h-3.5 w-3.5 md:h-4 md:w-4" aria-hidden="true" />
+                <span className="text-xs md:text-sm font-medium">
+                  {t('approvedByCommittee', {
+                    date: formatApprovalDate(regulationsStatus.approvalDate)
+                  })}
+                </span>
+              </Badge>
+            ) : (
+              <aside
+                className="inline-flex items-center gap-1.5 md:gap-2 bg-[#fdc500]/20
+                         border border-[#fdc500]/40 rounded-full
+                         px-2.5 py-0.5 md:px-4 md:py-1.5"
+                role="status"
+                aria-label={locale === 'ru' ? "Статус документа: черновик" : "סטטוס מסמך טיוטה"}
+              >
+                <span className="text-base md:text-xl" aria-hidden="true">📝</span>
+                <span className="text-[10px] md:text-sm font-medium text-[#fdc500]">
+                  {t('draftAwaitingApproval')}
+                </span>
+              </aside>
+            )}
           </div>
         </div>
 
@@ -306,11 +345,11 @@ export function RegulationsModalContent({ standalone = false }: RegulationsModal
   )
 }
 
-// Section Header Component - Accessible and compact
+// Section Header Component - Accessible and compact with RTL support
 function SectionHeader({ number, title }: { number: number; title: string }) {
   return (
-    <div className="mb-4">
-      <div className="flex items-center gap-3 mb-3">
+    <div className="mb-4" dir="rtl">
+      <div className="flex flex-row-reverse items-center gap-3 mb-3">
         <div
           className="w-10 h-10 md:w-12 md:h-12 rounded-full
                    bg-gradient-to-br from-[#00509d] to-[#00296b]
@@ -323,7 +362,7 @@ function SectionHeader({ number, title }: { number: number; title: string }) {
           </span>
         </div>
         <h2
-          className="text-xl md:text-2xl font-bold font-formal text-[#00509d]"
+          className="text-xl md:text-2xl font-bold font-formal text-[#00509d] text-right"
           id={`section-${number}`}
         >
           <span className="sr-only">סעיף {number}: </span>

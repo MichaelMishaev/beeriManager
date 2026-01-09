@@ -12,6 +12,7 @@ import { ShareButton } from '@/components/ui/share-button'
 import { formatProtocolShareData } from '@/lib/utils/share-formatters'
 import { EditProtocolButton } from '@/components/protocols/EditProtocolButton'
 import { DeleteProtocolButton } from '@/components/protocols/DeleteProtocolButton'
+import { SummarizeProtocolButton } from '@/components/protocols/SummarizeProtocolButton'
 import TextWithTaskMentions from '@/components/protocols/TextWithTaskMentions'
 
 const categoryTranslations: Record<string, string> = {
@@ -181,6 +182,7 @@ async function ProtocolContent({ id }: { id: string }) {
                   </a>
                 </Button>
               )}
+              <SummarizeProtocolButton protocolId={protocol.id} />
               <EditProtocolButton protocolId={protocol.id} />
               <ShareButton
                 shareData={formatProtocolShareData(protocol)}

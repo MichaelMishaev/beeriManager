@@ -1,6 +1,7 @@
 'use client'
 
 import Script from 'next/script'
+import { RouteChangeTracker } from './RouteChangeTracker'
 
 export function GoogleAnalytics() {
   const measurementId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID
@@ -9,7 +10,8 @@ export function GoogleAnalytics() {
   // This prevents localhost:4500 traffic from being tracked
   if (process.env.NODE_ENV === 'development') {
     console.log('[GA] Skipping GA in development mode')
-    return null
+    // Still render RouteChangeTracker for console logging in dev
+    return <RouteChangeTracker />
   }
 
   // Don't load GA if no measurement ID configured
@@ -37,11 +39,14 @@ export function GoogleAnalytics() {
             // Restrict tracking to production domain only
             cookie_domain: 'beeri.online',
             cookie_flags: 'SameSite=None;Secure',
-            // Additional bot filtering hints
-            send_page_view: true
+            // CRITICAL: Disable automatic page_view on initial load
+            // We'll handle all page views manually via RouteChangeTracker
+            send_page_view: false
           });
         `}
       </Script>
+      {/* Track all route changes including initial page load */}
+      <RouteChangeTracker />
     </>
   )
 }

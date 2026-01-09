@@ -10,6 +10,7 @@ const ProtocolUpdateSchema = z.object({
   protocol_date: z.string().optional(),
   year: z.number().optional(),
   categories: z.array(z.string()).optional(),
+  attendees: z.array(z.string()).optional(),
   is_public: z.boolean().optional(),
   extracted_text: z.string().optional(),
   agenda: z.string().optional(),

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Calendar, Camera, Loader2 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -34,6 +34,7 @@ function EventsList({
   const t = useTranslations('Events')
   const [allEvents, setAllEvents] = useState<Event[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const todayEventRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     loadEvents()
@@ -53,6 +54,21 @@ function EventsList({
       setIsLoading(false)
     }
   }
+
+  // Auto-scroll to today's events when viewing "all" events (only on first load)
+  useEffect(() => {
+    if (!isLoading && filter === 'all' && todayEventRef.current) {
+      // Small delay to ensure DOM is fully rendered
+      const timer = setTimeout(() => {
+        todayEventRef.current?.scrollIntoView({
+          behavior: 'auto', // Changed from 'smooth' to 'auto' for instant scroll
+          block: 'start'    // Changed from 'center' to 'start' to avoid blank space
+        })
+      }, 150)
+      return () => clearTimeout(timer)
+    }
+    return undefined
+  }, [isLoading, filter]) // Removed allEvents to prevent re-scroll on data change
 
   if (isLoading) {
     return (
@@ -83,7 +99,26 @@ function EventsList({
     }
   })
 
-  if (filteredEvents.length === 0) {
+  // Sort events for optimal viewing experience
+  const sortedEvents = [...filteredEvents].sort((a, b) => {
+    const dateA = new Date(a.start_datetime)
+    const dateB = new Date(b.start_datetime)
+
+    if (filter === 'all') {
+      // For "all" tab: chronological order (oldest first)
+      // Past events appear at top, upcoming at bottom
+      // Scroll UP to see older past events, scroll DOWN to see future events
+      return dateA.getTime() - dateB.getTime()
+    } else if (filter === 'upcoming') {
+      // Upcoming events: sort ascending (soonest first)
+      return dateA.getTime() - dateB.getTime()
+    } else {
+      // Past/photos: sort descending (most recent first)
+      return dateB.getTime() - dateA.getTime()
+    }
+  })
+
+  if (sortedEvents.length === 0) {
     return (
       <div className="text-center py-12">
         <Camera className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
@@ -94,63 +129,75 @@ function EventsList({
     )
   }
 
+  // Find the first upcoming event (today or later) for auto-scroll
+  const firstUpcomingIndex = sortedEvents.findIndex(event => {
+    const eventDate = new Date(event.start_datetime)
+    return eventDate >= startOfToday
+  })
+
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-      {filteredEvents.map((event) => (
-        <Link key={event.id} href={`/events/${event.id}`}>
-          <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-            <CardHeader>
-              <div className="flex items-start justify-between gap-2">
-                <CardTitle className="text-lg flex-1">
-                  {locale === 'ru' && event.title_ru ? event.title_ru : event.title}
-                </CardTitle>
-                <div className="flex items-center gap-2 flex-shrink-0">
-                  {event.status === 'draft' && (
-                    <Badge className="text-xs bg-yellow-100 text-yellow-800 border-yellow-300">{t('badgeDraft')}</Badge>
-                  )}
-                  {event.status === 'published' && (
-                    <Badge className="text-xs bg-green-100 text-green-800 border-green-300">{t('badgePublished')}</Badge>
-                  )}
-                  {event.status === 'cancelled' && (
-                    <Badge className="text-xs bg-red-100 text-red-800 border-red-300">{t('badgeCancelled')}</Badge>
-                  )}
-                  {event.photos_url && (
-                    <Camera className="h-5 w-5 text-primary" />
-                  )}
-                </div>
-              </div>
-              <div className="text-sm text-muted-foreground">
-                {new Date(event.start_datetime).toLocaleDateString(getDateLocale(locale), {
-                  day: 'numeric',
-                  month: 'long',
-                  year: 'numeric'
-                })}
-                {event.location && ` • ${event.location}`}
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground line-clamp-2">
-                {locale === 'ru' && event.description_ru ? event.description_ru : event.description}
-              </p>
-              <div className="mt-3 flex items-center gap-2">
-                <Badge variant="secondary" className="text-xs">
-                  {event.event_type === 'meeting' && t('typeMeeting')}
-                  {event.event_type === 'fundraiser' && t('typeFundraiser')}
-                  {event.event_type === 'general' && t('typeGeneral')}
-                  {event.event_type === 'trip' && t('typeTrip')}
-                  {event.event_type === 'workshop' && t('typeWorkshop')}
-                </Badge>
-                {event.photos_url && (
-                  <Badge variant="outline" className="text-xs gap-1">
-                    <Camera className="h-3 w-3" />
-                    {t('badgePhotos')}
-                  </Badge>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </Link>
-      ))}
+      {sortedEvents.map((event, index) => {
+        const isFirstUpcoming = filter === 'all' && index === firstUpcomingIndex
+
+        return (
+          <div key={event.id} ref={isFirstUpcoming ? todayEventRef : null}>
+            <Link href={`/events/${event.id}`}>
+              <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+                <CardHeader>
+                  <div className="flex items-start justify-between gap-2">
+                    <CardTitle className="text-lg flex-1">
+                      {locale === 'ru' && event.title_ru ? event.title_ru : event.title}
+                    </CardTitle>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      {event.status === 'draft' && (
+                        <Badge className="text-xs bg-yellow-100 text-yellow-800 border-yellow-300">{t('badgeDraft')}</Badge>
+                      )}
+                      {event.status === 'published' && (
+                        <Badge className="text-xs bg-green-100 text-green-800 border-green-300">{t('badgePublished')}</Badge>
+                      )}
+                      {event.status === 'cancelled' && (
+                        <Badge className="text-xs bg-red-100 text-red-800 border-red-300">{t('badgeCancelled')}</Badge>
+                      )}
+                      {event.photos_url && (
+                        <Camera className="h-5 w-5 text-primary" />
+                      )}
+                    </div>
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    {new Date(event.start_datetime).toLocaleDateString(getDateLocale(locale), {
+                      day: 'numeric',
+                      month: 'long',
+                      year: 'numeric'
+                    })}
+                    {event.location && ` • ${event.location}`}
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground line-clamp-2">
+                    {locale === 'ru' && event.description_ru ? event.description_ru : event.description}
+                  </p>
+                  <div className="mt-3 flex items-center gap-2">
+                    <Badge variant="secondary" className="text-xs">
+                      {event.event_type === 'meeting' && t('typeMeeting')}
+                      {event.event_type === 'fundraiser' && t('typeFundraiser')}
+                      {event.event_type === 'general' && t('typeGeneral')}
+                      {event.event_type === 'trip' && t('typeTrip')}
+                      {event.event_type === 'workshop' && t('typeWorkshop')}
+                    </Badge>
+                    {event.photos_url && (
+                      <Badge variant="outline" className="text-xs gap-1">
+                        <Camera className="h-3 w-3" />
+                        {t('badgePhotos')}
+                      </Badge>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+          </div>
+        )
+      })}
     </div>
   )
 }

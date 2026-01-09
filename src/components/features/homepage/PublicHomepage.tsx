@@ -69,9 +69,32 @@ function UpcomingEventsCard({
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [showAllEventsModal, setShowAllEventsModal] = useState(false)
+  const [allEvents, setAllEvents] = useState<Event[]>([]) // State for all events (past + future)
 
   const displayedEvents = upcomingEvents.slice(0, INITIAL_EVENTS_COUNT)
   const hasMore = upcomingEvents.length > INITIAL_EVENTS_COUNT
+
+  // Fetch all events (past + future) when modal opens
+  useEffect(() => {
+    if (showAllEventsModal && allEvents.length === 0) {
+      async function fetchAllEvents() {
+        try {
+          const response = await fetch('/api/events?limit=100&status=published')
+          const data = await response.json()
+          if (data.success) {
+            // Sort chronologically (oldest first, newest last)
+            const sorted = [...(data.data || [])].sort((a, b) => {
+              return new Date(a.start_datetime).getTime() - new Date(b.start_datetime).getTime()
+            })
+            setAllEvents(sorted)
+          }
+        } catch (error) {
+          console.error('Error fetching all events:', error)
+        }
+      }
+      fetchAllEvents()
+    }
+  }, [showAllEventsModal, allEvents.length])
 
   const handleEventClick = (event: Event) => {
     setSelectedEvent(event)
@@ -256,7 +279,7 @@ function UpcomingEventsCard({
       <AllEventsModal
         open={showAllEventsModal}
         onOpenChange={setShowAllEventsModal}
-        events={upcomingEvents}
+        events={allEvents.length > 0 ? allEvents : upcomingEvents}
         dateLocale={dateLocale}
         locale={locale}
         onEventClick={handleEventClick}
@@ -300,11 +323,9 @@ function EventItem({
   const timeDiff = startDate.getTime() - now.getTime()
   const hasEnded = now > endDate
 
-  // 2025 Enhancement: Countdown Timer Logic
-  const hoursUntil = Math.floor(timeDiff / (1000 * 60 * 60))
+  // 2025 Enhancement: Countdown Timer Logic (hours removed)
   const daysUntil = Math.floor(timeDiff / (1000 * 60 * 60 * 24))
 
-  const isStartingVerySoon = !isHappeningNow && timeDiff > 0 && timeDiff <= 3 * 60 * 60 * 1000 // Within 3 hours
   const isStartingToday = !isHappeningNow && timeDiff > 0 && timeDiff <= 24 * 60 * 60 * 1000 // Within 24 hours
   const isStartingThisWeek = !isHappeningNow && timeDiff > 0 && timeDiff <= 7 * 24 * 60 * 60 * 1000 // Within 7 days
 
@@ -325,13 +346,6 @@ function EventItem({
     ? {
         text: locale === 'ru' ? '🔴 Сейчас' : '🔴 מתקיים כעת',
         bgColor: 'bg-emerald-500',
-        textColor: 'text-white',
-        showPulse: false
-      }
-    : isStartingVerySoon
-    ? {
-        text: locale === 'ru' ? `🔥 Через ${hoursUntil}ч` : `🔥 בעוד ${hoursUntil} שעות`,
-        bgColor: 'bg-[#FFBA00]',
         textColor: 'text-white',
         showPulse: false
       }
@@ -439,6 +453,29 @@ function AllEventsModal({
   locale: Locale
   onEventClick: (event: Event) => void
 }) {
+  const todayEventRef = useRef<HTMLDivElement>(null)
+
+  // Auto-scroll to today's event when modal opens
+  useEffect(() => {
+    if (open && todayEventRef.current) {
+      setTimeout(() => {
+        todayEventRef.current?.scrollIntoView({
+          behavior: 'auto',
+          block: 'start'
+        })
+      }, 150)
+    }
+  }, [open, events])
+
+  // Find first upcoming event (today or later)
+  const startOfToday = new Date()
+  startOfToday.setHours(0, 0, 0, 0)
+
+  const firstUpcomingIndex = events.findIndex(event => {
+    const eventDate = new Date(event.start_datetime)
+    return eventDate >= startOfToday
+  })
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
@@ -452,18 +489,23 @@ function AllEventsModal({
         </DialogHeader>
 
         <div className="space-y-1 mt-4">
-          {events.map((event) => (
-            <EventItem
-              key={event.id}
-              event={event}
-              dateLocale={dateLocale}
-              locale={locale}
-              onClick={() => {
-                onEventClick(event)
-                onOpenChange(false) // Close "All Events" modal when viewing event details
-              }}
-            />
-          ))}
+          {events.map((event, index) => {
+            const isFirstUpcoming = index === firstUpcomingIndex
+
+            return (
+              <div key={event.id} ref={isFirstUpcoming ? todayEventRef : null}>
+                <EventItem
+                  event={event}
+                  dateLocale={dateLocale}
+                  locale={locale}
+                  onClick={() => {
+                    onEventClick(event)
+                    onOpenChange(false) // Close "All Events" modal when viewing event details
+                  }}
+                />
+              </div>
+            )
+          })}
         </div>
       </DialogContent>
     </Dialog>

@@ -64,7 +64,8 @@ export async function GET(req: NextRequest) {
         .or(`end_datetime.gte.${now.toISOString()},and(end_datetime.is.null,start_datetime.gte.${now.toISOString()})`)
         .order('start_datetime', { ascending: true })
     } else {
-      query = query.order('created_at', { ascending: false })
+      // Sort by event date (descending) - shows recent/future events first, then past events
+      query = query.order('start_datetime', { ascending: false })
     }
 
     // Apply limit

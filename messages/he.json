@@ -491,5 +491,17 @@
     "importantText1": "הקבוצות מיועדות לעדכונים רשמיים מהוועד. אנא שמרו על תקשורת מכבדת ורלוונטית.",
     "importantText2": "אם אתם דוברי רוסית, תוכלו גם להצטרף לקבוצה הרוסית הייעודית לקבלת עדכונים בשפה הרוסית.",
     "joinNow": "הצטרפו עכשיו"
+  },
+  "regulations": {
+    "approvedByCommittee": "מאושר על ידי ועד ההורים ב-{date}",
+    "draftAwaitingApproval": "טיוטה - ממתין לאישור ועד ההורים"
+  },
+  "footer": {
+    "parentCommitteeConstitution": "תקנון הנהגת הורים",
+    "help": "עזרה",
+    "copyright": "בית ספר בארי, נתניה",
+    "studentsAndClasses": "562 תלמידים • 22 כיתות",
+    "builtWithLove": "💙 נבנה באהבה על ידי ועד הורים בארי",
+    "allRightsReserved": "כל הזכויות שמורות"
   }
 }
