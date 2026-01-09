@@ -328,7 +328,7 @@ export default function GroupsExplanationPage() {
             )}
           >
             <p className="text-sm font-semibold text-green-900">
-              🎉 <span className="font-bold">400+ הורים</span> כבר הצטרפו!
+              🎉 <span className="font-bold">{tExp('socialProof')}</span>
             </p>
           </div>
 
