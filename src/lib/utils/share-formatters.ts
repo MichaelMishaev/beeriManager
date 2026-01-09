@@ -786,14 +786,14 @@ export function formatWhatsAppGroupsExplanationShareData(
   const url = `https://beeri.online/${locale}/groups/explanation`
 
   const title = locale === 'ru'
-    ? '📱 Присоединяйтесь к группам WhatsApp по классам!'
-    : '📱 הצטרפו לקבוצות WhatsApp לפי שכבות!'
+    ? 'Присоединяйтесь к группам WhatsApp по классам'
+    : 'הצטרפו לקבוצות WhatsApp לפי שכבות'
 
   const text = locale === 'ru'
-    ? `*${title}*
+    ? `📱 *${title}*
 
 🎯 Официальные обновления от родительского комитета
-⏰ Никакого спама - только важные обновления!
+⏰ Никакого спама - только важные обновления
 🏫 Школа Беэри, Нетания
 
 ✨ Что вы получите:
@@ -802,15 +802,11 @@ export function formatWhatsAppGroupsExplanationShareData(
 • Прямую связь с комитетом
 • Только проверенная информация
 
-📌 Присоединяйтесь к группе вашего класса:
-🔗 ${url}
-
-📢 Не пропустите обновления! Заходите на портал:
-🌐 https://beeri.online/${locale}`
-    : `*${title}*
+📌 Присоединяйтесь к группе вашего класса`
+    : `📱 *${title}*
 
 🎯 עדכונים רשמיים מועד ההורים
-⏰ ללא ספאם - רק עדכונים חשובים!
+⏰ ללא ספאם - רק עדכונים חשובים
 🏫 בית ספר בארי, נתניה
 
 ✨ מה תקבלו:
@@ -819,11 +815,7 @@ export function formatWhatsAppGroupsExplanationShareData(
 • קשר ישיר עם ועד ההורים
 • מידע מהימן ומאומת בלבד
 
-📌 הצטרפו לקבוצה של שכבת ילדכם:
-🔗 ${url}
-
-📢 אל תפספסו שום עדכון! בקרו בפורטל:
-🌐 https://beeri.online/${locale}`
+📌 הצטרפו לקבוצה של שכבת ילדכם`
 
   return { title, text, url }
 }
