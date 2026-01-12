@@ -250,6 +250,9 @@ public/sw*.js
 !public/sw.js
 public/workbox-*.js.map
 public/sw.js*.map
+# Catch files with spaces in names (invalid build artifacts)
+public/*" "*.map
+public/workbox-*.js*.map
 
 # ============================================
 # Documentation with Potential Secrets
