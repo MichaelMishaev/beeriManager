@@ -1,4 +1,4 @@
-// Cost tracking for GPT-5 Mini API calls
+// Cost tracking for GPT-5.1 API calls
 
 interface TokenUsage {
   prompt_tokens: number
@@ -6,8 +6,13 @@ interface TokenUsage {
   total_tokens: number
 }
 
-// GPT-5 Mini pricing (December 2025)
+// GPT-5.1 pricing (January 2026)
 const PRICING = {
+  'gpt-5.1': {
+    input: 1.25 / 1_000_000, // $1.25 per 1M input tokens
+    output: 10.0 / 1_000_000, // $10.00 per 1M output tokens
+    cached: 0.125 / 1_000_000, // $0.125 per 1M cached tokens (90% discount)
+  },
   'gpt-5-mini': {
     input: 0.25 / 1_000_000, // $0.25 per 1M input tokens
     output: 2.0 / 1_000_000, // $2.00 per 1M output tokens
@@ -15,7 +20,7 @@ const PRICING = {
   },
 }
 
-export function calculateCost(usage: TokenUsage, model: string = 'gpt-5-mini'): number {
+export function calculateCost(usage: TokenUsage, model: string = 'gpt-5.1'): number {
   const pricing = PRICING[model as keyof typeof PRICING]
   if (!pricing) return 0
 
@@ -39,7 +44,7 @@ export function logAICost(
     timestamp: new Date().toISOString(),
     operation,
     round: round || 1, // Default to round 1
-    model: 'gpt-5-mini',
+    model: 'gpt-5.1',
     promptTokens: usage.prompt_tokens,
     completionTokens: usage.completion_tokens,
     totalTokens: usage.total_tokens,

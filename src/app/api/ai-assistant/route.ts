@@ -13,6 +13,7 @@ import {
 } from '@/lib/ai/tools'
 import { incrementAiUsage, validateMessageLength } from '@/lib/ai/rate-limiter'
 import { aiLogger } from '@/lib/ai/logger'
+import { calculateCost } from '@/lib/ai/cost-tracker'
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic'
@@ -239,7 +240,7 @@ export async function POST(req: NextRequest) {
         promptTokens: response.usage?.prompt_tokens || 0,
         completionTokens: response.usage?.completion_tokens || 0,
         totalTokens: response.usage?.total_tokens || 0,
-        cost: ((response.usage?.total_tokens || 0) * 0.000001), // GPT-5 Mini pricing
+        cost: response.usage ? calculateCost(response.usage, AI_CONFIG.model) : 0,
         roundNumber: 1,
         durationMs: duration,
         metadata: {
@@ -334,7 +335,7 @@ export async function POST(req: NextRequest) {
         promptTokens: response.usage?.prompt_tokens || 0,
         completionTokens: response.usage?.completion_tokens || 0,
         totalTokens: response.usage?.total_tokens || 0,
-        cost: ((response.usage?.total_tokens || 0) * 0.000001), // GPT-5 Mini pricing
+        cost: response.usage ? calculateCost(response.usage, AI_CONFIG.model) : 0,
         roundNumber,
         durationMs: duration,
         metadata: {

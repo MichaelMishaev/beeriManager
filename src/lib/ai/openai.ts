@@ -1,13 +1,13 @@
 import OpenAI from 'openai'
 
-// Initialize OpenAI client with GPT-5 Mini
+// Initialize OpenAI client with GPT-5.1
 export const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 })
 
 // Model configuration
 export const AI_CONFIG = {
-  model: 'gpt-4o-mini', // GPT-4o Mini for cost-effective, high-quality responses
+  model: 'gpt-5.1', // GPT-5.1 for superior long-context handling and better reasoning
   max_completion_tokens: 5000, // Extra headroom for complex responses
 } as const
 
@@ -66,6 +66,7 @@ export const SYSTEM_PROMPT = `אתה עוזר AI למערכת ניהול ועד 
 4. אם משהו לא ברור, תבקש הבהרה (במיוחד תאריכים!)
 5. תמיד תציג את המידע שחילצת לאישור לפני הוספה למערכת
 6. **חשוב**: תמיד קרא לפונקציה המתאימה - אל תחזיר תשובה טקסטואלית אם זיהית תוכן!
+7. **⚠️ CRITICAL: אל תמחק לעולם URLs או קישורים מהודעות! שמור אותם תמיד בדיוק כמו שהם!**
 
 🎯 זיהוי אירועים מרובים:
 - חפש מילות קישור: "וגם", "and", "also", "בנוסף", פסיקים
@@ -444,8 +445,9 @@ export const UNDERSTANDING_PROMPT = `אתה עוזר AI שמנתח הודעות 
 הנחיות:
 1. התעלם מברכות פתיחה/סגירה ("הורים יקרים", "שלום רב", "בברכה", חתימות)
 2. חלץ את העובדות המרכזיות: תאריכים, אירועים, שעות, מיקום, סיבה
-3. סכם בצורה תמציתית וברורה
-4. שאל אם ההבנה נכונה
+3. **⚠️ CRITICAL: שמור על כל ה-URLs וקישורים בדיוק כמו שהם! אל תקצר, אל תסכם, אל תמחק!**
+4. סכם בצורה תמציתית וברורה
+5. שאל אם ההבנה נכונה
 
 פורמט תשובה:
 "הבנתי - [סיכום קצר של האירוע/הודעה]. נכון?"
@@ -460,6 +462,9 @@ export const UNDERSTANDING_PROMPT = `אתה עוזר AI שמנתח הודעות 
 ---
 קלט: "יום שלישי ב-18.2 מבחן מתמטיקה וגם ביום רביעי 19.2 מבחן אנגלית"
 פלט: "הבנתי - שני אירועים: מבחן מתמטיקה ב-18.2.2026 ומבחן אנגלית ב-19.2.2026. נכון?"
+---
+קלט: "הורים יקרים, תשלומי הורים באמצעות כרטיס אשראי בקישור https://netpay.schoolcash.co.il/?p=25tzNN0NXPDdCy2TL9lVda52bHYrH7zfofXpZOlS6Z0= או העברה בנקאית לבנק 46 חשבון 10888 סניף 508"
+פלט: "הבנתי - הודעה על תשלומי הורים באמצעות כרטיס אשראי דרך הקישור https://netpay.schoolcash.co.il/?p=25tzNN0NXPDdCy2TL9lVda52bHYrH7zfofXpZOlS6Z0= או בהעברה בנקאית לבנק 46, חשבון 10888, סניף 508. נכון?"
 ---
 
 תמיד תשיב בעברית בלבד. תמיד תסיים ב"נכון?" כדי לאשר הבנה.

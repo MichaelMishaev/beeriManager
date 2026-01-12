@@ -60,7 +60,7 @@ export const metadata: Metadata = {
     description: 'בארי נתניה - מערכת ניהול הנהגה הורית - אירועים, משימות, ועדות ופרוטוקולים',
     images: [
       {
-        url: 'https://beeri.online/og-image.png?v=6',
+        url: 'https://beeri.online/og-image.png?v=7',
         width: 1200,
         height: 630,
         alt: 'בארי נתניה - הנהגה הורית',
@@ -68,11 +68,27 @@ export const metadata: Metadata = {
       },
     ],
   },
+  // Additional meta tags to ensure beeri.online logo is always shown
+  metadataBase: new URL('https://beeri.online'),
   twitter: {
     card: 'summary_large_image',
     title: 'בארי נתניה - הנהגה הורית',
     description: 'בארי נתניה - מערכת ניהול הנהגה הורית - אירועים, משימות, ועדות ופרוטוקולים',
-    images: ['https://beeri.online/og-image.png?v=6'],
+    images: ['https://beeri.online/og-image.png?v=7'],
+  },
+  alternates: {
+    canonical: 'https://beeri.online',
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
   },
   manifest: '/manifest.json?v=5',
   appleWebApp: {
