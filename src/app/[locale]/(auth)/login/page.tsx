@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { AlertTriangle, Eye, EyeOff } from 'lucide-react'
+import { trackEvent, EventCategory, EventAction, UserType } from '@/lib/analytics'
 
 export default function LoginPage() {
   const [password, setPassword] = useState('')
@@ -20,6 +21,13 @@ export default function LoginPage() {
     e.preventDefault()
     setIsLoading(true)
     setError('')
+    trackEvent({
+      category: EventCategory.AUTH,
+      action: EventAction.LOGIN,
+      label: 'Admin login attempt',
+      userType: UserType.ANONYMOUS,
+      componentName: 'LoginPage',
+    })
 
     try {
       const response = await fetch('/api/auth/login', {
@@ -33,14 +41,38 @@ export default function LoginPage() {
       const data = await response.json()
 
       if (data.success) {
+        trackEvent({
+          category: EventCategory.AUTH,
+          action: EventAction.LOGIN,
+          label: 'Admin login success',
+          userType: UserType.ADMIN,
+          componentName: 'LoginPage',
+          metadata: { method: 'password' },
+        })
         // Redirect to admin dashboard with full page reload to ensure cookie is set
         window.location.href = '/admin'
       } else {
         setError(data.error || 'שגיאה בהתחברות')
+        trackEvent({
+          category: EventCategory.AUTH,
+          action: EventAction.LOGIN,
+          label: 'Admin login failed',
+          userType: UserType.ANONYMOUS,
+          componentName: 'LoginPage',
+          metadata: { method: 'password', error: data.error || 'unknown_error' },
+        })
       }
     } catch (error) {
       console.error('Login error:', error)
       setError('שגיאה בהתחברות לשרת')
+      trackEvent({
+        category: EventCategory.AUTH,
+        action: EventAction.LOGIN,
+        label: 'Admin login exception',
+        userType: UserType.ANONYMOUS,
+        componentName: 'LoginPage',
+        metadata: { method: 'password', error: error instanceof Error ? error.message : 'unknown_error' },
+      })
     } finally {
       setIsLoading(false)
     }

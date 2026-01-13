@@ -33,6 +33,14 @@ export function GoogleAnalytics() {
           function gtag(){dataLayer.push(arguments);}
           gtag('js', new Date());
 
+          // Basic consent defaults (no ads, analytics only)
+          gtag('consent', 'default', {
+            ad_storage: 'denied',
+            analytics_storage: 'granted',
+            functionality_storage: 'granted',
+            security_storage: 'granted'
+          });
+
           // Configure GA with production domain restriction
           gtag('config', '${measurementId}', {
             page_path: window.location.pathname,

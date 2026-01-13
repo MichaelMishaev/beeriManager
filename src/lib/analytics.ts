@@ -113,11 +113,34 @@ interface EventParams {
 }
 
 /**
+ * Page view parameters interface
+ */
+interface PageViewParams {
+  page_path: string
+  page_title?: string
+  page_location?: string
+  page_referrer?: string
+  userType?: UserType
+}
+
+/**
  * Check if gtag is available
  */
 function isGtagAvailable(): boolean {
   return typeof window !== 'undefined' && typeof window.gtag === 'function'
 }
+
+/**
+ * Safe push to GTM dataLayer when available
+ */
+function pushToDataLayer(event: string, params: Record<string, unknown>) {
+  if (typeof window === 'undefined') return
+  window.dataLayer = window.dataLayer || []
+  window.dataLayer.push({ event, ...params })
+}
+
+let engagementActionCount = 0
+let engagementSignalSent = false
 
 /**
  * Track a custom event in Google Analytics
@@ -175,23 +198,42 @@ export function trackEvent(params: EventParams): void {
   }
 
   window.gtag!('event', eventName, eventParams)
+  pushToDataLayer('custom_event', {
+    event_name: eventName,
+    ...eventParams,
+  })
+
+  // Emit a lightweight engagement conversion after 10 tracked actions
+  engagementActionCount += 1
+  if (engagementActionCount >= 10 && !engagementSignalSent) {
+    engagementSignalSent = true
+    window.gtag!('event', 'engaged_session_10_actions', {
+      engagement_actions: engagementActionCount,
+    })
+    pushToDataLayer('conversion_engaged_session', {
+      event_name: 'engaged_session_10_actions',
+      engagement_actions: engagementActionCount,
+    })
+  }
 }
 
 /**
  * Track a page view
  *
- * @param pagePath - The page path
- * @param pageTitle - The page title
- * @param userType - The user type viewing the page
+ * @param params - Page view parameters
  */
-export function trackPageView(
-  pagePath: string,
-  pageTitle?: string,
-  userType?: UserType
-): void {
+export function trackPageView(params: PageViewParams): void {
+  const { page_path, page_title, page_location, page_referrer, userType } = params
+
   // In development: only log to console
   if (process.env.NODE_ENV === 'development') {
-    console.log('[Analytics] Page view tracked (dev mode - not sent to GA):', { pagePath, pageTitle, userType })
+    console.log('[Analytics] Page view tracked (dev mode - not sent to GA):', {
+      page_path,
+      page_title,
+      page_location,
+      page_referrer,
+      userType,
+    })
     return
   }
 
@@ -201,8 +243,17 @@ export function trackPageView(
   }
 
   window.gtag!('event', 'page_view', {
-    page_path: pagePath,
-    page_title: pageTitle,
+    page_path,
+    page_title,
+    page_location,
+    page_referrer,
+    user_type: userType,
+  })
+  pushToDataLayer('spa_page_view', {
+    page_path,
+    page_title,
+    page_location,
+    page_referrer,
     user_type: userType,
   })
 }

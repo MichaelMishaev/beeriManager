@@ -14,6 +14,7 @@ import { NotificationBell } from '@/components/layout/NotificationBell'
 import { NotificationSubscription } from '@/components/pwa/NotificationSubscription'
 import { cn } from '@/lib/utils'
 import { logger } from '@/lib/logger'
+import { trackNavigation, trackEvent, EventCategory, EventAction, UserType } from '@/lib/analytics'
 
 // Navigation items - simplified menu
 function useNavItems() {
@@ -67,6 +68,7 @@ export function Navigation() {
 
   const handleNavClick = (href: string, label: string) => {
     logger.userAction('Navigate from menu', { to: href, label })
+    trackNavigation(href, pathname, 'Navigation')
     setIsOpen(false)
   }
 
@@ -74,9 +76,25 @@ export function Navigation() {
     try {
       await fetch('/api/auth/logout', { method: 'POST' })
       setIsAuthenticated(false)
+      trackEvent({
+        category: EventCategory.AUTH,
+        action: EventAction.LOGOUT,
+        label: 'Logout from navigation',
+        userType: UserType.USER,
+        componentName: 'Navigation',
+        metadata: { from: pathname },
+      })
       window.location.href = '/'
     } catch (error) {
       logger.error('Logout failed', { error })
+      trackEvent({
+        category: EventCategory.AUTH,
+        action: EventAction.LOGOUT,
+        label: 'Logout failed',
+        userType: UserType.USER,
+        componentName: 'Navigation',
+        metadata: { from: pathname, error: error instanceof Error ? error.message : 'unknown_error' },
+      })
     }
   }
 

@@ -108,7 +108,10 @@ export default function AdminHighlightsPage() {
   useEffect(() => {
     loadHighlights()
     // Track page view
-    trackPageView('/admin/highlights', 'Admin Highlights Management')
+    trackPageView({
+      page_path: '/admin/highlights',
+      page_title: 'Admin Highlights Management',
+    })
   }, [])
 
   async function translateToRussian(highlightId: string) {

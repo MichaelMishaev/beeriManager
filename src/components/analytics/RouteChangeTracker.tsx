@@ -3,6 +3,7 @@
 import { useEffect } from 'react'
 import { usePathname, useSearchParams } from 'next/navigation'
 import { trackPageView, detectUserType } from '@/lib/analytics'
+import { useRef } from 'react'
 
 /**
  * RouteChangeTracker - Tracks client-side route changes in Next.js App Router
@@ -16,6 +17,7 @@ import { trackPageView, detectUserType } from '@/lib/analytics'
 export function RouteChangeTracker() {
   const pathname = usePathname()
   const searchParams = useSearchParams()
+  const lastPageLocationRef = useRef<string | null>(null)
 
   useEffect(() => {
     // Skip if we're in development mode
@@ -26,21 +28,25 @@ export function RouteChangeTracker() {
 
     // Build full path including query params
     const url = pathname + (searchParams?.toString() ? `?${searchParams.toString()}` : '')
+    const origin = typeof window !== 'undefined' ? window.location.origin : ''
+    const pageLocation = `${origin}${url}`
 
     // Detect user type for better analytics segmentation
     const userType = detectUserType()
 
-    // Send page_view event to GA4
-    trackPageView(url, document.title, userType)
+    // Determine referrer: previous in-app location or document.referrer on first hit
+    const pageReferrer = lastPageLocationRef.current || (typeof document !== 'undefined' ? document.referrer || undefined : undefined)
 
-    // Also send to gtag directly for immediate tracking
-    if (typeof window !== 'undefined' && window.gtag) {
-      window.gtag('event', 'page_view', {
-        page_path: url,
-        page_title: document.title,
-        user_type: userType,
-      })
-    }
+    // Send page_view event to GA4 and GTM
+    trackPageView({
+      page_path: url,
+      page_title: typeof document !== 'undefined' ? document.title : undefined,
+      page_location: pageLocation,
+      page_referrer: pageReferrer,
+      userType,
+    })
+
+    lastPageLocationRef.current = pageLocation
   }, [pathname, searchParams])
 
   return null
