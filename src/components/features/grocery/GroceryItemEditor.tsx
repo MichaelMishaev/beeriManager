@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, useCallback } from 'react'
 import { useTranslations } from 'next-intl'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { GroceryItem } from '@/types'
-import { Plus, Minus, Trash2, ShoppingCart, ArrowRight, Loader2, Sparkles } from 'lucide-react'
+import { Plus, Minus, Trash2, ShoppingCart, ArrowRight, Sparkles } from 'lucide-react'
 import { ALL_GROCERY_ITEMS, QUICK_SUGGESTIONS } from '@/lib/data/grocery-items'
 import { fuzzySearchHebrew, filterExistingItems } from '@/lib/utils/fuzzy-search'
 
@@ -53,7 +53,6 @@ export function GroceryItemEditor({
 }: GroceryItemEditorProps) {
   const t = useTranslations('grocery')
   const [newItemName, setNewItemName] = useState('')
-  const [isAdding, setIsAdding] = useState(false)
   const [showConfirmClear, setShowConfirmClear] = useState(false)
   const [suggestions, setSuggestions] = useState<string[]>([])
   const [selectedIndex, setSelectedIndex] = useState(-1)
@@ -87,17 +86,19 @@ export function GroceryItemEditor({
   const handleAddItem = async () => {
     if (!newItemName.trim()) return
 
-    setIsAdding(true)
-    try {
-      await onAddItem({ item_name: newItemName.trim(), quantity: 1 })
-      setNewItemName('')
-      // Re-focus input after adding
-      inputRef.current?.focus()
-    } catch (error) {
+    const itemName = newItemName.trim()
+    // INSTANT: Clear input immediately for rapid entry
+    setNewItemName('')
+    setSuggestions([])
+    setShowSuggestions(false)
+
+    // Fire optimistic add - don't block UI
+    onAddItem({ item_name: itemName, quantity: 1 }).catch(error => {
       console.error('Error adding item:', error)
-    } finally {
-      setIsAdding(false)
-    }
+    })
+
+    // Re-focus input immediately
+    inputRef.current?.focus()
   }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -106,21 +107,18 @@ export function GroceryItemEditor({
     updateSuggestions(value)
   }
 
-  const handleSelectSuggestion = async (suggestion: string) => {
+  const handleSelectSuggestion = (suggestion: string) => {
     setNewItemName('')
     setSuggestions([])
     setShowSuggestions(false)
     setSelectedIndex(-1)
 
-    setIsAdding(true)
-    try {
-      await onAddItem({ item_name: suggestion, quantity: 1 })
-      inputRef.current?.focus()
-    } catch (error) {
+    // Fire optimistic add - don't block UI
+    onAddItem({ item_name: suggestion, quantity: 1 }).catch(error => {
       console.error('Error adding item:', error)
-    } finally {
-      setIsAdding(false)
-    }
+    })
+
+    inputRef.current?.focus()
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -177,22 +175,17 @@ export function GroceryItemEditor({
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  const handleQuickAdd = async (itemName: string) => {
-    setIsAdding(true)
-    try {
-      await onAddItem({ item_name: itemName, quantity: 1 })
-    } catch (error) {
+  const handleQuickAdd = (itemName: string) => {
+    // Fire optimistic add - don't block UI
+    onAddItem({ item_name: itemName, quantity: 1 }).catch(error => {
       console.error('Error adding item:', error)
-    } finally {
-      setIsAdding(false)
-    }
+    })
   }
 
   const handleClearAll = async () => {
     setShowConfirmClear(false)
-    for (const item of items) {
-      await onRemoveItem(item.id)
-    }
+    // PARALLEL DELETE - Run all deletes concurrently for instant UX
+    await Promise.all(items.map(item => onRemoveItem(item.id)))
   }
 
   return (
@@ -221,7 +214,6 @@ export function GroceryItemEditor({
                 }}
                 className="form-input flex w-full min-w-0 flex-1 border-none bg-transparent h-14 placeholder:text-[#4c9a73] px-4 text-base font-normal leading-normal focus:ring-0 focus:outline-none text-[#0d1b14] dark:text-white"
                 placeholder={t('itemPlaceholder')}
-                disabled={isAdding}
                 aria-label={t('newItem')}
                 autoComplete="off"
                 role="combobox"
@@ -231,18 +223,14 @@ export function GroceryItemEditor({
               />
               <motion.button
                 onClick={handleAddItem}
-                disabled={isAdding || !newItemName.trim()}
+                disabled={!newItemName.trim()}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 className="bg-[#13ec80] text-[#0d1b14] px-5 flex items-center justify-center font-bold disabled:opacity-50 transition-all
                   focus:outline-none focus:ring-4 focus:ring-[#13ec80]/40"
                 aria-label={t('addItem')}
               >
-                {isAdding ? (
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                ) : (
-                  <Plus className="h-5 w-5" />
-                )}
+                <Plus className="h-5 w-5" />
               </motion.button>
             </div>
           </div>
@@ -293,7 +281,7 @@ export function GroceryItemEditor({
                 key={suggestion}
                 type="button"
                 onClick={() => !alreadyAdded && handleQuickAdd(suggestion)}
-                disabled={alreadyAdded || isAdding}
+                disabled={alreadyAdded}
                 whileHover={{ scale: alreadyAdded ? 1 : 1.05 }}
                 whileTap={{ scale: alreadyAdded ? 1 : 0.95 }}
                 className={`flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-full border transition-all
@@ -387,7 +375,7 @@ export function GroceryItemEditor({
       </AnimatePresence>
 
       {/* Grocery Items List */}
-      <div className="flex-1 pb-48">
+      <div className="flex-1">
         <AnimatePresence mode="popLayout">
           {items.length === 0 ? (
             <motion.div
@@ -429,7 +417,7 @@ export function GroceryItemEditor({
 
                   <div className="flex items-center gap-3">
                     {/* Quantity Stepper */}
-                    <div className="flex items-center gap-1 bg-[#f6f8f7] dark:bg-[#102219] rounded-full p-1 border border-[#cfe7db] dark:border-[#1e3a2c]">
+                    <div className="flex items-center bg-[#f6f8f7] dark:bg-[#102219] rounded-full p-1 border border-[#cfe7db] dark:border-[#1e3a2c]">
                       <motion.button
                         onClick={() => onUpdateQuantity(item.id, Math.max(1, item.quantity - 1))}
                         disabled={item.quantity <= 1}
@@ -450,7 +438,7 @@ export function GroceryItemEditor({
                             onUpdateQuantity(item.id, val)
                           }
                         }}
-                        className="text-base font-bold w-8 p-0 text-center bg-transparent border-none focus:ring-0 text-[#0d1b14] dark:text-white"
+                        className="text-base font-bold w-12 px-1 text-center bg-transparent border-none focus:ring-0 text-[#0d1b14] dark:text-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         min="1"
                         aria-label={t('quantity')}
                       />
@@ -506,7 +494,7 @@ export function GroceryItemEditor({
       </AnimatePresence>
 
       {/* Bottom Actions */}
-      <div className="fixed bottom-0 left-0 right-0 bg-[#f6f8f7]/95 dark:bg-[#102219]/95 backdrop-blur-lg p-4 border-t border-[#cfe7db] dark:border-[#1e3a2c] z-40">
+      <div className="p-4 bg-[#f6f8f7] dark:bg-[#102219] border-t border-[#cfe7db] dark:border-[#1e3a2c]">
         <div className="max-w-md mx-auto">
           <motion.button
             onClick={onDone}

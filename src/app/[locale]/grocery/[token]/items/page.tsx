@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { GroceryItemEditor } from '@/components/features/grocery'
@@ -17,6 +17,9 @@ export default function GroceryItemsPage() {
   const [_eventId, setEventId] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+
+  // Track pending operations for optimistic updates
+  const pendingOps = useRef<Set<string>>(new Set())
 
   const fetchItems = useCallback(async () => {
     try {
@@ -43,57 +46,150 @@ export default function GroceryItemsPage() {
     fetchItems()
   }, [fetchItems])
 
+  // OPTIMISTIC ADD - Instant UI update, API call in background
   const handleAddItem = async (item: { item_name: string; quantity: number }) => {
-    const response = await fetch(`/api/grocery/${token}/items`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(item)
-    })
-
-    const result = await response.json()
-
-    if (!result.success) {
-      throw new Error(result.error || 'שגיאה בהוספת הפריט')
+    // Create optimistic item with temp ID
+    const tempId = `temp-${Date.now()}-${Math.random().toString(36).slice(2)}`
+    const optimisticItem: GroceryItem = {
+      id: tempId,
+      grocery_event_id: '',
+      item_name: item.item_name,
+      quantity: item.quantity,
+      display_order: items.length,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
     }
 
-    // Refresh items
-    await fetchItems()
+    // INSTANT UI UPDATE - Add to list immediately
+    setItems(prev => [...prev, optimisticItem])
+
+    try {
+      const response = await fetch(`/api/grocery/${token}/items`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(item)
+      })
+
+      const result = await response.json()
+
+      if (!result.success) {
+        // Rollback on failure
+        setItems(prev => prev.filter(i => i.id !== tempId))
+        throw new Error(result.error || 'שגיאה בהוספת הפריט')
+      }
+
+      // Replace temp item with real item from server
+      if (result.data) {
+        setItems(prev => prev.map(i =>
+          i.id === tempId ? result.data : i
+        ))
+      }
+    } catch (err) {
+      // Rollback on error
+      setItems(prev => prev.filter(i => i.id !== tempId))
+      throw err
+    }
   }
 
+  // OPTIMISTIC REMOVE - Instant UI update, API call in background
   const handleRemoveItem = async (itemId: string) => {
-    const response = await fetch(`/api/grocery/${token}/items/${itemId}`, {
-      method: 'DELETE'
-    })
+    // Store the item for potential rollback
+    const itemToRemove = items.find(i => i.id === itemId)
+    if (!itemToRemove) return
 
-    const result = await response.json()
+    // Skip if already being processed (prevent double-clicks)
+    if (pendingOps.current.has(itemId)) return
+    pendingOps.current.add(itemId)
 
-    if (!result.success) {
-      throw new Error(result.error || 'שגיאה במחיקת הפריט')
+    // INSTANT UI UPDATE - Remove immediately
+    setItems(prev => prev.filter(i => i.id !== itemId))
+
+    try {
+      const response = await fetch(`/api/grocery/${token}/items/${itemId}`, {
+        method: 'DELETE'
+      })
+
+      const result = await response.json()
+
+      if (!result.success) {
+        // Rollback on failure - restore the item
+        setItems(prev => {
+          const newItems = [...prev]
+          // Insert at original position based on display_order
+          const insertIndex = newItems.findIndex(i => i.display_order > itemToRemove.display_order)
+          if (insertIndex === -1) {
+            newItems.push(itemToRemove)
+          } else {
+            newItems.splice(insertIndex, 0, itemToRemove)
+          }
+          return newItems
+        })
+        throw new Error(result.error || 'שגיאה במחיקת הפריט')
+      }
+    } catch (err) {
+      // Rollback on error - restore the item
+      setItems(prev => {
+        if (prev.some(i => i.id === itemId)) return prev // Already restored
+        const newItems = [...prev]
+        const insertIndex = newItems.findIndex(i => i.display_order > itemToRemove.display_order)
+        if (insertIndex === -1) {
+          newItems.push(itemToRemove)
+        } else {
+          newItems.splice(insertIndex, 0, itemToRemove)
+        }
+        return newItems
+      })
+      throw err
+    } finally {
+      pendingOps.current.delete(itemId)
     }
-
-    // Refresh items
-    await fetchItems()
   }
 
+  // OPTIMISTIC QUANTITY - Update UI first, then sync
   const handleUpdateQuantity = async (itemId: string, quantity: number) => {
-    const response = await fetch(`/api/grocery/${token}/items/${itemId}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ quantity })
-    })
+    // Store previous value for rollback
+    const previousItem = items.find(i => i.id === itemId)
+    const previousQuantity = previousItem?.quantity
 
-    const result = await response.json()
-
-    if (!result.success) {
-      throw new Error(result.error || 'שגיאה בעדכון הכמות')
-    }
-
-    // Update local state immediately for better UX
-    setItems((prev) =>
-      prev.map((item) =>
+    // INSTANT UI UPDATE - Update immediately
+    setItems(prev =>
+      prev.map(item =>
         item.id === itemId ? { ...item, quantity } : item
       )
     )
+
+    try {
+      const response = await fetch(`/api/grocery/${token}/items/${itemId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ quantity })
+      })
+
+      const result = await response.json()
+
+      if (!result.success) {
+        // Rollback on failure
+        if (previousQuantity !== undefined) {
+          setItems(prev =>
+            prev.map(item =>
+              item.id === itemId ? { ...item, quantity: previousQuantity } : item
+            )
+          )
+        }
+        throw new Error(result.error || 'שגיאה בעדכון הכמות')
+      }
+    } catch (err) {
+      // Rollback on error
+      if (previousQuantity !== undefined) {
+        setItems(prev =>
+          prev.map(item =>
+            item.id === itemId ? { ...item, quantity: previousQuantity } : item
+          )
+        )
+      }
+      // Don't re-throw for quantity updates - silent fail with rollback
+      console.error('Quantity update failed:', err)
+    }
   }
 
   const handleDone = () => {

@@ -39,11 +39,14 @@ export default function GroceryPublicPage() {
     fetchEvent()
   }, [fetchEvent])
 
-  const handleClaimItem = async (itemId: string, claimerName: string) => {
+  const handleClaimItem = async (itemId: string, claimerName: string, quantity?: number) => {
     const response = await fetch(`/api/grocery/${token}/items/${itemId}/claim`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ claimer_name: claimerName })
+      body: JSON.stringify({
+        claimer_name: claimerName,
+        quantity: quantity // For partial claiming
+      })
     })
 
     const result = await response.json()
@@ -111,8 +114,8 @@ export default function GroceryPublicPage() {
 
   return (
     <div className="relative flex h-auto min-h-screen w-full flex-col bg-[#f6f8f7] dark:bg-[#102219] max-w-[480px] mx-auto shadow-xl">
-      {/* Header */}
-      <header className="flex items-center bg-[#f6f8f7]/80 dark:bg-[#102219]/80 backdrop-blur-md p-4 pb-2 justify-between sticky top-0 z-10 border-b border-gray-100 dark:border-white/10">
+      {/* Header - positioned below Navigation (h-16 = 64px) */}
+      <header className="flex items-center bg-[#f6f8f7]/95 dark:bg-[#102219]/95 backdrop-blur-md p-4 pb-2 justify-between sticky top-16 z-40 border-b border-gray-100 dark:border-white/10">
         <div className="text-[#0d1b14] dark:text-white flex size-12 shrink-0 items-center justify-start cursor-pointer">
           <button onClick={() => router.back()}>
             <ChevronLeft className="h-5 w-5" />

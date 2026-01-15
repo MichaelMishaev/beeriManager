@@ -9,7 +9,7 @@ import { ShoppingBasket, Trash2, Loader2, CheckCircle2 } from 'lucide-react'
 
 interface GroceryItemProps {
   item: GroceryItemType
-  onClaim: (itemId: string, claimerName: string) => Promise<void>
+  onClaim: (itemId: string, claimerName: string, quantity?: number) => Promise<void>
   onUnclaim: (itemId: string) => Promise<void>
   isEditable?: boolean
   onDelete?: (itemId: string) => void
@@ -55,10 +55,10 @@ export function GroceryItem({
 
   const isClaimed = !!item.claimed_by
 
-  const handleClaim = async (name: string) => {
+  const handleClaim = async (name: string, quantity?: number) => {
     setIsLoading(true)
     try {
-      await onClaim(item.id, name)
+      await onClaim(item.id, name, quantity)
       setIsClaimDialogOpen(false)
     } catch (error) {
       console.error('Error claiming item:', error)
@@ -222,6 +222,7 @@ export function GroceryItem({
         onClaim={handleClaim}
         itemName={displayName}
         isLoading={isLoading}
+        maxQuantity={item.quantity}
       />
     </>
   )

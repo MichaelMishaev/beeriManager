@@ -858,7 +858,7 @@ export function GroceryCreateForm({ onSuccess }: GroceryCreateFormProps) {
       </AnimatePresence>
 
       {/* Spacer for fixed footer - only show when keyboard is closed */}
-      {!isKeyboardOpen && <div className="h-28" aria-hidden="true" />}
+      
 
       {/* Inline submit button - shows when keyboard is open for better mobile UX */}
       {isKeyboardOpen && (
@@ -895,7 +895,7 @@ export function GroceryCreateForm({ onSuccess }: GroceryCreateFormProps) {
       {!isKeyboardOpen && (
         <footer
           data-grocery-footer
-          className="fixed bottom-0 left-0 right-0 max-w-[430px] mx-auto p-4 pb-6 bg-[#f6f8f7]/95 dark:bg-[#102219]/95 backdrop-blur-lg border-t border-gray-200 dark:border-gray-800"
+          className="max-w-[430px] mx-auto p-4 pb-6 bg-[#f6f8f7] dark:bg-[#102219] border-t border-gray-200 dark:border-gray-800"
           style={{ paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))' }}
         >
           <motion.button

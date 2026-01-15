@@ -11,7 +11,7 @@ import { ShoppingCart, GraduationCap, Calendar, MapPin, CheckCircle2, Circle, Pa
 
 interface GroceryPublicListProps {
   event: GroceryEvent
-  onClaimItem: (itemId: string, claimerName: string) => Promise<void>
+  onClaimItem: (itemId: string, claimerName: string, quantity?: number) => Promise<void>
   onUnclaimItem: (itemId: string) => Promise<void>
   onRefresh?: () => void
   isLoading?: boolean
@@ -172,10 +172,10 @@ export function GroceryPublicList({
         </span>
       </motion.div>
 
-      {/* Filter Pills */}
+      {/* Filter Pills - Compact row */}
       <motion.div
         variants={itemVariants}
-        className="flex gap-3 p-4 overflow-x-auto no-scrollbar"
+        className="flex gap-1.5 px-3 py-2 justify-center"
         role="tablist"
         aria-label={t('filterAll')}
       >
@@ -187,24 +187,24 @@ export function GroceryPublicList({
             <motion.button
               key={filterType}
               whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+              whileTap={{ scale: 0.95 }}
               onClick={() => setFilter(filterType)}
               role="tab"
               aria-selected={isActive}
               aria-controls={`panel-${filterType}`}
-              className={`flex h-10 shrink-0 items-center justify-center gap-x-2 rounded-full px-5 cursor-pointer transition-all
-                focus:outline-none focus:ring-4 focus:ring-[#13ec80]/30
+              className={`flex h-9 items-center justify-center gap-x-1.5 rounded-full px-3 cursor-pointer transition-all
+                focus:outline-none focus:ring-2 focus:ring-[#13ec80]/30
                 ${isActive
-                  ? 'bg-[#13ec80] shadow-md shadow-[#13ec80]/30 text-[#0d1b14] font-bold'
+                  ? 'bg-[#13ec80] shadow-sm shadow-[#13ec80]/30 text-[#0d1b14] font-bold'
                   : 'bg-white dark:bg-[#1a2e24] border border-[#cfe7db] dark:border-[#2a3d34] text-[#0d1b14] dark:text-white font-medium hover:border-[#13ec80]/50'
                 }`}
             >
               {isActive ? (
-                <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
+                <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
               ) : (
-                <Circle className="h-4 w-4" aria-hidden="true" />
+                <Circle className="h-3.5 w-3.5" aria-hidden="true" />
               )}
-              <span className="text-sm">{t(labelKey)}</span>
+              <span className="text-xs font-medium">{t(labelKey)}</span>
             </motion.button>
           )
         })}
