@@ -246,6 +246,9 @@ export function GroceryCreateForm({ onSuccess }: GroceryCreateFormProps) {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
+  // State for keyboard visibility
+  const [isKeyboardOpen, setIsKeyboardOpen] = useState(false)
+
   // Handle keyboard visibility for mobile
   useEffect(() => {
     if (typeof window === 'undefined' || !window.visualViewport) {
@@ -256,16 +259,9 @@ export function GroceryCreateForm({ onSuccess }: GroceryCreateFormProps) {
       const viewport = window.visualViewport
       if (!viewport) return
 
-      const footerEl = document.querySelector('[data-grocery-footer]') as HTMLElement
-      if (footerEl) {
-        const keyboardHeight = window.innerHeight - viewport.height
-        if (keyboardHeight > 150) {
-          // Keyboard is likely open
-          footerEl.style.transform = `translateY(-${keyboardHeight}px)`
-        } else {
-          footerEl.style.transform = 'translateY(0)'
-        }
-      }
+      const keyboardHeight = window.innerHeight - viewport.height
+      // Keyboard is considered open if more than 150px is hidden
+      setIsKeyboardOpen(keyboardHeight > 150)
     }
 
     window.visualViewport.addEventListener('resize', handleResize)
@@ -861,37 +857,71 @@ export function GroceryCreateForm({ onSuccess }: GroceryCreateFormProps) {
         )}
       </AnimatePresence>
 
-      {/* Spacer for fixed footer */}
-      <div className="h-28" aria-hidden="true" />
+      {/* Spacer for fixed footer - only show when keyboard is closed */}
+      {!isKeyboardOpen && <div className="h-28" aria-hidden="true" />}
 
-      {/* Bottom Primary Button - Keyboard Aware */}
-      <footer
-        data-grocery-footer
-        className="fixed bottom-0 left-0 right-0 max-w-[430px] mx-auto p-4 bg-[#f6f8f7]/95 dark:bg-[#102219]/95 backdrop-blur-lg border-t border-gray-200 dark:border-gray-800 transition-transform duration-200"
-      >
-        <motion.button
-          type="submit"
-          disabled={isSubmitting || !isValid}
-          whileHover={{ scale: isValid && !isSubmitting ? 1.02 : 1 }}
-          whileTap={{ scale: isValid && !isSubmitting ? 0.98 : 1 }}
-          className="w-full bg-[#13ec80] hover:bg-[#10d970] text-[#102219] font-bold py-4 rounded-xl
-            shadow-lg shadow-[#13ec80]/20 transition-all flex items-center justify-center gap-2
-            disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none
-            focus:outline-none focus:ring-4 focus:ring-[#13ec80]/40"
+      {/* Inline submit button - shows when keyboard is open for better mobile UX */}
+      {isKeyboardOpen && (
+        <motion.div
+          className="px-4 py-6"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
         >
-          {isSubmitting ? (
-            <>
-              <Loader2 className="animate-spin h-5 w-5" aria-hidden="true" />
-              <span>{t('creating')}</span>
-            </>
-          ) : (
-            <>
-              <span>{t('createList')}</span>
-              <ArrowLeft className="h-5 w-5" aria-hidden="true" />
-            </>
-          )}
-        </motion.button>
-      </footer>
+          <motion.button
+            type="submit"
+            disabled={isSubmitting || !isValid}
+            whileTap={{ scale: isValid && !isSubmitting ? 0.98 : 1 }}
+            className="w-full bg-[#13ec80] hover:bg-[#10d970] text-[#102219] font-bold py-4 rounded-xl
+              shadow-lg shadow-[#13ec80]/20 transition-all flex items-center justify-center gap-2
+              disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none
+              focus:outline-none focus:ring-4 focus:ring-[#13ec80]/40"
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="animate-spin h-5 w-5" aria-hidden="true" />
+                <span>{t('creating')}</span>
+              </>
+            ) : (
+              <>
+                <span>{t('createList')}</span>
+                <ArrowLeft className="h-5 w-5" aria-hidden="true" />
+              </>
+            )}
+          </motion.button>
+        </motion.div>
+      )}
+
+      {/* Bottom Primary Button - Fixed footer, hidden when keyboard is open */}
+      {!isKeyboardOpen && (
+        <footer
+          data-grocery-footer
+          className="fixed bottom-0 left-0 right-0 max-w-[430px] mx-auto p-4 pb-6 bg-[#f6f8f7]/95 dark:bg-[#102219]/95 backdrop-blur-lg border-t border-gray-200 dark:border-gray-800"
+          style={{ paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))' }}
+        >
+          <motion.button
+            type="submit"
+            disabled={isSubmitting || !isValid}
+            whileHover={{ scale: isValid && !isSubmitting ? 1.02 : 1 }}
+            whileTap={{ scale: isValid && !isSubmitting ? 0.98 : 1 }}
+            className="w-full bg-[#13ec80] hover:bg-[#10d970] text-[#102219] font-bold py-4 rounded-xl
+              shadow-lg shadow-[#13ec80]/20 transition-all flex items-center justify-center gap-2
+              disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none
+              focus:outline-none focus:ring-4 focus:ring-[#13ec80]/40"
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="animate-spin h-5 w-5" aria-hidden="true" />
+                <span>{t('creating')}</span>
+              </>
+            ) : (
+              <>
+                <span>{t('createList')}</span>
+                <ArrowLeft className="h-5 w-5" aria-hidden="true" />
+              </>
+            )}
+          </motion.button>
+        </footer>
+      )}
     </motion.form>
   )
 }
