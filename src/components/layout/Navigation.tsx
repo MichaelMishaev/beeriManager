@@ -5,13 +5,14 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { Menu, X, Home, Users, HelpCircle, LogOut, LogIn, Phone, MessageCircle } from 'lucide-react'
+import { Menu, X, Home, Users, HelpCircle, LogOut, LogIn, Phone, MessageCircle, School, ClipboardList } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { LanguageSwitcher } from '@/components/ui/language-switcher'
 import { InstallButton } from '@/components/pwa/InstallButton'
 import { ContactsDialog } from '@/components/features/contacts/ContactsDialog'
 import { NotificationBell } from '@/components/layout/NotificationBell'
 import { NotificationSubscription } from '@/components/pwa/NotificationSubscription'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { cn } from '@/lib/utils'
 import { logger } from '@/lib/logger'
 import { trackNavigation, trackEvent, EventCategory, EventAction, UserType } from '@/lib/analytics'
@@ -37,6 +38,7 @@ export function Navigation() {
   const pathname = usePathname()
   const t = useTranslations('common')
   const tAuth = useTranslations('auth')
+  const tNav = useTranslations('navigation')
   const navItems = useNavItems()
 
   useEffect(() => {
@@ -139,9 +141,9 @@ export function Navigation() {
                 </span>
               </div>
             </Link>
-            {/* Language Switcher & PWA Install - Always visible */}
-            <div className="flex items-center gap-2">
-              <LanguageSwitcher />
+            {/* Desktop: Language Switcher & PWA Install */}
+            <div className="hidden md:flex items-center gap-2">
+              <LanguageSwitcher variant="full" />
               <InstallButton variant="compact" />
             </div>
           </div>
@@ -167,6 +169,32 @@ export function Navigation() {
                 </Link>
               )
             })}
+
+            {/* School tools menu */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="flex items-center gap-1.5 text-sm"
+                >
+                  <School className="h-4 w-4" />
+                  <span>{tNav('schoolTools')}</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-52">
+                <DropdownMenuItem asChild>
+                  <Link
+                    href="/grocery"
+                    onClick={() => handleNavClick('/grocery', tNav('groceryList'))}
+                    className="flex items-center gap-2"
+                  >
+                    <School className="h-4 w-4" />
+                    <span>{tNav('groceryList')}</span>
+                  </Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
             {/* Notifications: Show bell with counts for admins, subscription button for public */}
             {isAuthenticated && pathname.includes('/admin') ? (
@@ -213,24 +241,27 @@ export function Navigation() {
             )}
           </div>
 
-          {/* Mobile - Notifications, Contacts Button & Menu Button */}
-          <div className="flex items-center gap-2 md:hidden">
+          {/* Mobile - Quick Actions & Menu Button */}
+          <div className="flex items-center gap-0.5 md:hidden">
+            {/* Grocery Quick Access */}
+            <Link
+              href="/grocery"
+              onClick={() => handleNavClick('/grocery', tNav('groceryList'))}
+              className="p-2 hover:bg-accent rounded-md transition-colors"
+              aria-label={tNav('groceryList')}
+            >
+              <ClipboardList className="h-5 w-5" />
+            </Link>
+
+            {/* Compact Language Switcher */}
+            <LanguageSwitcher variant="compact" />
+
             {/* Notifications: Show bell with counts for admins, subscription button for public */}
             {isAuthenticated && pathname.includes('/admin') ? (
               <NotificationBell />
             ) : (
               <NotificationSubscription />
             )}
-
-            {/* Contacts Button - Always visible on mobile */}
-            <ContactsDialog>
-              <Button
-                variant="ghost"
-                size="icon"
-              >
-                <Phone className="h-5 w-5" />
-              </Button>
-            </ContactsDialog>
 
             {/* Hamburger Menu Button */}
             <Button
@@ -248,7 +279,23 @@ export function Navigation() {
 
         {/* Mobile Navigation */}
         {isOpen && (
-          <div className="md:hidden py-4 space-y-2">
+          <div className="md:hidden py-4 space-y-3">
+            {/* School tools menu for mobile */}
+            <div className="px-4 space-y-1">
+              <div className="flex items-center gap-2 text-base font-semibold">
+                <School className="h-5 w-5" />
+                <span>{tNav('schoolTools')}</span>
+              </div>
+              <Link
+                href="/grocery"
+                onClick={() => handleNavClick('/grocery', tNav('groceryList'))}
+                className="flex items-center gap-3 px-4 py-3 text-base font-medium rounded-md transition-colors text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+              >
+                <School className="h-5 w-5" />
+                {tNav('groceryList')}
+              </Link>
+            </div>
+
             {isAuthenticated ? (
               <>
                 {items.map((item) => {
@@ -305,6 +352,19 @@ export function Navigation() {
                 </Link>
               </>
             )}
+
+            {/* Contacts Button (moved into menu) */}
+            <div className="px-4 pt-1">
+              <ContactsDialog>
+                <Button
+                  variant="ghost"
+                  className="flex w-full items-center gap-3 text-base font-medium"
+                >
+                  <Phone className="h-5 w-5" />
+                  <span className="flex-1 text-left">{t('contactsLabel')}</span>
+                </Button>
+              </ContactsDialog>
+            </div>
           </div>
         )}
       </div>
