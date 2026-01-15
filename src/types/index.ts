@@ -643,3 +643,77 @@ export interface MeetingIdea {
   created_at: string
   updated_at: string
 }
+
+// ============================================================================
+// Grocery Events (Items Pickup) - Public sharing via WhatsApp
+// ============================================================================
+
+export interface GroceryEvent {
+  id: string
+  share_token: string // URL-friendly 8-char token
+
+  // Event details
+  class_name: string // e.g., "כיתה ג'2"
+  event_name: string // e.g., "מסיבת סוף שנה"
+  event_date?: string // ISO date
+  event_time?: string // ISO time
+  event_address?: string
+
+  // Creator info (optional)
+  creator_name?: string
+
+  // Status
+  status: 'active' | 'completed' | 'archived'
+
+  // Stats (denormalized)
+  total_items: number
+  claimed_items: number
+
+  // Timestamps
+  created_at: string
+  updated_at: string
+
+  // Joined data
+  items?: GroceryItem[]
+}
+
+export interface GroceryItem {
+  id: string
+  grocery_event_id: string
+
+  // Item details
+  item_name: string // e.g., "חלב"
+  quantity: number // e.g., 3
+  notes?: string
+
+  // Claiming
+  claimed_by?: string // Name of person who claimed
+  claimed_at?: string // ISO timestamp
+
+  // Display
+  display_order: number
+
+  // Timestamps
+  created_at: string
+  updated_at: string
+}
+
+// Form types for grocery
+export interface CreateGroceryEventForm {
+  class_name: string
+  event_name: string
+  event_date?: string
+  event_time?: string
+  event_address?: string
+  creator_name?: string
+}
+
+export interface CreateGroceryItemForm {
+  item_name: string
+  quantity: number
+  notes?: string
+}
+
+export interface ClaimGroceryItemForm {
+  claimer_name: string
+}
