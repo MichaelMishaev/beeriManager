@@ -55,10 +55,15 @@ export function GroceryPublicList({
     if (!dateStr) return ''
     const date = new Date(dateStr)
     return date.toLocaleDateString('he-IL', {
-      weekday: 'long',
       day: 'numeric',
       month: 'long'
     })
+  }, [])
+
+  const formatTime = useCallback((timeStr?: string) => {
+    if (!timeStr) return ''
+    // Remove seconds if present (09:00:00 -> 09:00)
+    return timeStr.slice(0, 5)
   }, [])
 
   // Smarter auto-refresh: 10 seconds when active, 30 seconds when idle
@@ -112,16 +117,16 @@ export function GroceryPublicList({
         variants={itemVariants}
         className="flex p-4 bg-[#f6f8f7] dark:bg-[#102219]"
       >
-        <div className="flex w-full flex-col gap-4 items-center">
-          <div className="flex gap-6 flex-col items-center">
-            {/* Event Image Placeholder */}
+        <div className="flex w-full flex-col gap-3 items-center">
+          <div className="flex gap-3 flex-col items-center">
+            {/* Event Image - Compact for mobile */}
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ type: 'spring', stiffness: 200, damping: 20 }}
-              className="bg-gradient-to-br from-[#13ec80] to-[#0d98ba] rounded-xl min-h-40 w-40 shadow-lg border-4 border-white dark:border-white/10 flex items-center justify-center"
+              className="bg-gradient-to-br from-[#13ec80] to-[#0d98ba] rounded-2xl h-20 w-20 shadow-lg border-2 border-white dark:border-white/10 flex items-center justify-center"
             >
-              <ShoppingCart className="text-white h-12 w-12" aria-hidden="true" />
+              <ShoppingCart className="text-white h-8 w-8" aria-hidden="true" />
             </motion.div>
             <div className="flex flex-col items-center justify-center gap-1">
               <h1 className="text-[#0d1b14] dark:text-white text-[24px] font-extrabold leading-tight tracking-[-0.015em] text-center">
@@ -134,10 +139,13 @@ export function GroceryPublicList({
               {event.event_date && (
                 <div className="flex items-center gap-2 text-[#4c9a73] dark:text-[#13ec80]/80 text-base font-medium">
                   <Calendar className="h-4 w-4" aria-hidden="true" />
-                  <span>
-                    {formatDate(event.event_date)}
-                    {event.event_time && ` - ${event.event_time}`}
-                  </span>
+                  <span>{formatDate(event.event_date)}</span>
+                  {event.event_time && (
+                    <>
+                      <span className="text-[#4c9a73]/50 dark:text-[#13ec80]/50">|</span>
+                      <span>{formatTime(event.event_time)}</span>
+                    </>
+                  )}
                 </div>
               )}
               {event.event_address && (
@@ -172,10 +180,10 @@ export function GroceryPublicList({
         </span>
       </motion.div>
 
-      {/* Filter Pills - Compact row */}
+      {/* Filter Pills - 44px min touch targets */}
       <motion.div
         variants={itemVariants}
-        className="flex gap-1.5 px-3 py-2 justify-center"
+        className="flex gap-2 px-4 py-3 justify-center"
         role="tablist"
         aria-label={t('filterAll')}
       >
@@ -187,12 +195,12 @@ export function GroceryPublicList({
             <motion.button
               key={filterType}
               whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.95 }}
+              whileTap={{ scale: 0.97 }}
               onClick={() => setFilter(filterType)}
               role="tab"
               aria-selected={isActive}
               aria-controls={`panel-${filterType}`}
-              className={`flex h-9 items-center justify-center gap-x-1.5 rounded-full px-3 cursor-pointer transition-all
+              className={`flex h-11 items-center justify-center gap-x-2 rounded-full px-4 cursor-pointer transition-all
                 focus:outline-none focus:ring-2 focus:ring-[#13ec80]/30
                 ${isActive
                   ? 'bg-[#13ec80] shadow-sm shadow-[#13ec80]/30 text-[#0d1b14] font-bold'
@@ -200,11 +208,11 @@ export function GroceryPublicList({
                 }`}
             >
               {isActive ? (
-                <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
+                <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
               ) : (
-                <Circle className="h-3.5 w-3.5" aria-hidden="true" />
+                <Circle className="h-4 w-4" aria-hidden="true" />
               )}
-              <span className="text-xs font-medium">{t(labelKey)}</span>
+              <span className="text-sm font-medium">{t(labelKey)}</span>
             </motion.button>
           )
         })}
@@ -252,6 +260,7 @@ export function GroceryPublicList({
                 <GroceryItem
                   key={item.id}
                   item={item}
+                  allItems={items}
                   onClaim={onClaimItem}
                   onUnclaim={onUnclaimItem}
                 />

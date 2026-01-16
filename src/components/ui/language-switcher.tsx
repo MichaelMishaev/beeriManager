@@ -40,7 +40,7 @@ export function LanguageSwitcher({ variant = 'full' }: LanguageSwitcherProps) {
           <Button
             variant="ghost"
             size="icon"
-            className="h-9 w-9 relative"
+            className="h-9 w-9 relative border-0 outline-none focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
             aria-label="Switch language"
           >
             <Globe className="h-5 w-5" />

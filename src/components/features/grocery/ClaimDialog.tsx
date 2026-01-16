@@ -70,13 +70,13 @@ export function ClaimDialog({
   useEffect(() => {
     if (isOpen) {
       const savedName = getSavedClaimerName()
-      if (savedName && !name) {
-        setName(savedName)
-      }
+      // Only set saved name when dialog first opens (not on every name change)
+      setName(savedName)
       // Reset quantity to 1 when dialog opens
       setQuantity(1)
     }
-  }, [isOpen, getSavedClaimerName, name])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]) // Only run when dialog opens/closes
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()

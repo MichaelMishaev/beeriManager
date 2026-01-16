@@ -1,14 +1,25 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { GroceryCreateForm } from '@/components/features/grocery'
+import { ShareButton } from '@/components/ui/share-button'
 import { X } from 'lucide-react'
+
+const PRODUCTION_URL = 'https://beeri.online'
 
 export default function GroceryCreatePage() {
   const router = useRouter()
+  const t = useTranslations('grocery')
 
   const handleSuccess = (token: string) => {
     router.push(`/he/grocery/${token}/items`)
+  }
+
+  const shareData = {
+    title: t('shareTitle'),
+    text: t('shareText'),
+    url: `${PRODUCTION_URL}/he/grocery`
   }
 
   return (
@@ -22,9 +33,17 @@ export default function GroceryCreatePage() {
           <X className="h-6 w-6" />
         </button>
         <h2 className="text-[#0d1b14] dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center">
-          רשימת קניות חדשה
+          {t('newList')}
         </h2>
-        <div className="flex w-12 items-center justify-end" />
+        <div className="flex w-12 items-center justify-end">
+          <ShareButton
+            shareData={shareData}
+            variant="ghost"
+            size="icon"
+            className="text-[#0d1b14] dark:text-white hover:bg-[#e7f3ed] dark:hover:bg-[#1e3a2c]"
+            iconSize="h-5 w-5"
+          />
+        </div>
       </header>
 
       {/* Form */}

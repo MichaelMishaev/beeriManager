@@ -13,6 +13,7 @@ import {
   Clock,
   MapPin,
   User,
+  Phone,
   ShoppingCart,
   AlertCircle,
   Loader2,
@@ -117,9 +118,19 @@ export function GroceryCreateForm({ onSuccess }: GroceryCreateFormProps) {
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [eventSuggestions, setEventSuggestions] = useState<string[]>([])
   const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1)
+  const [creatorPhone, setCreatorPhone] = useState('')
+  const [phoneError, setPhoneError] = useState<string | null>(null)
   const formRef = useRef<HTMLFormElement>(null)
   const eventNameInputRef = useRef<HTMLInputElement | null>(null)
   const suggestionsDropdownRef = useRef<HTMLDivElement>(null)
+
+  // Format phone number as user types
+  const formatPhone = (input: string) => {
+    const digits = input.replace(/\D/g, '').slice(0, 10)
+    if (digits.length <= 3) return digits
+    if (digits.length <= 6) return `${digits.slice(0, 3)}-${digits.slice(3)}`
+    return `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}`
+  }
 
   // Schema with i18n error messages
   const groceryEventSchema = z.object({
@@ -271,6 +282,15 @@ export function GroceryCreateForm({ onSuccess }: GroceryCreateFormProps) {
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true)
     setError(null)
+    setPhoneError(null)
+
+    // Validate phone number (mandatory)
+    const phoneDigits = creatorPhone.replace(/\D/g, '')
+    if (!phoneDigits || !/^05\d{8}$/.test(phoneDigits)) {
+      setPhoneError(t('invalidPhone'))
+      setIsSubmitting(false)
+      return
+    }
 
     // Save creator name to localStorage for future use
     if (data.creator_name && typeof window !== 'undefined') {
@@ -281,7 +301,10 @@ export function GroceryCreateForm({ onSuccess }: GroceryCreateFormProps) {
       const response = await fetch('/api/grocery', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
+        body: JSON.stringify({
+          ...data,
+          creator_phone: phoneDigits
+        })
       })
 
       const result = await response.json()
@@ -823,6 +846,51 @@ export function GroceryCreateForm({ onSuccess }: GroceryCreateFormProps) {
             />
           </div>
         </label>
+      </motion.div>
+
+      {/* Phone Input for My Lists */}
+      <motion.div
+        className="flex flex-col px-4 py-3"
+        variants={fadeInUp}
+      >
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <label className="text-sm font-semibold text-[#0d1b14] dark:text-white flex items-center gap-2">
+              <Phone className="h-4 w-4 text-[#13ec80]" />
+              {t('phoneNumber')}
+              <span className="text-red-500">*</span>
+            </label>
+          </div>
+          <input
+            type="tel"
+            inputMode="numeric"
+            dir="ltr"
+            placeholder="050-000-0000"
+            value={creatorPhone}
+            onChange={(e) => {
+              setCreatorPhone(formatPhone(e.target.value))
+              setPhoneError(null)
+            }}
+            className={`w-full px-4 py-3 text-lg text-center tracking-wide border-2 rounded-xl
+              bg-white dark:bg-gray-900 text-[#0d1b14] dark:text-white
+              focus:outline-none focus:ring-4 focus:ring-[#13ec80]/40 focus:border-[#13ec80] transition-all
+              ${phoneError
+                ? 'border-red-500 ring-2 ring-red-500/20'
+                : creatorPhone && /^05\d-\d{3}-\d{4}$/.test(creatorPhone)
+                  ? 'border-[#13ec80] bg-[#13ec80]/5'
+                  : 'border-gray-200 dark:border-gray-700'
+              }`}
+          />
+          {phoneError ? (
+            <p className="text-sm text-red-600 flex items-center gap-1">
+              <span>⚠️</span> {phoneError}
+            </p>
+          ) : (
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              {t('phoneNumberHint')}
+            </p>
+          )}
+        </div>
       </motion.div>
 
       {/* Grocery Link Info */}

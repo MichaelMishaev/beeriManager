@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Heebo } from 'next/font/google'
 import { Roboto } from 'next/font/google'
 import { Frank_Ruhl_Libre } from 'next/font/google'
+import { Plus_Jakarta_Sans } from 'next/font/google'
 import { NextIntlClientProvider } from 'next-intl'
 import { getMessages, setRequestLocale } from 'next-intl/server'
 import { notFound } from 'next/navigation'
@@ -12,6 +13,7 @@ import { Footer } from '@/components/layout/Footer'
 import { GoogleAnalytics } from '@/components/analytics/GoogleAnalytics'
 import { HtmlAttributes } from '@/components/HtmlAttributes'
 import { IOSInstallPrompt } from '@/components/pwa/IOSInstallPrompt'
+import { MaterialSymbols } from '@/components/MaterialSymbols'
 import { locales, localeDirections, type Locale } from '@/i18n/config'
 import { logger } from '@/lib/logger'
 
@@ -34,6 +36,13 @@ const frankRuhl = Frank_Ruhl_Libre({
   variable: '--font-formal',
   display: 'swap',
   weight: ['400', '500', '700', '900'],
+})
+
+const plusJakarta = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  variable: '--font-jakarta',
+  display: 'swap',
+  weight: ['400', '500', '600', '700', '800'],
 })
 
 export const metadata: Metadata = {
@@ -163,7 +172,7 @@ export default async function LocaleLayout({
 
   const messages = await getMessages()
   const direction = localeDirections[locale as Locale]
-  const fontClass = `${locale === 'he' ? heebo.variable : roboto.variable} ${frankRuhl.variable}`
+  const fontClass = `${locale === 'he' ? heebo.variable : roboto.variable} ${frankRuhl.variable} ${plusJakarta.variable}`
   const fontFamily = locale === 'he'
     ? 'var(--font-hebrew), system-ui, sans-serif'
     : 'var(--font-russian), system-ui, sans-serif'
@@ -181,6 +190,7 @@ export default async function LocaleLayout({
   return (
     <>
       <GoogleAnalytics />
+      <MaterialSymbols />
       <HtmlAttributes lang={locale} dir={direction} className={fontClass} />
       <div className="min-h-screen flex flex-col bg-background font-sans antialiased" style={{ fontFamily }}>
         <NextIntlClientProvider messages={messages}>

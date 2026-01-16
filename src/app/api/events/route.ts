@@ -22,7 +22,9 @@ const EventSchema = z.object({
   payment_amount: z.number().min(0).optional().nullable(),
   budget_allocated: z.number().min(0).optional().nullable(),
   notes: z.string().optional().nullable(),
-  status: z.enum(['draft', 'published', 'ongoing', 'completed', 'cancelled']).default('draft')
+  status: z.enum(['draft', 'published', 'ongoing', 'completed', 'cancelled']).default('draft'),
+  // My Events feature - optional creator phone for lookup
+  creator_phone: z.string().regex(/^05\d{8}$/, 'מספר טלפון לא תקין').optional().nullable()
 })
 
 export async function GET(req: NextRequest) {
@@ -150,6 +152,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       success: true,
       data,
+      // My Events feature - return shareable edit URL
+      edit_url: data.edit_token ? `/events/edit/${data.edit_token}` : null,
       message: 'האירוע נוצר בהצלחה'
     })
 

@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
 import { toast } from 'sonner'
+import { CreatorPhoneInput } from '@/components/features/events/CreatorPhoneInput'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -32,7 +33,8 @@ const eventSchema = z.object({
   registration_deadline_time: z.string().optional(),
   requires_payment: z.boolean(),
   payment_amount: z.string().optional(),
-  budget_allocated: z.string().optional()
+  budget_allocated: z.string().optional(),
+  creator_phone: z.string().optional()
 })
 
 type EventFormData = z.infer<typeof eventSchema>
@@ -96,7 +98,8 @@ export default function NewEventPage() {
         registration_deadline: registrationDeadline,
         requires_payment: data.requires_payment,
         payment_amount: data.payment_amount ? parseFloat(data.payment_amount) : null,
-        budget_allocated: data.budget_allocated ? parseFloat(data.budget_allocated) : null
+        budget_allocated: data.budget_allocated ? parseFloat(data.budget_allocated) : null,
+        creator_phone: data.creator_phone?.replace(/\D/g, '') || null
       }
 
       const response = await fetch('/api/events', {
@@ -224,6 +227,20 @@ export default function NewEventPage() {
               </Select>
               <p className="text-xs text-muted-foreground mt-1">רק אירועים "פורסם" גלויים למשתמשים רגילים</p>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Creator Phone */}
+        <Card className="border-[#13ec80]/20 bg-gradient-to-br from-[#13ec80]/5 to-transparent">
+          <CardHeader>
+            <CardTitle>פרטי יוצר האירוע</CardTitle>
+            <CardDescription>לניהול קל יותר של האירועים שיצרת</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <CreatorPhoneInput
+              value={watch('creator_phone') || ''}
+              onChange={(value) => setValue('creator_phone', value)}
+            />
           </CardContent>
         </Card>
 

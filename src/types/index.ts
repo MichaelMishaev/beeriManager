@@ -50,6 +50,10 @@ export interface Event {
   // Photos
   photos_url?: string
 
+  // My Events feature - shareable edit links
+  edit_token?: string // 8-char token for public edit access
+  creator_phone?: string // Phone of event creator for lookup
+
   // Audit
   created_at: string
   updated_at: string
@@ -661,6 +665,7 @@ export interface GroceryEvent {
 
   // Creator info (optional)
   creator_name?: string
+  creator_phone?: string // Phone for "My Grocery Lists" lookup
 
   // Status
   status: 'active' | 'completed' | 'archived'

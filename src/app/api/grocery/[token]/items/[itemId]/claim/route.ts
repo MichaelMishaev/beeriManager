@@ -112,22 +112,26 @@ export async function POST(
       }
 
       // Create a new claimed item with the claimed quantity
+      // Use display_order + 1 to place it after the original item
+      const insertData = {
+        grocery_event_id: event.id,
+        item_name: existingItem.item_name,
+        quantity: claimQuantity,
+        notes: existingItem.notes || null,
+        claimed_by: validation.data.claimer_name,
+        claimed_at: new Date().toISOString(),
+        display_order: (existingItem.display_order ?? 0) + 1
+      }
+
       const { data: newClaimedItem, error: insertError } = await supabase
         .from('grocery_items')
-        .insert({
-          grocery_event_id: event.id,
-          item_name: existingItem.item_name,
-          quantity: claimQuantity,
-          notes: existingItem.notes,
-          claimed_by: validation.data.claimer_name,
-          claimed_at: new Date().toISOString(),
-          display_order: existingItem.display_order + 0.5 // Place it right after the original
-        })
+        .insert([insertData])  // Use array syntax for consistency
         .select()
         .single()
 
       if (insertError) {
-        console.error('Item insert error:', insertError)
+        console.error('Item insert error:', JSON.stringify(insertError, null, 2))
+        console.error('Insert data was:', insertData)
         // Rollback: restore original quantity
         await supabase
           .from('grocery_items')

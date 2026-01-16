@@ -5,7 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { Menu, X, Home, Users, HelpCircle, LogOut, LogIn, Phone, MessageCircle, School, ClipboardList } from 'lucide-react'
+import { Menu, X, Home, Users, HelpCircle, LogOut, LogIn, Phone, MessageCircle, ClipboardList, Plus, ListChecks, ChevronDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { LanguageSwitcher } from '@/components/ui/language-switcher'
 import { InstallButton } from '@/components/pwa/InstallButton'
@@ -170,16 +170,17 @@ export function Navigation() {
               )
             })}
 
-            {/* School tools menu */}
+            {/* Grocery Lists menu */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="flex items-center gap-1.5 text-sm"
+                  className="flex items-center gap-1.5 text-sm border-0 outline-none focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
                 >
-                  <School className="h-4 w-4" />
-                  <span>{tNav('schoolTools')}</span>
+                  <ClipboardList className="h-4 w-4" />
+                  <span>{tNav('groceryLists')}</span>
+                  <ChevronDown className="h-3 w-3 opacity-60" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-52">
@@ -189,8 +190,18 @@ export function Navigation() {
                     onClick={() => handleNavClick('/grocery', tNav('groceryList'))}
                     className="flex items-center gap-2"
                   >
-                    <School className="h-4 w-4" />
-                    <span>{tNav('groceryList')}</span>
+                    <Plus className="h-4 w-4 text-green-600" />
+                    <span>{tNav('createNewList')}</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link
+                    href="/my-grocery"
+                    onClick={() => handleNavClick('/my-grocery', tNav('myGrocery'))}
+                    className="flex items-center gap-2"
+                  >
+                    <ListChecks className="h-4 w-4 text-blue-600" />
+                    <span>{tNav('myLists')}</span>
                   </Link>
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -243,15 +254,43 @@ export function Navigation() {
 
           {/* Mobile - Quick Actions & Menu Button */}
           <div className="flex items-center gap-0.5 md:hidden">
-            {/* Grocery Quick Access */}
-            <Link
-              href="/grocery"
-              onClick={() => handleNavClick('/grocery', tNav('groceryList'))}
-              className="p-2 hover:bg-accent rounded-md transition-colors"
-              aria-label={tNav('groceryList')}
-            >
-              <ClipboardList className="h-5 w-5" />
-            </Link>
+            {/* Grocery Lists Dropdown - Single Entry Point */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="flex items-center gap-1 px-2 h-9 border-0 outline-none focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                  aria-label={tNav('groceryLists')}
+                >
+                  <ClipboardList className="h-5 w-5" />
+                  <span className="text-xs font-medium">{tNav('lists')}</span>
+                  <ChevronDown className="h-3 w-3 opacity-60" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem asChild>
+                  <Link
+                    href="/grocery"
+                    onClick={() => handleNavClick('/grocery', tNav('groceryList'))}
+                    className="flex items-center gap-2 cursor-pointer"
+                  >
+                    <Plus className="h-4 w-4 text-green-600" />
+                    <span>{tNav('createNewList')}</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link
+                    href="/my-grocery"
+                    onClick={() => handleNavClick('/my-grocery', tNav('myGrocery'))}
+                    className="flex items-center gap-2 cursor-pointer"
+                  >
+                    <ListChecks className="h-4 w-4 text-blue-600" />
+                    <span>{tNav('myLists')}</span>
+                  </Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
             {/* Compact Language Switcher */}
             <LanguageSwitcher variant="compact" />
@@ -280,22 +319,6 @@ export function Navigation() {
         {/* Mobile Navigation */}
         {isOpen && (
           <div className="md:hidden py-4 space-y-3">
-            {/* School tools menu for mobile */}
-            <div className="px-4 space-y-1">
-              <div className="flex items-center gap-2 text-base font-semibold">
-                <School className="h-5 w-5" />
-                <span>{tNav('schoolTools')}</span>
-              </div>
-              <Link
-                href="/grocery"
-                onClick={() => handleNavClick('/grocery', tNav('groceryList'))}
-                className="flex items-center gap-3 px-4 py-3 text-base font-medium rounded-md transition-colors text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-              >
-                <School className="h-5 w-5" />
-                {tNav('groceryList')}
-              </Link>
-            </div>
-
             {isAuthenticated ? (
               <>
                 {items.map((item) => {

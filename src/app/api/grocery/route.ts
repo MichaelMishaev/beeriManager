@@ -10,7 +10,8 @@ const CreateGroceryEventSchema = z.object({
   event_date: z.string().optional().nullable(),
   event_time: z.string().optional().nullable(),
   event_address: z.string().optional().nullable(),
-  creator_name: z.string().optional().nullable()
+  creator_name: z.string().optional().nullable(),
+  creator_phone: z.string().regex(/^05\d{8}$/, 'מספר טלפון לא תקין').optional().nullable()
 })
 
 /**
@@ -99,6 +100,7 @@ export async function POST(req: NextRequest) {
         event_time: validation.data.event_time || null,
         event_address: validation.data.event_address || null,
         creator_name: validation.data.creator_name || null,
+        creator_phone: validation.data.creator_phone || null,
         status: 'active'
       }])
       .select()

@@ -1,8 +1,10 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations, useLocale } from 'next-intl'
+import { useRouter } from 'next/navigation'
 import type { GroceryEvent } from '@/types'
-import { X, CheckCircle2, Link2, Copy, Check, Share2, MapPin, ShoppingBasket, ChevronLeft, ShoppingCart } from 'lucide-react'
+import { X, CheckCircle2, Link2, Copy, Check, Share2, MapPin, ShoppingBasket, ChevronLeft, ShoppingCart, Bookmark, ChevronRight } from 'lucide-react'
 
 const PRODUCTION_URL = 'https://beeri.online'
 
@@ -18,6 +20,9 @@ export function GroceryShareSuccess({
   onBackToDashboard
 }: GroceryShareSuccessProps) {
   const [copied, setCopied] = useState(false)
+  const t = useTranslations('grocery')
+  const router = useRouter()
+  const locale = useLocale()
 
   const shareUrl = `${PRODUCTION_URL}/grocery/${event.share_token}`
 
@@ -112,13 +117,38 @@ export function GroceryShareSuccess({
       </div>
 
       {/* SingleButton (Primary CTA) */}
-      <div className="flex px-4 py-3 mb-6">
+      <div className="flex px-4 py-3 mb-4">
         <button
           onClick={handleWhatsAppShare}
           className="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-14 px-5 flex-1 bg-[#25D366] hover:bg-[#22c55e] text-white gap-3 text-base font-bold leading-normal tracking-[0.015em] shadow-[0_4px_14px_0_rgba(37,211,102,0.39)] transition-all active:scale-[0.98]"
         >
           <Share2 className="h-5 w-5" />
           <span className="truncate">שתף ב-WhatsApp</span>
+        </button>
+      </div>
+
+      {/* Tip Callout - My Lists */}
+      <div className="px-4 mb-6">
+        <button
+          onClick={() => router.push(`/${locale}/my-lists`)}
+          className="w-full group"
+        >
+          <div className="flex items-center gap-3 bg-gradient-to-l from-[#13ec80]/5 to-[#0d98ba]/5 dark:from-[#13ec80]/10 dark:to-[#0d98ba]/10 backdrop-blur-sm px-4 py-3.5 rounded-xl border border-[#13ec80]/20 dark:border-[#13ec80]/30 transition-all hover:border-[#13ec80]/40 hover:shadow-[0_2px_12px_rgba(19,236,128,0.1)]">
+            <div className="flex items-center justify-center shrink-0 size-10 rounded-full bg-[#13ec80]/10 dark:bg-[#13ec80]/20">
+              <Bookmark className="h-5 w-5 text-[#13ec80]" />
+            </div>
+            <div className="flex-1 text-right min-w-0">
+              <p className="text-[#0d1b14] dark:text-white text-sm font-semibold leading-tight">
+                {t('successTipTitle')}
+              </p>
+              <p className="text-[#4c6659] dark:text-gray-400 text-xs leading-normal mt-0.5 line-clamp-2">
+                {t('successTipMyLists')}
+              </p>
+            </div>
+            <div className="flex items-center shrink-0">
+              <ChevronRight className="h-5 w-5 text-[#13ec80] transform rotate-180 group-hover:-translate-x-0.5 transition-transform" />
+            </div>
+          </div>
         </button>
       </div>
 

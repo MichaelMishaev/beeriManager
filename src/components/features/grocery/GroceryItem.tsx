@@ -5,10 +5,12 @@ import { useTranslations } from 'next-intl'
 import { motion } from 'framer-motion'
 import type { GroceryItem as GroceryItemType } from '@/types'
 import { ClaimDialog } from './ClaimDialog'
+import { ItemDetailsModal } from './ItemDetailsModal'
 import { ShoppingBasket, Trash2, Loader2, CheckCircle2 } from 'lucide-react'
 
 interface GroceryItemProps {
   item: GroceryItemType
+  allItems?: GroceryItemType[]  // All items to show who else is bringing
   onClaim: (itemId: string, claimerName: string, quantity?: number) => Promise<void>
   onUnclaim: (itemId: string) => Promise<void>
   isEditable?: boolean
@@ -44,6 +46,7 @@ const itemVariants = {
 
 export function GroceryItem({
   item,
+  allItems = [],
   onClaim,
   onUnclaim,
   isEditable = false,
@@ -51,7 +54,13 @@ export function GroceryItem({
 }: GroceryItemProps) {
   const t = useTranslations('grocery')
   const [isClaimDialogOpen, setIsClaimDialogOpen] = useState(false)
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+
+  // Check if there are other items with the same name (claimed by others)
+  const hasOtherClaimers = allItems.some(
+    i => i.item_name === item.item_name && i.claimed_by && i.id !== item.id
+  )
 
   const isClaimed = !!item.claimed_by
 
@@ -97,68 +106,14 @@ export function GroceryItem({
         animate="visible"
         exit="exit"
         layout
-        className={`flex items-center gap-4 px-3 min-h-[80px] py-3 justify-between border-b
+        className={`flex items-center gap-3 px-3 min-h-[80px] py-3 border-b
           transition-all duration-200 font-[family-name:var(--font-jakarta)]
           ${isClaimed
-            ? 'bg-gray-50/80 dark:bg-[#102219]/60 border-gray-100 dark:border-white/5'
+            ? 'bg-[#13ec80]/5 dark:bg-[#13ec80]/10 border-[#13ec80]/20 dark:border-[#13ec80]/10'
             : 'bg-white dark:bg-[#102219] border-gray-100 dark:border-white/5 hover:bg-gray-50 dark:hover:bg-[#152a1f]'
           }`}
       >
-        <div className="flex items-center gap-4 flex-1 min-w-0">
-          {/* Icon */}
-          <motion.div
-            initial={false}
-            animate={{
-              scale: isClaimed ? 0.9 : 1,
-              opacity: isClaimed ? 0.6 : 1
-            }}
-            className={`flex size-11 items-center justify-center rounded-full flex-shrink-0
-              ${isClaimed
-                ? 'bg-gray-100 dark:bg-white/5'
-                : 'bg-[#13ec80]/10 dark:bg-[#13ec80]/5'
-              }`}
-          >
-            <ShoppingBasket
-              className={`h-5 w-5 ${isClaimed ? 'text-gray-400' : 'text-[#13ec80]'}`}
-              aria-hidden="true"
-            />
-          </motion.div>
-
-          {/* Content */}
-          <div className="flex flex-col justify-center min-w-0 flex-1">
-            <p
-              className={`text-base leading-normal truncate
-                ${isClaimed
-                  ? 'text-gray-500 dark:text-white/50 font-medium line-through'
-                  : 'text-[#0d1b14] dark:text-white font-bold'
-                }`}
-            >
-              {displayName}
-            </p>
-
-            {isClaimed ? (
-              <motion.div
-                initial={{ opacity: 0, y: -5 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="flex items-center gap-1.5 mt-0.5"
-              >
-                <div
-                  className={`size-4 rounded-full ${avatarColor} flex-shrink-0`}
-                  aria-hidden="true"
-                />
-                <p className="text-gray-500 dark:text-white/40 text-xs font-semibold truncate">
-                  {t('claimedBy', { name: item.claimed_by })}
-                </p>
-              </motion.div>
-            ) : item.notes ? (
-              <p className="text-[#4c9a73] dark:text-[#13ec80]/60 text-sm font-normal leading-normal line-clamp-2">
-                {item.notes}
-              </p>
-            ) : null}
-          </div>
-        </div>
-
-        {/* Actions */}
+        {/* Actions - LEFT side for RTL */}
         <div className="shrink-0 flex items-center gap-2">
           {isEditable && onDelete && (
             <motion.button
@@ -179,17 +134,20 @@ export function GroceryItem({
               whileTap={{ scale: 0.95 }}
               onClick={handleUnclaim}
               disabled={isLoading}
-              className="flex items-center justify-center rounded-full h-10 w-10
-                bg-gray-100 dark:bg-white/10 text-gray-400 dark:text-white/30
-                hover:bg-gray-200 dark:hover:bg-white/20 transition-colors
-                focus:outline-none focus:ring-2 focus:ring-gray-400/40
-                disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center justify-center rounded-full h-11 px-4 gap-1.5
+                bg-[#13ec80]/10 dark:bg-[#13ec80]/20 text-[#13ec80] dark:text-[#13ec80]
+                hover:bg-[#13ec80]/20 dark:hover:bg-[#13ec80]/30 transition-colors
+                focus:outline-none focus:ring-2 focus:ring-[#13ec80]/40
+                disabled:opacity-50 disabled:cursor-not-allowed text-sm font-bold"
               aria-label={t('unclaimItem')}
             >
               {isLoading ? (
-                <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
+                <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
               ) : (
-                <CheckCircle2 className="h-5 w-5" aria-hidden="true" />
+                <>
+                  <span>{t('unclaimItem')}</span>
+                  <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
+                </>
               )}
             </motion.button>
           ) : (
@@ -198,8 +156,8 @@ export function GroceryItem({
               whileTap={{ scale: 0.95 }}
               onClick={() => setIsClaimDialogOpen(true)}
               disabled={isLoading}
-              className="flex min-w-[84px] cursor-pointer items-center justify-center
-                overflow-hidden rounded-full h-10 px-5
+              className="flex min-w-[90px] cursor-pointer items-center justify-center
+                overflow-hidden rounded-full h-11 px-5
                 bg-[#13ec80] hover:bg-[#10d970] text-[#0d1b14]
                 text-sm font-bold leading-normal
                 shadow-sm shadow-[#13ec80]/20 transition-all
@@ -214,6 +172,79 @@ export function GroceryItem({
             </motion.button>
           )}
         </div>
+
+        {/* Clickable Item Area - Opens details modal */}
+        <button
+          onClick={() => setIsDetailsModalOpen(true)}
+          className="flex items-center gap-3 flex-1 min-w-0 focus:outline-none
+            rounded-lg -m-1 p-1 hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+          aria-label={`${displayName} - ${t('whoBringsWhat')}`}
+        >
+          {/* Content - Takes remaining space, right aligned for RTL */}
+          <div className="flex flex-col justify-center min-w-0 flex-1 text-right">
+            <p
+              className={`text-base leading-normal
+                ${isClaimed
+                  ? 'text-[#0d1b14]/80 dark:text-white/80 font-medium'
+                  : 'text-[#0d1b14] dark:text-white font-bold'
+                }`}
+            >
+              {displayName}
+            </p>
+
+            {isClaimed ? (
+              <motion.div
+                initial={{ opacity: 0, y: -5 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex items-center gap-2 mt-1 justify-end"
+              >
+                <p className="text-[#13ec80] dark:text-[#13ec80] text-sm font-bold">
+                  {item.claimed_by} ✓
+                </p>
+                <div
+                  className={`size-5 rounded-full ${avatarColor} flex-shrink-0 flex items-center justify-center text-white text-[10px] font-bold`}
+                  aria-hidden="true"
+                >
+                  {item.claimed_by?.charAt(0).toUpperCase()}
+                </div>
+              </motion.div>
+            ) : hasOtherClaimers ? (
+              <p className="text-[#4c9a73] dark:text-[#13ec80]/60 text-xs font-medium">
+                {t('tapToSeeWho')}
+              </p>
+            ) : item.notes ? (
+              <p className="text-[#4c9a73] dark:text-[#13ec80]/60 text-sm font-normal leading-normal line-clamp-2">
+                {item.notes}
+              </p>
+            ) : null}
+          </div>
+
+          {/* Icon - RIGHT side for RTL */}
+          <motion.div
+            initial={false}
+            animate={{
+              scale: isClaimed ? 0.95 : 1,
+              opacity: 1
+            }}
+            className={`flex size-11 items-center justify-center rounded-full flex-shrink-0
+              ${isClaimed
+                ? 'bg-[#13ec80]/20 dark:bg-[#13ec80]/15'
+                : 'bg-[#13ec80]/10 dark:bg-[#13ec80]/5'
+              }`}
+          >
+            {isClaimed ? (
+              <CheckCircle2
+                className="h-5 w-5 text-[#13ec80]"
+                aria-hidden="true"
+              />
+            ) : (
+              <ShoppingBasket
+                className="h-5 w-5 text-[#13ec80]"
+                aria-hidden="true"
+              />
+            )}
+          </motion.div>
+        </button>
       </motion.div>
 
       <ClaimDialog
@@ -223,6 +254,13 @@ export function GroceryItem({
         itemName={displayName}
         isLoading={isLoading}
         maxQuantity={item.quantity}
+      />
+
+      <ItemDetailsModal
+        isOpen={isDetailsModalOpen}
+        onClose={() => setIsDetailsModalOpen(false)}
+        itemName={item.item_name}
+        allItems={allItems}
       />
     </>
   )

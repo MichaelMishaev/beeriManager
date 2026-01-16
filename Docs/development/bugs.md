@@ -36,9 +36,33 @@ When a production bug is fixed:
 
 ## Bugs (Newest First)
 
-<!-- Add bugs here as they occur -->
+## [2025-01-16] Grocery claim 500 error on partial claiming
 
-### Example Entry (Delete this when first real bug is added)
+**Problem:** Users get HTTP 500 error when trying to partially claim a grocery item (e.g., claiming 1 out of 3 items). Error message: "שגיאה ביצירת פריט חדש"
+
+**Root Cause:** Two issues in the partial claim flow:
+1. Used object syntax `.insert({...})` instead of array syntax `.insert([{...}])` - inconsistent with other routes
+2. Used `||` operator for null check on `display_order` instead of `??` (nullish coalescing)
+3. `notes` field passed as undefined instead of explicit null
+
+**Solution:**
+1. Changed to array syntax `.insert([insertData])` for consistency with other routes
+2. Changed `(existingItem.display_order || 0)` to `(existingItem.display_order ?? 0)`
+3. Changed `notes: existingItem.notes` to `notes: existingItem.notes || null`
+
+**Prevention Rule:**
+- Always use array syntax for Supabase inserts: `.insert([{...}])`
+- Use nullish coalescing (`??`) instead of OR (`||`) when 0 is a valid value
+- Explicitly pass `null` for nullable fields instead of `undefined`
+
+**Files Changed:**
+- `src/app/api/grocery/[token]/items/[itemId]/claim/route.ts`
+
+**Test Added:** Manual test - verify partial claiming works
+
+---
+
+### Example Entry (Reference only)
 
 ## [2025-12-16] Example: Admin authentication bypass
 
