@@ -669,9 +669,18 @@ export function GroceryCreateForm({ onSuccess }: GroceryCreateFormProps) {
         <motion.button
           type="button"
           onClick={() => setShowManualDate(!showManualDate)}
-          className="mt-3 text-xs text-[#4c9a73] hover:text-[#13ec80] transition-colors underline underline-offset-2"
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          className="mt-4 w-full flex items-center justify-center gap-2 px-4 py-3
+            bg-[#13ec80]/10 dark:bg-[#13ec80]/15 border-2 border-dashed border-[#13ec80]/60
+            hover:border-[#13ec80] hover:bg-[#13ec80]/20
+            rounded-xl text-sm font-semibold text-[#0d9a5c] dark:text-[#13ec80] hover:text-[#087a47]
+            transition-all duration-200
+            focus:outline-none focus:ring-4 focus:ring-[#13ec80]/30
+            min-h-[44px]"
         >
-          {t('orSelectManually')}
+          <Calendar className="h-5 w-5" />
+          <span>{t('orSelectManually')}</span>
         </motion.button>
 
         {/* Manual Date Input */}
@@ -683,15 +692,19 @@ export function GroceryCreateForm({ onSuccess }: GroceryCreateFormProps) {
               exit={{ opacity: 0, height: 0 }}
               className="mt-3 overflow-hidden"
             >
-              <input
-                type="date"
-                {...register('event_date')}
-                className="form-input w-full rounded-xl text-[#0d1b14] dark:text-white
-                  border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900
-                  h-14 px-4 text-base
-                  focus:outline-none focus:ring-4 focus:ring-[#13ec80]/40 focus:border-[#13ec80]
-                  transition-all duration-200"
-              />
+              <div className="relative">
+                <Calendar className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-[#13ec80] pointer-events-none" />
+                <input
+                  type="date"
+                  {...register('event_date')}
+                  className="form-input w-full rounded-xl text-[#0d1b14] dark:text-white
+                    border-2 border-[#13ec80]/30 bg-[#13ec80]/5 dark:bg-[#13ec80]/10
+                    h-14 pr-12 pl-4 text-lg font-semibold text-center
+                    focus:outline-none focus:ring-4 focus:ring-[#13ec80]/40 focus:border-[#13ec80]
+                    hover:border-[#13ec80]/50 hover:bg-[#13ec80]/10
+                    transition-all duration-200 cursor-pointer"
+                />
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
@@ -774,9 +787,18 @@ export function GroceryCreateForm({ onSuccess }: GroceryCreateFormProps) {
         <motion.button
           type="button"
           onClick={() => setShowManualTime(!showManualTime)}
-          className="mt-3 text-xs text-[#4c9a73] hover:text-[#13ec80] transition-colors underline underline-offset-2"
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          className="mt-4 w-full flex items-center justify-center gap-2 px-4 py-3
+            bg-[#13ec80]/10 dark:bg-[#13ec80]/15 border-2 border-dashed border-[#13ec80]/60
+            hover:border-[#13ec80] hover:bg-[#13ec80]/20
+            rounded-xl text-sm font-semibold text-[#0d9a5c] dark:text-[#13ec80] hover:text-[#087a47]
+            transition-all duration-200
+            focus:outline-none focus:ring-4 focus:ring-[#13ec80]/30
+            min-h-[44px]"
         >
-          {t('orSelectManually')}
+          <Clock className="h-5 w-5" />
+          <span>{t('orSelectManually')}</span>
         </motion.button>
 
         {/* Manual Time Input */}
@@ -788,15 +810,19 @@ export function GroceryCreateForm({ onSuccess }: GroceryCreateFormProps) {
               exit={{ opacity: 0, height: 0 }}
               className="mt-3 overflow-hidden"
             >
-              <input
-                type="time"
-                {...register('event_time')}
-                className="form-input w-full rounded-xl text-[#0d1b14] dark:text-white
-                  border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900
-                  h-14 px-4 text-base
-                  focus:outline-none focus:ring-4 focus:ring-[#13ec80]/40 focus:border-[#13ec80]
-                  transition-all duration-200"
-              />
+              <div className="relative">
+                <Clock className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-[#13ec80] pointer-events-none" />
+                <input
+                  type="time"
+                  {...register('event_time')}
+                  className="form-input w-full rounded-xl text-[#0d1b14] dark:text-white
+                    border-2 border-[#13ec80]/30 bg-[#13ec80]/5 dark:bg-[#13ec80]/10
+                    h-14 pr-12 pl-4 text-lg font-semibold text-center
+                    focus:outline-none focus:ring-4 focus:ring-[#13ec80]/40 focus:border-[#13ec80]
+                    hover:border-[#13ec80]/50 hover:bg-[#13ec80]/10
+                    transition-all duration-200 cursor-pointer"
+                />
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
