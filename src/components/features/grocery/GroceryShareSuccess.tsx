@@ -4,6 +4,8 @@ import { useState } from 'react'
 import type { GroceryEvent } from '@/types'
 import { X, CheckCircle2, Link2, Copy, Check, Share2, MapPin, ShoppingBasket, ChevronLeft, ShoppingCart } from 'lucide-react'
 
+const PRODUCTION_URL = 'https://beeri.online'
+
 interface GroceryShareSuccessProps {
   event: GroceryEvent
   onViewEvent: () => void
@@ -17,9 +19,7 @@ export function GroceryShareSuccess({
 }: GroceryShareSuccessProps) {
   const [copied, setCopied] = useState(false)
 
-  const shareUrl = typeof window !== 'undefined'
-    ? `${window.location.origin}/he/grocery/${event.share_token}`
-    : `/grocery/${event.share_token}`
+  const shareUrl = `${PRODUCTION_URL}/grocery/${event.share_token}`
 
   const handleCopyLink = async () => {
     try {

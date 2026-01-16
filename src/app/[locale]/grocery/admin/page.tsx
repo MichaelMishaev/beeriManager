@@ -6,6 +6,8 @@ import type { GroceryEvent } from '@/types'
 import { GroceryProgressBar } from '@/components/features/grocery'
 import { Loader2, AlertCircle, ChevronLeft, ShoppingCart, MessageCircle, Plus } from 'lucide-react'
 
+const PRODUCTION_URL = 'https://beeri.online'
+
 export default function GroceryAdminPage() {
   const router = useRouter()
 
@@ -52,7 +54,7 @@ export default function GroceryAdminPage() {
   }
 
   const handleWhatsAppNudge = (event: GroceryEvent) => {
-    const shareUrl = `${window.location.origin}/he/grocery/${event.share_token}`
+    const shareUrl = `${PRODUCTION_URL}/grocery/${event.share_token}`
     const unclaimed = event.total_items - event.claimed_items
     const text = encodeURIComponent(
       `תזכורת! 🛒\n\n` +

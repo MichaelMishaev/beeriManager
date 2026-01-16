@@ -6,6 +6,8 @@ import { GroceryPublicList } from '@/components/features/grocery'
 import type { GroceryEvent } from '@/types'
 import { Loader2, AlertCircle, ChevronLeft, Share2 } from 'lucide-react'
 
+const PRODUCTION_URL = 'https://beeri.online'
+
 export default function GroceryPublicPage() {
   const params = useParams()
   const router = useRouter()
@@ -75,7 +77,7 @@ export default function GroceryPublicPage() {
   }
 
   const handleShare = () => {
-    const shareUrl = `${window.location.origin}/he/grocery/${token}`
+    const shareUrl = `${PRODUCTION_URL}/grocery/${token}`
     const text = encodeURIComponent(
       `היי! 🛒\n\n` +
       `הצטרפו לרשימת הקניות ל${event?.event_name} של ${event?.class_name}\n\n` +
