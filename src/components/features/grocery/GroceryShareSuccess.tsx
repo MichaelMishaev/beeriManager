@@ -4,7 +4,9 @@ import { useState } from 'react'
 import { useTranslations, useLocale } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import type { GroceryEvent } from '@/types'
-import { X, CheckCircle2, Link2, Copy, Check, Share2, MapPin, ShoppingBasket, ChevronLeft, ShoppingCart, Bookmark, ChevronRight } from 'lucide-react'
+import { X, CheckCircle2, Link2, Copy, Check, Share2, MapPin, ShoppingBasket, ChevronLeft, Bookmark, ChevronRight } from 'lucide-react'
+import { getEventIcon } from '@/lib/data/event-names'
+import { EventTypeIcon } from './EventTypeIcon'
 
 const PRODUCTION_URL = 'https://beeri.online'
 
@@ -187,7 +189,12 @@ export function GroceryShareSuccess({
             </button>
           </div>
           <div className="w-24 h-24 sm:w-32 sm:h-auto bg-gradient-to-br from-[#13ec80] to-[#0d98ba] rounded-lg shrink-0 border border-[#e0e8e4] dark:border-transparent flex items-center justify-center">
-            <ShoppingCart className="text-white h-10 w-10" />
+            <EventTypeIcon
+              icon={getEventIcon(event.event_name)}
+              size="xl"
+              showBackground={false}
+              colorOverride="white"
+            />
           </div>
         </div>
       </div>

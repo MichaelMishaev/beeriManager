@@ -1,13 +1,28 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useTranslations } from 'next-intl'
 import { motion, AnimatePresence } from 'framer-motion'
-import type { GroceryEvent } from '@/types'
+import type { GroceryEvent, GroceryItem as GroceryItemType } from '@/types'
 import { GroceryItem } from './GroceryItem'
+
+// Consolidated item structure for grouping items with the same name
+export interface ConsolidatedItem {
+  id: string // Primary item ID for key
+  item_name: string
+  totalQuantity: number
+  claims: Array<{ claimerName: string; quantity: number; itemId: string }>
+  unclaimedItems: GroceryItemType[] // Unclaimed items in this group
+  unclaimedQuantity: number
+  allItemIds: string[] // All item IDs in this group
+  notes?: string | null
+  display_order: number
+}
 import { GroceryProgressBar } from './GroceryProgressBar'
 import { GroceryListSkeleton } from './GroceryListSkeleton'
-import { ShoppingCart, GraduationCap, Calendar, MapPin, CheckCircle2, Circle, PartyPopper } from 'lucide-react'
+import { GraduationCap, Calendar, MapPin, CheckCircle2, Circle, PartyPopper, ShoppingBasket } from 'lucide-react'
+import { getEventIcon } from '@/lib/data/event-names'
+import { EventTypeIcon } from './EventTypeIcon'
 
 interface GroceryPublicListProps {
   event: GroceryEvent
@@ -45,9 +60,56 @@ export function GroceryPublicList({
 
   const items = event.items || []
 
-  const filteredItems = items.filter((item) => {
-    if (filter === 'unclaimed') return !item.claimed_by
-    if (filter === 'claimed') return !!item.claimed_by
+  // Consolidate ALL items (including partial claims) by name into single rows
+  // This ensures claimed portions from partial claims are included
+  const consolidatedItems = useMemo((): ConsolidatedItem[] => {
+    const grouped = new Map<string, GroceryItemType[]>()
+
+    // Group ALL items by name (case-insensitive, trimmed)
+    // Include items with parent_item_id - they are partial claims that should be consolidated
+    items.forEach(item => {
+      const key = item.item_name.toLowerCase().trim()
+      if (!grouped.has(key)) {
+        grouped.set(key, [])
+      }
+      grouped.get(key)!.push(item)
+    })
+
+    // Convert groups to consolidated items
+    return Array.from(grouped.values()).map(itemGroup => {
+      const totalQuantity = itemGroup.reduce((sum, item) => sum + item.quantity, 0)
+      const claims = itemGroup
+        .filter(item => item.claimed_by)
+        .map(item => ({
+          claimerName: item.claimed_by!,
+          quantity: item.quantity,
+          itemId: item.id
+        }))
+      const unclaimedItems = itemGroup.filter(item => !item.claimed_by)
+      const unclaimedQuantity = unclaimedItems.reduce((sum, item) => sum + item.quantity, 0)
+
+      // Use the earliest item as primary (by display_order or created_at)
+      const sortedGroup = [...itemGroup].sort((a, b) =>
+        (a.display_order ?? 0) - (b.display_order ?? 0)
+      )
+
+      return {
+        id: sortedGroup[0].id,
+        item_name: sortedGroup[0].item_name,
+        totalQuantity,
+        claims,
+        unclaimedItems,
+        unclaimedQuantity,
+        allItemIds: itemGroup.map(i => i.id),
+        notes: sortedGroup[0].notes,
+        display_order: sortedGroup[0].display_order ?? 0
+      }
+    }).sort((a, b) => a.display_order - b.display_order)
+  }, [items])
+
+  const filteredItems = consolidatedItems.filter((item) => {
+    if (filter === 'unclaimed') return item.unclaimedQuantity > 0
+    if (filter === 'claimed') return item.claims.length > 0
     return true
   })
 
@@ -98,7 +160,7 @@ export function GroceryPublicList({
     }
   }, [onRefresh])
 
-  const unclaimedCount = items.filter(i => !i.claimed_by).length
+  const unclaimedCount = consolidatedItems.filter(i => i.unclaimedQuantity > 0).length
 
   // Show skeleton while loading
   if (isLoading) {
@@ -126,7 +188,12 @@ export function GroceryPublicList({
               transition={{ type: 'spring', stiffness: 200, damping: 20 }}
               className="bg-gradient-to-br from-[#13ec80] to-[#0d98ba] rounded-2xl h-20 w-20 shadow-lg border-2 border-white dark:border-white/10 flex items-center justify-center"
             >
-              <ShoppingCart className="text-white h-8 w-8" aria-hidden="true" />
+              <EventTypeIcon
+                icon={getEventIcon(event.event_name)}
+                size="xl"
+                showBackground={false}
+                colorOverride="white"
+              />
             </motion.div>
             <div className="flex flex-col items-center justify-center gap-1">
               <h1 className="text-[#0d1b14] dark:text-white text-[24px] font-extrabold leading-tight tracking-[-0.015em] text-center">
@@ -236,7 +303,7 @@ export function GroceryPublicList({
               {filter === 'unclaimed' ? (
                 <PartyPopper className="h-12 w-12 mb-2 opacity-50" aria-hidden="true" />
               ) : (
-                <ShoppingCart className="h-12 w-12 mb-2 opacity-50" aria-hidden="true" />
+                <ShoppingBasket className="h-12 w-12 mb-2 opacity-50" aria-hidden="true" />
               )}
               <p className="text-base font-medium">
                 {filter === 'unclaimed'
@@ -256,10 +323,10 @@ export function GroceryPublicList({
               animate="visible"
               variants={containerVariants}
             >
-              {filteredItems.map((item) => (
+              {filteredItems.map((consolidatedItem) => (
                 <GroceryItem
-                  key={item.id}
-                  item={item}
+                  key={consolidatedItem.id}
+                  consolidatedItem={consolidatedItem}
                   allItems={items}
                   onClaim={onClaimItem}
                   onUnclaim={onUnclaimItem}

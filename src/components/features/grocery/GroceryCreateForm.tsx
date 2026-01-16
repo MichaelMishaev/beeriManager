@@ -18,15 +18,14 @@ import {
   AlertCircle,
   Loader2,
   ArrowLeft,
-  Sparkles,
   Sun,
   Sunset,
   Moon,
   X,
-  Plus
 } from 'lucide-react'
-import { ALL_EVENT_NAMES, QUICK_EVENT_SUGGESTIONS } from '@/lib/data/event-names'
+import { ALL_EVENT_NAMES, QUICK_EVENT_SUGGESTIONS, getEventIcon } from '@/lib/data/event-names'
 import { fuzzySearchHebrew } from '@/lib/utils/fuzzy-search'
+import { EventTypeIcon } from './EventTypeIcon'
 
 // Local storage key for remembering creator name
 const CREATOR_NAME_KEY = 'grocery_creator_name'
@@ -466,25 +465,28 @@ export function GroceryCreateForm({ onSuccess }: GroceryCreateFormProps) {
                 transition={{ duration: 0.15 }}
                 className="mt-2 bg-white dark:bg-gray-900 rounded-xl border-2 border-gray-200 dark:border-gray-700 shadow-lg overflow-hidden"
               >
-                {eventSuggestions.map((suggestion, index) => (
-                  <motion.button
-                    key={suggestion}
-                    type="button"
-                    role="option"
-                    aria-selected={selectedSuggestionIndex === index}
-                    onClick={() => selectSuggestion(suggestion)}
-                    className={`w-full px-4 py-3 text-right flex items-center gap-3 transition-colors
-                      ${selectedSuggestionIndex === index
-                        ? 'bg-[#13ec80]/20 text-[#0d1b14] dark:text-white'
-                        : 'hover:bg-gray-50 dark:hover:bg-gray-800 text-[#0d1b14] dark:text-white'
-                      }
-                      ${index < eventSuggestions.length - 1 ? 'border-b border-gray-100 dark:border-gray-800' : ''}
-                    `}
-                  >
-                    <Plus className="h-4 w-4 text-[#13ec80] shrink-0" />
-                    <span className="text-base font-medium">{suggestion}</span>
-                  </motion.button>
-                ))}
+                {eventSuggestions.map((suggestion, index) => {
+                  const iconType = getEventIcon(suggestion)
+                  return (
+                    <motion.button
+                      key={suggestion}
+                      type="button"
+                      role="option"
+                      aria-selected={selectedSuggestionIndex === index}
+                      onClick={() => selectSuggestion(suggestion)}
+                      className={`w-full px-4 py-3 text-right flex items-center gap-3 transition-colors
+                        ${selectedSuggestionIndex === index
+                          ? 'bg-[#13ec80]/20 text-[#0d1b14] dark:text-white'
+                          : 'hover:bg-gray-50 dark:hover:bg-gray-800 text-[#0d1b14] dark:text-white'
+                        }
+                        ${index < eventSuggestions.length - 1 ? 'border-b border-gray-100 dark:border-gray-800' : ''}
+                      `}
+                    >
+                      <EventTypeIcon icon={iconType} size="sm" />
+                      <span className="text-base font-medium">{suggestion}</span>
+                    </motion.button>
+                  )
+                })}
               </motion.div>
             )}
           </AnimatePresence>
@@ -500,17 +502,17 @@ export function GroceryCreateForm({ onSuccess }: GroceryCreateFormProps) {
               >
                 {QUICK_EVENT_SUGGESTIONS.map((suggestion) => (
                   <motion.button
-                    key={suggestion}
+                    key={suggestion.name}
                     type="button"
-                    onClick={() => selectSuggestion(suggestion)}
+                    onClick={() => selectSuggestion(suggestion.name)}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-[#13ec80]/10 hover:bg-[#13ec80]/20
-                      text-[#0d1b14] dark:text-white text-sm rounded-full border border-[#13ec80]/20
-                      transition-colors cursor-pointer"
+                    className="flex items-center gap-2 px-3 py-2 bg-white dark:bg-gray-900 hover:bg-[#13ec80]/10
+                      text-[#0d1b14] dark:text-white text-sm rounded-full border-2 border-gray-200 dark:border-gray-700
+                      hover:border-[#13ec80]/30 transition-all cursor-pointer shadow-sm"
                   >
-                    <Sparkles className="h-3.5 w-3.5 text-[#13ec80]" />
-                    {suggestion}
+                    <EventTypeIcon icon={suggestion.icon} size="sm" />
+                    <span className="font-medium">{suggestion.name}</span>
                   </motion.button>
                 ))}
               </motion.div>

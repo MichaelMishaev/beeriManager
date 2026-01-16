@@ -3,7 +3,9 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
-import { Search, ShoppingCart, Calendar, MapPin, ChevronLeft, Loader2, Users, Clock, Pencil, Eye } from 'lucide-react'
+import { Search, ShoppingBasket, Calendar, MapPin, ChevronLeft, Loader2, Users, Clock, Pencil, Eye } from 'lucide-react'
+import { getEventIcon } from '@/lib/data/event-names'
+import { EventTypeIcon } from '@/components/features/grocery/EventTypeIcon'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
@@ -205,7 +207,7 @@ export default function MyListsPage() {
                       </Badge>
                       <div className="flex items-center gap-2 text-right min-w-0 flex-1 justify-end">
                         <h3 className="font-semibold text-lg truncate">{list.event_name}</h3>
-                        <ShoppingCart className="h-5 w-5 text-[#13ec80] shrink-0" />
+                        <EventTypeIcon icon={getEventIcon(list.event_name)} size="sm" />
                       </div>
                     </div>
 
@@ -262,7 +264,7 @@ export default function MyListsPage() {
           ) : (
             <Card className="bg-gray-50">
               <CardContent className="py-8 text-center">
-                <ShoppingCart className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                <ShoppingBasket className="h-12 w-12 text-gray-300 mx-auto mb-4" />
                 <p className="text-muted-foreground">{t('noListsFound')}</p>
                 <p className="text-sm text-muted-foreground mt-1">
                   {t('noListsFoundDescription')}
