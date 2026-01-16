@@ -259,14 +259,27 @@ export default function AIChatModal({ isOpen, onClose }: AIChatModalProps) {
           // Simple message → Direct extraction (existing flow)
           action = 'extract_data'
 
-          // Pass selected type as context for simple messages too
+          // Build context with selected type + understanding (if exists from previous round)
+          // This ensures subsequent messages in highlight flow (like "1" for end_date)
+          // have full context
+          const contextParts: string[] = []
+
           if (selectedType) {
             const typeNames = {
               event: 'אירוע',
               urgent: 'הודעה דחופה',
               highlight: 'הדגשה (קרוסלה)',
             }
-            context = `המשתמש בחר ליצור: ${typeNames[selectedType]}`
+            contextParts.push(`המשתמש בחר ליצור: ${typeNames[selectedType]}`)
+          }
+
+          // Include understanding context if available (from previous understanding_check phase)
+          if (conversationContext.understanding) {
+            contextParts.push(`ההבנה שאושרה: ${conversationContext.understanding}`)
+          }
+
+          if (contextParts.length > 0) {
+            context = contextParts.join('\n\n')
           }
         }
       } else if (chatPhase === 'understanding_check') {
@@ -289,6 +302,11 @@ export default function AIChatModal({ isOpen, onClose }: AIChatModalProps) {
             action: 'confirmation_detected'
           })
           action = 'extract_data'
+
+          // CRITICAL: Change phase to data_entry so subsequent messages
+          // (like end_date selection "1") are handled as data extraction
+          // instead of being checked against isConfirmation again
+          setChatPhase('data_entry')
 
           // Build context with selected type + understanding
           const contextParts: string[] = []
@@ -352,17 +370,26 @@ export default function AIChatModal({ isOpen, onClose }: AIChatModalProps) {
         ]
       }
 
-      // If extracting after confirmation, send original message for extraction
-      if (action === 'extract_data' && context && conversationContext.originalMessage) {
+      // If extracting IMMEDIATELY after understanding confirmation, send original message for extraction
+      // This block should only run ONCE - right after user confirmed understanding
+      // We detect this by checking if the current phase is still understanding_check
+      // (it will be changed to data_entry AFTER this send completes)
+      const isFirstExtractionAfterConfirmation =
+        chatPhase === 'understanding_check' &&
+        action === 'extract_data' &&
+        context &&
+        conversationContext.originalMessage
+
+      if (isFirstExtractionAfterConfirmation) {
         // Send explicit extraction request with context inline
         // This makes it crystal clear to the AI what to do
-        logger.info('Preparing extraction with context', {
+        logger.info('Preparing FIRST extraction with context (after understanding confirmation)', {
           component: 'AIChatModal',
           action: 'prepare_extraction',
           data: {
             hasContext: true,
             contextPreview: context?.substring(0, 100),
-            originalMessagePreview: conversationContext.originalMessage.substring(0, 100),
+            originalMessagePreview: conversationContext.originalMessage!.substring(0, 100),
           }
         })
 
@@ -586,6 +613,7 @@ ${conversationContext.originalMessage}
     // Reset chat after successful creation
     setMessages([])
     setChatPhase('initial')
+    setSelectedType(null) // Reset selected type
     setConversationContext({ gptCallCount: 0, failureCount: 0 }) // Reset context
     initializeChat()
   }
@@ -594,6 +622,7 @@ ${conversationContext.originalMessage}
     setMessages([])
     setExtractedData(null)
     setChatPhase('initial')
+    setSelectedType(null) // Reset selected type
     setConversationContext({ gptCallCount: 0, failureCount: 0 }) // Reset context
     setShowExamples(false)
     setShowManualForm(false)

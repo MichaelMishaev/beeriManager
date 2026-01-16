@@ -113,6 +113,7 @@ export async function POST(
 
       // Create a new claimed item with the claimed quantity
       // Use display_order + 1 to place it after the original item
+      // Track parent_item_id for merging back on unclaim
       const insertData = {
         grocery_event_id: event.id,
         item_name: existingItem.item_name,
@@ -120,7 +121,8 @@ export async function POST(
         notes: existingItem.notes || null,
         claimed_by: validation.data.claimer_name,
         claimed_at: new Date().toISOString(),
-        display_order: (existingItem.display_order ?? 0) + 1
+        display_order: (existingItem.display_order ?? 0) + 1,
+        parent_item_id: itemId // Track the parent for merge-back on unclaim
       }
 
       const { data: newClaimedItem, error: insertError } = await supabase
@@ -144,6 +146,18 @@ export async function POST(
           { status: 500 }
         )
       }
+
+      // Log activity for partial claim
+      await supabase
+        .from('grocery_activity_log')
+        .insert({
+          grocery_event_id: event.id,
+          item_id: newClaimedItem.id,
+          action: 'claimed',
+          item_name: existingItem.item_name,
+          quantity: claimQuantity,
+          user_name: validation.data.claimer_name
+        })
 
       return NextResponse.json({
         success: true,
@@ -172,6 +186,18 @@ export async function POST(
       )
     }
 
+    // Log activity for full claim
+    await supabase
+      .from('grocery_activity_log')
+      .insert({
+        grocery_event_id: event.id,
+        item_id: itemId,
+        action: 'claimed',
+        item_name: existingItem.item_name,
+        quantity: existingItem.quantity,
+        user_name: validation.data.claimer_name
+      })
+
     return NextResponse.json({
       success: true,
       data,
@@ -189,6 +215,7 @@ export async function POST(
 /**
  * DELETE /api/grocery/[token]/items/[itemId]/claim
  * Unclaim an item (public)
+ * If item was a partial claim (has parent_item_id), merge quantity back to parent
  */
 export async function DELETE(
   _req: NextRequest,
@@ -220,7 +247,85 @@ export async function DELETE(
       )
     }
 
-    // Unclaim the item
+    // Get item with parent reference
+    const { data: item, error: itemError } = await supabase
+      .from('grocery_items')
+      .select('id, quantity, parent_item_id, claimed_by, item_name')
+      .eq('id', itemId)
+      .eq('grocery_event_id', event.id)
+      .single()
+
+    if (itemError || !item) {
+      return NextResponse.json(
+        { success: false, error: 'הפריט לא נמצא' },
+        { status: 404 }
+      )
+    }
+
+    // If this was a partial claim (has parent), merge quantity back
+    if (item.parent_item_id) {
+      // Get parent item
+      const { data: parent, error: parentError } = await supabase
+        .from('grocery_items')
+        .select('id, quantity')
+        .eq('id', item.parent_item_id)
+        .single()
+
+      if (!parentError && parent) {
+        // Merge quantity back to parent
+        const { error: updateError } = await supabase
+          .from('grocery_items')
+          .update({ quantity: parent.quantity + item.quantity })
+          .eq('id', item.parent_item_id)
+
+        if (updateError) {
+          console.error('Parent quantity update error:', updateError)
+          return NextResponse.json(
+            { success: false, error: 'שגיאה בעדכון הכמות' },
+            { status: 500 }
+          )
+        }
+
+        // Log unclaim activity BEFORE deleting (to avoid foreign key error)
+        const { error: logError } = await supabase
+          .from('grocery_activity_log')
+          .insert({
+            grocery_event_id: event.id,
+            item_id: itemId,
+            action: 'unclaimed',
+            item_name: item.item_name,
+            quantity: item.quantity,
+            user_name: item.claimed_by
+          })
+
+        if (logError) {
+          console.error('Activity log insert error (partial unclaim):', logError)
+        }
+
+        // Delete the split item entirely
+        const { error: deleteError } = await supabase
+          .from('grocery_items')
+          .delete()
+          .eq('id', itemId)
+
+        if (deleteError) {
+          console.error('Item delete error:', deleteError)
+          return NextResponse.json(
+            { success: false, error: 'שגיאה במחיקת הפריט' },
+            { status: 500 }
+          )
+        }
+
+        return NextResponse.json({
+          success: true,
+          merged: true,
+          message: 'quantityMergedBack'
+        })
+      }
+      // If parent was deleted, fall through to normal unclaim
+    }
+
+    // Normal unclaim (no parent or parent was deleted) - just clear claimed_by
     const { data, error } = await supabase
       .from('grocery_items')
       .update({
@@ -238,6 +343,22 @@ export async function DELETE(
         { success: false, error: 'שגיאה בביטול התפיסה' },
         { status: 500 }
       )
+    }
+
+    // Log unclaim activity
+    const { error: logError2 } = await supabase
+      .from('grocery_activity_log')
+      .insert({
+        grocery_event_id: event.id,
+        item_id: itemId,
+        action: 'unclaimed',
+        item_name: item.item_name,
+        quantity: item.quantity,
+        user_name: item.claimed_by
+      })
+
+    if (logError2) {
+      console.error('Activity log insert error (normal unclaim):', logError2)
     }
 
     return NextResponse.json({

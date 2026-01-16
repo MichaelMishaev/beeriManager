@@ -71,6 +71,10 @@ export async function GET(
 /**
  * PATCH /api/grocery/[token]/items/[itemId]
  * Update a grocery item (public)
+ *
+ * IMPORTANT: When increasing quantity on a CLAIMED item,
+ * we must NOT increase the claimer's quantity automatically.
+ * Instead, create a new unclaimed item for the additional quantity.
  */
 export async function PATCH(
   req: NextRequest,
@@ -108,7 +112,90 @@ export async function PATCH(
       )
     }
 
-    // Update the item
+    // Get the current item to check if it's claimed
+    const { data: currentItem, error: fetchError } = await supabase
+      .from('grocery_items')
+      .select('*')
+      .eq('id', itemId)
+      .eq('grocery_event_id', event.id)
+      .single()
+
+    if (fetchError || !currentItem) {
+      return NextResponse.json(
+        { success: false, error: 'הפריט לא נמצא' },
+        { status: 404 }
+      )
+    }
+
+    // Check if this is a quantity increase on a CLAIMED item
+    const newQuantity = validation.data.quantity
+    const isClaimedItem = !!currentItem.claimed_by
+    const isQuantityIncrease = newQuantity && newQuantity > currentItem.quantity
+
+    if (isClaimedItem && isQuantityIncrease) {
+      // SPECIAL CASE: Admin is increasing quantity on a claimed item
+      // We must NOT increase what the claimer is bringing!
+      // Instead, create a new unclaimed item for the additional quantity
+
+      const additionalQuantity = newQuantity - currentItem.quantity
+
+      // Check if there's already an unclaimed item with the same name (parent or sibling)
+      // that we can add the quantity to
+      const { data: existingUnclaimed } = await supabase
+        .from('grocery_items')
+        .select('*')
+        .eq('grocery_event_id', event.id)
+        .eq('item_name', currentItem.item_name)
+        .is('claimed_by', null)
+        .neq('id', itemId)
+        .single()
+
+      if (existingUnclaimed) {
+        // Add to the existing unclaimed item's quantity
+        const { error: updateError } = await supabase
+          .from('grocery_items')
+          .update({ quantity: existingUnclaimed.quantity + additionalQuantity })
+          .eq('id', existingUnclaimed.id)
+
+        if (updateError) {
+          console.error('Error updating existing unclaimed item:', updateError)
+          return NextResponse.json(
+            { success: false, error: 'שגיאה בעדכון הפריט' },
+            { status: 500 }
+          )
+        }
+      } else {
+        // Create a new unclaimed item for the additional quantity
+        const { error: insertError } = await supabase
+          .from('grocery_items')
+          .insert({
+            grocery_event_id: event.id,
+            item_name: currentItem.item_name,
+            quantity: additionalQuantity,
+            notes: currentItem.notes || null,
+            display_order: (currentItem.display_order ?? 0) + 1,
+            // No claimed_by - this is unclaimed
+          })
+
+        if (insertError) {
+          console.error('Error creating new unclaimed item:', insertError)
+          return NextResponse.json(
+            { success: false, error: 'שגיאה ביצירת פריט חדש' },
+            { status: 500 }
+          )
+        }
+      }
+
+      // Return the original item unchanged (claimer's quantity stays the same)
+      return NextResponse.json({
+        success: true,
+        data: currentItem,
+        additionalItemCreated: true,
+        message: 'נוספה כמות חדשה לפריט - הכמות הנוספת זמינה לתפיסה'
+      })
+    }
+
+    // Normal update (not a quantity increase on claimed item)
     const { data, error } = await supabase
       .from('grocery_items')
       .update(validation.data)
@@ -142,6 +229,7 @@ export async function PATCH(
 /**
  * DELETE /api/grocery/[token]/items/[itemId]
  * Delete a grocery item (public)
+ * Note: Cannot delete items that are claimed - must unclaim first
  */
 export async function DELETE(
   _req: NextRequest,
@@ -162,6 +250,29 @@ export async function DELETE(
       return NextResponse.json(
         { success: false, error: 'רשימת הקניות לא נמצאה' },
         { status: 404 }
+      )
+    }
+
+    // Check if item exists and if it's claimed
+    const { data: item, error: itemError } = await supabase
+      .from('grocery_items')
+      .select('id, claimed_by')
+      .eq('id', itemId)
+      .eq('grocery_event_id', event.id)
+      .single()
+
+    if (itemError || !item) {
+      return NextResponse.json(
+        { success: false, error: 'הפריט לא נמצא' },
+        { status: 404 }
+      )
+    }
+
+    // Block deletion of claimed items
+    if (item.claimed_by) {
+      return NextResponse.json(
+        { success: false, error: 'cannotDeleteClaimedItem' },
+        { status: 400 }
       )
     }
 
