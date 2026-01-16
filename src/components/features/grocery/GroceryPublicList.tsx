@@ -3,21 +3,8 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useTranslations } from 'next-intl'
 import { motion, AnimatePresence } from 'framer-motion'
-import type { GroceryEvent, GroceryItem as GroceryItemType } from '@/types'
+import type { GroceryEvent, GroceryItem as GroceryItemType, ConsolidatedItem } from '@/types'
 import { GroceryItem } from './GroceryItem'
-
-// Consolidated item structure for grouping items with the same name
-export interface ConsolidatedItem {
-  id: string // Primary item ID for key
-  item_name: string
-  totalQuantity: number
-  claims: Array<{ claimerName: string; quantity: number; itemId: string }>
-  unclaimedItems: GroceryItemType[] // Unclaimed items in this group
-  unclaimedQuantity: number
-  allItemIds: string[] // All item IDs in this group
-  notes?: string | null
-  display_order: number
-}
 import { GroceryProgressBar } from './GroceryProgressBar'
 import { GroceryListSkeleton } from './GroceryListSkeleton'
 import { GraduationCap, Calendar, MapPin, CheckCircle2, Circle, PartyPopper, ShoppingBasket } from 'lucide-react'

@@ -695,6 +695,9 @@ export interface GroceryItem {
   claimed_by?: string // Name of person who claimed
   claimed_at?: string // ISO timestamp
 
+  // Partial claim tracking
+  parent_item_id?: string // Reference to original item when created via partial claim
+
   // Display
   display_order: number
 
@@ -721,4 +724,17 @@ export interface CreateGroceryItemForm {
 
 export interface ClaimGroceryItemForm {
   claimer_name: string
+}
+
+// Consolidated item structure for grouping items with the same name
+export interface ConsolidatedItem {
+  id: string // Primary item ID for key
+  item_name: string
+  totalQuantity: number
+  claims: Array<{ claimerName: string; quantity: number; itemId: string }>
+  unclaimedItems: GroceryItem[] // Unclaimed items in this group
+  unclaimedQuantity: number
+  allItemIds: string[] // All item IDs in this group
+  notes?: string | null
+  display_order: number
 }

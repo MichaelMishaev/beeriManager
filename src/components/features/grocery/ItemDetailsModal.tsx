@@ -1,16 +1,36 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, ShoppingBasket, Users } from 'lucide-react'
-import type { GroceryItem } from '@/types'
+import { X, ShoppingBasket, Users, Loader2 } from 'lucide-react'
+import type { GroceryItem, ConsolidatedItem } from '@/types'
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction
+} from '@/components/ui/alert-dialog'
+
+interface ClaimedItemInfo {
+  itemId: string
+  claimerName: string
+  quantity: number
+}
 
 interface ItemDetailsModalProps {
   isOpen: boolean
   onClose: () => void
   itemName: string
+  itemId: string
+  currentItem: GroceryItem | null
   allItems: GroceryItem[]
+  onUnclaim?: (itemId: string) => Promise<void>
+  consolidatedItem?: ConsolidatedItem
 }
 
 // Avatar color palette
@@ -60,43 +80,89 @@ export function ItemDetailsModal({
   isOpen,
   onClose,
   itemName,
-  allItems
+  itemId,
+  currentItem,
+  allItems,
+  onUnclaim,
+  consolidatedItem
 }: ItemDetailsModalProps) {
   const t = useTranslations('grocery')
+  const [unclaimingItemId, setUnclaimingItemId] = useState<string | null>(null)
+  const [confirmUnclaimItem, setConfirmUnclaimItem] = useState<ClaimedItemInfo | null>(null)
 
-  // Find all items with the same base name and group by claimer
-  const { claimers, totalNeeded, totalClaimed, unclaimed } = useMemo(() => {
-    // Get all items with the same item_name
-    const relatedItems = allItems.filter(item => item.item_name === itemName)
+  // Find child claims (partial claims from this item) and calculate totals
+  const { claimedItems, totalNeeded, totalClaimed, unclaimed } = useMemo(() => {
+    // If we have a consolidated item, use its data directly
+    if (consolidatedItem) {
+      return {
+        claimedItems: consolidatedItem.claims.map(c => ({
+          itemId: c.itemId,
+          claimerName: c.claimerName,
+          quantity: c.quantity
+        })),
+        totalNeeded: consolidatedItem.totalQuantity,
+        totalClaimed: consolidatedItem.claims.reduce((sum, c) => sum + c.quantity, 0),
+        unclaimed: consolidatedItem.unclaimedQuantity
+      }
+    }
 
-    // Group by claimer
-    const claimerMap = new Map<string, { name: string; quantity: number }>()
-    let totalNeeded = 0
-    let totalClaimed = 0
+    // Legacy: Find child items (items that were split from this one via partial claim)
+    const childClaims = allItems.filter(item => item.parent_item_id === itemId && item.claimed_by)
 
-    relatedItems.forEach(item => {
-      totalNeeded += item.quantity
-      if (item.claimed_by) {
-        totalClaimed += item.quantity
-        const existing = claimerMap.get(item.claimed_by)
-        if (existing) {
-          existing.quantity += item.quantity
-        } else {
-          claimerMap.set(item.claimed_by, {
-            name: item.claimed_by,
-            quantity: item.quantity
-          })
-        }
+    // Collect all claimed items (both child claims and current item if claimed)
+    const claimedItems: ClaimedItemInfo[] = []
+
+    // Add child claims (partial claims)
+    childClaims.forEach(child => {
+      if (child.claimed_by) {
+        claimedItems.push({
+          itemId: child.id,
+          claimerName: child.claimed_by,
+          quantity: child.quantity
+        })
       }
     })
 
+    // Add current item's claim if it's claimed (full claim or remaining portion)
+    if (currentItem?.claimed_by) {
+      claimedItems.push({
+        itemId: currentItem.id,
+        claimerName: currentItem.claimed_by,
+        quantity: currentItem.quantity
+      })
+    }
+
+    // Calculate totals
+    const childQuantity = childClaims.reduce((sum, c) => sum + c.quantity, 0)
+    const totalNeeded = (currentItem?.quantity ?? 0) + childQuantity
+    const totalClaimed = childQuantity + (currentItem?.claimed_by ? currentItem.quantity : 0)
+
     return {
-      claimers: Array.from(claimerMap.values()).sort((a, b) => b.quantity - a.quantity),
+      claimedItems,
       totalNeeded,
       totalClaimed,
       unclaimed: totalNeeded - totalClaimed
     }
-  }, [allItems, itemName])
+  }, [allItems, itemId, currentItem, consolidatedItem])
+
+  // Show confirmation dialog before unclaiming
+  const handleUnclaimClick = (claimed: ClaimedItemInfo) => {
+    setConfirmUnclaimItem(claimed)
+  }
+
+  // Actually perform the unclaim after confirmation
+  const handleUnclaimConfirm = async () => {
+    if (!onUnclaim || !confirmUnclaimItem) return
+    setUnclaimingItemId(confirmUnclaimItem.itemId)
+    setConfirmUnclaimItem(null)
+    try {
+      await onUnclaim(confirmUnclaimItem.itemId)
+    } catch (error) {
+      console.error('Error unclaiming item:', error)
+    } finally {
+      setUnclaimingItemId(null)
+    }
+  }
 
   if (!isOpen) return null
 
@@ -165,7 +231,7 @@ export function ItemDetailsModal({
 
             {/* Content */}
             <div className="px-5 py-4 flex-1 min-h-0 overflow-y-auto">
-              {claimers.length > 0 ? (
+              {claimedItems.length > 0 ? (
                 <>
                   <div className="flex items-center gap-2 mb-3">
                     <Users className="h-4 w-4 text-[#4c9a73]" aria-hidden="true" />
@@ -174,25 +240,46 @@ export function ItemDetailsModal({
                     </span>
                   </div>
                   <div className="space-y-2">
-                    {claimers.map((claimer) => (
+                    {claimedItems.map((claimed) => (
                       <motion.div
-                        key={claimer.name}
+                        key={claimed.itemId}
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
                         className="flex items-center gap-3 p-3
                           bg-gray-50 dark:bg-white/5 rounded-xl"
                       >
+                        {/* Unclaim button */}
+                        {onUnclaim && (
+                          <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={() => handleUnclaimClick(claimed)}
+                            disabled={unclaimingItemId === claimed.itemId}
+                            className="flex items-center justify-center rounded-full h-9 px-3 gap-1
+                              bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400
+                              hover:bg-red-200 dark:hover:bg-red-500/30 transition-colors
+                              focus:outline-none focus:ring-2 focus:ring-red-500/40
+                              disabled:opacity-50 disabled:cursor-not-allowed text-xs font-bold"
+                            aria-label={t('unclaimItem')}
+                          >
+                            {unclaimingItemId === claimed.itemId ? (
+                              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                            ) : (
+                              <span>{t('unclaimItem')}</span>
+                            )}
+                          </motion.button>
+                        )}
                         <div
                           className={`flex size-10 items-center justify-center rounded-full
-                            ${getAvatarColor(claimer.name)} text-white font-bold text-sm shadow-sm`}
+                            ${getAvatarColor(claimed.claimerName)} text-white font-bold text-sm shadow-sm`}
                         >
-                          {claimer.name.charAt(0).toUpperCase()}
+                          {claimed.claimerName.charAt(0).toUpperCase()}
                         </div>
                         <span className="flex-1 text-[#0d1b14] dark:text-white font-bold truncate">
-                          {claimer.name}
+                          {claimed.claimerName}
                         </span>
                         <span className="text-[#13ec80] font-bold text-lg">
-                          ×{claimer.quantity}
+                          ×{claimed.quantity}
                         </span>
                       </motion.div>
                     ))}
@@ -234,6 +321,42 @@ export function ItemDetailsModal({
           </motion.div>
         </>
       )}
+
+      {/* Unclaim Confirmation Dialog */}
+      <AlertDialog
+        open={!!confirmUnclaimItem}
+        onOpenChange={(open) => !open && setConfirmUnclaimItem(null)}
+      >
+        <AlertDialogContent className="bg-white dark:bg-[#102219] border-gray-200 dark:border-[#2a3d34]">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-[#0d1b14] dark:text-white text-right">
+              {t('confirmUnclaim')}
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-[#4c9a73] dark:text-[#13ec80]/80 text-right">
+              {t('claimedByPerson', { name: confirmUnclaimItem?.claimerName || '' })}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-row-reverse gap-2">
+            <AlertDialogAction
+              onClick={handleUnclaimConfirm}
+              disabled={!!unclaimingItemId}
+              className="bg-red-500 hover:bg-red-600"
+            >
+              {unclaimingItemId ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                t('confirmCancel')
+              )}
+            </AlertDialogAction>
+            <AlertDialogCancel
+              onClick={() => setConfirmUnclaimItem(null)}
+              disabled={!!unclaimingItemId}
+            >
+              {t('cancel')}
+            </AlertDialogCancel>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AnimatePresence>
   )
 }

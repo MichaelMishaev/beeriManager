@@ -3,13 +3,25 @@
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { motion } from 'framer-motion'
-import type { GroceryItem as GroceryItemType } from '@/types'
+import type { GroceryItem as GroceryItemType, ConsolidatedItem } from '@/types'
 import { ClaimDialog } from './ClaimDialog'
 import { ItemDetailsModal } from './ItemDetailsModal'
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction
+} from '@/components/ui/alert-dialog'
 import { ShoppingBasket, Trash2, Loader2, CheckCircle2 } from 'lucide-react'
 
 interface GroceryItemProps {
-  item: GroceryItemType
+  // Support both legacy single item and new consolidated item
+  item?: GroceryItemType
+  consolidatedItem?: ConsolidatedItem
   allItems?: GroceryItemType[]  // All items to show who else is bringing
   onClaim: (itemId: string, claimerName: string, quantity?: number) => Promise<void>
   onUnclaim: (itemId: string) => Promise<void>
@@ -46,6 +58,7 @@ const itemVariants = {
 
 export function GroceryItem({
   item,
+  consolidatedItem,
   allItems = [],
   onClaim,
   onUnclaim,
@@ -55,19 +68,39 @@ export function GroceryItem({
   const t = useTranslations('grocery')
   const [isClaimDialogOpen, setIsClaimDialogOpen] = useState(false)
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false)
+  const [isUnclaimConfirmOpen, setIsUnclaimConfirmOpen] = useState(false)
+  const [selectedUnclaimId, setSelectedUnclaimId] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
 
-  // Check if there are other items with the same name (claimed by others)
-  const hasOtherClaimers = allItems.some(
-    i => i.item_name === item.item_name && i.claimed_by && i.id !== item.id
-  )
+  // Use consolidated item if provided, otherwise fall back to legacy single item
+  const isConsolidated = !!consolidatedItem
 
-  const isClaimed = !!item.claimed_by
+  // Extract data from consolidated or legacy item
+  const itemName = consolidatedItem?.item_name ?? item?.item_name ?? ''
+  const totalQuantity = consolidatedItem?.totalQuantity ?? item?.quantity ?? 0
+  const claims = consolidatedItem?.claims ?? (item?.claimed_by ? [{ claimerName: item.claimed_by, quantity: item.quantity, itemId: item.id }] : [])
+  const unclaimedQuantity = consolidatedItem?.unclaimedQuantity ?? (item?.claimed_by ? 0 : item?.quantity ?? 0)
+  const unclaimedItems = consolidatedItem?.unclaimedItems ?? (item && !item.claimed_by ? [item] : [])
+  const primaryId = consolidatedItem?.id ?? item?.id ?? ''
+  const notes = consolidatedItem?.notes ?? item?.notes
+
+  // For legacy support: check child claims
+  const childClaims = item ? allItems.filter(i => i.parent_item_id === item.id && i.claimed_by) : []
+  const childClaimedQuantity = childClaims.reduce((sum, c) => sum + c.quantity, 0)
+
+  // Determine states
+  const hasClaims = claims.length > 0
+  const hasUnclaimed = unclaimedQuantity > 0
+  const isFullyClaimed = hasClaims && !hasUnclaimed
 
   const handleClaim = async (name: string, quantity?: number) => {
     setIsLoading(true)
     try {
-      await onClaim(item.id, name, quantity)
+      // Claim the first unclaimed item in the group
+      const targetItem = unclaimedItems[0]
+      if (targetItem) {
+        await onClaim(targetItem.id, name, quantity)
+      }
       setIsClaimDialogOpen(false)
     } catch (error) {
       console.error('Error claiming item:', error)
@@ -76,14 +109,29 @@ export function GroceryItem({
     }
   }
 
-  const handleUnclaim = async () => {
+  const handleUnclaimClick = (claimItemId?: string) => {
+    // For consolidated items, we need to know which claim to unclaim
+    if (claimItemId) {
+      setSelectedUnclaimId(claimItemId)
+    } else if (claims.length === 1) {
+      setSelectedUnclaimId(claims[0].itemId)
+    } else if (item) {
+      setSelectedUnclaimId(item.id)
+    }
+    setIsUnclaimConfirmOpen(true)
+  }
+
+  const handleUnclaimConfirm = async () => {
+    if (!selectedUnclaimId) return
     setIsLoading(true)
+    setIsUnclaimConfirmOpen(false)
     try {
-      await onUnclaim(item.id)
+      await onUnclaim(selectedUnclaimId)
     } catch (error) {
       console.error('Error unclaiming item:', error)
     } finally {
       setIsLoading(false)
+      setSelectedUnclaimId(null)
     }
   }
 
@@ -93,10 +141,11 @@ export function GroceryItem({
     return avatarColors[charSum % avatarColors.length]
   }
 
-  const avatarColor = item.claimed_by ? getAvatarColor(item.claimed_by) : avatarColors[0]
-
-  // Format item display name with quantity
-  const displayName = item.quantity > 1 ? `${item.quantity}x ${item.item_name}` : item.item_name
+  // For display
+  const displayQuantity = isConsolidated ? totalQuantity : (totalQuantity + childClaimedQuantity)
+  const displayName = displayQuantity > 1 ? `${displayQuantity}x ${itemName}` : itemName
+  const primaryClaimer = claims[0]?.claimerName
+  const avatarColor = primaryClaimer ? getAvatarColor(primaryClaimer) : avatarColors[0]
 
   return (
     <>
@@ -108,14 +157,15 @@ export function GroceryItem({
         layout
         className={`flex items-center gap-3 px-3 min-h-[80px] py-3 border-b
           transition-all duration-200 font-[family-name:var(--font-jakarta)]
-          ${isClaimed
+          ${isFullyClaimed
             ? 'bg-[#13ec80]/5 dark:bg-[#13ec80]/10 border-[#13ec80]/20 dark:border-[#13ec80]/10'
             : 'bg-white dark:bg-[#102219] border-gray-100 dark:border-white/5 hover:bg-gray-50 dark:hover:bg-[#152a1f]'
           }`}
       >
         {/* Actions - LEFT side for RTL */}
         <div className="shrink-0 flex items-center gap-2">
-          {isEditable && onDelete && (
+          {/* Only show delete for unclaimed items - claimed items must be unclaimed first */}
+          {isEditable && onDelete && !isFullyClaimed && item && (
             <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
@@ -128,29 +178,8 @@ export function GroceryItem({
             </motion.button>
           )}
 
-          {isClaimed ? (
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={handleUnclaim}
-              disabled={isLoading}
-              className="flex items-center justify-center rounded-full h-11 px-4 gap-1.5
-                bg-[#13ec80]/10 dark:bg-[#13ec80]/20 text-[#13ec80] dark:text-[#13ec80]
-                hover:bg-[#13ec80]/20 dark:hover:bg-[#13ec80]/30 transition-colors
-                focus:outline-none focus:ring-2 focus:ring-[#13ec80]/40
-                disabled:opacity-50 disabled:cursor-not-allowed text-sm font-bold"
-              aria-label={t('unclaimItem')}
-            >
-              {isLoading ? (
-                <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-              ) : (
-                <>
-                  <span>{t('unclaimItem')}</span>
-                  <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
-                </>
-              )}
-            </motion.button>
-          ) : (
+          {/* Show claim button if there's unclaimed quantity */}
+          {hasUnclaimed ? (
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -170,6 +199,35 @@ export function GroceryItem({
                 <span>{t('claimItem')}</span>
               )}
             </motion.button>
+          ) : hasClaims && claims.length === 1 ? (
+            // Single claimer - show unclaim button
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => handleUnclaimClick(claims[0].itemId)}
+              disabled={isLoading}
+              className="flex items-center justify-center rounded-full h-11 px-4 gap-1.5
+                bg-[#13ec80]/10 dark:bg-[#13ec80]/20 text-[#13ec80] dark:text-[#13ec80]
+                hover:bg-[#13ec80]/20 dark:hover:bg-[#13ec80]/30 transition-colors
+                focus:outline-none focus:ring-2 focus:ring-[#13ec80]/40
+                disabled:opacity-50 disabled:cursor-not-allowed text-sm font-bold"
+              aria-label={t('unclaimItem')}
+            >
+              {isLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+              ) : (
+                <>
+                  <span>{t('unclaimItem')}</span>
+                  <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
+                </>
+              )}
+            </motion.button>
+          ) : (
+            // Multiple claimers - show checkmark (click item to see details)
+            <div className="flex items-center justify-center rounded-full h-11 px-4
+              bg-[#13ec80]/10 dark:bg-[#13ec80]/20 text-[#13ec80]">
+              <CheckCircle2 className="h-5 w-5" aria-hidden="true" />
+            </div>
           )}
         </div>
 
@@ -184,7 +242,7 @@ export function GroceryItem({
           <div className="flex flex-col justify-center min-w-0 flex-1 text-right">
             <p
               className={`text-base leading-normal
-                ${isClaimed
+                ${isFullyClaimed
                   ? 'text-[#0d1b14]/80 dark:text-white/80 font-medium'
                   : 'text-[#0d1b14] dark:text-white font-bold'
                 }`}
@@ -192,47 +250,74 @@ export function GroceryItem({
               {displayName}
             </p>
 
-            {isClaimed ? (
+            {/* Show claims summary */}
+            {hasClaims && (
               <motion.div
                 initial={{ opacity: 0, y: -5 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="flex items-center gap-2 mt-1 justify-end"
+                className="flex items-center gap-2 mt-1 justify-end flex-wrap"
               >
-                <p className="text-[#13ec80] dark:text-[#13ec80] text-sm font-bold">
-                  {item.claimed_by} ✓
-                </p>
+                {/* Show claimers */}
+                <div className="flex items-center gap-1">
+                  {claims.slice(0, 2).map((claim, idx) => (
+                    <div key={claim.itemId} className="flex items-center gap-1">
+                      <span className="text-[#13ec80] dark:text-[#13ec80] text-sm font-bold">
+                        {claim.claimerName} {claim.quantity > 1 && `(${claim.quantity})`} ✓
+                      </span>
+                      {idx < Math.min(claims.length - 1, 1) && (
+                        <span className="text-[#13ec80]/50">•</span>
+                      )}
+                    </div>
+                  ))}
+                  {claims.length > 2 && (
+                    <span className="text-[#13ec80]/70 text-xs">+{claims.length - 2}</span>
+                  )}
+                </div>
+                {/* Avatar for primary claimer */}
                 <div
                   className={`size-5 rounded-full ${avatarColor} flex-shrink-0 flex items-center justify-center text-white text-[10px] font-bold`}
                   aria-hidden="true"
                 >
-                  {item.claimed_by?.charAt(0).toUpperCase()}
+                  {primaryClaimer?.charAt(0).toUpperCase()}
                 </div>
               </motion.div>
-            ) : hasOtherClaimers ? (
-              <p className="text-[#4c9a73] dark:text-[#13ec80]/60 text-xs font-medium">
-                {t('tapToSeeWho')}
-              </p>
-            ) : item.notes ? (
+            )}
+
+            {/* Show remaining unclaimed if partially claimed */}
+            {hasClaims && hasUnclaimed && (
+              <motion.div
+                initial={{ opacity: 0, y: -5 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex items-center gap-2 mt-0.5 justify-end"
+              >
+                <p className="text-[#4c9a73] dark:text-[#13ec80]/60 text-xs font-medium">
+                  {unclaimedQuantity} {t('remaining')}
+                </p>
+              </motion.div>
+            )}
+
+            {/* Show notes if no claims */}
+            {!hasClaims && notes && (
               <p className="text-[#4c9a73] dark:text-[#13ec80]/60 text-sm font-normal leading-normal line-clamp-2">
-                {item.notes}
+                {notes}
               </p>
-            ) : null}
+            )}
           </div>
 
           {/* Icon - RIGHT side for RTL */}
           <motion.div
             initial={false}
             animate={{
-              scale: isClaimed ? 0.95 : 1,
+              scale: isFullyClaimed ? 0.95 : 1,
               opacity: 1
             }}
             className={`flex size-11 items-center justify-center rounded-full flex-shrink-0
-              ${isClaimed
+              ${isFullyClaimed
                 ? 'bg-[#13ec80]/20 dark:bg-[#13ec80]/15'
                 : 'bg-[#13ec80]/10 dark:bg-[#13ec80]/5'
               }`}
           >
-            {isClaimed ? (
+            {isFullyClaimed ? (
               <CheckCircle2
                 className="h-5 w-5 text-[#13ec80]"
                 aria-hidden="true"
@@ -253,15 +338,60 @@ export function GroceryItem({
         onClaim={handleClaim}
         itemName={displayName}
         isLoading={isLoading}
-        maxQuantity={item.quantity}
+        maxQuantity={unclaimedQuantity}
       />
 
       <ItemDetailsModal
         isOpen={isDetailsModalOpen}
         onClose={() => setIsDetailsModalOpen(false)}
-        itemName={item.item_name}
+        itemName={itemName}
+        itemId={primaryId}
+        currentItem={item || (unclaimedItems[0] ?? null)}
         allItems={allItems}
+        onUnclaim={onUnclaim}
+        consolidatedItem={consolidatedItem}
       />
+
+      {/* Unclaim Confirmation Dialog */}
+      <AlertDialog
+        open={isUnclaimConfirmOpen}
+        onOpenChange={setIsUnclaimConfirmOpen}
+      >
+        <AlertDialogContent className="bg-white dark:bg-[#102219] border-gray-200 dark:border-[#2a3d34]">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-[#0d1b14] dark:text-white text-right">
+              {t('confirmUnclaim')}
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-[#4c9a73] dark:text-[#13ec80]/80 text-right">
+              {t('claimedByPerson', {
+                name: selectedUnclaimId
+                  ? claims.find(c => c.itemId === selectedUnclaimId)?.claimerName || ''
+                  : primaryClaimer || ''
+              })}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-row-reverse gap-2">
+            <AlertDialogAction
+              onClick={handleUnclaimConfirm}
+              disabled={isLoading}
+              variant="destructive"
+              className="bg-red-500 hover:bg-red-600"
+            >
+              {isLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                t('confirmCancel')
+              )}
+            </AlertDialogAction>
+            <AlertDialogCancel
+              onClick={() => setIsUnclaimConfirmOpen(false)}
+              disabled={isLoading}
+            >
+              {t('cancel')}
+            </AlertDialogCancel>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   )
 }
