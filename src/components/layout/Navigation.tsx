@@ -148,101 +148,116 @@ export function Navigation() {
             </div>
           </div>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex md:items-center md:gap-2">
-            {items.map((item) => {
-              const Icon = item.icon
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={() => handleNavClick(item.href, item.label)}
-                  className={cn(
-                    'flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md transition-colors',
-                    isActive(item.href)
-                      ? 'bg-primary text-primary-foreground'
-                      : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
-                  )}
-                >
-                  <Icon className="h-4 w-4" />
-                  {item.label}
-                </Link>
-              )
-            })}
+          {/* Desktop Navigation - Redesigned with proper grouping */}
+          <div className="hidden md:flex md:items-center">
+            {/* Primary Navigation Group */}
+            <div className="flex items-center bg-muted/50 rounded-lg p-1 gap-1">
+              {items.map((item) => {
+                const Icon = item.icon
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => handleNavClick(item.href, item.label)}
+                    className={cn(
+                      'flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md transition-all',
+                      isActive(item.href)
+                        ? 'bg-background text-foreground shadow-sm'
+                        : 'text-muted-foreground hover:text-foreground hover:bg-background/50'
+                    )}
+                  >
+                    <Icon className="h-4 w-4" />
+                    {item.label}
+                  </Link>
+                )
+              })}
 
-            {/* Grocery Lists menu */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
+              {/* Grocery Lists menu - inside primary nav */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    className={cn(
+                      'flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md transition-all',
+                      pathname.startsWith('/grocery') || pathname.startsWith('/my-grocery')
+                        ? 'bg-background text-foreground shadow-sm'
+                        : 'text-muted-foreground hover:text-foreground hover:bg-background/50'
+                    )}
+                  >
+                    <ClipboardList className="h-4 w-4" />
+                    <span>{tNav('groceryLists')}</span>
+                    <ChevronDown className="h-3 w-3 opacity-60" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-52">
+                  <DropdownMenuItem asChild>
+                    <Link
+                      href="/grocery"
+                      onClick={() => handleNavClick('/grocery', tNav('groceryList'))}
+                      className="flex items-center gap-2"
+                    >
+                      <Plus className="h-4 w-4 text-green-600" />
+                      <span>{tNav('createNewList')}</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link
+                      href="/my-grocery"
+                      onClick={() => handleNavClick('/my-grocery', tNav('myGrocery'))}
+                      className="flex items-center gap-2"
+                    >
+                      <ListChecks className="h-4 w-4 text-blue-600" />
+                      <span>{tNav('myLists')}</span>
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+
+            {/* Divider */}
+            <div className="h-6 w-px bg-border mx-3" />
+
+            {/* Actions Group */}
+            <div className="flex items-center gap-1">
+              {/* Notifications */}
+              {isAuthenticated && pathname.includes('/admin') ? (
+                <NotificationBell />
+              ) : (
+                <NotificationSubscription />
+              )}
+
+              {/* Contacts Button */}
+              <ContactsDialog>
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="flex items-center gap-1.5 text-sm border-0 outline-none focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                  className="flex items-center gap-2 h-9"
                 >
-                  <ClipboardList className="h-4 w-4" />
-                  <span>{tNav('groceryLists')}</span>
-                  <ChevronDown className="h-3 w-3 opacity-60" />
+                  <Phone className="h-4 w-4" />
+                  <span className="hidden lg:inline">{t('contactsLabel')}</span>
                 </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-52">
-                <DropdownMenuItem asChild>
-                  <Link
-                    href="/grocery"
-                    onClick={() => handleNavClick('/grocery', tNav('groceryList'))}
-                    className="flex items-center gap-2"
-                  >
-                    <Plus className="h-4 w-4 text-green-600" />
-                    <span>{tNav('createNewList')}</span>
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link
-                    href="/my-grocery"
-                    onClick={() => handleNavClick('/my-grocery', tNav('myGrocery'))}
-                    className="flex items-center gap-2"
-                  >
-                    <ListChecks className="h-4 w-4 text-blue-600" />
-                    <span>{tNav('myLists')}</span>
-                  </Link>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+              </ContactsDialog>
+            </div>
 
-            {/* Notifications: Show bell with counts for admins, subscription button for public */}
-            {isAuthenticated && pathname.includes('/admin') ? (
-              <NotificationBell />
-            ) : (
-              <NotificationSubscription />
-            )}
+            {/* Divider */}
+            <div className="h-6 w-px bg-border mx-3" />
 
-            {/* Contacts Button */}
-            <ContactsDialog>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="flex items-center gap-2"
-              >
-                <Phone className="h-4 w-4" />
-                <span className="hidden lg:inline">אנשי קשר</span>
-              </Button>
-            </ContactsDialog>
-
-            {/* Login/Logout Button */}
+            {/* Auth Action */}
             {isAuthenticated ? (
               <Button
-                variant="ghost"
+                variant="outline"
                 size="sm"
                 onClick={handleLogout}
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 h-9 text-muted-foreground hover:text-destructive hover:border-destructive/50"
               >
                 <LogOut className="h-4 w-4" />
                 {tAuth('logout')}
               </Button>
             ) : (
               <Button
-                variant="ghost"
+                variant="default"
                 size="sm"
                 asChild
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 h-9"
               >
                 <Link href="/login">
                   <LogIn className="h-4 w-4" />
