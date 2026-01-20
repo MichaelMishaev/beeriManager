@@ -617,31 +617,6 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
             {t('heroBenefits')}
           </p>
 
-          {/* Primary CTA - Single Focused Action (Z-Pattern) */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-2">
-            <Button
-              onClick={() => {
-                const eventsSection = document.getElementById('events-section')
-                eventsSection?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-              }}
-              size="lg"
-              className="min-h-[56px] px-8 py-3
-                       bg-[#0D98BA] hover:bg-[#003153]
-                       text-white font-semibold text-base
-                       rounded-xl
-                       shadow-lg shadow-[#0D98BA]/30 hover:shadow-xl hover:shadow-[#003153]/40
-                       hover:-translate-y-0.5
-                       active:scale-[0.98]
-                       transition-all duration-200 ease-out
-                       focus:outline-none focus:ring-4 focus:ring-[#0D98BA]/40
-                       border-none"
-              aria-label={t('heroCtaLabel')}
-            >
-              📅 {t('heroCta')}
-            </Button>
-          </div>
-
-
         </div>
       </div>
 

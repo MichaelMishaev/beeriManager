@@ -20,6 +20,7 @@ export async function GET(req: NextRequest) {
       .from('grocery_events')
       .select('*')
       .eq('creator_phone', phone)
+      .neq('status', 'archived')  // Filter out archived (soft-deleted) events
       .order('created_at', { ascending: false })
 
     if (error) {

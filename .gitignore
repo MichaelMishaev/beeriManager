@@ -258,3 +258,27 @@ public/workbox-*.js*.map
 # Documentation with Potential Secrets
 # ============================================
 Docs/3rdParty/openAI/openai.md
+
+# ============================================
+# Corrupted/Temp Build Folders
+# ============================================
+.next_corrupted*/
+*.corrupted*/
+.next_backup*/
+
+# ============================================
+# Third-Party Project Downloads (Development Only)
+# ============================================
+Docs/3rdParty/*/
+!Docs/3rdParty/openAI/
+
+# ============================================
+# Zip & Archive Files (Should Not Be Committed)
+# ============================================
+*.zip
+*.tar
+*.tar.gz
+*.rar
+*.7z
+Docs/development/*.zip
+Docs/development/stitch_*/

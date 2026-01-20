@@ -23,7 +23,8 @@
     "info": "מידע",
     "committeeLogin": "כניסת ועד",
     "installApp": "התקן אפליקציה",
-    "contactsLabel": "אנשי קשר"
+    "contactsLabel": "אנשי קשר",
+    "language": "שפה"
   },
   "navigation": {
     "home": "בית",
@@ -562,6 +563,8 @@
     "addFirstItem": "הוסיפו פריט ראשון לרשימה",
     "itemAdded": "הפריט נוסף",
     "itemRemoved": "הפריט הוסר",
+    "itemDeleted": "{itemName} נמחק",
+    "undoDelete": "ביטול מחיקה",
     "progress": "{claimed} מתוך {total}",
     "progressFull": "{claimed} מתוך {total} פריטים נתפסו",
     "allClaimed": "כל הפריטים נתפסו!",
@@ -762,7 +765,13 @@
     "itemsProgress": "{claimed} מתוך {total} פריטים",
     "createNew": "צור רשימה חדשה",
     "emptyStateHint": "הזינו מספר טלפון או קישור שיתוף",
-    "editList": "ערוך"
+    "editList": "ערוך",
+    "deleteConfirmTitle": "מחיקת רשימה",
+    "deleteConfirmDescription": "האם אתה בטוח שברצונך למחוק את \"{eventName}\"? פעולה זו תעביר את הרשימה לארכיון.",
+    "deleteCancel": "ביטול",
+    "deleteConfirm": "מחק",
+    "deleting": "מוחק...",
+    "deleteError": "שגיאה במחיקת הרשימה"
   },
   "groceryEdit": {
     "title": "עריכת רשימת קניות",

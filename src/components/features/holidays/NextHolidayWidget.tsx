@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { Sparkles, Clock } from 'lucide-react'
+import { Sparkles, Clock, ChevronLeft, ChevronRight, CalendarDays } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { ShareButton } from '@/components/ui/share-button'
@@ -74,10 +74,22 @@ export function NextHolidayWidget({ onClick }: NextHolidayWidgetProps) {
   const isStartToday = daysUntilStart === 0
   const isStartTomorrow = daysUntilStart === 1
 
+  // Get the correct chevron icon for the locale direction
+  const ChevronIcon = locale === 'he' ? ChevronLeft : ChevronRight
+
   return (
     <Card
-      className="cursor-pointer hover:shadow-lg transition-all hover:scale-[1.02] relative"
+      className="group cursor-pointer hover:shadow-lg transition-all hover:scale-[1.02] relative overflow-hidden"
       onClick={onClick}
+      role="button"
+      tabIndex={0}
+      aria-label={locale === 'ru' ? `Показать все праздники - ${nextHoliday.hebrew_name}` : `הצג את כל החגים - ${nextHoliday.hebrew_name}`}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          onClick?.()
+        }
+      }}
       style={{
         background: `linear-gradient(135deg, ${nextHoliday.color}15, ${nextHoliday.color}05)`,
         borderColor: nextHoliday.color + '40'
@@ -153,7 +165,26 @@ export function NextHolidayWidget({ onClick }: NextHolidayWidgetProps) {
             {nextHoliday.description}
           </p>
         )}
+
+        {/* Clickability indicator - prominent CTA button style */}
+        <div className="mt-4 pt-3 border-t border-current/10 flex items-center justify-center">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 group-hover:bg-primary/20 transition-all duration-300">
+            <CalendarDays className="h-4 w-4 text-primary" />
+            <span className="text-sm font-medium text-primary">
+              {locale === 'ru' ? 'Все праздники' : 'הצג את כל החגים'}
+            </span>
+            <ChevronIcon className="h-4 w-4 text-primary group-hover:translate-x-[-3px] transition-transform duration-300" />
+          </div>
+        </div>
       </CardContent>
+
+      {/* Hover overlay effect */}
+      <div
+        className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+        style={{
+          background: `linear-gradient(to top, ${nextHoliday.color}15, transparent)`
+        }}
+      />
     </Card>
   )
 }

@@ -126,3 +126,55 @@ export async function PATCH(
     )
   }
 }
+
+/**
+ * DELETE /api/grocery/[token]
+ * Soft delete a grocery event (sets status to 'archived')
+ * The event and items remain in the database but are hidden from views
+ */
+export async function DELETE(
+  _req: NextRequest,
+  { params }: RouteParams
+) {
+  try {
+    const { token } = await params
+    const supabase = await createClient()
+
+    // Soft delete: update status to 'archived' instead of removing records
+    // Note: DB constraint only allows 'active', 'completed', 'archived'
+    const { data, error } = await supabase
+      .from('grocery_events')
+      .update({ status: 'archived' })
+      .eq('share_token', token)
+      .select()
+      .single()
+
+    if (error) {
+      console.error('Grocery event soft delete error:', error)
+
+      if (error.code === 'PGRST116') {
+        return NextResponse.json(
+          { success: false, error: 'רשימת הקניות לא נמצאה' },
+          { status: 404 }
+        )
+      }
+
+      return NextResponse.json(
+        { success: false, error: 'שגיאה במחיקת רשימת הקניות' },
+        { status: 500 }
+      )
+    }
+
+    return NextResponse.json({
+      success: true,
+      data,
+      message: 'רשימת הקניות נמחקה בהצלחה'
+    })
+  } catch (error) {
+    console.error('Grocery event DELETE error:', error)
+    return NextResponse.json(
+      { success: false, error: 'שגיאה במחיקת רשימת הקניות' },
+      { status: 500 }
+    )
+  }
+}

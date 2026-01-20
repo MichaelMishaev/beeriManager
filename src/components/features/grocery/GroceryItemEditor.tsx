@@ -7,6 +7,7 @@ import type { GroceryItem } from '@/types'
 import { Plus, Minus, Trash2, ShoppingCart, ArrowRight, Sparkles } from 'lucide-react'
 import { ALL_GROCERY_ITEMS, QUICK_SUGGESTIONS } from '@/lib/data/grocery-items'
 import { fuzzySearchHebrew, filterExistingItems } from '@/lib/utils/fuzzy-search'
+import { UndoToast, useUndoToast } from '@/components/ui/undo-toast'
 
 interface GroceryItemEditorProps {
   items: GroceryItem[]
@@ -59,6 +60,11 @@ export function GroceryItemEditor({
   const [showSuggestions, setShowSuggestions] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const suggestionsRef = useRef<HTMLDivElement>(null)
+
+  // Soft delete state
+  const [itemsPendingDeletion, setItemsPendingDeletion] = useState<Set<string>>(new Set())
+  const [deletionTimers, setDeletionTimers] = useState<Map<string, NodeJS.Timeout>>(new Map())
+  const { toast, showToast, dismissToast } = useUndoToast()
 
   // Get existing item names to filter from suggestions
   const existingItemNames = items.map(item => item.item_name)
@@ -187,6 +193,66 @@ export function GroceryItemEditor({
     // PARALLEL DELETE - Run all deletes concurrently for instant UX
     await Promise.all(items.map(item => onRemoveItem(item.id)))
   }
+
+  // Soft delete handler
+  const handleSoftDelete = useCallback((item: GroceryItem) => {
+    // Add to pending deletion
+    setItemsPendingDeletion(prev => new Set(prev).add(item.id))
+
+    // Show undo toast
+    showToast(
+      t('itemDeleted', { itemName: item.item_name }),
+      () => handleUndoDelete(item.id)
+    )
+
+    // Set timer to actually delete after 5 seconds
+    const timer = setTimeout(() => {
+      onRemoveItem(item.id)
+      setItemsPendingDeletion(prev => {
+        const newSet = new Set(prev)
+        newSet.delete(item.id)
+        return newSet
+      })
+      setDeletionTimers(prev => {
+        const newMap = new Map(prev)
+        newMap.delete(item.id)
+        return newMap
+      })
+    }, 5000)
+
+    setDeletionTimers(prev => new Map(prev).set(item.id, timer))
+  }, [onRemoveItem, showToast, t])
+
+  // Undo delete handler
+  const handleUndoDelete = useCallback((itemId: string) => {
+    // Clear the deletion timer
+    const timer = deletionTimers.get(itemId)
+    if (timer) {
+      clearTimeout(timer)
+    }
+
+    // Remove from pending deletion
+    setItemsPendingDeletion(prev => {
+      const newSet = new Set(prev)
+      newSet.delete(itemId)
+      return newSet
+    })
+
+    setDeletionTimers(prev => {
+      const newMap = new Map(prev)
+      newMap.delete(itemId)
+      return newMap
+    })
+
+    dismissToast()
+  }, [deletionTimers, dismissToast])
+
+  // Cleanup timers on unmount
+  useEffect(() => {
+    return () => {
+      deletionTimers.forEach(timer => clearTimeout(timer))
+    }
+  }, [deletionTimers])
 
   return (
     <div className="flex flex-col min-h-screen bg-[#f6f8f7] dark:bg-[#102219] font-[family-name:var(--font-jakarta)]">
@@ -377,7 +443,7 @@ export function GroceryItemEditor({
       {/* Grocery Items List */}
       <div className="flex-1">
         <AnimatePresence mode="popLayout">
-          {items.length === 0 ? (
+          {items.filter(item => !itemsPendingDeletion.has(item.id)).length === 0 ? (
             <motion.div
               key="empty"
               initial={{ opacity: 0, scale: 0.95 }}
@@ -397,13 +463,17 @@ export function GroceryItemEditor({
               animate="visible"
               className="space-y-1"
             >
-              {items.map((item, index) => (
+              {items.filter(item => !itemsPendingDeletion.has(item.id)).map((item, index) => {
+                const isPending = itemsPendingDeletion.has(item.id)
+                return (
                 <motion.div
                   key={item.id}
                   variants={itemVariants}
                   exit="exit"
                   layout
-                  className="flex items-center gap-4 bg-white dark:bg-[#152a1f] px-4 py-3 justify-between border-y border-[#f0f5f2] dark:border-[#1e3a2c]"
+                  className={`flex items-center gap-4 bg-white dark:bg-[#152a1f] px-4 py-3 justify-between border-y border-[#f0f5f2] dark:border-[#1e3a2c] transition-opacity ${
+                    isPending ? 'opacity-40' : 'opacity-100'
+                  }`}
                 >
                   <div className="flex items-center gap-3 overflow-hidden flex-1">
                     {/* Item Number Badge */}
@@ -454,20 +524,21 @@ export function GroceryItemEditor({
                       </motion.button>
                     </div>
 
-                    {/* Delete Button */}
+                    {/* Delete Button with Soft Delete */}
                     <motion.button
-                      onClick={() => onRemoveItem(item.id)}
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
+                      onClick={() => handleSoftDelete(item)}
+                      disabled={isPending}
+                      whileHover={{ scale: isPending ? 1 : 1.1 }}
+                      whileTap={{ scale: isPending ? 1 : 0.9 }}
                       className="text-[#4c9a73] hover:text-red-500 transition-colors p-2
-                        focus:outline-none focus:ring-2 focus:ring-red-500/30 rounded-lg"
+                        focus:outline-none focus:ring-2 focus:ring-red-500/30 rounded-lg disabled:opacity-30"
                       aria-label={t('removeItem')}
                     >
                       <Trash2 className="h-5 w-5" />
                     </motion.button>
                   </div>
                 </motion.div>
-              ))}
+              )})}
             </motion.div>
           )}
         </AnimatePresence>
@@ -509,6 +580,17 @@ export function GroceryItemEditor({
           </motion.button>
         </div>
       </div>
+
+      {/* Undo Toast */}
+      {toast && (
+        <UndoToast
+          message={toast.message}
+          onUndo={toast.onUndo}
+          onDismiss={dismissToast}
+          duration={5000}
+          position="bottom-center"
+        />
+      )}
     </div>
   )
 }

@@ -54,9 +54,9 @@ function convertToDisplay(highlight: Highlight): DisplayHighlight {
 function HighlightsSkeleton() {
   return (
     <div className="mb-6 space-y-3">
-      <div className="relative min-h-[320px] bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 rounded-3xl overflow-hidden shadow-lg">
+      <div className="relative min-h-[240px] bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 rounded-3xl overflow-hidden shadow-lg">
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-16 h-16 bg-white/50 rounded-2xl animate-pulse" />
+          <div className="w-12 h-12 bg-white/50 rounded-xl animate-pulse" />
         </div>
       </div>
       <div className="h-1 bg-gray-200 rounded-full animate-pulse" />
@@ -228,7 +228,7 @@ export function HighlightsCarousel() {
       <div className="mb-6 space-y-3 animate-in fade-in-50 duration-700">
         {/* Carousel Card - Clean, no overlapping controls */}
         <div
-          className="relative min-h-[320px] bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-500 group cursor-pointer"
+          className="relative min-h-[240px] bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-500 group cursor-pointer"
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
@@ -248,10 +248,10 @@ export function HighlightsCarousel() {
               prevSlide()
               setIsAutoPlaying(false)
             }}
-            className="absolute top-1/2 -translate-y-1/2 left-3 z-20 bg-white/95 backdrop-blur-sm hover:bg-white rounded-full p-3 shadow-lg hover:shadow-xl transition-all hover:scale-110 active:scale-95 border border-gray-200/50"
+            className="absolute top-1/2 -translate-y-1/2 left-2 z-20 bg-white/95 backdrop-blur-sm hover:bg-white rounded-full p-2 shadow-md hover:shadow-lg transition-all hover:scale-110 active:scale-95 border border-gray-200/50"
             aria-label={currentLocale === 'ru' ? 'Предыдущий' : 'הקודם'}
           >
-            <ChevronLeft className="h-5 w-5 text-gray-900" />
+            <ChevronLeft className="h-4 w-4 text-gray-900" />
           </button>
           <button
             onClick={(e) => {
@@ -259,14 +259,14 @@ export function HighlightsCarousel() {
               nextSlide()
               setIsAutoPlaying(false)
             }}
-            className="absolute top-1/2 -translate-y-1/2 right-3 z-20 bg-white/95 backdrop-blur-sm hover:bg-white rounded-full p-3 shadow-lg hover:shadow-xl transition-all hover:scale-110 active:scale-95 border border-gray-200/50"
+            className="absolute top-1/2 -translate-y-1/2 right-2 z-20 bg-white/95 backdrop-blur-sm hover:bg-white rounded-full p-2 shadow-md hover:shadow-lg transition-all hover:scale-110 active:scale-95 border border-gray-200/50"
             aria-label={currentLocale === 'ru' ? 'Следующий' : 'הבא'}
           >
-            <ChevronRight className="h-5 w-5 text-gray-900" />
+            <ChevronRight className="h-4 w-4 text-gray-900" />
           </button>
 
           {/* Content - Centered, no controls blocking */}
-          <div className="relative min-h-[320px] flex items-center justify-center px-16 py-6">
+          <div className="relative min-h-[240px] flex items-center justify-center px-12 py-4">
             <div
               className="flex transition-transform duration-700 ease-out w-full"
               style={{ transform: `translateX(${currentLocale === 'he' ? currentSlide * 100 : -currentSlide * 100}%)` }}
@@ -292,7 +292,7 @@ export function HighlightsCarousel() {
                     </div>
 
                     {/* Icon */}
-                    <div className="w-16 h-16 bg-white/90 backdrop-blur-sm rounded-2xl flex items-center justify-center text-4xl shadow-xl transform group-hover:scale-110 transition-transform duration-300">
+                    <div className="w-12 h-12 bg-white/90 backdrop-blur-sm rounded-xl flex items-center justify-center text-2xl shadow-lg transform group-hover:scale-110 transition-transform duration-300">
                       {highlight.image_placeholder || highlight.icon}
                     </div>
 

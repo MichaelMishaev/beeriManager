@@ -40,9 +40,9 @@ export function AlertDialog({ open, onOpenChange, children }: AlertDialogProps) 
   )
 }
 
-export function AlertDialogContent({ children, className }: { children: React.ReactNode; className?: string }) {
+export function AlertDialogContent({ children, className, dir }: { children: React.ReactNode; className?: string; dir?: 'ltr' | 'rtl' }) {
   return (
-    <div className={cn('bg-background rounded-lg shadow-lg border', className)}>
+    <div className={cn('bg-background rounded-lg shadow-lg border', className)} dir={dir}>
       {children}
     </div>
   )
@@ -80,9 +80,9 @@ export function AlertDialogFooter({ children, className }: { children: React.Rea
   )
 }
 
-export function AlertDialogCancel({ onClick, children, disabled }: { onClick?: () => void; children: React.ReactNode; disabled?: boolean }) {
+export function AlertDialogCancel({ onClick, children, disabled, className }: { onClick?: () => void; children: React.ReactNode; disabled?: boolean; className?: string }) {
   return (
-    <Button variant="outline" onClick={onClick} disabled={disabled} className="w-full sm:w-auto">
+    <Button variant="outline" onClick={onClick} disabled={disabled} className={cn("w-full sm:w-auto", className)}>
       {children}
     </Button>
   )

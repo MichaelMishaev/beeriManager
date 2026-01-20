@@ -5,7 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { Menu, X, Home, Users, HelpCircle, LogOut, LogIn, Phone, MessageCircle, ClipboardList, Plus, ListChecks, ChevronDown } from 'lucide-react'
+import { Menu, X, Home, Users, HelpCircle, LogOut, LogIn, Phone, MessageCircle, ClipboardList, Plus, ListChecks, ChevronDown, Globe } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { LanguageSwitcher } from '@/components/ui/language-switcher'
 import { InstallButton } from '@/components/pwa/InstallButton'
@@ -307,15 +307,8 @@ export function Navigation() {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            {/* Compact Language Switcher */}
+            {/* Language Switcher */}
             <LanguageSwitcher variant="compact" />
-
-            {/* Notifications: Show bell with counts for admins, subscription button for public */}
-            {isAuthenticated && pathname.includes('/admin') ? (
-              <NotificationBell />
-            ) : (
-              <NotificationSubscription />
-            )}
 
             {/* Hamburger Menu Button */}
             <Button
@@ -396,12 +389,23 @@ export function Navigation() {
               <ContactsDialog>
                 <Button
                   variant="ghost"
-                  className="flex w-full items-center gap-3 text-base font-medium"
+                  className="flex w-full justify-start items-center gap-3 text-base font-medium"
                 >
                   <Phone className="h-5 w-5" />
-                  <span className="flex-1 text-left">{t('contactsLabel')}</span>
+                  {t('contactsLabel')}
                 </Button>
               </ContactsDialog>
+            </div>
+
+            {/* Notifications with label */}
+            <div className="px-4 pt-2 border-t mt-2">
+              <div className="flex items-center gap-3 py-2">
+                {isAuthenticated && pathname.includes('/admin') ? (
+                  <NotificationBell />
+                ) : (
+                  <NotificationSubscription />
+                )}
+              </div>
             </div>
           </div>
         )}
