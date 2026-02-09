@@ -13,7 +13,7 @@ export async function DELETE(
   try {
     // Verify admin authentication
     const token = request.cookies.get('auth-token')
-    if (!token || !verifyJWT(token.value)) {
+    if (!token || !(await verifyJWT(token.value))) {
       return NextResponse.json(
         { success: false, message: 'נדרשת הרשאת מנהל' },
         { status: 401 }

@@ -98,7 +98,7 @@ export async function POST(req: NextRequest) {
     const token = req.cookies.get('auth-token')
     console.log('Auth token present:', !!token)
 
-    if (!token || !verifyJWT(token.value)) {
+    if (!token || !(await verifyJWT(token.value))) {
       console.log('Auth failed - token:', !!token)
       return NextResponse.json(
         { success: false, error: 'נדרשת הרשאת מנהל' },
@@ -176,7 +176,7 @@ export async function DELETE(req: NextRequest) {
   try {
     // Only admins can delete tasks
     const token = req.cookies.get('auth-token')
-    if (!token || !verifyJWT(token.value)) {
+    if (!token || !(await verifyJWT(token.value))) {
       return NextResponse.json(
         { success: false, error: 'נדרשת הרשאת מנהל' },
         { status: 401 }
@@ -205,24 +205,24 @@ export async function DELETE(req: NextRequest) {
       })
     }
 
-    // Delete each task individually to satisfy audit trigger
-    let deletedCount = 0
-    for (const task of allTasks) {
-      const { error } = await supabase
-        .from('tasks')
-        .delete()
-        .eq('id', task.id)
+    // Bulk delete all tasks at once (row-level triggers still fire per row)
+    const taskIds = allTasks.map(t => t.id)
+    const { error: deleteError } = await supabase
+      .from('tasks')
+      .delete()
+      .in('id', taskIds)
 
-      if (!error) {
-        deletedCount++
-      } else {
-        console.error('Error deleting task:', task.id, error)
-      }
+    if (deleteError) {
+      console.error('Bulk delete error:', deleteError)
+      return NextResponse.json(
+        { success: false, error: 'שגיאה במחיקת המשימות' },
+        { status: 500 }
+      )
     }
 
     return NextResponse.json({
       success: true,
-      message: `${deletedCount} משימות נמחקו בהצלחה`
+      message: `${taskIds.length} משימות נמחקו בהצלחה`
     })
 
   } catch (error) {

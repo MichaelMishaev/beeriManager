@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { google } from 'googleapis'
+import { drive as googleDrive, auth as googleAuth } from '@googleapis/drive'
 import { logger } from '@/lib/logger'
 import { extractTextFromFile } from '@/lib/textExtraction'
 
@@ -32,12 +32,12 @@ export async function POST(req: NextRequest) {
     }
 
     // Initialize Google Drive API
-    const auth = new google.auth.GoogleAuth({
+    const auth = new googleAuth.GoogleAuth({
       credentials,
       scopes: ['https://www.googleapis.com/auth/drive.file'],
     })
 
-    const drive = google.drive({ version: 'v3', auth })
+    const drive = googleDrive({ version: 'v3', auth })
 
     // Get the folder ID from environment (specific folder for protocols)
     const folderId = process.env.GOOGLE_DRIVE_PROTOCOLS_FOLDER_ID

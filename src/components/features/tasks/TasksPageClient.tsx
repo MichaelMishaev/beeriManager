@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { useRouter, useSearchParams, useParams } from 'next/navigation'
 import { CheckSquare, Plus, X, AlertCircle, Clock, UserCheck, Tags as TagsIcon, Share2, Search, ArrowUpDown } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -51,15 +51,15 @@ export function TasksPageClient({ initialTasks, initialStats, availableTags }: T
 
   const locale = (params?.locale || 'he') as Locale
 
-  const handleTaskTagsUpdated = (updatedTask: Task) => {
+  const handleTaskTagsUpdated = useCallback((updatedTask: Task) => {
     setTasks(prev => prev.map(t => t.id === updatedTask.id ? updatedTask : t))
-  }
+  }, [])
 
-  const handleToggleSortDirection = () => {
+  const handleToggleSortDirection = useCallback(() => {
     setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc')
-  }
+  }, [])
 
-  const handleTaskComplete = async (taskId: string, comment?: string) => {
+  const handleTaskComplete = useCallback(async (taskId: string, comment?: string) => {
     try {
       const task = tasks.find(t => t.id === taskId)
       if (!task) return
@@ -100,7 +100,7 @@ export function TasksPageClient({ initialTasks, initialStats, availableTags }: T
         variant: 'destructive'
       })
     }
-  }
+  }, [tasks, router, toast])
 
   const handleShareTasks = async () => {
     // IMPORTANT: Only share tasks that are actually displayed in the UI
@@ -280,7 +280,7 @@ export function TasksPageClient({ initialTasks, initialStats, availableTags }: T
     setSearchQuery('')
   }
 
-  const handleToggleTag = (tagId: string) => {
+  const handleToggleTag = useCallback((tagId: string) => {
     setSelectedTagIds(prev => {
       if (prev.includes(tagId)) {
         return prev.filter(id => id !== tagId)
@@ -288,11 +288,11 @@ export function TasksPageClient({ initialTasks, initialStats, availableTags }: T
         return [...prev, tagId]
       }
     })
-  }
+  }, [])
 
-  const handleClearTags = () => {
+  const handleClearTags = useCallback(() => {
     setSelectedTagIds([])
-  }
+  }, [])
 
   if (tasks.length === 0) {
     return (

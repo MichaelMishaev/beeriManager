@@ -19,7 +19,7 @@ interface EventCardProps {
   className?: string
 }
 
-export function EventCard({
+export const EventCard = React.memo(function EventCard({
   event,
   variant = 'full',
   showActions = true,
@@ -287,4 +287,4 @@ export function EventCard({
       </CardContent>
     </Card>
   )
-}
+})

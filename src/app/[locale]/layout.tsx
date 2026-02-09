@@ -13,7 +13,6 @@ import { Footer } from '@/components/layout/Footer'
 import { GoogleAnalytics } from '@/components/analytics/GoogleAnalytics'
 import { HtmlAttributes } from '@/components/HtmlAttributes'
 import { IOSInstallPrompt } from '@/components/pwa/IOSInstallPrompt'
-import { MaterialSymbols } from '@/components/MaterialSymbols'
 import { locales, localeDirections, type Locale } from '@/i18n/config'
 import { logger } from '@/lib/logger'
 
@@ -190,7 +189,6 @@ export default async function LocaleLayout({
   return (
     <>
       <GoogleAnalytics />
-      <MaterialSymbols />
       <HtmlAttributes lang={locale} dir={direction} className={fontClass} />
       <div className="min-h-screen flex flex-col bg-background font-sans antialiased" style={{ fontFamily }}>
         <NextIntlClientProvider messages={messages}>

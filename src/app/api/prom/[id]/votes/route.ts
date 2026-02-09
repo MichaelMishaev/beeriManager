@@ -29,7 +29,7 @@ export async function GET(
 
     // Check if user is admin
     const token = req.cookies.get('auth-token')
-    const isAdmin = token && verifyJWT(token.value)
+    const isAdmin = token && await verifyJWT(token.value)
 
     const quoteId = searchParams.get('quote_id')
 

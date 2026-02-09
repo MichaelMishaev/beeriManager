@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, type JSX } from 'react'
 import { X, Shirt, AlertCircle, AlertTriangle, Info, Bell } from 'lucide-react'
 import { ShareButton } from '@/components/ui/share-button'
 import { formatUrgentMessageShareData } from '@/lib/utils/share-formatters'

@@ -25,7 +25,7 @@ interface TaskCardProps {
   className?: string
 }
 
-export function TaskCard({
+export const TaskCard = React.memo(function TaskCard({
   task,
   variant = 'full',
   showActions = true,
@@ -463,4 +463,4 @@ export function TaskCard({
     />
   </>
   )
-}
+})

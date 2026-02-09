@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
-import { Dialog, DialogContent } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { RegulationsModalContent } from '@/components/features/protocols/RegulationsModalContent'
 
 export function Footer() {
@@ -64,7 +64,10 @@ export function Footer() {
         <DialogContent
           className="max-w-4xl h-[90vh] p-0 gap-0 overflow-hidden"
           dir="rtl"
+          aria-describedby={undefined}
         >
+          <DialogTitle className="sr-only">תקנון הנהגת הורים</DialogTitle>
+          <DialogDescription className="sr-only">תקנון הנהגת ההורים - בית ספר בארי נתניה</DialogDescription>
           <RegulationsModalContent />
         </DialogContent>
       </Dialog>

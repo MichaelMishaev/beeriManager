@@ -64,7 +64,7 @@ export async function PUT(
   try {
     // Verify admin authentication
     const token = req.cookies.get('auth-token')
-    if (!token || !verifyJWT(token.value)) {
+    if (!token || !(await verifyJWT(token.value))) {
       return NextResponse.json(
         { success: false, error: 'נדרשת הרשאת מנהל' },
         { status: 401 }
@@ -157,7 +157,7 @@ export async function DELETE(
       )
     }
 
-    const isValid = verifyJWT(token.value)
+    const isValid = await verifyJWT(token.value)
     console.log('🔒 Token valid:', isValid)
 
     if (!isValid) {

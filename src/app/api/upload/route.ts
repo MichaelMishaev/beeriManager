@@ -6,7 +6,7 @@ export async function POST(req: NextRequest) {
   try {
     // Verify admin authentication
     const token = req.cookies.get('auth-token')
-    if (!token || !verifyJWT(token.value)) {
+    if (!token || !(await verifyJWT(token.value))) {
       return NextResponse.json(
         { success: false, error: 'נדרשת הרשאת מנהל' },
         { status: 401 }
@@ -108,7 +108,7 @@ export async function DELETE(req: NextRequest) {
   try {
     // Verify admin authentication
     const token = req.cookies.get('auth-token')
-    if (!token || !verifyJWT(token.value)) {
+    if (!token || !(await verifyJWT(token.value))) {
       return NextResponse.json(
         { success: false, error: 'נדרשת הרשאת מנהל' },
         { status: 401 }

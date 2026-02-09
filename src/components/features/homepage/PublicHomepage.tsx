@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge'
 import { SkillsSurveyCard } from './SkillsSurveyCard'
 import { SchoolStats } from './SchoolStats'
 import { WhatsAppCommunityCard } from '@/components/features/whatsapp/WhatsAppCommunityCard'
+import { CommitteeCard } from './CommitteeCard'
 import { WhiteShirtBanner } from './WhiteShirtBanner'
 import { UrgentMessagesBanner } from '@/components/features/urgent/UrgentMessagesBanner'
 import { HighlightsCarousel } from '@/components/features/highlights/HighlightsCarousel'
@@ -699,6 +700,11 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
         {/* PROMOTED: WhatsApp Community Card - High Priority */}
         <div id="whatsapp-section" className="mb-4 scroll-mt-20">
           <WhatsAppCommunityCard />
+        </div>
+
+        {/* Committee Representatives */}
+        <div className="mb-4">
+          <CommitteeCard />
         </div>
 
       {/* Photos Gallery Section */}

@@ -79,7 +79,7 @@ export default async function VendorDetailPage({ params }: { params: { id: strin
   // Check if user is admin
   const cookieStore = cookies()
   const token = cookieStore.get('auth-token')
-  const isAdmin = token ? verifyJWT(token.value) : false
+  const isAdmin = token ? await verifyJWT(token.value) : false
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">

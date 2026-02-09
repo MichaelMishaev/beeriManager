@@ -70,7 +70,7 @@ export async function PATCH(
   try {
     // Only admins can update highlights
     const token = req.cookies.get('auth-token')
-    if (!token || !verifyJWT(token.value)) {
+    if (!token || !(await verifyJWT(token.value))) {
       return NextResponse.json(
         { success: false, error: 'נדרשת הרשאת מנהל' },
         { status: 401 }
@@ -150,7 +150,7 @@ export async function DELETE(
   try {
     // Only admins can delete highlights
     const token = req.cookies.get('auth-token')
-    if (!token || !verifyJWT(token.value)) {
+    if (!token || !(await verifyJWT(token.value))) {
       return NextResponse.json(
         { success: false, error: 'נדרשת הרשאת מנהל' },
         { status: 401 }

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { motion } from 'framer-motion'
 import type { GroceryItem as GroceryItemType, ConsolidatedItem } from '@/types'
@@ -56,7 +56,7 @@ const itemVariants = {
   }
 }
 
-export function GroceryItem({
+export const GroceryItem = React.memo(function GroceryItem({
   item,
   consolidatedItem,
   allItems = [],
@@ -394,4 +394,4 @@ export function GroceryItem({
       </AlertDialog>
     </>
   )
-}
+})

@@ -102,7 +102,7 @@ export async function POST(req: NextRequest) {
   try {
     // Verify admin authentication
     const token = req.cookies.get('auth-token')
-    if (!token || !verifyJWT(token.value)) {
+    if (!token || !(await verifyJWT(token.value))) {
       return NextResponse.json(
         { success: false, error: 'נדרשת הרשאת מנהל' },
         { status: 401 }
@@ -170,7 +170,7 @@ export async function DELETE(req: NextRequest) {
   try {
     // Only admins can delete events
     const token = req.cookies.get('auth-token')
-    if (!token || !verifyJWT(token.value)) {
+    if (!token || !(await verifyJWT(token.value))) {
       return NextResponse.json(
         { success: false, error: 'נדרשת הרשאת מנהל' },
         { status: 401 }
@@ -199,24 +199,24 @@ export async function DELETE(req: NextRequest) {
       })
     }
 
-    // Delete each event individually to satisfy audit trigger
-    let deletedCount = 0
-    for (const event of allEvents) {
-      const { error } = await supabase
-        .from('events')
-        .delete()
-        .eq('id', event.id)
+    // Bulk delete all events at once (row-level triggers still fire per row)
+    const eventIds = allEvents.map(e => e.id)
+    const { error: deleteError } = await supabase
+      .from('events')
+      .delete()
+      .in('id', eventIds)
 
-      if (!error) {
-        deletedCount++
-      } else {
-        console.error('Error deleting event:', event.id, error)
-      }
+    if (deleteError) {
+      console.error('Bulk delete error:', deleteError)
+      return NextResponse.json(
+        { success: false, error: 'שגיאה במחיקת האירועים' },
+        { status: 500 }
+      )
     }
 
     return NextResponse.json({
       success: true,
-      message: `${deletedCount} אירועים נמחקו בהצלחה`
+      message: `${eventIds.length} אירועים נמחקו בהצלחה`
     })
 
   } catch (error) {

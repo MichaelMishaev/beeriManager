@@ -40,7 +40,7 @@ export async function GET(
 
     // Check if user is admin
     const token = req.cookies.get('auth-token')
-    const isAdmin = token && verifyJWT(token.value)
+    const isAdmin = token && await verifyJWT(token.value)
 
     // Query parameters
     const category = searchParams.get('category')
@@ -108,7 +108,7 @@ export async function POST(
   try {
     // Verify admin authentication
     const token = req.cookies.get('auth-token')
-    if (!token || !verifyJWT(token.value)) {
+    if (!token || !(await verifyJWT(token.value))) {
       return NextResponse.json(
         { success: false, error: 'נדרשת הרשאת מנהל' },
         { status: 401 }

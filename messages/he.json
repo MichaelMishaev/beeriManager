@@ -513,7 +513,10 @@
   },
   "regulations": {
     "approvedByCommittee": "מאושר על ידי ועד ההורים ב-{date}",
-    "draftAwaitingApproval": "טיוטה - ממתין לאישור ועד ההורים"
+    "draftAwaitingApproval": "טיוטה - ממתין לאישור ועד ההורים",
+    "tableOfContents": "תוכן עניינים",
+    "backToTop": "חזרה למעלה",
+    "appendixLabel": "נספח"
   },
   "footer": {
     "parentCommitteeConstitution": "תקנון הנהגת הורים",

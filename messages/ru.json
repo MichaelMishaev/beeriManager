@@ -464,7 +464,10 @@
   },
   "regulations": {
     "approvedByCommittee": "Утверждено родительским комитетом {date}",
-    "draftAwaitingApproval": "Черновик - ожидает утверждения родительским комитетом"
+    "draftAwaitingApproval": "Черновик - ожидает утверждения родительским комитетом",
+    "tableOfContents": "Содержание",
+    "backToTop": "Наверх",
+    "appendixLabel": "Приложение"
   },
   "footer": {
     "parentCommitteeConstitution": "Устав родительского комитета",

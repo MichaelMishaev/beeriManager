@@ -42,7 +42,7 @@ interface QuoteCardProps {
   availabilityColor: string
 }
 
-export function QuoteCard({
+export const QuoteCard = React.memo(function QuoteCard({
   quote,
   onTap,
   onEdit,
@@ -203,4 +203,4 @@ export function QuoteCard({
       </div>
     </article>
   )
-}
+})

@@ -83,7 +83,7 @@ export async function POST(req: NextRequest) {
   try {
     // Verify admin authentication
     const token = req.cookies.get('auth-token')
-    if (!token || !verifyJWT(token.value)) {
+    if (!token || !(await verifyJWT(token.value))) {
       return NextResponse.json(
         { success: false, error: 'נדרשת הרשאת מנהל' },
         { status: 401 }
@@ -162,7 +162,7 @@ export async function DELETE(req: NextRequest) {
   try {
     // Only admins can delete vendors
     const token = req.cookies.get('auth-token')
-    if (!token || !verifyJWT(token.value)) {
+    if (!token || !(await verifyJWT(token.value))) {
       return NextResponse.json(
         { success: false, error: 'נדרשת הרשאת מנהל' },
         { status: 401 }
@@ -191,24 +191,24 @@ export async function DELETE(req: NextRequest) {
       })
     }
 
-    // Delete each vendor individually
-    let deletedCount = 0
-    for (const vendor of allVendors) {
-      const { error } = await supabase
-        .from('vendors')
-        .delete()
-        .eq('id', vendor.id)
+    // Bulk delete all vendors at once (row-level triggers still fire per row)
+    const vendorIds = allVendors.map(v => v.id)
+    const { error: deleteError } = await supabase
+      .from('vendors')
+      .delete()
+      .in('id', vendorIds)
 
-      if (!error) {
-        deletedCount++
-      } else {
-        console.error('Error deleting vendor:', vendor.id, error)
-      }
+    if (deleteError) {
+      console.error('Bulk delete error:', deleteError)
+      return NextResponse.json(
+        { success: false, error: 'שגיאה במחיקת הספקים' },
+        { status: 500 }
+      )
     }
 
     return NextResponse.json({
       success: true,
-      message: `${deletedCount} ספקים נמחקו בהצלחה`
+      message: `${vendorIds.length} ספקים נמחקו בהצלחה`
     })
 
   } catch (error) {

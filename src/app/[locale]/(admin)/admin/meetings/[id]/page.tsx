@@ -10,8 +10,7 @@ import { toast } from 'sonner'
 import { format } from 'date-fns'
 import { he } from 'date-fns/locale'
 import Link from 'next/link'
-import html2canvas from 'html2canvas'
-import jsPDF from 'jspdf'
+// html2canvas and jspdf loaded dynamically in handleExportPDF
 import type { Meeting, MeetingIdea } from '@/types'
 
 interface PageProps {
@@ -92,6 +91,11 @@ export default function ManageMeetingPage({ params }: PageProps) {
 
     try {
       toast.loading('מכין PDF...')
+
+      const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
+        import('html2canvas'),
+        import('jspdf')
+      ])
 
       // Capture the print content as canvas
       const canvas = await html2canvas(printRef.current, {

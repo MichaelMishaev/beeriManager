@@ -42,12 +42,6 @@ export async function GET(req: NextRequest) {
       tasksQuery.gt('created_at', lastViewed.toISOString())
     }
 
-    const { data: tasksData, count: tasksCount, error: tasksError } = await tasksQuery
-
-    if (tasksError) {
-      console.error('Tasks count error:', tasksError)
-    }
-
     // Count new ideas (status = new)
     const ideasQuery = supabase
       .from('ideas')
@@ -55,16 +49,6 @@ export async function GET(req: NextRequest) {
       .eq('status', 'new')
       .order('created_at', { ascending: false })
       .limit(1)
-
-    if (lastViewed) {
-      ideasQuery.gt('created_at', lastViewed.toISOString())
-    }
-
-    const { data: ideasData, count: ideasCount, error: ideasError } = await ideasQuery
-
-    if (ideasError) {
-      console.error('Ideas count error:', ideasError)
-    }
 
     // Count new feedback (status = new)
     const feedbackQuery = supabase
@@ -75,14 +59,22 @@ export async function GET(req: NextRequest) {
       .limit(1)
 
     if (lastViewed) {
-      feedbackQuery.gt('created_at', lastViewed.toISOString())
+      const isoDate = lastViewed.toISOString()
+      tasksQuery.gt('created_at', isoDate)
+      ideasQuery.gt('created_at', isoDate)
+      feedbackQuery.gt('created_at', isoDate)
     }
 
-    const { data: feedbackData, count: feedbackCount, error: feedbackError } = await feedbackQuery
+    // Execute all 3 count queries in parallel
+    const [
+      { data: tasksData, count: tasksCount, error: tasksError },
+      { data: ideasData, count: ideasCount, error: ideasError },
+      { data: feedbackData, count: feedbackCount, error: feedbackError }
+    ] = await Promise.all([tasksQuery, ideasQuery, feedbackQuery])
 
-    if (feedbackError) {
-      console.error('Feedback count error:', feedbackError)
-    }
+    if (tasksError) console.error('Tasks count error:', tasksError)
+    if (ideasError) console.error('Ideas count error:', ideasError)
+    if (feedbackError) console.error('Feedback count error:', feedbackError)
 
     // Calculate total
     const total = (tasksCount || 0) + (ideasCount || 0) + (feedbackCount || 0)
