@@ -355,7 +355,7 @@ export function RegulationsModalContent({ standalone = false }: RegulationsModal
   return content
 }
 
-// ─── Navy Gradient Header ───────────────────────────────────────────
+// ─── Clean Light Header (2026 Redesign) ────────────────────────────
 
 function RegulationsHeader({
   standalone,
@@ -379,26 +379,13 @@ function RegulationsHeader({
   t: ReturnType<typeof useTranslations>
 }) {
   return (
-    <header className={`relative overflow-hidden ${!standalone ? 'rounded-t-2xl' : ''}`}>
-      {/* Gold top accent line */}
-      <div className="h-[3px] bg-gradient-to-r from-transparent via-[#fdc500] to-transparent" />
+    <header className={`relative ${!standalone ? 'rounded-t-2xl' : ''} overflow-hidden bg-gradient-to-b from-slate-50/80 to-white backdrop-blur-sm`}>
+      {/* Thin accent bar — brand blue gradient */}
+      <div className="h-0.5 bg-gradient-to-r from-[#0D98BA] via-[#003f88] to-[#0D98BA]" />
 
-      {/* Navy gradient body */}
-      <div className={`relative bg-gradient-to-b from-[#00296b] via-[#003f88] to-[#00509d] ${
-        standalone ? 'px-4 py-8 md:px-8 md:py-12' : 'px-4 py-5 md:px-6 md:py-6'
+      <div className={`relative ${
+        standalone ? 'px-6 py-10 md:px-10 md:py-14' : 'px-5 py-5 md:px-8 md:py-7'
       }`}>
-        {/* Dot pattern overlay (standalone only) */}
-        {standalone && (
-          <div
-            className="absolute inset-0 opacity-[0.03]"
-            style={{
-              backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
-              backgroundSize: '20px 20px',
-            }}
-            aria-hidden="true"
-          />
-        )}
-
         <div className="relative max-w-3xl mx-auto text-center">
           {/* Logo (standalone only) */}
           {standalone && (
@@ -408,48 +395,50 @@ function RegulationsHeader({
                 alt={locale === 'ru' ? 'Логотип школы Баари' : 'לוגו בית ספר בארי'}
                 width={100}
                 height={50}
-                className="h-10 w-auto md:h-12 drop-shadow-[0_2px_8px_rgba(0,0,0,0.3)]"
+                className="h-10 w-auto md:h-12"
                 priority
               />
             </div>
           )}
 
-          {/* Title */}
-          <h1 className={`font-black text-white leading-tight tracking-tight ${
+          {/* Title — bold dark text */}
+          <h1 className={`font-bold text-slate-900 leading-tight tracking-tight ${
             standalone ? 'text-2xl md:text-[2.5rem] mb-1.5' : 'text-xl md:text-2xl mb-1'
           }`}>
             {regulationsContent.title}
           </h1>
 
-          {/* Metadata — single line, subtle */}
-          <p className={`text-white/50 font-light ${standalone ? 'text-xs md:text-sm mb-0.5' : 'text-[11px] md:text-xs mb-0.5'}`}>
+          {/* Subtitle — muted */}
+          <p className={`text-slate-400 font-light ${standalone ? 'text-xs md:text-sm mb-0.5' : 'text-[11px] md:text-xs mb-0.5'}`}>
             {regulationsContent.subtitle}
           </p>
-          <p className={`text-[#fdc500]/90 font-medium ${standalone ? 'text-xs md:text-sm' : 'text-[11px] md:text-xs'}`}>
+
+          {/* Year + Chairman — brand accent color */}
+          <p className={`text-[#0D98BA] font-medium ${standalone ? 'text-xs md:text-sm' : 'text-[11px] md:text-xs'}`}>
             {regulationsContent.academicYear} &middot; {regulationsContent.chairman}
           </p>
 
-          {/* Approval badge + actions in one row */}
+          {/* Approval badge + actions row */}
           <div className={`flex items-center justify-center gap-3 ${standalone ? 'mt-5' : 'mt-3'}`}>
-            {/* Approval micro-badge */}
+            {/* Approval badge — soft colored pill */}
             {regulationsStatus.isApproved ? (
               <span
-                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full
-                         bg-white/[0.07] backdrop-blur-sm
-                         text-[11px] font-medium text-white/80"
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full
+                         bg-emerald-50 border border-emerald-200/60
+                         text-[11px] font-medium text-emerald-700"
                 role="status"
                 aria-label={locale === 'ru' ? 'Статус: утверждён' : 'סטטוס: מאושר'}
               >
-                <CheckCircle className="h-3 w-3 text-emerald-400/90" aria-hidden="true" />
+                <CheckCircle className="h-3.5 w-3.5" aria-hidden="true" />
                 {t('approvedByCommittee', {
                   date: formatApprovalDate(regulationsStatus.approvalDate)
                 })}
               </span>
             ) : (
               <span
-                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full
-                         bg-white/[0.07] backdrop-blur-sm
-                         text-[11px] font-medium text-amber-300/80"
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full
+                         bg-amber-50 border border-amber-200/60
+                         text-[11px] font-medium text-amber-700"
                 role="status"
                 aria-label={locale === 'ru' ? 'Статус: черновик' : 'סטטוס: טיוטה'}
               >
@@ -457,16 +446,16 @@ function RegulationsHeader({
               </span>
             )}
 
-            {/* Separator dot */}
-            <div className="w-0.5 h-0.5 rounded-full bg-white/20" aria-hidden="true" />
+            {/* Vertical separator */}
+            <div className="w-px h-4 bg-slate-200" aria-hidden="true" />
 
-            {/* Icon-only action buttons */}
+            {/* Action buttons — ghost on light */}
             <div className="flex items-center gap-1">
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={exportToPDF}
-                className="h-7 w-7 text-white/50 hover:text-white hover:bg-white/10 rounded-full"
+                className="h-7 w-7 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full"
                 aria-label={locale === 'ru' ? 'Экспорт в PDF' : 'ייצוא ל-PDF'}
               >
                 <FileDown className="h-3.5 w-3.5" />
@@ -479,7 +468,7 @@ function RegulationsHeader({
                 }}
                 variant="ghost"
                 size="icon"
-                className="h-7 w-7 text-white/50 hover:text-white hover:bg-white/10 rounded-full"
+                className="h-7 w-7 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full"
                 aria-label={locale === 'ru' ? 'Поделиться' : 'שיתוף'}
               />
             </div>
@@ -487,8 +476,8 @@ function RegulationsHeader({
         </div>
       </div>
 
-      {/* Subtle gradient fade to white */}
-      <div className="h-4 bg-gradient-to-b from-[#00509d] to-transparent opacity-[0.06]" />
+      {/* Bottom separator — hairline gradient */}
+      <div className="h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent" />
     </header>
   )
 }
