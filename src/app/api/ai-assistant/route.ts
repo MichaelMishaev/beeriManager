@@ -3,6 +3,7 @@ import {
   openai,
   AI_CONFIG,
   UNDERSTANDING_PROMPT,
+  SUMMARIZE_PROMPT,
   getExtractionPrompt,
 } from '@/lib/ai/openai'
 import {
@@ -27,7 +28,7 @@ interface ChatMessage {
 
 interface AIAssistantRequest {
   messages: ChatMessage[]
-  action?: 'initial' | 'select_type' | 'extract_data' | 'understand_message'
+  action?: 'initial' | 'select_type' | 'extract_data' | 'understand_message' | 'summarize_message'
   context?: string // Optional context from understanding round
 }
 
@@ -187,6 +188,27 @@ export async function POST(req: NextRequest) {
           message: 'לא הבנתי את הבחירה שלך 😕\n\nאנא בחר:\n1️⃣ אירוע\n2️⃣ הודעה דחופה\n3️⃣ הדגשה',
         })
       }
+    }
+
+    // Handle auto-summarize for long messages
+    if (action === 'summarize_message') {
+      const userMessage = messages[messages.length - 1]?.content || ''
+
+      const response = await openai.chat.completions.create({
+        model: AI_CONFIG.model,
+        max_completion_tokens: 300,
+        messages: [
+          { role: 'system', content: SUMMARIZE_PROMPT },
+          { role: 'user', content: userMessage },
+        ],
+      })
+
+      const summary = response.choices[0].message.content || userMessage
+
+      return NextResponse.json({
+        success: true,
+        summary,
+      })
     }
 
     // Handle understanding check for complex messages (Round 1)
