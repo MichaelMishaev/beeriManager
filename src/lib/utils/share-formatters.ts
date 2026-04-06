@@ -510,7 +510,6 @@ export function formatHolidayShareData(
   return {
     title: holiday.hebrew_name,
     text,
-    url: `https://beeri.online/${locale}`
   }
 }
 
@@ -542,7 +541,7 @@ export function formatCommitteeRepresentativesShareData(
         `${gradeLevel}׳:\n${gradeMembers.map(m => `${m.name} - ${m.grade}${RLM}`).join('\n')}`
       ).join('\n\n')}\n\n📢 אל תפספסו שום עדכון! בקרו בפורטל:\n🌐 ${url}`
 
-  return { title, text, url }
+  return { title, text }
 }
 
 // All Holidays share data formatter
@@ -587,7 +586,7 @@ export function formatAllHolidaysShareData(
 
   const text = `📆 *${title}*\n\n${holidayTexts}\n\n${portalText} ${url}`
 
-  return { title, text, url }
+  return { title, text }
 }
 
 // Urgent message share data formatter
@@ -613,14 +612,15 @@ export function formatUrgentMessageShareData(
   const endDate = new Date(message.end_date).toLocaleDateString(dateLocaleStr)
   const dateRange = `📅 ${startDate} - ${endDate}`
 
-  let text = `${message.icon || ''} ${title}`
+  const icon = message.icon || '📢'
+  let text = `${icon} ${title}`
   if (description) {
     text += `\n\n${description}`
   }
   text += `\n\n${dateRange}`
   text += `\n\n🌐 ${url}`
 
-  return { title, text, url }
+  return { title, text }
 }
 
 // White shirt reminder share data formatter
@@ -643,7 +643,7 @@ export function formatWhiteShirtShareData(
 
   const text = `👕 ${title}\n\n${description}\n\n${portalText} ${url}`
 
-  return { title, text, url }
+  return { title, text }
 }
 
 // WhatsApp community links share data formatter
@@ -668,7 +668,7 @@ export function formatWhatsAppLinksShareData(
 
   text += `${portalText} ${url}`
 
-  return { title, text, url }
+  return { title, text }
 }
 
 // All Committees share data formatter
@@ -722,7 +722,7 @@ export function formatAllCommitteesShareData(
   text += `• ${totalResp} תחומי אחריות\n\n`
   text += `🔗 לצפייה מלאה:\n${url}`
 
-  return { title, text, url }
+  return { title, text }
 }
 
 // Skills Survey share data formatter

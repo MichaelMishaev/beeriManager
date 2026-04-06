@@ -15,11 +15,13 @@ interface ExtractedData {
 interface AIConfirmationPreviewProps {
   extractedData: ExtractedData
   onClose: () => void
+  onEdit?: () => void
 }
 
 export default function AIConfirmationPreview({
   extractedData,
   onClose,
+  onEdit,
 }: AIConfirmationPreviewProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -183,6 +185,16 @@ export default function AIConfirmationPreview({
               <CheckCircle2 className="h-5 w-5" />
               <span>{isSubmitting ? 'שומר...' : 'אישור ויצירה'}</span>
             </button>
+            {onEdit && (
+              <button
+                onClick={onEdit}
+                disabled={isSubmitting}
+                className="flex items-center justify-center gap-2 rounded-lg border-2 border-amber-300 bg-amber-50 px-4 py-3 font-medium text-amber-700 transition-colors hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <span>✏️</span>
+                <span>ערוך</span>
+              </button>
+            )}
             <button
               onClick={handleReject}
               disabled={isSubmitting}

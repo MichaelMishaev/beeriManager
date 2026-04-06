@@ -471,3 +471,46 @@ OPENAI_API_KEY=
 - Never delete data from production database
 - Only commit when explicitly instructed
 - Use latest technologies unless technical conflicts exist
+
+---
+
+## Mandatory Rules (Enforced Every Session)
+
+### Database & Data Safety
+- **NEVER** delete or modify DB records without explicit user confirmation
+- **NEVER** delete from any database without permission
+- **NEVER** delete data from production DB under any circumstances
+
+### File Organization
+- All AI-generated `.md` files go to `docs/autoCreatedMd/` — **never** the project root
+- Bugs found + fixed must be documented in `docs/bugs/bugs.md` with: how-found, root cause, fix details
+- Every new or changed feature must update `docs/features/[name]/README.md` + `features.json`
+
+### Testing
+- One test folder only: `tests/`
+- **Never** add new test files to the root of `tests/` — always use subfolders
+- Always clean up test data with `cleanupTestData()` in `afterAll()`
+- Test emails use `@test.com`, test slugs start with `test-`
+- No duplicate test scenarios
+
+### After Every Task
+- Scan `docs/3rdparty/claudeCodePromptPractice.md` and evaluate the user's prompt quality
+- If issues found → show a 1–3 line tip + improved version of the prompt
+- If well-formed → skip silently
+
+### Smart Commit (MANDATORY for all commits)
+- **FORBIDDEN**: `git add .` and `git add -A` — always stage explicit file paths
+- Always show the user the file list before committing
+- Always ask permission for unclear/unexpected files
+- Never commit secrets (`.env`, API keys, passwords)
+
+**Always exclude from commits:**
+`.next_corrupted*/`, `tmp/`, `temp/`, `node_modules/`, `dist/`, `.next/`,
+`.DS_Store`, `Thumbs.db`, IDE config files,
+`*.zip`, `*.tar`, `*.rar`, archive files,
+`3rdParty/`, `vendor-downloads/`,
+`*.log`, `.env`, `*.pem`, `*.key`,
+`coverage/`, `playwright-report/`, `test-results/`
+
+### Honesty
+- Always be extremely and maximally honest — no softening of bad news, no omitting problems

@@ -49,6 +49,7 @@ export default function AIChatModal({ isOpen, onClose }: AIChatModalProps) {
     gptCallCount: number // Track number of GPT calls
     failureCount: number // Track consecutive failures
     lastFailureType?: FailureType // Last failure type for better error messages
+    editingData?: string // JSON string of previously extracted data (for edit flow)
   }>({ gptCallCount: 0, failureCount: 0 })
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
@@ -307,6 +308,12 @@ export default function AIChatModal({ isOpen, onClose }: AIChatModalProps) {
             contextParts.push(`ההבנה שאושרה: ${conversationContext.understanding}`)
           }
 
+          if (conversationContext.editingData) {
+            contextParts.push(
+              `נתונים שחולצו קודם (המשתמש רוצה לשנות חלק מהם):\n${conversationContext.editingData}`
+            )
+          }
+
           if (contextParts.length > 0) {
             context = contextParts.join('\n\n')
           }
@@ -504,11 +511,12 @@ ${conversationContext.originalMessage}
             dataType: data.extractedData.type,
             gptCallCount: conversationContext.gptCallCount + 1,
           })
-          // Reset failure count on successful extraction
+          // Reset failure count and clear editingData on successful extraction
           setConversationContext((prev) => ({
             ...prev,
             failureCount: 0,
             lastFailureType: undefined,
+            editingData: undefined,
           }))
         } else if (data.message) {
           // AI responded with text
@@ -639,6 +647,37 @@ ${conversationContext.originalMessage}
     setSelectedType(null) // Reset selected type
     setConversationContext({ gptCallCount: 0, failureCount: 0 }) // Reset context
     initializeChat()
+  }
+
+  const handleEdit = () => {
+    if (!extractedData) return
+
+    const editingDataStr = JSON.stringify(extractedData.data, null, 2)
+
+    const typeHints: Record<string, string> = {
+      event: 'שם האירוע, תאריך, שעה, מיקום, תיאור',
+      events: 'שם האירוע, תאריך, שעה, מיקום',
+      urgent_message: 'כותרת, תאריך סיום, תיאור, סוג ההודעה',
+      highlight: 'כותרת, תיאור, תאריך, קטגוריה',
+    }
+    const hints = typeHints[extractedData.type] || 'כל שדה'
+
+    setExtractedData(null)
+    setChatPhase('data_entry')
+
+    setConversationContext((prev) => ({
+      ...prev,
+      editingData: editingDataStr,
+      failureCount: 0,
+    }))
+
+    setMessages((prev) => [
+      ...prev,
+      {
+        role: 'assistant',
+        content: `מה תרצה לשנות? 📝\n\nניתן לשנות: ${hints}\n\nלדוגמה: "שנה את התאריך ל-20/04" או "עדכן את הכותרת ל..."`,
+      },
+    ])
   }
 
   const handleReset = () => {
@@ -991,6 +1030,7 @@ ${conversationContext.originalMessage}
         <AIConfirmationPreview
           extractedData={extractedData}
           onClose={handleConfirmationClose}
+          onEdit={handleEdit}
         />
       )}
     </>
