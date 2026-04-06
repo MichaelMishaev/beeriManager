@@ -194,6 +194,13 @@ export async function POST(req: NextRequest) {
     if (action === 'summarize_message') {
       const userMessage = messages[messages.length - 1]?.content || ''
 
+      if (userMessage.length > 5000) {
+        return NextResponse.json({
+          success: false,
+          error: 'ההודעה ארוכה מדי לסיכום',
+        }, { status: 400 })
+      }
+
       const response = await openai.chat.completions.create({
         model: AI_CONFIG.model,
         max_completion_tokens: 300,
@@ -203,7 +210,14 @@ export async function POST(req: NextRequest) {
         ],
       })
 
-      const summary = response.choices[0].message.content || userMessage
+      const summary = response.choices[0]?.message?.content
+
+      if (!summary) {
+        return NextResponse.json({
+          success: false,
+          error: 'לא הצלחתי לסכם את ההודעה',
+        })
+      }
 
       return NextResponse.json({
         success: true,

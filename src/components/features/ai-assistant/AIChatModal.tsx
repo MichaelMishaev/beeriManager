@@ -920,7 +920,7 @@ ${conversationContext.originalMessage}
 
         {/* Input */}
         <div className="border-t border-gray-200 p-4">
-          {characterCount > 1300 && (
+          {characterCount > RATE_LIMITS.SUMMARIZE_THRESHOLD && (
             <div className="flex items-center gap-2 mb-1">
               <button
                 onClick={handleSummarize}

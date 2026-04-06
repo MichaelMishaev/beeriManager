@@ -8,6 +8,7 @@ import { supabase } from '@/lib/supabase/client'
 export const RATE_LIMITS = {
   DAILY_REQUESTS: 50,
   MAX_MESSAGE_LENGTH: 5000,
+  SUMMARIZE_THRESHOLD: 1300, // Show summarize button above this length
 } as const
 
 export interface UsageStats {
