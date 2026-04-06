@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
-import { Calendar, CheckSquare, AlertTriangle, FileText, Users, DollarSign, MessageSquare, Settings, Plus, Edit, BarChart, HelpCircle, Ticket, Tags, Phone, Bell, Sparkles, GraduationCap, Store } from 'lucide-react'
+import { Calendar, CheckSquare, AlertTriangle, FileText, Users, DollarSign, MessageSquare, Settings, Plus, Edit, BarChart, HelpCircle, Ticket, Tags, Phone, Bell, Sparkles, GraduationCap, Store, Lightbulb } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
@@ -708,6 +708,12 @@ export default function AdminDashboard() {
               <Link href="/admin/reports">
                 <BarChart className="h-4 w-4 ml-2" />
                 דוחות
+              </Link>
+            </Button>
+            <Button variant="outline" asChild size="sm">
+              <Link href="/admin/ideas">
+                <Lightbulb className="h-4 w-4 ml-2" />
+                ניהול רעיונות
               </Link>
             </Button>
           </div>
