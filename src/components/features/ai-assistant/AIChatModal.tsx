@@ -65,6 +65,10 @@ export default function AIChatModal({ isOpen, onClose }: AIChatModalProps) {
   const [usageStats, setUsageStats] = useState<UsageStats | null>(null)
   const [characterCount, setCharacterCount] = useState(0)
 
+  // Summarize feature
+  const [isSummarizing, setIsSummarizing] = useState(false)
+  const [wasSummarized, setWasSummarized] = useState(false)
+
   // Track user's selected content type (1=event, 2=urgent, 3=highlight)
   const [selectedType, setSelectedType] = useState<'event' | 'urgent' | 'highlight' | null>(null)
 
@@ -100,6 +104,30 @@ export default function AIChatModal({ isOpen, onClose }: AIChatModalProps) {
         action: 'fetch_stats',
         error,
       })
+    }
+  }
+
+  const handleSummarize = async () => {
+    if (!input.trim() || isSummarizing) return
+    setIsSummarizing(true)
+    try {
+      const response = await fetch('/api/ai-assistant', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'summarize_message',
+          messages: [{ role: 'user', content: input.trim() }],
+        }),
+      })
+      const data = await response.json()
+      if (data.success && data.summary) {
+        setInput(data.summary)
+        setWasSummarized(true)
+      }
+    } catch {
+      // Silent fail — user keeps original text
+    } finally {
+      setIsSummarizing(false)
     }
   }
 
@@ -217,6 +245,7 @@ export default function AIChatModal({ isOpen, onClose }: AIChatModalProps) {
     const userMessage: Message = { role: 'user', content: input.trim() }
     setMessages((prev) => [...prev, userMessage])
     setInput('')
+    setWasSummarized(false)
     setIsLoading(true)
 
     // Track message send
@@ -526,27 +555,21 @@ ${conversationContext.originalMessage}
         // Escalation logic based on failure count
         if (newFailureCount === 2) {
           // Second failure → Show examples
-          errorMessage += '\n\n💡 בחר דוגמה למטה או נסה שוב:'
+          errorMessage += '\n\n💡 נסה לנסח מחדש או בחר דוגמה:'
           setShowExamples(true)
         } else if (newFailureCount === 3) {
           // Third failure → Offer manual form
-          errorMessage += '\n\n🔧 עדיין מתקשה? אפשר למלא טופס ידני'
+          errorMessage += '\n\n🔧 רוצה למלא טופס ידני במקום?'
           setShowExamples(true)
         } else if (newFailureCount >= 4) {
-          // Fourth failure → Auto-reset with explanation
-          errorMessage = `נראה שיש בעיית תקשורת 😔
+          // Fourth failure → Show guidance, do NOT auto-reset
+          errorMessage = `לא הצלחתי להבין 😔
 
-אני מאפס את השיחה. בואו ננסה שוב מההתחלה.
+נסה לכתוב בפשטות:
+"[שם האירוע] ב-[תאריך]"
 
-💡 טיפ: השתמש בפורמט פשוט:
-"[שם האירוע] ב-[תאריך] בשעה [שעה]"
-
-דוגמה: "מסיבת פורים ב-15/03/2025 בשעה 17:00"`
-
-          // Auto-reset after showing message
-          setTimeout(() => {
-            handleReset()
-          }, 3000)
+דוגמה: "מסיבת פורים ב-15/03 בשעה 17:00"`
+          // Do NOT auto-reset - user stays in current phase and can retry
         }
 
         setMessages((prev) => [
@@ -897,6 +920,20 @@ ${conversationContext.originalMessage}
 
         {/* Input */}
         <div className="border-t border-gray-200 p-4">
+          {characterCount > 1300 && (
+            <div className="flex items-center gap-2 mb-1">
+              <button
+                onClick={handleSummarize}
+                disabled={isSummarizing}
+                className="text-xs px-3 py-1 rounded-full bg-purple-600 text-white hover:bg-purple-700 disabled:opacity-50 transition-colors"
+              >
+                {isSummarizing ? '⏳ מסכם...' : '✨ סכם עבורי'}
+              </button>
+              {wasSummarized && (
+                <span className="text-xs text-gray-400">✏️ נערך אוטומטית</span>
+              )}
+            </div>
+          )}
           <div className="flex gap-2 items-end">
             <textarea
               ref={inputRef}
