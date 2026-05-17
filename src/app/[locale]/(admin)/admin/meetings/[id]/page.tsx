@@ -22,6 +22,7 @@ export default function ManageMeetingPage({ params }: PageProps) {
   const [ideas, setIdeas] = useState<MeetingIdea[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [copied, setCopied] = useState(false)
+  const [updatingId, setUpdatingId] = useState<string | null>(null)
   const printRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -81,6 +82,27 @@ export default function ManageMeetingPage({ params }: PageProps) {
     setCopied(true)
     toast.success('הקישור הועתק')
     setTimeout(() => setCopied(false), 2000)
+  }
+
+  async function updateIdeaStatus(ideaId: string, status: 'pending' | 'discussed' | 'decided') {
+    setUpdatingId(ideaId)
+    try {
+      const res = await fetch(`/api/meetings/${params.id}/ideas/${ideaId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ discussion_status: status })
+      })
+      const result = await res.json()
+      if (result.success) {
+        setIdeas(prev => prev.map(i => i.id === ideaId ? { ...i, discussion_status: status } : i))
+      } else {
+        toast.error('שגיאה בעדכון הסטטוס')
+      }
+    } catch {
+      toast.error('שגיאה בעדכון הסטטוס')
+    } finally {
+      setUpdatingId(null)
+    }
   }
 
   async function exportToPDF() {
@@ -270,6 +292,40 @@ export default function ManageMeetingPage({ params }: PageProps) {
                         <span>
                           {format(new Date(idea.created_at), 'dd/MM/yyyy HH:mm')}
                         </span>
+                      </div>
+
+                      {/* Discussion status controls */}
+                      <div className="flex items-center gap-2 mt-3 flex-wrap">
+                        <Badge
+                          className={
+                            idea.discussion_status === 'decided'
+                              ? 'bg-green-100 text-green-800 border border-green-200'
+                              : idea.discussion_status === 'discussed'
+                              ? 'bg-blue-100 text-blue-800 border border-blue-200'
+                              : 'bg-yellow-100 text-yellow-800 border border-yellow-200'
+                          }
+                        >
+                          {idea.discussion_status === 'decided' ? 'הוחלט'
+                            : idea.discussion_status === 'discussed' ? 'נדון'
+                            : 'ממתין'}
+                        </Badge>
+                        <div className="flex gap-1">
+                          {(['pending', 'discussed', 'decided'] as const).map((s) => {
+                            const labels = { pending: 'ממתין', discussed: 'נדון', decided: 'הוחלט' }
+                            return (
+                              <Button
+                                key={s}
+                                variant="outline"
+                                size="sm"
+                                disabled={updatingId === idea.id || (idea.discussion_status ?? 'pending') === s}
+                                onClick={() => updateIdeaStatus(idea.id, s)}
+                                className={`text-xs h-7 px-2 ${(idea.discussion_status ?? 'pending') === s ? 'bg-primary/10' : ''}`}
+                              >
+                                {labels[s]}
+                              </Button>
+                            )
+                          })}
+                        </div>
                       </div>
                     </div>
 

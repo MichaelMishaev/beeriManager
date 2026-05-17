@@ -640,6 +640,9 @@ export interface MeetingIdea {
   submitter_name?: string
   is_anonymous: boolean
 
+  // Discussion status (set by admin during meeting)
+  discussion_status: 'pending' | 'discussed' | 'decided'
+
   // Locale
   submission_locale: string
 
