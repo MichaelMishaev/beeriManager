@@ -282,3 +282,4 @@ Docs/3rdParty/*/
 *.7z
 Docs/development/*.zip
 Docs/development/stitch_*/
+.superpowers/
