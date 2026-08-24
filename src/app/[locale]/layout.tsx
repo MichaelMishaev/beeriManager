@@ -28,6 +28,8 @@ const roboto = Roboto({
   variable: '--font-russian',
   display: 'swap',
   weight: ['300', '400', '500', '700', '900'],
+  // Only rendered on ru locale — don't block every he-locale page load with this preload
+  preload: false,
 })
 
 const frankRuhl = Frank_Ruhl_Libre({
@@ -35,6 +37,8 @@ const frankRuhl = Frank_Ruhl_Libre({
   variable: '--font-formal',
   display: 'swap',
   weight: ['400', '500', '700', '900'],
+  // Used on a handful of pages (protocols, regulations) only — not a global font
+  preload: false,
 })
 
 const plusJakarta = Plus_Jakarta_Sans({
@@ -42,6 +46,8 @@ const plusJakarta = Plus_Jakarta_Sans({
   variable: '--font-jakarta',
   display: 'swap',
   weight: ['400', '500', '600', '700', '800'],
+  // Used only on grocery pages — not a global font
+  preload: false,
 })
 
 export const metadata: Metadata = {

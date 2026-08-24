@@ -7,10 +7,12 @@ import { PublicHomepage } from '@/components/features/homepage/PublicHomepage'
 import { ThankYouPopup } from '@/components/features/meetings/ThankYouPopup'
 import { eachDayOfInterval, parseISO } from 'date-fns'
 import type { DashboardStats, Event, Task, CalendarEvent, Holiday } from '@/types'
+import { useAuthSession } from '@/hooks/useAuthSession'
 
 export default function HomePage() {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
+  const { isAdmin: isAuthenticated, isLoading: isAuthLoading } = useAuthSession()
+  const [isPublicDataLoading, setIsPublicDataLoading] = useState(true)
+  const [isAdminDataLoading, setIsAdminDataLoading] = useState(true)
   const [events, setEvents] = useState<Event[]>([])
   const [holidays, setHolidays] = useState<Holiday[]>([])
   const [tasks, setTasks] = useState<Task[]>([])
@@ -23,57 +25,72 @@ export default function HomePage() {
     thisMonthEvents: 0
   })
 
+  // Events/holidays don't depend on auth, so fetch them immediately in parallel
+  // rather than waiting on the session check first.
   useEffect(() => {
-    loadData()
+    loadPublicData()
   }, [])
 
-  async function loadData() {
-    try {
-      // Check authentication
-      const authResponse = await fetch('/api/auth/session')
-      const authData = await authResponse.json()
-      const isAuth = authData.authenticated && authData.role === 'admin'
-      setIsAuthenticated(isAuth)
+  // Admin-only data loads once we know the session is authenticated
+  useEffect(() => {
+    if (isAuthLoading) return
+    if (isAuthenticated) {
+      loadAdminData()
+    } else {
+      setIsAdminDataLoading(false)
+    }
+  }, [isAuthLoading, isAuthenticated])
 
-      // Load events (upcoming, published)
-      const eventsResponse = await fetch('/api/events?upcoming=true&limit=50')
-      const eventsData = await eventsResponse.json()
+  async function loadPublicData() {
+    try {
+      const [eventsResponse, holidaysResponse] = await Promise.all([
+        fetch('/api/events?upcoming=true&limit=50'),
+        fetch('/api/holidays')
+      ])
+      const [eventsData, holidaysData] = await Promise.all([
+        eventsResponse.json(),
+        holidaysResponse.json()
+      ])
       if (eventsData.success) {
         setEvents(eventsData.data || [])
       }
-
-      // Load holidays
-      const holidaysResponse = await fetch('/api/holidays')
-      const holidaysData = await holidaysResponse.json()
       if (holidaysData.success) {
         setHolidays(holidaysData.data || [])
       }
-
-      // Load tasks (if authenticated)
-      if (isAuth) {
-        const tasksResponse = await fetch('/api/tasks?status=pending,in_progress&limit=10')
-        const tasksData = await tasksResponse.json()
-        if (tasksData.success) {
-          setTasks(tasksData.data || [])
-        }
-
-        // Load dashboard stats
-        const statsResponse = await fetch('/api/dashboard/stats')
-        const statsData = await statsResponse.json()
-        if (statsData.success) {
-          setStats(statsData.data)
-        }
-      }
     } catch (error) {
       console.error('Error loading data:', error)
-      setIsAuthenticated(false)
     } finally {
-      setIsLoading(false)
+      setIsPublicDataLoading(false)
     }
   }
 
-  // Loading state
-  if (isLoading || isAuthenticated === null) {
+  async function loadAdminData() {
+    try {
+      const [tasksResponse, statsResponse] = await Promise.all([
+        fetch('/api/tasks?status=pending,in_progress&limit=10'),
+        fetch('/api/dashboard/stats')
+      ])
+      const [tasksData, statsData] = await Promise.all([
+        tasksResponse.json(),
+        statsResponse.json()
+      ])
+      if (tasksData.success) {
+        setTasks(tasksData.data || [])
+      }
+      if (statsData.success) {
+        setStats(statsData.data)
+      }
+    } catch (error) {
+      console.error('Error loading data:', error)
+    } finally {
+      setIsAdminDataLoading(false)
+    }
+  }
+
+  // Loading state - wait for auth + public data always, and admin data only
+  // when the session turns out to be an authenticated admin.
+  const isLoading = isAuthLoading || isPublicDataLoading || (isAuthenticated && isAdminDataLoading)
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[80vh]">
         <div className="text-center">

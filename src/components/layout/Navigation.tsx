@@ -16,6 +16,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { cn } from '@/lib/utils'
 import { logger } from '@/lib/logger'
 import { trackNavigation, trackEvent, EventCategory, EventAction, UserType } from '@/lib/analytics'
+import { useAuthSession } from '@/hooks/useAuthSession'
 
 // Navigation items - simplified menu
 function useNavItems() {
@@ -33,16 +34,15 @@ function useNavItems() {
 
 export function Navigation() {
   const [isOpen, setIsOpen] = useState(false)
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [settings, setSettings] = useState<{ committee_name?: string; school_name?: string } | null>(null)
   const pathname = usePathname()
   const t = useTranslations('common')
   const tAuth = useTranslations('auth')
   const tNav = useTranslations('navigation')
   const navItems = useNavItems()
+  const { isAdmin: isAuthenticated } = useAuthSession()
 
   useEffect(() => {
-    checkAuth()
     fetchSettings()
   }, [])
 
@@ -58,16 +58,6 @@ export function Navigation() {
     }
   }
 
-  async function checkAuth() {
-    try {
-      const response = await fetch('/api/auth/session')
-      const data = await response.json()
-      setIsAuthenticated(data.authenticated && data.user?.role === 'admin')
-    } catch (error) {
-      setIsAuthenticated(false)
-    }
-  }
-
   const handleNavClick = (href: string, label: string) => {
     logger.userAction('Navigate from menu', { to: href, label })
     trackNavigation(href, pathname, 'Navigation')
@@ -77,7 +67,6 @@ export function Navigation() {
   const handleLogout = async () => {
     try {
       await fetch('/api/auth/logout', { method: 'POST' })
-      setIsAuthenticated(false)
       trackEvent({
         category: EventCategory.AUTH,
         action: EventAction.LOGOUT,
