@@ -316,6 +316,10 @@
     "saveFailedDescription": "אנא נסה שנית",
     "helpText": "תוכן משותף יישמר ויהיה זמין למנהלים לעיון"
   },
+  "welcomeBackBanner": {
+    "alt": "ברוכים הבאים לתלמידי כיתות א' - בית ספר בארי נתניה",
+    "dismiss": "סגור"
+  },
   "whiteShirtBanner": {
     "tomorrowTitle": "👕 תזכורת: מחר יום שישי - חולצה לבנה!",
     "todayTitle": "👕 תזכורת: היום חולצה לבנה!",

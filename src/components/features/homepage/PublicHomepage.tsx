@@ -15,6 +15,7 @@ import { SchoolStats } from './SchoolStats'
 import { WhatsAppCommunityCard } from '@/components/features/whatsapp/WhatsAppCommunityCard'
 import { CommitteeCard } from './CommitteeCard'
 import { WhiteShirtBanner } from './WhiteShirtBanner'
+import { WelcomeBackBanner } from './WelcomeBackBanner'
 import { UrgentMessagesBanner } from '@/components/features/urgent/UrgentMessagesBanner'
 import { HighlightsCarousel } from '@/components/features/highlights/HighlightsCarousel'
 import { NextHolidayWidget } from '@/components/features/holidays/NextHolidayWidget'
@@ -655,6 +656,9 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
         <div className="mb-3">
           <UrgentMessagesBanner />
         </div>
+
+        {/* Welcome Back Banner - Temporary, visible until Sept 2 2026 */}
+        <WelcomeBackBanner />
 
         {/* Highlights Carousel */}
         <HighlightsCarousel />
