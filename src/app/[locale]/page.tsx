@@ -2,44 +2,19 @@
 
 import { useEffect, useState } from 'react'
 import { Loader2 } from 'lucide-react'
-import { Dashboard } from '@/components/features/dashboard/Dashboard'
 import { PublicHomepage } from '@/components/features/homepage/PublicHomepage'
 import { ThankYouPopup } from '@/components/features/meetings/ThankYouPopup'
 import { eachDayOfInterval, parseISO } from 'date-fns'
-import type { DashboardStats, Event, Task, CalendarEvent, Holiday } from '@/types'
-import { useAuthSession } from '@/hooks/useAuthSession'
+import type { Event, CalendarEvent, Holiday } from '@/types'
 
 export default function HomePage() {
-  const { isAdmin: isAuthenticated, isLoading: isAuthLoading } = useAuthSession()
   const [isPublicDataLoading, setIsPublicDataLoading] = useState(true)
-  const [isAdminDataLoading, setIsAdminDataLoading] = useState(true)
   const [events, setEvents] = useState<Event[]>([])
   const [holidays, setHolidays] = useState<Holiday[]>([])
-  const [tasks, setTasks] = useState<Task[]>([])
-  const [stats, setStats] = useState<DashboardStats>({
-    upcomingEvents: 0,
-    pendingTasks: 0,
-    activeIssues: 0,
-    recentProtocols: 0,
-    pendingExpenses: 0,
-    thisMonthEvents: 0
-  })
 
-  // Events/holidays don't depend on auth, so fetch them immediately in parallel
-  // rather than waiting on the session check first.
   useEffect(() => {
     loadPublicData()
   }, [])
-
-  // Admin-only data loads once we know the session is authenticated
-  useEffect(() => {
-    if (isAuthLoading) return
-    if (isAuthenticated) {
-      loadAdminData()
-    } else {
-      setIsAdminDataLoading(false)
-    }
-  }, [isAuthLoading, isAuthenticated])
 
   async function loadPublicData() {
     try {
@@ -64,33 +39,7 @@ export default function HomePage() {
     }
   }
 
-  async function loadAdminData() {
-    try {
-      const [tasksResponse, statsResponse] = await Promise.all([
-        fetch('/api/tasks?status=pending,in_progress&limit=10'),
-        fetch('/api/dashboard/stats')
-      ])
-      const [tasksData, statsData] = await Promise.all([
-        tasksResponse.json(),
-        statsResponse.json()
-      ])
-      if (tasksData.success) {
-        setTasks(tasksData.data || [])
-      }
-      if (statsData.success) {
-        setStats(statsData.data)
-      }
-    } catch (error) {
-      console.error('Error loading data:', error)
-    } finally {
-      setIsAdminDataLoading(false)
-    }
-  }
-
-  // Loading state - wait for auth + public data always, and admin data only
-  // when the session turns out to be an authenticated admin.
-  const isLoading = isAuthLoading || isPublicDataLoading || (isAuthenticated && isAdminDataLoading)
-  if (isLoading) {
+  if (isPublicDataLoading) {
     return (
       <div className="flex items-center justify-center min-h-[80vh]">
         <div className="text-center">
@@ -128,23 +77,8 @@ export default function HomePage() {
     })
   ]
 
-  // Show appropriate homepage based on auth status
-  if (isAuthenticated) {
-    // Committee member - show full dashboard
-    return (
-      <>
-        <ThankYouPopup />
-        <Dashboard
-          stats={stats}
-          upcomingEvents={events}
-          pendingTasks={tasks}
-          calendarEvents={calendarEvents}
-        />
-      </>
-    )
-  }
-
-  // Regular parent - show public homepage
+  // The homepage (/[locale]) always shows the public view, for everyone —
+  // including logged-in admins. The admin dashboard lives at /[locale]/admin.
   return (
     <>
       <ThankYouPopup />
