@@ -18,7 +18,7 @@ export function WhatsAppCommunityCard() {
   const locale = (params.locale || 'he') as Locale
 
   return (
-    <Card className="group shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-100">
+    <Card className="group shadow-md shadow-green-100/40 hover:shadow-xl hover:shadow-green-200/40 hover:-translate-y-1 transition-all duration-300 border border-green-200 hover:border-green-400 bg-gradient-to-br from-white via-white to-green-50/40">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between gap-3 mb-2">
           <div className="flex items-center gap-3">

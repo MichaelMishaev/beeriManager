@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import dynamic from 'next/dynamic'
+import { motion } from 'framer-motion'
 import { Calendar, ChevronLeft, Camera, ArrowLeft, ChevronDown, ChevronUp, Clock, MapPin } from 'lucide-react'
 import { ShareButton } from '@/components/ui/share-button'
 import { formatEventShareData } from '@/lib/utils/share-formatters'
@@ -125,29 +126,36 @@ function UpcomingEventsCard({
         <div className="space-y-2">
           {upcomingEvents.length > 0 ? (
             <>
-              {displayedEvents.map((event) => (
-                <EventItem
+              {displayedEvents.map((event, index) => (
+                <motion.div
                   key={event.id}
-                  event={event}
-                  dateLocale={dateLocale}
-                  locale={locale}
-                  onClick={() => handleEventClick(event)}
-                />
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.25, delay: index * 0.05, ease: [0.16, 1, 0.3, 1] }}
+                >
+                  <EventItem
+                    event={event}
+                    dateLocale={dateLocale}
+                    locale={locale}
+                    onClick={() => handleEventClick(event)}
+                  />
+                </motion.div>
               ))}
               {hasMore && (
                 <div className="text-center pt-3">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setShowAllEventsModal(true)}
-                    className="gap-2 active:scale-95 transition-transform"
-                  >
-                    {locale === 'ru'
-                      ? `Показать все (${upcomingEvents.length})`
-                      : `הצג הכל (${upcomingEvents.length})`
-                    }
-                    <ChevronLeft className="h-4 w-4" />
-                  </Button>
+                  <motion.div className="inline-block" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                    <Button
+                      size="sm"
+                      onClick={() => setShowAllEventsModal(true)}
+                      className="gap-2 rounded-full font-bold bg-[#FFBA00] text-[#003153] border-0 shadow-sm hover:bg-[#e6a800]"
+                    >
+                      {locale === 'ru'
+                        ? `Показать все (${upcomingEvents.length})`
+                        : `הצג הכל (${upcomingEvents.length})`
+                      }
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                  </motion.div>
                 </div>
               )}
             </>
@@ -330,46 +338,49 @@ function EventItem({
   const isStartingToday = !isHappeningNow && timeDiff > 0 && timeDiff <= 24 * 60 * 60 * 1000 // Within 24 hours
   const isStartingThisWeek = !isHappeningNow && timeDiff > 0 && timeDiff <= 7 * 24 * 60 * 60 * 1000 // Within 7 days
 
-  // Get event type icon
-  const getEventIcon = () => {
+  // Date-block color + icon per event type (each pair verified ≥4.5:1 text contrast)
+  const getEventVisual = () => {
     switch (event.event_type) {
-      case 'meeting': return '👥'
-      case 'fundraiser': return '💰'
-      case 'trip': return '🚌'
-      case 'workshop': return '📚'
-      case 'general': return '🎯'
-      default: return '🎯'
+      case 'meeting': return { bg: '#003153', text: '#FFFFFF', icon: '👥' }
+      case 'fundraiser': return { bg: '#FFBA00', text: '#003153', icon: '💰' }
+      case 'trip': return { bg: '#FF8200', text: '#003153', icon: '🚌' }
+      case 'workshop': return { bg: '#87CEEB', text: '#003153', icon: '📚' }
+      case 'general':
+      default: return { bg: '#003153', text: '#FFFFFF', icon: '🎯' }
     }
   }
+  const eventVisual = getEventVisual()
 
   // Countdown timers (pulse animation removed per user request)
+  // Colors below are chosen for ≥4.5:1 text contrast (the previous white-on-yellow /
+  // white-on-brand-blue / white-on-emerald pairings failed WCAG AA)
   const statusConfig = isHappeningNow
     ? {
-        text: locale === 'ru' ? '🔴 Сейчас' : '🔴 מתקיים כעת',
-        bgColor: 'bg-emerald-500',
+        text: locale === 'ru' ? 'Сейчас' : 'מתקיים כעת',
+        bgColor: 'bg-emerald-700',
         textColor: 'text-white',
-        showPulse: false
+        dotColor: 'bg-emerald-300'
       }
     : isStartingToday
     ? {
-        text: locale === 'ru' ? '⚡ Сегодня!' : '⚡ היום!',
+        text: locale === 'ru' ? 'Сегодня!' : 'היום!',
         bgColor: 'bg-[#FFBA00]',
-        textColor: 'text-white',
-        showPulse: false
+        textColor: 'text-[#003153]',
+        dotColor: 'bg-[#003153]/50'
       }
     : isStartingThisWeek
     ? {
-        text: locale === 'ru' ? `📅 Через ${daysUntil} дн.` : `📅 בעוד ${daysUntil} ימים`,
-        bgColor: 'bg-[#0D98BA]',
+        text: locale === 'ru' ? `Через ${daysUntil} дн.` : `בעוד ${daysUntil} ימים`,
+        bgColor: 'bg-[#003153]',
         textColor: 'text-white',
-        showPulse: false
+        dotColor: 'bg-[#87CEEB]'
       }
     : hasEnded
     ? {
         text: locale === 'ru' ? 'Завершено' : 'הסתיים',
         bgColor: 'bg-gray-300',
         textColor: 'text-gray-700',
-        showPulse: false
+        dotColor: 'bg-gray-500'
       }
     : null
 
@@ -386,11 +397,25 @@ function EventItem({
                     active:scale-[0.98] active:shadow-md
                     focus-within:ring-4 focus-within:ring-[#0D98BA]/20
                     min-h-[56px]">
-        {/* Icon */}
-        <div className="flex-shrink-0 mt-0.5">
-          <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center">
-            <span className="text-lg">{getEventIcon()}</span>
+        {/* Date block - leading, colored by event type */}
+        <div className="relative flex-shrink-0">
+          <div
+            className="w-12 h-12 rounded-xl flex flex-col items-center justify-center leading-none shadow-sm"
+            style={{ backgroundColor: eventVisual.bg }}
+          >
+            <span
+              className="text-[9px] font-bold uppercase tracking-wide mb-0.5"
+              style={{ color: eventVisual.text, opacity: 0.85 }}
+            >
+              {format(startDate, 'MMM', { locale: dateLocale })}
+            </span>
+            <span className="text-lg font-extrabold" style={{ color: eventVisual.text }}>
+              {format(startDate, 'd')}
+            </span>
           </div>
+          <span className="absolute -bottom-1.5 -left-1.5 w-5 h-5 rounded-full bg-white border border-gray-200 shadow-sm flex items-center justify-center text-[10px]">
+            {eventVisual.icon}
+          </span>
         </div>
 
         {/* Event Info - Primary focus */}
@@ -400,14 +425,10 @@ function EventItem({
               {title}
             </h3>
             {statusConfig && (
-              <div className="relative flex-shrink-0">
-                <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${statusConfig.bgColor} ${statusConfig.textColor} shadow-sm`}>
-                  {statusConfig.showPulse && (
-                    <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75 animate-ping"></span>
-                  )}
-                  <span className="relative">{statusConfig.text}</span>
-                </span>
-              </div>
+              <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold ${statusConfig.bgColor} ${statusConfig.textColor} shadow-sm flex-shrink-0`}>
+                <span className={`w-1.5 h-1.5 rounded-full ${statusConfig.dotColor}`} />
+                {statusConfig.text}
+              </span>
             )}
           </div>
 
@@ -607,7 +628,12 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
 
       {/* Hero Section - 2025 Enhanced with Single Focused CTA */}
       <div className="bg-gradient-to-br from-[#0D98BA]/5 via-white to-[#003153]/5 py-8 md:py-12">
-        <div className="container mx-auto px-4 text-center max-w-4xl">
+        <motion.div
+          className="container mx-auto px-4 text-center max-w-4xl"
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+        >
           {/* Value Proposition - Clear & Outcome-Focused */}
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-[#003153] mb-3 leading-tight">
             {t('heroTitle')}
@@ -618,7 +644,7 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
             {t('heroBenefits')}
           </p>
 
-        </div>
+        </motion.div>
       </div>
 
       {/* School Stats - Restored per user request */}
@@ -641,16 +667,14 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
         {/* Calendar Toggle - Single Button (2025: Reduce Choices) */}
         <aside aria-label="לוח שנה וחגים" className="mb-3 relative">
           {/* Single Unified Button - Reduces Decision Fatigue */}
-          <div className="relative z-10">
+          <motion.div className="relative z-10" whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
             <Button
-              variant="outline"
               size="default"
               onClick={() => setIsCalendarExpanded(!isCalendarExpanded)}
-              className="w-full min-h-[44px] text-sm md:text-base
+              className="w-full min-h-[44px] text-sm md:text-base rounded-full font-bold
+                       bg-[#003153] text-white border-0 shadow-sm
                        transition-all duration-200
-                       hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50
-                       hover:border-[#0D98BA] hover:shadow-md
-                       active:scale-[0.98]
+                       hover:bg-[#00243e] hover:shadow-md
                        focus:outline-none focus:ring-4 focus:ring-[#0D98BA]/30"
               title={isCalendarExpanded ? calendarT('hideCalendar') : calendarT('showCalendar')}
             >
@@ -662,7 +686,7 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
                 <ChevronDown className="h-5 w-5 mr-2 transition-transform duration-300" />
               )}
             </Button>
-          </div>
+          </motion.div>
 
           {/* Collapsible Calendar - Under the buttons with proper z-index */}
           <div
@@ -698,14 +722,27 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
         </div>
 
         {/* PROMOTED: WhatsApp Community Card - High Priority */}
-        <div id="whatsapp-section" className="mb-4 scroll-mt-20">
+        <motion.div
+          id="whatsapp-section"
+          className="mb-4 scroll-mt-20"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-50px' }}
+          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+        >
           <WhatsAppCommunityCard />
-        </div>
+        </motion.div>
 
         {/* Committee Representatives */}
-        <div className="mb-4">
+        <motion.div
+          className="mb-4"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-50px' }}
+          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+        >
           <CommitteeCard />
-        </div>
+        </motion.div>
 
       {/* Photos Gallery Section */}
       {eventsWithPhotos.length > 0 && (
@@ -774,14 +811,27 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
         {/* Main Content - Full width */}
         <div className="space-y-4">
           {/* Tickets Section - Only show if there are active tickets */}
-          {tickets.length > 0 && <TicketsSection tickets={tickets} />}
+          {tickets.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.2 }}
+            >
+              <TicketsSection tickets={tickets} />
+            </motion.div>
+          )}
         </div>
       </div>
 
       {/* 2025: Contact & Feedback - Consolidated Bento Box (WhatsApp + Feedback + Ideas) */}
-      <div className="mt-6">
+      <motion.div
+        className="mt-6"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.2 }}
+      >
         <ConnectWithUsCard />
-      </div>
+      </motion.div>
 
       {/* 2025: Skills Survey - Moved to Bottom 30% (Progressive Disclosure) */}
       <div id="survey-section" className="mt-6 scroll-mt-20">
