@@ -36,6 +36,25 @@ When a production bug is fixed:
 
 ## Bugs (Newest First)
 
+## [2026-08-24] Share/close buttons overlapping modal title on mobile
+
+**Problem:** On mobile, the "Highlight details" modal (`HighlightsCarousel.tsx`) and the "Event details" modal (`PublicHomepage.tsx`) rendered the `ShareButton` inside the `DialogHeader` flex row next to `DialogTitle`. In RTL, that row places the second flex child (`ShareButton`) at the visual top-left — the exact same corner where `dialog.tsx`'s built-in `DialogPrimitive.Close` (`absolute left-4 top-4`) is rendered. The two controls stacked/overlapped each other and crowded a two-line wrapped title, and the close button's tap target (~16px icon, no padding) was well under the 44x44px minimum touch target.
+
+**Root Cause:** `DialogContent` always renders its own absolutely-positioned close button in the top-left (RTL) corner, but callers were independently placing another action button (`ShareButton`) in that same corner via normal flex flow, with no reserved spacing for either control.
+
+**Solution:**
+1. `dialog.tsx`: increased `DialogPrimitive.Close` hit area to `h-10 w-10` (44px-adjacent) at `left-2 top-2`.
+2. `HighlightsCarousel.tsx` / `PublicHomepage.tsx`: removed `ShareButton` from the `DialogHeader` row, added `pl-12` to `DialogHeader` to clear the close button, and moved `ShareButton` into its own row below the title (next to the category badge, or in a dedicated row) so it never competes with the close button regardless of title length.
+
+**Prevention Rule:** Never place a second header action button in the same flex row as `DialogTitle` — `DialogContent` already owns the top-left (RTL) corner for its close button. Any extra header actions (share, more, etc.) belong in a separate row inside the dialog body, with the header given enough `pl-*` clearance for the close button.
+
+**Files Changed:**
+- `src/components/ui/dialog.tsx`
+- `src/components/features/highlights/HighlightsCarousel.tsx`
+- `src/components/features/homepage/PublicHomepage.tsx`
+
+**Test Added:** None (visual/layout fix, verified manually via Chrome mobile viewport 390x844)
+
 ## [2025-01-16] Grocery claim 500 error on partial claiming
 
 **Problem:** Users get HTTP 500 error when trying to partially claim a grocery item (e.g., claiming 1 out of 3 items). Error message: "שגיאה ביצירת פריט חדש"

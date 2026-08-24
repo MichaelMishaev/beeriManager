@@ -414,12 +414,18 @@ export function HighlightsCarousel() {
         <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
           {selectedHighlight && (
             <>
-              <DialogHeader>
-                <div className="flex items-start justify-between gap-4">
-                  <DialogTitle className="flex items-center gap-3 text-2xl flex-1">
-                    <span className="text-4xl">{selectedHighlight.image_placeholder || selectedHighlight.icon}</span>
-                    {currentLocale === 'ru' ? selectedHighlight.title_ru : selectedHighlight.title_he}
-                  </DialogTitle>
+              <DialogHeader className="pl-12">
+                <DialogTitle className="flex items-center gap-3 text-2xl leading-snug">
+                  <span className="text-4xl shrink-0">{selectedHighlight.image_placeholder || selectedHighlight.icon}</span>
+                  <span className="min-w-0">{currentLocale === 'ru' ? selectedHighlight.title_ru : selectedHighlight.title_he}</span>
+                </DialogTitle>
+              </DialogHeader>
+
+              <div className="space-y-4 pt-4">
+                <div className="flex items-center justify-between gap-2">
+                  <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-sm font-semibold ${selectedHighlight.badge_color} shadow-sm`}>
+                    {currentLocale === 'ru' ? selectedHighlight.category_ru : selectedHighlight.category_he}
+                  </span>
                   <ShareButton
                     shareData={formatHighlightShareData(selectedHighlight, currentLocale)}
                     variant="ghost"
@@ -433,14 +439,6 @@ export function HighlightsCarousel() {
                       })
                     }}
                   />
-                </div>
-              </DialogHeader>
-
-              <div className="space-y-4 pt-4">
-                <div className="flex items-center gap-2">
-                  <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-sm font-semibold ${selectedHighlight.badge_color} shadow-sm`}>
-                    {currentLocale === 'ru' ? selectedHighlight.category_ru : selectedHighlight.category_he}
-                  </span>
                 </div>
 
                 <div className="prose prose-sm max-w-none">

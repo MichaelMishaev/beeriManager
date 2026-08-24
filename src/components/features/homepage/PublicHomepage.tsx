@@ -173,17 +173,20 @@ function UpcomingEventsCard({
       {selectedEvent && (
         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
           <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
-            <DialogHeader>
-              <div className="flex items-start justify-between gap-4">
-                <DialogTitle className="flex items-center gap-3 text-2xl flex-1">
-                  <span className="text-3xl">
-                    {selectedEvent.event_type === 'meeting' ? '👥' :
-                     selectedEvent.event_type === 'fundraiser' ? '💰' :
-                     selectedEvent.event_type === 'trip' ? '🚌' :
-                     selectedEvent.event_type === 'workshop' ? '📚' : '🎯'}
-                  </span>
-                  {(locale === 'ru' && selectedEvent.title_ru) ? selectedEvent.title_ru : selectedEvent.title}
-                </DialogTitle>
+            <DialogHeader className="pl-12">
+              <DialogTitle className="flex items-center gap-3 text-2xl leading-snug">
+                <span className="text-3xl shrink-0">
+                  {selectedEvent.event_type === 'meeting' ? '👥' :
+                   selectedEvent.event_type === 'fundraiser' ? '💰' :
+                   selectedEvent.event_type === 'trip' ? '🚌' :
+                   selectedEvent.event_type === 'workshop' ? '📚' : '🎯'}
+                </span>
+                <span className="min-w-0">{(locale === 'ru' && selectedEvent.title_ru) ? selectedEvent.title_ru : selectedEvent.title}</span>
+              </DialogTitle>
+            </DialogHeader>
+
+            <div className="space-y-4 pt-4">
+              <div className="flex items-center justify-end">
                 <ShareButton
                   shareData={formatEventShareData(selectedEvent, locale)}
                   variant="ghost"
@@ -192,9 +195,7 @@ function UpcomingEventsCard({
                   className="flex-shrink-0"
                 />
               </div>
-            </DialogHeader>
 
-            <div className="space-y-4 pt-4">
               {/* Event Status Badge */}
               {(() => {
                 const startDate = new Date(selectedEvent.start_datetime)
@@ -223,12 +224,6 @@ function UpcomingEventsCard({
                 <div>
                   <p className="font-medium text-gray-900">
                     {format(new Date(selectedEvent.start_datetime), 'EEEE, d MMMM yyyy', { locale: dateLocale })}
-                  </p>
-                  <p className="text-sm text-gray-700">
-                    {format(new Date(selectedEvent.start_datetime), 'HH:mm', { locale: dateLocale })}
-                    {selectedEvent.end_datetime && (
-                      <span> - {format(new Date(selectedEvent.end_datetime), 'HH:mm', { locale: dateLocale })}</span>
-                    )}
                   </p>
                 </div>
               </div>
