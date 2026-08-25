@@ -86,4 +86,40 @@ test.describe('push_subscriptions platform migration', () => {
 
     await supabase.from('push_subscriptions').delete().eq('endpoint', testEndpoint)
   })
+
+  test('platform CHECK constraint rejects invalid values', async () => {
+    const testEndpoint = `https://test.push.example.com/test-invalid-platform-${Date.now()}`
+
+    const { error } = await supabase
+      .from('push_subscriptions')
+      .insert([{
+        endpoint: testEndpoint,
+        keys: { p256dh: 'test-p256dh', auth: 'test-auth' },
+        subscription_data: {},
+        platform: 'linux'
+      }])
+
+    expect(error).toBeTruthy()
+    expect(error!.message.toLowerCase()).toContain('check')
+
+    await supabase.from('push_subscriptions').delete().eq('endpoint', testEndpoint)
+  })
+
+  test('platform NOT NULL constraint rejects null values', async () => {
+    const testEndpoint = `https://test.push.example.com/test-null-platform-${Date.now()}`
+
+    const { error } = await supabase
+      .from('push_subscriptions')
+      .insert([{
+        endpoint: testEndpoint,
+        keys: { p256dh: 'test-p256dh', auth: 'test-auth' },
+        subscription_data: {},
+        platform: null
+      }])
+
+    expect(error).toBeTruthy()
+    expect(error!.message.toLowerCase()).toMatch(/not.null|null/)
+
+    await supabase.from('push_subscriptions').delete().eq('endpoint', testEndpoint)
+  })
 })
