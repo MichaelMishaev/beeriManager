@@ -3,6 +3,7 @@ import webpush from 'web-push';
 import { createClient } from '@/lib/supabase/server';
 import { cookies } from 'next/headers';
 import { verifyJWT } from '@/lib/auth/jwt-edge';
+import { dispatchNotification, NotificationPayload } from '@/lib/push/dispatch';
 
 // Track if VAPID has been initialized
 let vapidInitialized = false;
@@ -42,21 +43,6 @@ function initializeVapid() {
       // Don't throw - allow the route to work even if VAPID fails
     }
   }
-}
-
-export interface NotificationPayload {
-  title: string;
-  body: string;
-  icon?: string;
-  badge?: string;
-  data?: any;
-  tag?: string;
-  requireInteraction?: boolean;
-  actions?: Array<{
-    action: string;
-    title: string;
-    icon?: string;
-  }>;
 }
 
 /**
@@ -131,24 +117,11 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // Prepare notification payload
-    const notificationPayload = JSON.stringify({
-      title: payload.title,
-      body: payload.body,
-      icon: payload.icon || '/icons/icon-192x192.png',
-      badge: payload.badge || '/icons/icon-96x96.png',
-      data: payload.data || {},
-      tag: payload.tag || 'notification',
-      requireInteraction: payload.requireInteraction || false,
-      actions: payload.actions || [],
-    });
-
     // Send notifications
     const results = await Promise.allSettled(
       subscriptions.map(async (sub) => {
         try {
-          const subscription = sub.subscription_data;
-          await webpush.sendNotification(subscription, notificationPayload);
+          await dispatchNotification(sub, payload);
           return { success: true, endpoint: sub.endpoint };
         } catch (error: any) {
           // Handle expired/invalid subscriptions
