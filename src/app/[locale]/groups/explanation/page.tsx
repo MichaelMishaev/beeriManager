@@ -49,7 +49,7 @@ const grades = [
     emoji: '📘',
     nameKey: 'grade1',
     gradeHe: 'א׳',
-    url: 'https://chat.whatsapp.com/E3t0BQwhj0PCT4YjI1EfKg',
+    url: 'https://chat.whatsapp.com/CO20D8DKsLOKMgA2xQCHXN?s=cl&p=a&mlu=0&ilr=4',
     color: '#87CEEB'
   },
   {
@@ -57,7 +57,7 @@ const grades = [
     emoji: '📗',
     nameKey: 'grade2',
     gradeHe: 'ב׳',
-    url: 'https://chat.whatsapp.com/J8OF6XOfESbG6icg5fcgbo',
+    url: 'https://chat.whatsapp.com/E3t0BQwhj0PCT4YjI1EfKg',
     color: '#0D98BA'
   },
   {
@@ -65,7 +65,7 @@ const grades = [
     emoji: '📙',
     nameKey: 'grade3',
     gradeHe: 'ג׳',
-    url: 'https://chat.whatsapp.com/LBOfq7prC7N7cwoEEnR1xD',
+    url: 'https://chat.whatsapp.com/J8OF6XOfESbG6icg5fcgbo',
     color: '#FFBA00'
   },
   {
@@ -73,7 +73,7 @@ const grades = [
     emoji: '📒',
     nameKey: 'grade4',
     gradeHe: 'ד׳',
-    url: 'https://chat.whatsapp.com/EHmRK5ArSlt2rnQwiJ2y6I',
+    url: 'https://chat.whatsapp.com/LBOfq7prC7N7cwoEEnR1xD',
     color: '#FF8200'
   },
   {
@@ -81,7 +81,7 @@ const grades = [
     emoji: '📔',
     nameKey: 'grade5',
     gradeHe: 'ה׳',
-    url: 'https://chat.whatsapp.com/EaxwgHvtr3r7PPGLaeGG8Z',
+    url: 'https://chat.whatsapp.com/EHmRK5ArSlt2rnQwiJ2y6I',
     color: '#003153'
   },
   {
@@ -89,7 +89,7 @@ const grades = [
     emoji: '📕',
     nameKey: 'grade6',
     gradeHe: 'ו׳',
-    url: 'https://chat.whatsapp.com/H1BvuS4Fcv09sLRNujLauj',
+    url: 'https://chat.whatsapp.com/EaxwgHvtr3r7PPGLaeGG8Z',
     color: '#8B5CF6'
   }
 ]

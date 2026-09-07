@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { Calendar, Download } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ShareButton } from '@/components/ui/share-button'
@@ -33,15 +33,28 @@ export function HolidaysModal({ open, onOpenChange }: HolidaysModalProps) {
   const [holidays, setHolidays] = useState<Holiday[]>([])
   const [loading, setLoading] = useState(true)
   const [academicYear] = useState('תשפ״ה')
+  const nextHolidayRef = useRef<HTMLDivElement | null>(null)
 
   // Get the appropriate date-fns locale
   const dateLocale = locale === 'ru' ? ru : he
+
+  // Compare by date only (not time-of-day) so a holiday ending "today" isn't treated as past
+  const todayStr = format(new Date(), 'yyyy-MM-dd')
+  const isHolidayPast = (holiday: Holiday) => holiday.end_date < todayStr
+  const nextHolidayId = holidays.find(h => !isHolidayPast(h))?.id
 
   useEffect(() => {
     if (open) {
       loadHolidays()
     }
   }, [open, academicYear, locale])
+
+  // Focus the next upcoming holiday on open instead of the historical ones at the top
+  useEffect(() => {
+    if (open && !loading && nextHolidayRef.current) {
+      nextHolidayRef.current.scrollIntoView({ block: 'start', behavior: 'smooth' })
+    }
+  }, [open, loading, holidays])
 
   async function loadHolidays() {
     try {
@@ -115,11 +128,13 @@ export function HolidaysModal({ open, onOpenChange }: HolidaysModalProps) {
           ) : (
             <div className="space-y-3">
               {holidays.map((holiday) => {
-                const isPast = parseISO(holiday.end_date) < new Date()
+                const isPast = isHolidayPast(holiday)
+                const isNext = holiday.id === nextHolidayId
 
                 return (
                   <div
                     key={holiday.id}
+                    ref={isNext ? nextHolidayRef : undefined}
                     className="p-4 rounded-lg border transition-all hover:shadow-md"
                     style={{
                       background: isPast
