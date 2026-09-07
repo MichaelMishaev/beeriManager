@@ -73,25 +73,26 @@ export function CommitteeCornerContent() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-[#003153] via-[#003153] to-[#0D98BA] text-white">
-        <div className="relative z-10 container mx-auto px-4 pt-10 md:pt-14 pb-28 md:pb-36 max-w-3xl text-center">
-          <div className="mx-auto mb-4 w-14 h-14 rounded-full bg-white/10 flex items-center justify-center">
-            <Heart className="h-7 w-7 text-[#FFBA00]" />
-          </div>
-          <h1 className="text-2xl md:text-3xl font-bold mb-2">{t('title')}</h1>
-          <p className="text-white/80 text-sm md:text-base leading-relaxed">{t('subtitle')}</p>
-        </div>
-
-        {/* Decorative figures — represents the parents/committee community */}
+      <div className="relative overflow-hidden text-white min-h-[360px] md:min-h-[440px] flex items-center">
         <Image
-          src="/images/committee-corner-hero.png"
+          src="/images/committee-corner-hero-bg.png"
           alt=""
           aria-hidden="true"
-          width={1600}
-          height={600}
-          className="pointer-events-none select-none absolute bottom-0 left-1/2 -translate-x-1/2 w-[90%] max-w-xl h-auto opacity-95"
+          fill
+          sizes="100vw"
           priority
+          className="object-cover"
         />
+        {/* Contrast overlay so text stays readable over the illustration */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#003153]/70 via-[#003153]/25 to-[#003153]/60" />
+
+        <div className="relative z-10 container mx-auto px-4 py-10 max-w-3xl text-center">
+          <div className="mx-auto mb-4 w-14 h-14 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center">
+            <Heart className="h-7 w-7 text-[#FFBA00]" />
+          </div>
+          <h1 className="text-2xl md:text-3xl font-bold mb-2 drop-shadow-sm">{t('title')}</h1>
+          <p className="text-white/90 text-sm md:text-base leading-relaxed drop-shadow-sm">{t('subtitle')}</p>
+        </div>
       </div>
 
       <main className="container mx-auto px-4 py-6 max-w-3xl">
