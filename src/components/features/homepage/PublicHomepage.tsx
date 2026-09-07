@@ -14,6 +14,7 @@ import { SkillsSurveyCard } from './SkillsSurveyCard'
 import { SchoolStats } from './SchoolStats'
 import { WhatsAppCommunityCard } from '@/components/features/whatsapp/WhatsAppCommunityCard'
 import { CommitteeCard } from './CommitteeCard'
+import { CommitteeCornerCard } from './CommitteeCornerCard'
 import { WhiteShirtBanner } from './WhiteShirtBanner'
 import { WelcomeBackBanner } from './WelcomeBackBanner'
 import { UrgentMessagesBanner } from '@/components/features/urgent/UrgentMessagesBanner'
@@ -730,6 +731,17 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
           transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
         >
           <WhatsAppCommunityCard />
+        </motion.div>
+
+        {/* Committee Corner - hub for regulations, protocols, members & contact */}
+        <motion.div
+          className="mb-4"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-50px' }}
+          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+        >
+          <CommitteeCornerCard />
         </motion.div>
 
         {/* Committee Representatives */}

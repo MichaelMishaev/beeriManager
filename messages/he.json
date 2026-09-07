@@ -679,11 +679,6 @@
     "addingItems": "הוספת פריטים",
     "finish": "סיום",
     "back": "חזרה",
-    "whoBringsWhat": "מי מביא מה?",
-    "contributorCount": "{count} הורים משתתפים",
-    "showMoreContributors": "הצג עוד",
-    "showLessContributors": "הסתר",
-    "noContributorsYet": "עדיין אין משתתפים",
     "myListsTitle": "הרשימות שלי",
     "myListsDescription": "חפש את רשימות הקניות שיצרת לפי מספר טלפון",
     "searchByPhone": "חיפוש לפי טלפון",
@@ -836,5 +831,33 @@
     "increaseQuantity": "הגדל כמות של {item}",
     "quantityAddedTitle": "כמות נוספה",
     "quantityAddedDescription": "הכמות הנוספת זמינה לתפיסה ע״י אחרים - הפריט המקורי לא השתנה"
+  },
+  "committeeCorner": {
+    "title": "פינת ועד ההורים של בארי",
+    "subtitle": "כל המידע על הנהגת ההורים במקום אחד: תקנון, פרוטוקולים, נציגים ויצירת קשר",
+    "homeCardTitle": "פינת ועד ההורים של בארי",
+    "homeCardSubtitle": "תקנון, פרוטוקולים, נציגים ויצירת קשר — הכל במקום אחד",
+    "regulations": {
+      "title": "תקנון ועד הורים",
+      "subtitle": "העקרונות והנהלים הרשמיים של הנהגת ההורים"
+    },
+    "protocols": {
+      "title": "פרוטוקולים",
+      "subtitle": "סיכומי ישיבות ועד ההורים"
+    },
+    "members": {
+      "title": "נציגי ועד לפי כיתה",
+      "subtitle": "מי מייצג את הכיתה שלכם בוועד"
+    },
+    "contact": {
+      "title": "יצירת קשר עם הוועד",
+      "subtitle": "שאלות, הצעות ופניות"
+    },
+    "classBylaws": {
+      "title": "הצעה לתקנון ועדי כיתות",
+      "subtitle": "כללים מוצעים לבחירה, סמכויות ושקיפות כספית"
+    },
+    "proposalBadge": "הצעה — טרם אושרה",
+    "backToCorner": "חזרה לפינת הוועד"
   }
 }
