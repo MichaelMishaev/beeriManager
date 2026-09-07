@@ -13,12 +13,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **UI Components**: shadcn/ui with Radix UI primitives
 - **Database**: Supabase (PostgreSQL)
 - **Authentication**: JWT tokens with bcrypt password hashing
-- **Internationalization**: next-intl (Hebrew, Russian, Arabic, English)
+- **Internationalization**: next-intl (Hebrew + Russian active; Arabic/English defined but inactive)
 - **Calendar**: Google Calendar API v3 (bidirectional sync)
 - **Testing**: Playwright for E2E automation
 - **Hosting**: Vercel (primary: https://beeri.online)
 - **PWA**: @ducanh2912/next-pwa with offline support
-- **State Management**: Zustand + TanStack React Query
+- **State Management**: TanStack React Query (server state) + React hooks/context (client state)
 - **Forms**: React Hook Form + Zod validation
 - **Analytics**: Google Analytics (G-9RS38VPXEZ)
 
@@ -44,8 +44,12 @@ npm run test:mobile      # Run mobile-specific tests
 npm run test:parallel    # Run with 4 workers
 npm run test:report      # Show test report
 npm run test:vendors     # Run vendor management tests
+npm run test:performance # Run performance-focused spec (tests/e2e/05-performance.spec.ts)
 npm run automation:watch # Watch mode for test development
+npm run automation:dev   # Run dev server + watch mode concurrently
 ```
+
+To run a single test file: `npx playwright test tests/e2e/<file>.spec.ts`. To run one test by name: `npx playwright test -g "test name"`.
 
 ### Database
 ```bash
@@ -56,12 +60,16 @@ npm run db:reset         # Reset database
 npm run db:backup        # Create database backup
 npm run db:connect       # Connect to database CLI
 npm run db:export-schema # Export current schema
+npm run db:import-schema # Import schema into a database
 npm run db:compare-schemas # Compare schemas
+npm run supabase:backup  # Full Supabase project backup (scripts/supabase-backup.sh)
+npm run supabase:export  # Export Supabase data to local files (scripts/export-supabase-data.js)
 ```
 
 ### Other
 ```bash
-npm run icons:generate   # Generate PWA icons from source
+npm run icons:generate   # Generate PWA icons from source (also runs on postinstall)
+npm run logo:process     # Process/optimize the app logo
 ```
 
 ## Architecture Overview
@@ -126,8 +134,8 @@ src/
 - **next-intl** handles all internationalization
 - Routes are prefixed with locale: `/he/admin`, `/ru/feedback`
 - Default locale: Hebrew (`he`)
-- Supported locales: `he`, `ru`, `ar`, `en`
-- Translation files in `messages/` (he.json, ru.json, ar.json, en.json)
+- Only two locales are defined in `src/i18n/config.ts`: `he` (default, RTL) and `ru` (LTR) — there is no Arabic/English config or message file in this codebase
+- Translation files in `messages/`: `he.json`/`ru.json` are the active files loaded at runtime; `he-full.json`/`ru-full.json` also exist in the same directory (check before assuming which file a key belongs in)
 - Middleware handles locale detection and routing
 
 #### 2. Authentication & Authorization
@@ -156,7 +164,7 @@ src/
   - `tickets` - Ticket tracking system
   - `app_settings` - Global app settings
   - `push_subscriptions` - PWA push notification subscriptions
-- **Migrations**: Located in `scripts/migrations/`, run via `db:migrate`
+- **Migrations**: Older numbered migrations in `scripts/migrations/` (e.g. `001_...`), newer timestamped migrations in `supabase/migrations/` (e.g. `20251031...`). Both run via `db:migrate`
 - **Timestamps**: All tables have `created_at` and `updated_at`
 
 #### 4. API Route Patterns
@@ -178,28 +186,35 @@ GET    /api/tasks/[id]/tags     - Get task tags
 POST   /api/tasks/[id]/tags     - Add tags to task
 ```
 
+**All active API domains** (`src/app/api/`):
+`auth`, `tasks`, `events`, `vendors`, `prom`, `tickets`, `tags`, `committees`,
+`contacts`, `dashboard`, `expenses`, `feedback`, `grocery`, `highlights`,
+`holidays`, `ideas`, `issues`, `meetings`, `notifications`, `protocols`,
+`search`, `settings`, `surveys`, `translate`, `upload`, `urgent-messages`, `ai-assistant`
+
+Internal/ops-only domains (not user-facing features, don't treat as a feature domain to extend):
+`admin` (one-off migration endpoints, e.g. `migrate-limit`), `debug` (ad-hoc DB debug/migration
+helpers), `generate-hash` (bcrypt hash generator for setting `ADMIN_PASSWORD_HASH`)
+
+**Special: token-based grocery access** (no auth cookie needed):
+```
+GET /api/grocery/[token]/my-lists  # public access via URL token
+```
+
 #### 5. Component Architecture
 - **shadcn/ui** provides base components in `components/ui/`
 - **Feature components** in `components/features/[feature]/`
 - **RTL support** built into all components
 - **Hebrew-first** - all labels, errors, messages in Hebrew
 - **Mobile-first** - responsive design prioritizing mobile
-- **Component structure**:
-  ```
-  features/
-    tasks/
-      TaskCard.tsx         # Display component
-      TaskForm.tsx         # Create/edit form
-      TaskList.tsx         # List view
-      tags/                # Tags subsystem
-        Tag.tsx            # Tag display
-        TagSelector.tsx    # Multi-select tags
-        TagManager.tsx     # Admin tag management
-  ```
+- **Active feature directories** under `components/features/`:
+  `tasks`, `events`, `vendors`, `prom`, `ai-assistant`, `dashboard`,
+  `contacts`, `grocery`, `highlights`, `holidays`, `ideas`, `meetings`,
+  `surveys`, `tickets`, `urgent`, `whatsapp`, `feedback`, `issues`, `protocols`, `homepage`
 
 #### 6. State Management
 - **TanStack React Query** for server state (fetching, caching, mutations)
-- **Zustand** for client state (UI state, filters, selections)
+- **React hooks/context** for client state (no Zustand or Redux in this codebase)
 - **React Hook Form** for form state
 - **IndexedDB** for offline state (via `lib/offline-storage.ts`)
 
@@ -210,6 +225,15 @@ POST   /api/tasks/[id]/tags     - Add tags to task
 - **Install prompt**: Custom install button component
 - **Manifest**: `/app/manifest.json` with icons and theme
 - **Background sync**: Queued operations synced when online
+
+#### 8. Force-Dynamic API Routes
+For routes that must never be cached by Vercel Edge (urgent messages, real-time data):
+```typescript
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+export const fetchCache = 'force-no-store'
+```
+Use this whenever stale CDN responses would cause incorrect behavior.
 
 ## Critical Development Patterns
 
@@ -284,17 +308,31 @@ export default function TaskCard() {
 ```
 
 ### 5. Supabase Query Pattern
+
+**Two distinct clients — never mix them up:**
+
 ```typescript
-// Server-side (API routes, server components)
+// API routes & server components → service role key, BYPASSES RLS
+import { createClient } from '@/lib/supabase/server'
+
+export async function GET() {
+  const supabase = await createClient()  // uses SUPABASE_SERVICE_ROLE_KEY
+  const { data, error } = await supabase
+    .from('tasks')
+    .select('*, tags(*)')
+    .order('created_at', { ascending: false })
+}
+
+// Client-side code → anon key, respects RLS (public read only)
 import { supabase } from '@/lib/supabase/client'
 
-const { data, error } = await supabase
-  .from('tasks')
-  .select('*, tags(*)')  // Join with tags
-  .eq('status', 'active')
-  .order('created_at', { ascending: false })
+const { data } = await supabase.from('tasks').select('*')
+```
 
-// Client-side with React Query
+> The server `createClient()` uses `SUPABASE_SERVICE_ROLE_KEY` and bypasses all RLS policies. Always use it in API routes, never in browser code.
+
+```typescript
+// Client-side with React Query (fetches via API route, never direct Supabase)
 import { useQuery } from '@tanstack/react-query'
 
 const { data, isLoading } = useQuery({
@@ -342,7 +380,6 @@ export function TaskForm() {
 - Error messages must use translation keys (never hard-coded)
 - Use `text-right` instead of `text-left` for Hebrew
 - Date formatting: Hebrew locale via date-fns
-- Currently supported locales: Hebrew (he), Russian (ru)
 
 ### 2. Mobile-First Design
 - Design for mobile screens first (375px baseline)
@@ -370,7 +407,7 @@ export function TaskForm() {
 - Validate all user input with Zod
 - Use RLS policies in Supabase
 - Sanitize data before database insertion
-- JWT tokens expire after 7 days
+- JWT tokens expire after 24 hours (`signJWT({ role: 'admin' }, '24h')` in `src/app/api/auth/login/route.ts`; a `'7d'` option exists in `src/lib/auth/jwt.ts` but isn't used by login)
 
 ### 6. Git Workflow
 - **Never push without explicit instruction**
@@ -397,6 +434,10 @@ export function TaskForm() {
 5. **Prom Planning** - Quote comparison and voting system
 6. **PWA Notifications** - Push notifications for updates
 7. **Offline Mode** - Full offline capability with sync
+8. **Urgent Messages** - Date-range-scoped banners (`urgent_messages` table, never cached)
+9. **Grocery Lists** - Token-based shared lists (no auth cookie, URL token only)
+10. **Surveys** - Parent skills survey and voting
+11. **AI Assistant** - OpenAI-powered assistant with rate limiting and cost tracking
 
 ### Design System
 - **Color Palette**:
@@ -407,13 +448,24 @@ export function TaskForm() {
   - UT Orange: #FF8200
 
 ### Documentation
-Comprehensive documentation in `Docs/`:
-- `PWA_COMPLETE_GUIDE.md` - PWA implementation
-- `UX_COMPLETE_GUIDE.md` - UX analysis and improvements
-- `TAGS_COMPLETE_GUIDE.md` - Tags system guide
-- `QA_COMPLETE_GUIDE.md` - Testing guide
-- `FEATURES_IMPLEMENTATION.md` - Feature status
-- `development/bugs.md` - Known bugs and solutions
+Documentation in `Docs/` (reorganized — avoid `Docs/oldMD/`):
+```
+Docs/
+├── 3rdParty/        # Third-party library notes
+├── database/        # Schema docs
+├── design/          # Design specs
+├── development/     # Dev notes, bugs.md
+├── devops/          # Deploy/infra
+├── generatedMd/     # AI-generated docs (auto-created)
+├── infrustructure/  # Baseline infra rules (baseRules.md) — note the repo's spelling
+├── plans/           # Feature plans
+├── QA/              # Test guides
+├── saas/            # SaaS-conversion notes
+├── superpowers/     # superpowers-skill plans/specs for this repo
+├── temp/            # Scratch notes, not durable docs
+└── oldMD/           # Archived/deprecated (do not update)
+```
+`Docs/3rdParty/devRules.md` holds enforced dev rules (TypeScript, error handling, testing, etc.) that deliberately don't repeat anything already in this file — read both.
 
 ### Common Patterns to Check
 
@@ -439,6 +491,7 @@ Comprehensive documentation in `Docs/`:
 # Supabase
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=   # Server-side only — bypasses RLS, never expose to client
 
 # Authentication
 JWT_SECRET=
