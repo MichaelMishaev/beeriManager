@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { FileText, ClipboardList, Users, ScrollText, ChevronLeft, ChevronDown, ChevronUp, Heart } from 'lucide-react'
@@ -72,14 +73,25 @@ export function CommitteeCornerContent() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero */}
-      <div className="bg-gradient-to-br from-[#003153] via-[#003153] to-[#0D98BA] text-white">
-        <div className="container mx-auto px-4 py-10 md:py-14 max-w-3xl text-center">
+      <div className="relative overflow-hidden bg-gradient-to-br from-[#003153] via-[#003153] to-[#0D98BA] text-white">
+        <div className="relative z-10 container mx-auto px-4 pt-10 md:pt-14 pb-28 md:pb-36 max-w-3xl text-center">
           <div className="mx-auto mb-4 w-14 h-14 rounded-full bg-white/10 flex items-center justify-center">
             <Heart className="h-7 w-7 text-[#FFBA00]" />
           </div>
           <h1 className="text-2xl md:text-3xl font-bold mb-2">{t('title')}</h1>
           <p className="text-white/80 text-sm md:text-base leading-relaxed">{t('subtitle')}</p>
         </div>
+
+        {/* Decorative figures — represents the parents/committee community */}
+        <Image
+          src="/images/committee-corner-hero.png"
+          alt=""
+          aria-hidden="true"
+          width={1600}
+          height={600}
+          className="pointer-events-none select-none absolute bottom-0 left-1/2 -translate-x-1/2 w-[90%] max-w-xl h-auto opacity-95"
+          priority
+        />
       </div>
 
       <main className="container mx-auto px-4 py-6 max-w-3xl">

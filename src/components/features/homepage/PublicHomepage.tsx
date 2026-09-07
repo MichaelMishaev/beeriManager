@@ -13,7 +13,6 @@ import { Badge } from '@/components/ui/badge'
 import { SkillsSurveyCard } from './SkillsSurveyCard'
 import { SchoolStats } from './SchoolStats'
 import { WhatsAppCommunityCard } from '@/components/features/whatsapp/WhatsAppCommunityCard'
-import { CommitteeCard } from './CommitteeCard'
 import { CommitteeCornerCard } from './CommitteeCornerCard'
 import { WhiteShirtBanner } from './WhiteShirtBanner'
 import { WelcomeBackBanner } from './WelcomeBackBanner'
@@ -742,17 +741,6 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
           transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
         >
           <CommitteeCornerCard />
-        </motion.div>
-
-        {/* Committee Representatives */}
-        <motion.div
-          className="mb-4"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-50px' }}
-          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-        >
-          <CommitteeCard />
         </motion.div>
 
       {/* Photos Gallery Section */}

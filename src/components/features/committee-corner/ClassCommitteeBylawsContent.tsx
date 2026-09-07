@@ -1,10 +1,12 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useMemo, useRef } from 'react'
 import Link from 'next/link'
 import { useLocale, useTranslations } from 'next-intl'
 import { useParams } from 'next/navigation'
-import { ScrollText, ArrowRight } from 'lucide-react'
+import { ScrollText, ArrowRight, FileDown } from 'lucide-react'
+import { toast } from 'sonner'
+import { ShareButton } from '@/components/ui/share-button'
 import { getClassCommitteeBylawsByLocale } from '@/lib/data/class-committee-bylaws'
 import type { BylawsSection } from '@/lib/data/class-committee-bylaws'
 import type { Locale } from '@/i18n/config'
@@ -14,8 +16,68 @@ export function ClassCommitteeBylawsContent() {
   const t = useTranslations('committeeCorner')
   const params = useParams()
   const pathLocale = (params.locale || 'he') as Locale
+  const printRef = useRef<HTMLDivElement>(null)
 
   const data = useMemo(() => getClassCommitteeBylawsByLocale(locale), [locale])
+
+  const shareUrl = typeof window !== 'undefined'
+    ? window.location.origin + `/${locale}/class-committee-bylaws`
+    : `https://beeri.online/${locale}/class-committee-bylaws`
+
+  async function exportToPDF() {
+    if (!printRef.current) {
+      toast.error(locale === 'ru' ? 'Ошибка загрузки содержимого' : 'שגיאה בטעינת התוכן')
+      return
+    }
+
+    try {
+      toast.loading(locale === 'ru' ? 'Создание PDF...' : 'מכין PDF...')
+
+      const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
+        import('html2canvas'),
+        import('jspdf')
+      ])
+
+      const canvas = await html2canvas(printRef.current, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff'
+      })
+
+      const imgData = canvas.toDataURL('image/png')
+      const imgWidth = 210
+      const imgHeight = (canvas.height * imgWidth) / canvas.width
+
+      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
+      const pageHeight = pdf.internal.pageSize.getHeight()
+      const pageWidth = pdf.internal.pageSize.getWidth()
+      let heightLeft = imgHeight
+      let position = 0
+
+      pdf.addImage(imgData, 'PNG', 0, position, pageWidth, imgHeight)
+      heightLeft -= pageHeight
+
+      while (heightLeft > 0) {
+        position = heightLeft - imgHeight
+        pdf.addPage()
+        pdf.addImage(imgData, 'PNG', 0, position, pageWidth, imgHeight)
+        heightLeft -= pageHeight
+      }
+
+      const fileName = locale === 'ru'
+        ? `proekt_ustava_klassnyh_komitetov_${new Date().getFullYear()}.pdf`
+        : `הצעה_לתקנון_ועדי_כיתות_${new Date().getFullYear()}.pdf`
+
+      pdf.save(fileName)
+      toast.dismiss()
+      toast.success(locale === 'ru' ? 'Файл успешно экспортирован' : 'הקובץ יוצא בהצלחה')
+    } catch (error) {
+      console.error('Error generating PDF:', error)
+      toast.dismiss()
+      toast.error(locale === 'ru' ? 'Ошибка при создании PDF' : 'שגיאה ביצירת PDF')
+    }
+  }
 
   return (
     <div className="min-h-screen bg-[#F4EFE4]">
@@ -44,8 +106,8 @@ export function ClassCommitteeBylawsContent() {
               </div>
             </div>
 
-            {/* Status ribbon */}
-            <div className="flex justify-center mb-4">
+            {/* Status ribbon + actions */}
+            <div className="flex items-center justify-center gap-3 mb-4">
               <span
                 className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full
                            bg-amber-50 border border-amber-200/60
@@ -54,6 +116,31 @@ export function ClassCommitteeBylawsContent() {
               >
                 {t('proposalBadge')}
               </span>
+
+              <div className="w-px h-4 bg-[#003153]/15" aria-hidden="true" />
+
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={exportToPDF}
+                  className="h-7 w-7 flex items-center justify-center rounded-full text-[#003153]/50 hover:text-[#003153] hover:bg-[#003153]/5 transition-colors"
+                  aria-label={locale === 'ru' ? 'Экспорт в PDF' : 'ייצוא ל-PDF'}
+                >
+                  <FileDown className="h-3.5 w-3.5" />
+                </button>
+                <ShareButton
+                  shareData={{
+                    title: data.title,
+                    text: data.intro,
+                    url: shareUrl,
+                  }}
+                  variant="ghost"
+                  size="icon"
+                  locale={locale === 'ru' ? 'ru' : 'he'}
+                  className="h-7 w-7 text-[#003153]/50 hover:text-[#003153] hover:bg-[#003153]/5 rounded-full"
+                  aria-label={locale === 'ru' ? 'Поделиться' : 'שיתוף'}
+                />
+              </div>
             </div>
 
             {/* Title */}
@@ -86,6 +173,32 @@ export function ClassCommitteeBylawsContent() {
               </p>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Hidden print content for PDF export */}
+      <div ref={printRef} className="fixed -left-[9999px] top-0 w-[800px] bg-white p-12" dir="rtl">
+        <div className="text-center mb-10 pb-6 border-b-2 border-black">
+          <h1 className="text-3xl font-bold text-black mb-2">{data.title}</h1>
+          <p className="text-sm text-black mt-2">{t('proposalBadge')}</p>
+        </div>
+        <p className="text-sm text-black italic mb-8 leading-relaxed">{data.intro}</p>
+        <div className="space-y-6">
+          {data.sections.map((section) => (
+            <div key={section.number} className="mb-6">
+              <h2 className="text-lg font-bold text-black mb-3">
+                {section.number}. {section.title}
+              </h2>
+              <div className="space-y-2 text-sm leading-relaxed mr-4">
+                {section.content.map((paragraph, idx) => (
+                  <p key={idx} className="text-black text-sm">{paragraph}</p>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="pt-6 mt-8 border-t border-gray-400">
+          <p className="text-center text-xs text-gray-700">{data.footer}</p>
         </div>
       </div>
     </div>
