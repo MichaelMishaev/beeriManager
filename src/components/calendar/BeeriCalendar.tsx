@@ -77,6 +77,15 @@ const priorityLabels = {
   urgent: 'דחוף'
 }
 
+// Next holiday that hasn't ended yet (today falls within it, or it's still upcoming)
+function getNextHoliday(holidays: Holiday[]): Holiday | null {
+  const todayStr = format(new Date(), 'yyyy-MM-dd')
+  const upcoming = holidays
+    .filter(h => h.end_date >= todayStr)
+    .sort((a, b) => a.start_date.localeCompare(b.start_date))
+  return upcoming[0] ?? null
+}
+
 export default function BeeriCalendar({
   events = [],
   holidays = [],
@@ -84,8 +93,14 @@ export default function BeeriCalendar({
   onEventClick,
   showCreateButton = false
 }: BeeriCalendarProps) {
-  const [currentDate, setCurrentDate] = useState(new Date())
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null)
+  const [currentDate, setCurrentDate] = useState(() => {
+    const nextHoliday = getNextHoliday(holidays)
+    return nextHoliday ? new Date(nextHoliday.start_date) : new Date()
+  })
+  const [selectedDate, setSelectedDate] = useState<Date | null>(() => {
+    const nextHoliday = getNextHoliday(holidays)
+    return nextHoliday ? new Date(nextHoliday.start_date) : null
+  })
   const [currentView, setCurrentView] = useState(view)
   const [showHolidays] = useState(true)
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null)
