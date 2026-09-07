@@ -4,9 +4,8 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { FileText, ClipboardList, Users, MessageCircle, ScrollText, ChevronLeft, ChevronDown, ChevronUp, Heart } from 'lucide-react'
+import { FileText, ClipboardList, Users, ScrollText, ChevronLeft, ChevronDown, ChevronUp, Heart } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
-import { ContactsDialog } from '@/components/features/contacts/ContactsDialog'
 import { getMembersByGradeLevel } from '@/lib/data/committee-members'
 import type { Locale } from '@/i18n/config'
 
@@ -129,15 +128,6 @@ export function CommitteeCornerContent() {
                 </div>
               </div>
             )}
-            <ContactsDialog>
-              <div>
-                <CornerRow
-                  icon={MessageCircle}
-                  title={t('contact.title')}
-                  subtitle={t('contact.subtitle')}
-                />
-              </div>
-            </ContactsDialog>
           </CardContent>
         </Card>
       </main>
