@@ -7,6 +7,7 @@ import { useParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { FileText, ClipboardList, Users, ScrollText, ChevronLeft, ChevronDown, ChevronUp, Heart } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
+import { ShareButton } from '@/components/ui/share-button'
 import { getMembersByGradeLevel } from '@/lib/data/committee-members'
 import type { Locale } from '@/i18n/config'
 
@@ -70,6 +71,10 @@ export function CommitteeCornerContent() {
   const locale = (params.locale || 'he') as Locale
   const [membersOpen, setMembersOpen] = useState(false)
 
+  const shareUrl = typeof window !== 'undefined'
+    ? window.location.origin + `/${locale}/committee-corner`
+    : `https://beeri.online/${locale}/committee-corner`
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero */}
@@ -85,6 +90,16 @@ export function CommitteeCornerContent() {
         />
         {/* Contrast overlay so text stays readable over the illustration */}
         <div className="absolute inset-0 bg-gradient-to-b from-[#003153]/70 via-[#003153]/25 to-[#003153]/60" />
+
+        <ShareButton
+          shareData={{ title: t('title'), text: t('subtitle'), url: shareUrl }}
+          showMenu={false}
+          variant="ghost"
+          size="icon"
+          locale={locale === 'ru' ? 'ru' : 'he'}
+          className="absolute z-10 top-4 end-4 h-10 w-10 rounded-full bg-white/10 backdrop-blur-sm text-white hover:bg-white/20 hover:text-white"
+          aria-label={t('share')}
+        />
 
         <div className="relative z-10 container mx-auto px-4 py-10 max-w-3xl text-center">
           <div className="mx-auto mb-4 w-14 h-14 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center">

@@ -156,6 +156,14 @@ const config: Config = {
           "0%, 100%": { opacity: "1", transform: "scale(1)" },
           "50%": { opacity: "0.9", transform: "scale(1.05)" },
         },
+        "float-soft": {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-4px)" },
+        },
+        "shine-sweep": {
+          "0%": { transform: "translateX(-150%) skewX(-20deg)" },
+          "40%, 100%": { transform: "translateX(250%) skewX(-20deg)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -163,6 +171,8 @@ const config: Config = {
         "slide-in": "slide-in 0.3s ease-out",
         "fade-in": "fade-in 0.3s ease-out",
         "pulse-soft": "pulse-soft 2s ease-in-out infinite",
+        "float-soft": "float-soft 3.5s ease-in-out infinite",
+        "shine-sweep": "shine-sweep 3.5s ease-in-out infinite",
       },
       fontFamily: {
         sans: ['var(--font-hebrew)', 'system-ui', 'sans-serif'],
