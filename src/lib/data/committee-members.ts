@@ -8,6 +8,8 @@ export const committeeMembers: CommitteeMember[] = [
   { grade: 'א2', name: 'ליאור בן הרוש', phone: '052-6589223' },
   { grade: 'א4', name: 'לילה ניימרק', phone: '054-2046433' },
 
+  { grade: 'ב1', name: 'דבי לוי כרדי', phone: '054-3974757' },
+  { grade: 'ב2', name: 'ניצן חכימי', phone: '052-2924773' },
   { grade: 'ב4', name: 'ורדית צוויג', phone: '050-8591536' },
 
   { grade: 'ג1', name: 'יוסי בן דוד', phone: '054-2101057' },
@@ -21,6 +23,7 @@ export const committeeMembers: CommitteeMember[] = [
   { grade: 'ה3', name: 'מיכאל מישייב', phone: '054-4345287' },
 
   { grade: 'ו1', name: 'ולנטינה מטייקה', phone: '054-2501921' },
+  { grade: 'ו2', name: 'מאגי ליבוביץ', phone: '054-2629609' },
   { grade: 'ו3', name: 'עמית נודלמן טסלר', phone: '054-6800750' },
 ]
 
