@@ -5,7 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { FileText, ClipboardList, Users, ScrollText, BookOpen, ChevronLeft, ChevronDown, ChevronUp, Heart } from 'lucide-react'
+import { FileText, ClipboardList, Users, ScrollText, BookOpen, ChevronLeft, Plus, Minus, Heart } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { ShareButton } from '@/components/ui/share-button'
 import { getMembersByGradeLevel } from '@/lib/data/committee-members'
@@ -28,10 +28,13 @@ function CornerRow({
   href?: string
   expanded?: boolean
 }) {
+  const isAccordion = expanded !== undefined
+
   const content = (
     <div
-      className="flex items-center gap-4 px-4 py-4 min-h-[64px] transition-colors
-                 hover:bg-[#0D98BA]/5 active:bg-[#0D98BA]/10 cursor-pointer"
+      className={`flex items-center gap-4 px-4 py-4 min-h-[64px] transition-colors
+                 hover:bg-[#0D98BA]/5 active:bg-[#0D98BA]/10 cursor-pointer
+                 ${isAccordion && expanded ? 'bg-[#0D98BA]/[0.06]' : ''}`}
     >
       <div className="flex-shrink-0 w-11 h-11 rounded-full bg-[#0D98BA]/10 flex items-center justify-center">
         <Icon className="h-5 w-5 text-[#0D98BA]" />
@@ -40,12 +43,19 @@ function CornerRow({
         <p className="font-bold text-[#003153] leading-tight">{title}</p>
         <p className="text-sm text-gray-500 leading-snug mt-0.5">{subtitle}</p>
       </div>
-      {expanded === undefined ? (
-        <ChevronLeft className="h-5 w-5 text-gray-400 flex-shrink-0 ltr:rotate-180" />
-      ) : expanded ? (
-        <ChevronUp className="h-5 w-5 text-gray-400 flex-shrink-0" />
+      {isAccordion ? (
+        <div
+          className="flex-shrink-0 w-8 h-8 rounded-full border border-[#0D98BA]/30 flex items-center justify-center"
+          aria-hidden="true"
+        >
+          {expanded ? (
+            <Minus className="h-4 w-4 text-[#0D98BA]" />
+          ) : (
+            <Plus className="h-4 w-4 text-[#0D98BA]" />
+          )}
+        </div>
       ) : (
-        <ChevronDown className="h-5 w-5 text-gray-400 flex-shrink-0" />
+        <ChevronLeft className="h-5 w-5 text-gray-400 flex-shrink-0 ltr:rotate-180" />
       )}
     </div>
   )
