@@ -176,8 +176,19 @@ export function CommitteeCornerContent() {
                       <div className="text-xs font-bold text-[#0D98BA] mb-1.5">{gradeLevel}׳</div>
                       <div className="space-y-1">
                         {members.map((member) => (
-                          <div key={member.grade} className="text-xs text-gray-700">
-                            <span className="font-medium">{member.grade}</span> — {member.name}
+                          <div key={`${member.grade}-${member.name}`} className="text-xs text-gray-700">
+                            <div>
+                              <span className="font-medium">{member.grade}</span> — {member.name}
+                            </div>
+                            {member.phone && (
+                              <a
+                                href={`tel:${member.phone}`}
+                                dir="ltr"
+                                className="text-[#0D98BA] hover:underline"
+                              >
+                                {member.phone}
+                              </a>
+                            )}
                           </div>
                         ))}
                       </div>
