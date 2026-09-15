@@ -5,7 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { FileText, ClipboardList, Users, ScrollText, ChevronLeft, ChevronDown, ChevronUp, Heart } from 'lucide-react'
+import { FileText, ClipboardList, Users, ScrollText, BookOpen, ChevronLeft, ChevronDown, ChevronUp, Heart } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { ShareButton } from '@/components/ui/share-button'
 import { getMembersByGradeLevel } from '@/lib/data/committee-members'
@@ -51,6 +51,20 @@ function CornerRow({
   )
 
   if (href) {
+    const isExternal = href.startsWith('http://') || href.startsWith('https://')
+    if (isExternal) {
+      return (
+        <a
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block"
+          aria-label={title}
+        >
+          {content}
+        </a>
+      )
+    }
     return (
       <Link href={href} className="block" aria-label={title}>
         {content}
@@ -130,6 +144,12 @@ export function CommitteeCornerContent() {
               title={t('classBylaws.title')}
               subtitle={t('classBylaws.subtitle')}
               href={`/${locale}/class-committee-bylaws`}
+            />
+            <CornerRow
+              icon={BookOpen}
+              title={t('mankalCircular.title')}
+              subtitle={t('mankalCircular.subtitle')}
+              href="https://apps.education.gov.il/Mankal/horaa.aspx?siduri=525#_Toc256000035"
             />
             <CornerRow
               icon={Users}
