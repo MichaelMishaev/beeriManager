@@ -309,6 +309,7 @@ function EventItem({
   locale: Locale
   onClick: () => void
 }) {
+  const t = useTranslations('homepage')
   const startDate = new Date(event.start_datetime)
   const now = new Date()
 
@@ -333,11 +334,19 @@ function EventItem({
   const timeDiff = startDate.getTime() - now.getTime()
   const hasEnded = now > endDate
 
-  // 2025 Enhancement: Countdown Timer Logic (hours removed)
-  const daysUntil = Math.floor(timeDiff / (1000 * 60 * 60 * 24))
+  // Count calendar days, not 24h blocks: an event tomorrow 08:00 seen today 20:00 is
+  // "tomorrow" (the old floor(ms/day) said "today!" or "in 1 days")
+  const startDay = new Date(startDate); startDay.setHours(0, 0, 0, 0)
+  const today = new Date(now); today.setHours(0, 0, 0, 0)
+  const daysUntil = Math.round((startDay.getTime() - today.getTime()) / (24 * 60 * 60 * 1000))
 
-  const isStartingToday = !isHappeningNow && timeDiff > 0 && timeDiff <= 24 * 60 * 60 * 1000 // Within 24 hours
-  const isStartingThisWeek = !isHappeningNow && timeDiff > 0 && timeDiff <= 7 * 24 * 60 * 60 * 1000 // Within 7 days
+  const isUpcoming = !isHappeningNow && timeDiff > 0
+  const isStartingToday = isUpcoming && daysUntil === 0
+  const isStartingTomorrow = isUpcoming && daysUntil === 1
+  const isStartingThisWeek = isUpcoming && daysUntil >= 2 && daysUntil <= 7
+  // All-day events are stored as UTC midnight (= 03:00 in Israel) — treat both
+  // local and UTC midnight as "no specific time"
+  const hasTime = !((startDate.getHours() === 0 && startDate.getMinutes() === 0) || (startDate.getUTCHours() === 0 && startDate.getUTCMinutes() === 0))
 
   // Date-block color + icon per event type (each pair verified ≥4.5:1 text contrast)
   const getEventVisual = () => {
@@ -357,28 +366,35 @@ function EventItem({
   // white-on-brand-blue / white-on-emerald pairings failed WCAG AA)
   const statusConfig = isHappeningNow
     ? {
-        text: locale === 'ru' ? 'Сейчас' : 'מתקיים כעת',
+        text: t('statusNow'),
         bgColor: 'bg-emerald-700',
         textColor: 'text-white',
         dotColor: 'bg-emerald-300'
       }
     : isStartingToday
     ? {
-        text: locale === 'ru' ? 'Сегодня!' : 'היום!',
+        text: t('statusToday'),
         bgColor: 'bg-[#FFBA00]',
+        textColor: 'text-[#003153]',
+        dotColor: 'bg-[#003153]/50'
+      }
+    : isStartingTomorrow
+    ? {
+        text: t('statusTomorrow'),
+        bgColor: 'bg-[#FF8200]',
         textColor: 'text-[#003153]',
         dotColor: 'bg-[#003153]/50'
       }
     : isStartingThisWeek
     ? {
-        text: locale === 'ru' ? `Через ${daysUntil} дн.` : `בעוד ${daysUntil} ימים`,
+        text: t('statusInDays', { days: daysUntil }),
         bgColor: 'bg-[#003153]',
         textColor: 'text-white',
         dotColor: 'bg-[#87CEEB]'
       }
     : hasEnded
     ? {
-        text: locale === 'ru' ? 'Завершено' : 'הסתיים',
+        text: t('statusEnded'),
         bgColor: 'bg-gray-300',
         textColor: 'text-gray-700',
         dotColor: 'bg-gray-500'
@@ -387,8 +403,16 @@ function EventItem({
 
   return (
     <div
+      role="button"
+      tabIndex={0}
       onClick={onClick}
-      className="block group cursor-pointer"
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          onClick()
+        }
+      }}
+      className="block group cursor-pointer rounded-2xl focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#0D98BA]/30"
     >
       <div className={cn(
         duoCard, duoPress,
@@ -397,20 +421,20 @@ function EventItem({
         {/* Date block - leading, colored by event type, chunky 3D tile */}
         <div className="relative flex-shrink-0">
           <div
-            className="w-12 h-12 rounded-xl flex flex-col items-center justify-center leading-none"
+            className="w-14 h-14 rounded-xl flex flex-col items-center justify-center leading-none"
             style={{ backgroundColor: eventVisual.bg, boxShadow: '0 3px 0 rgba(0,0,0,0.22)' }}
           >
             <span
-              className="text-[9px] font-bold uppercase tracking-wide mb-0.5"
+              className="text-xs font-bold tracking-wide mb-0.5"
               style={{ color: eventVisual.text, opacity: 0.85 }}
             >
               {format(startDate, 'MMM', { locale: dateLocale })}
             </span>
-            <span className="text-lg font-extrabold" style={{ color: eventVisual.text }}>
+            <span className="text-xl font-extrabold" style={{ color: eventVisual.text }}>
               {format(startDate, 'd')}
             </span>
           </div>
-          <span className="absolute -bottom-1.5 -left-1.5 w-5 h-5 rounded-full bg-white border border-gray-200 shadow-sm flex items-center justify-center text-[10px]">
+          <span className="absolute -bottom-1.5 -left-1.5 w-5 h-5 rounded-full bg-white border border-gray-200 shadow-sm flex items-center justify-center text-xs">
             {eventVisual.icon}
           </span>
         </div>
@@ -437,11 +461,9 @@ function EventItem({
 
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-600">
             <div className="flex items-center gap-1">
-              <span className="truncate">
-                {format(startDate, 'd MMMM', { locale: dateLocale })}
-                {event.end_datetime && isValidEndDate && (
-                  <span className="mr-1"> • {format(startDate, 'HH:mm', { locale: dateLocale })}</span>
-                )}
+              <span className="truncate font-medium">
+                {format(startDate, 'EEEE', { locale: dateLocale })}
+                {hasTime && ` · ${format(startDate, 'HH:mm')}`}
               </span>
             </div>
             {location && (
@@ -615,7 +637,7 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
       </a>
 
       {/* Hero Section - 2025 Enhanced with Single Focused CTA */}
-      <div className="bg-gradient-to-br from-[#0D98BA]/5 via-white to-[#003153]/5 py-8 md:py-12">
+      <div className="bg-gradient-to-br from-[#0D98BA]/5 via-white to-[#003153]/5 py-5 md:py-8">
         <motion.div
           className="container mx-auto px-4 text-center max-w-4xl"
           initial="hidden"
@@ -626,7 +648,7 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
           <motion.h1
             variants={heroItem}
             transition={{ duration: 0.6, ease: EASE_OUT }}
-            className="text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight text-[#003153] mb-3 leading-tight"
+            className="text-2xl md:text-4xl font-extrabold tracking-tight text-[#003153] mb-2 leading-tight"
           >
             {t('heroTitle')}
           </motion.h1>
@@ -635,7 +657,7 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
           <motion.p
             variants={heroItem}
             transition={{ duration: 0.6, ease: EASE_OUT }}
-            className="text-base md:text-lg text-gray-700 mb-6 leading-relaxed"
+            className="text-sm md:text-lg text-gray-700 mb-3 leading-relaxed"
           >
             {t('heroBenefits')}
           </motion.p>
@@ -662,20 +684,38 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
         {/* Duolingo-style mascot greeting */}
         <DuoGreeting upcomingEvents={upcomingEvents} />
 
+        {/* Time-boxed banners stay near the top (they're only shown when relevant) */}
+        <div className="space-y-3">
+          {/* White Shirt Friday Reminder - Shows Thu 9:00 AM - Fri 9:00 AM */}
+          <WhiteShirtBanner />
+        </div>
         {/* Welcome Back Banner - Temporary, visible until Sept 2 2026 */}
         <WelcomeBackBanner />
 
-        {/* Highlights Carousel */}
-        <HighlightsCarousel />
+        {/* Events first (main reason parents open the app). Desktop: 2 columns. */}
+        <div className="lg:grid lg:grid-cols-2 lg:gap-4 lg:items-start">
+          <div id="events-section" className="mb-4 scroll-mt-20">
+            <UpcomingEventsCard
+              upcomingEvents={upcomingEvents}
+              dateLocale={dateLocale}
+              locale={currentLocale}
+            />
+          </div>
 
-        {/* School-year XP bar */}
-        <Reveal>
-          <SchoolYearProgress />
-        </Reveal>
+          <div>
+            {/* Highlights Carousel */}
+            <HighlightsCarousel />
 
-        {/* Next Holiday Widget - Right after carousel */}
-        <div className="mb-3">
-          <NextHolidayWidget onClick={() => setHolidaysModalOpen(true)} />
+            {/* School-year XP bar */}
+            <Reveal>
+              <SchoolYearProgress />
+            </Reveal>
+
+            {/* Next Holiday Widget */}
+            <div className="mb-3">
+              <NextHolidayWidget onClick={() => setHolidaysModalOpen(true)} />
+            </div>
+          </div>
         </div>
 
         {/* Calendar Toggle - Single Button (2025: Reduce Choices) */}
@@ -690,7 +730,7 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
               title={isCalendarExpanded ? calendarT('hideCalendar') : calendarT('showCalendar')}
             >
               <Calendar className="h-5 w-5 ml-2" />
-              <span className="font-medium">📅 {calendarT('calendarAndHolidays')}</span>
+              <span className="font-medium">{calendarT('calendarAndHolidays')}</span>
               <motion.span
                 className="mr-2 inline-flex"
                 animate={{ rotate: isCalendarExpanded ? 180 : 0 }}
@@ -731,29 +771,17 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
           </AnimatePresence>
         </aside>
 
-        <div className="space-y-3">
-          {/* White Shirt Friday Reminder - Shows Thu 9:00 AM - Fri 9:00 AM */}
-          <WhiteShirtBanner />
+        <div className="lg:grid lg:grid-cols-2 lg:gap-4 lg:items-start">
+          {/* WhatsApp Community Card */}
+          <Reveal id="whatsapp-section" className="mb-4 scroll-mt-20">
+            <WhatsAppCommunityCard />
+          </Reveal>
+
+          {/* Committee Corner - hub for regulations, protocols, members & contact */}
+          <Reveal className="mb-4">
+            <CommitteeCornerCard />
+          </Reveal>
         </div>
-
-        {/* PROMOTED: UPCOMING EVENTS - High Priority */}
-        <div id="events-section" className="mb-4 scroll-mt-20">
-          <UpcomingEventsCard
-            upcomingEvents={upcomingEvents}
-            dateLocale={dateLocale}
-            locale={currentLocale}
-          />
-        </div>
-
-        {/* PROMOTED: WhatsApp Community Card - High Priority */}
-        <Reveal id="whatsapp-section" className="mb-4 scroll-mt-20">
-          <WhatsAppCommunityCard />
-        </Reveal>
-
-        {/* Committee Corner - hub for regulations, protocols, members & contact */}
-        <Reveal className="mb-4">
-          <CommitteeCornerCard />
-        </Reveal>
 
       {/* Photos Gallery Section */}
       {eventsWithPhotos.length > 0 && (

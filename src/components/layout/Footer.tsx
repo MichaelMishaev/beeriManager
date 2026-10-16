@@ -26,7 +26,7 @@ export function Footer() {
               {!isOnRegulationsPage && (
                 <button
                   onClick={() => setRegulationsOpen(true)}
-                  className="text-primary hover:text-primary-600
+                  className="inline-flex items-center justify-center min-h-[44px] min-w-[44px] px-1 text-primary hover:text-primary-600
                            underline underline-offset-4 decoration-primary/40
                            hover:decoration-primary transition-all duration-200
                            font-medium cursor-pointer
@@ -38,7 +38,7 @@ export function Footer() {
               )}
               <Link
                 href="/help"
-                className="text-primary hover:text-primary-600
+                className="inline-flex items-center justify-center min-h-[44px] min-w-[44px] px-1 text-primary hover:text-primary-600
                          underline underline-offset-4 decoration-primary/40
                          hover:decoration-primary transition-all duration-200
                          font-medium

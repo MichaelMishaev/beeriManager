@@ -220,7 +220,7 @@ export const ShareButton = forwardRef<HTMLButtonElement, ShareButtonProps>(
           ref={ref}
           variant={variant}
           size={size}
-          className={cn(label && 'gap-2', className)}
+          className={cn(size === 'icon' && 'min-w-[44px] min-h-[44px] flex-shrink-0', label && 'gap-2', className)}
           onClick={handleNative}
           title={t.share}
           {...buttonProps}
@@ -243,7 +243,7 @@ export const ShareButton = forwardRef<HTMLButtonElement, ShareButtonProps>(
             ref={ref}
             variant={variant}
             size={size}
-            className={cn(label && 'gap-2', className)}
+            className={cn(size === 'icon' && 'min-w-[44px] min-h-[44px] flex-shrink-0', label && 'gap-2', className)}
             title={t.share}
             {...buttonProps}
           >

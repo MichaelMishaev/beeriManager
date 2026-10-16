@@ -241,32 +241,10 @@ export function HighlightsCarousel() {
           {/* Animated gradient background */}
           <div className="absolute inset-0 bg-gradient-to-br from-[#0D98BA]/5 via-purple-500/5 to-pink-500/5 animate-gradient" />
 
-          {/* Navigation Arrows - On sides, not overlapping content */}
-          <button
-            onClick={(e) => {
-              e.stopPropagation()
-              prevSlide()
-              setIsAutoPlaying(false)
-            }}
-            className="absolute top-1/2 -translate-y-1/2 left-2 z-20 bg-white rounded-full p-2 border-2 border-[#e5e5e5] shadow-[0_3px_0_#e5e5e5] transition-[margin,box-shadow] duration-75 active:mt-[3px] active:shadow-none"
-            aria-label={currentLocale === 'ru' ? 'Предыдущий' : 'הקודם'}
-          >
-            <ChevronLeft className="h-4 w-4 text-gray-900" />
-          </button>
-          <button
-            onClick={(e) => {
-              e.stopPropagation()
-              nextSlide()
-              setIsAutoPlaying(false)
-            }}
-            className="absolute top-1/2 -translate-y-1/2 right-2 z-20 bg-white rounded-full p-2 border-2 border-[#e5e5e5] shadow-[0_3px_0_#e5e5e5] transition-[margin,box-shadow] duration-75 active:mt-[3px] active:shadow-none"
-            aria-label={currentLocale === 'ru' ? 'Следующий' : 'הבא'}
-          >
-            <ChevronRight className="h-4 w-4 text-gray-900" />
-          </button>
+          {/* Prev/next live only in the control row below (removed duplicate on-card arrows) */}
 
           {/* Content - Centered, no controls blocking */}
-          <div className="relative min-h-[240px] flex items-center justify-center px-12 py-4">
+          <div className="relative min-h-[240px] flex items-center justify-center px-4 py-4">
             <div
               className="flex transition-transform duration-700 ease-out w-full"
               style={{ transform: `translateX(${currentLocale === 'he' ? currentSlide * 100 : -currentSlide * 100}%)` }}
@@ -347,25 +325,26 @@ export function HighlightsCarousel() {
               prevSlide()
               setIsAutoPlaying(false)
             }}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors active:scale-95"
+            className="w-11 h-11 flex items-center justify-center hover:bg-gray-100 rounded-full transition-colors active:scale-95"
             aria-label={currentLocale === 'ru' ? 'Предыдущий' : 'הקודם'}
           >
             <ChevronLeft className="h-5 w-5 text-gray-700" />
           </button>
 
           {/* Dot Indicators */}
-          <div className="flex gap-2">
+          <div className="flex gap-0.5">
             {highlights.map((_, index) => (
               <button
                 key={index}
                 onClick={() => goToSlide(index)}
-                className={`h-2 rounded-full transition-all duration-300 ${
-                  index === currentSlide
-                    ? 'bg-gradient-to-r from-[#0D98BA] to-[#003153] w-8'
-                    : 'bg-gray-300 hover:bg-gray-400 w-2'
-                }`}
+                className="h-11 min-w-[24px] flex items-center justify-center"
                 aria-label={`${currentLocale === 'ru' ? 'Слайд' : 'שקופית'} ${index + 1}`}
-              />
+                aria-current={index === currentSlide}
+              >
+                <span className={`h-2.5 rounded-full transition-all duration-300 ${
+                  index === currentSlide ? 'bg-[#087A96] w-8' : 'bg-gray-300 w-2.5'
+                }`} />
+              </button>
             ))}
           </div>
 
@@ -377,7 +356,7 @@ export function HighlightsCarousel() {
           {/* Play/Pause */}
           <button
             onClick={() => setIsAutoPlaying(!isAutoPlaying)}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors active:scale-95"
+            className="w-11 h-11 flex items-center justify-center hover:bg-gray-100 rounded-full transition-colors active:scale-95"
             aria-label={isAutoPlaying ? (currentLocale === 'ru' ? 'Пауза' : 'השהה') : (currentLocale === 'ru' ? 'Играть' : 'נגן')}
           >
             {isAutoPlaying ? (
@@ -393,7 +372,7 @@ export function HighlightsCarousel() {
               nextSlide()
               setIsAutoPlaying(false)
             }}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors active:scale-95"
+            className="w-11 h-11 flex items-center justify-center hover:bg-gray-100 rounded-full transition-colors active:scale-95"
             aria-label={currentLocale === 'ru' ? 'Следующий' : 'הבא'}
           >
             <ChevronRight className="h-5 w-5 text-gray-700" />

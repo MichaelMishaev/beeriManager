@@ -23,7 +23,7 @@ export function ConnectWithUsCard() {
       external: true,
       icon: MessageSquare,
       tone: 'green' as const,
-      title: 'WhatsApp',
+      title: t('whatsappTitle'),
       description: t('whatsappDescription'),
     },
     {

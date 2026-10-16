@@ -105,7 +105,7 @@ export function Navigation() {
           <div className="flex items-center gap-3">
             <Link
               href={isAuthenticated ? "/admin" : "/"}
-              className="flex items-center gap-3 min-w-0 flex-shrink"
+              className="flex items-center gap-3 min-w-0 min-h-[44px] flex-shrink"
               onClick={() => handleNavClick(isAuthenticated ? '/admin' : '/', 'בית')}
             >
               {/* Logo Image */}
@@ -175,7 +175,7 @@ export function Navigation() {
                 <DropdownMenuTrigger asChild>
                   <button
                     className={cn(
-                      'flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md transition-all',
+                      'flex items-center gap-1.5 px-3 min-h-[44px] text-sm font-medium rounded-md transition-all',
                       pathname.startsWith('/grocery') || pathname.startsWith('/my-grocery')
                         ? 'bg-background text-foreground shadow-sm'
                         : 'text-muted-foreground hover:text-foreground hover:bg-background/50'
@@ -273,7 +273,7 @@ export function Navigation() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="flex items-center gap-1 px-2 h-9 border-0 outline-none focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                  className="flex items-center gap-1 px-2 h-11 border-0 outline-none focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
                   aria-label={tNav('groceryLists')}
                 >
                   <ClipboardList className="h-5 w-5" />
@@ -316,6 +316,8 @@ export function Navigation() {
                 setIsOpen(!isOpen)
                 logger.userAction('Toggle mobile menu', { isOpen: !isOpen })
               }}
+              aria-label={isOpen ? tNav('closeMenu') : tNav('openMenu')}
+              aria-expanded={isOpen}
             >
               {/* Icon swap: rotate + fade instead of a hard cut */}
               <AnimatePresence mode="wait" initial={false}>

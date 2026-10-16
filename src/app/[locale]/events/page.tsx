@@ -2,7 +2,9 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { Calendar, Camera, Loader2 } from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card } from '@/components/ui/card'
+import { DuoTag, duoPress } from '@/components/ui/duo'
+import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
@@ -123,7 +125,7 @@ function EventsList({
       <div className="text-center py-12">
         <Camera className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
         <p className="text-muted-foreground">
-          {filter === 'photos' ? 'אין עדיין תמונות מאירועים' : 'לא נמצאו אירועים'}
+          {filter === 'photos' ? t('emptyPhotos') : t('emptyEvents')}
         </p>
       </div>
     )
@@ -136,63 +138,50 @@ function EventsList({
   })
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+    <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
       {sortedEvents.map((event, index) => {
         const isFirstUpcoming = filter === 'all' && index === firstUpcomingIndex
+        const start = new Date(event.start_datetime)
+        // All-day events are stored as UTC midnight (= 03:00 in Israel) — treat both
+        // local and UTC midnight as "no specific time"
+        const hasTime = !((start.getHours() === 0 && start.getMinutes() === 0) || (start.getUTCHours() === 0 && start.getUTCMinutes() === 0))
+        const title = locale === 'ru' && event.title_ru ? event.title_ru : event.title
+        const location = locale === 'ru' && event.location_ru ? event.location_ru : event.location
+        const description = locale === 'ru' && event.description_ru ? event.description_ru : event.description
 
         return (
-          <div key={event.id} ref={isFirstUpcoming ? todayEventRef : null}>
-            <Link href={`/events/${event.id}`}>
-              <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-                <CardHeader>
-                  <div className="flex items-start justify-between gap-2">
-                    <CardTitle className="text-lg flex-1">
-                      {locale === 'ru' && event.title_ru ? event.title_ru : event.title}
-                    </CardTitle>
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                      {event.status === 'draft' && (
-                        <Badge className="text-xs bg-yellow-100 text-yellow-800 border-yellow-300">{t('badgeDraft')}</Badge>
-                      )}
-                      {event.status === 'published' && (
-                        <Badge className="text-xs bg-green-100 text-green-800 border-green-300">{t('badgePublished')}</Badge>
-                      )}
-                      {event.status === 'cancelled' && (
-                        <Badge className="text-xs bg-red-100 text-red-800 border-red-300">{t('badgeCancelled')}</Badge>
-                      )}
-                      {event.photos_url && (
-                        <Camera className="h-5 w-5 text-primary" />
-                      )}
-                    </div>
+          <div key={event.id} ref={isFirstUpcoming ? todayEventRef : null} className="scroll-mt-24">
+            <Link href={`/events/${event.id}`} className="block h-full">
+              {/* Compact card: title, date·time·place, 1-line description, type */}
+              <Card className={cn(duoPress, 'h-full cursor-pointer p-4')}>
+                <div className="flex items-start justify-between gap-2">
+                  <h2 className="text-base md:text-lg font-extrabold text-[#003153] leading-tight flex-1">
+                    {title}
+                  </h2>
+                  <div className="flex items-center gap-1.5 flex-shrink-0">
+                    {/* "Published" is the default state — only flag the exceptions */}
+                    {event.status === 'draft' && <DuoTag tone="yellow">{t('badgeDraft')}</DuoTag>}
+                    {event.status === 'cancelled' && <DuoTag tone="red">{t('badgeCancelled')}</DuoTag>}
+                    {event.photos_url && <Camera className="h-5 w-5 text-[#087A96]" aria-label={t('badgePhotos')} />}
                   </div>
-                  <div className="text-sm text-muted-foreground">
-                    {new Date(event.start_datetime).toLocaleDateString(getDateLocale(locale), {
-                      day: 'numeric',
-                      month: 'long',
-                      year: 'numeric'
-                    })}
-                    {event.location && ` • ${event.location}`}
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground line-clamp-2">
-                    {locale === 'ru' && event.description_ru ? event.description_ru : event.description}
-                  </p>
-                  <div className="mt-3 flex items-center gap-2">
-                    <Badge variant="secondary" className="text-xs">
-                      {event.event_type === 'meeting' && t('typeMeeting')}
-                      {event.event_type === 'fundraiser' && t('typeFundraiser')}
-                      {event.event_type === 'general' && t('typeGeneral')}
-                      {event.event_type === 'trip' && t('typeTrip')}
-                      {event.event_type === 'workshop' && t('typeWorkshop')}
-                    </Badge>
-                    {event.photos_url && (
-                      <Badge variant="outline" className="text-xs gap-1">
-                        <Camera className="h-3 w-3" />
-                        {t('badgePhotos')}
-                      </Badge>
-                    )}
-                  </div>
-                </CardContent>
+                </div>
+                <p className="mt-1.5 text-sm font-medium text-gray-600">
+                  {start.toLocaleDateString(getDateLocale(locale), { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' })}
+                  {hasTime && ` · ${start.toLocaleTimeString(getDateLocale(locale), { hour: '2-digit', minute: '2-digit' })}`}
+                  {location && ` · ${location}`}
+                </p>
+                {description && (
+                  <p className="mt-1 text-sm text-gray-500 line-clamp-1">{description}</p>
+                )}
+                <div className="mt-2.5">
+                  <Badge variant="secondary" className="text-xs">
+                    {event.event_type === 'meeting' && t('typeMeeting')}
+                    {event.event_type === 'fundraiser' && t('typeFundraiser')}
+                    {event.event_type === 'general' && t('typeGeneral')}
+                    {event.event_type === 'trip' && t('typeTrip')}
+                    {event.event_type === 'workshop' && t('typeWorkshop')}
+                  </Badge>
+                </div>
               </Card>
             </Link>
           </div>
@@ -207,7 +196,7 @@ export default function EventsPage() {
   const locale = (params.locale as string) || 'he'
   const t = useTranslations('Events')
 
-  const [activeTab, setActiveTab] = useState<'all' | 'upcoming' | 'past' | 'photos'>('all')
+  const [activeTab, setActiveTab] = useState<'all' | 'upcoming' | 'past' | 'photos'>('upcoming')
   const showDrafts = false // Only show published events
 
   return (
@@ -232,11 +221,11 @@ export default function EventsPage() {
       </div>
 
       <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as any)} className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="all">{t('tabAll')}</TabsTrigger>
-          <TabsTrigger value="upcoming">{t('tabUpcoming')}</TabsTrigger>
-          <TabsTrigger value="past">{t('tabPast')}</TabsTrigger>
-          <TabsTrigger value="photos" className="gap-1">
+        <TabsList className="grid w-full grid-cols-4 h-auto">
+          <TabsTrigger value="upcoming" className="min-h-[44px]">{t('tabUpcoming')}</TabsTrigger>
+          <TabsTrigger value="all" className="min-h-[44px]">{t('tabAll')}</TabsTrigger>
+          <TabsTrigger value="past" className="min-h-[44px]">{t('tabPast')}</TabsTrigger>
+          <TabsTrigger value="photos" className="gap-1 min-h-[44px]">
             <Camera className="h-4 w-4" />
             <span className="hidden sm:inline">{t('tabPhotos')}</span>
             <span className="sm:hidden">{t('tabPhotosShort')}</span>

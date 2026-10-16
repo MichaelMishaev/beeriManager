@@ -36,6 +36,62 @@ When a production bug is fixed:
 
 ## Bugs (Newest First)
 
+## [2026-10-16] Sold-out tickets were still clickable purchase links
+
+**How found:** Code review while restyling the homepage tickets card (Duolingo redesign).
+
+**Problem:** A sold-out ticket showed "אזל מהמלאי" but tapping it still opened the purchase URL.
+
+**Root Cause:** `<Button asChild disabled>` wrapped an `<a>`. With `asChild`, `disabled` is passed to the anchor, and anchors ignore `disabled`.
+
+**Solution:** Sold-out tickets render a real disabled `<button>`; only available tickets render the link.
+
+**Prevention Rule:** Never rely on `disabled` with `asChild` + `<a>`. Render a different element for the disabled state.
+
+**Files Changed:** `src/components/features/tickets/TicketsSection.tsx`
+
+## [2026-10-16] Event countdown said "בעוד 1 ימים" / "היום!" for tomorrow's events
+
+**How found:** UX audit (homepage at 390px).
+
+**Problem:** Events two calendar days away showed "בעוד 1 ימים" (also ungrammatical); events tomorrow morning, viewed in the evening, showed "היום!".
+
+**Root Cause:** Days were computed as `Math.floor(msUntilStart / 24h)`, i.e. 24-hour blocks, not calendar days. Strings were hard-coded per locale with no plural rules.
+
+**Solution:** Compare start-of-day dates (calendar days): 0 → today, 1 → tomorrow, 2–7 → ICU plural ("בעוד יומיים", "Через 2 дня"). Moved strings to `homepage.status*` translation keys.
+
+**Prevention Rule:** User-facing "in N days" must use calendar-day diff + ICU plurals, never floor(ms/day).
+
+**Files Changed:** `src/components/features/homepage/PublicHomepage.tsx`, `messages/he.json`, `messages/ru.json`
+
+## [2026-10-16] Homepage event rows unreachable by keyboard
+
+**How found:** UX audit.
+
+**Problem:** Keyboard and switch-access users could not focus or open upcoming events on the homepage.
+
+**Root Cause:** Rows were a plain `<div onClick>` with no role, tabIndex or key handler.
+
+**Solution:** `role="button"`, `tabIndex={0}`, Enter/Space handler, visible focus ring.
+
+**Prevention Rule:** Clickable non-button elements need role + tabIndex + keyboard handler (or use `<button>`/`<a>`).
+
+**Files Changed:** `src/components/features/homepage/PublicHomepage.tsx`
+
+## [2026-10-16] Russian homepage threw MISSING_MESSAGE errors
+
+**How found:** Browser console while verifying the redesign in `/ru`.
+
+**Problem:** 12 console errors on `/ru`; the WhatsApp row description fell back to the key name.
+
+**Root Cause:** `feedbackAndIdeas.whatsappDescription` existed in `he.json` but not `ru.json`.
+
+**Solution:** Added the Russian translation.
+
+**Prevention Rule:** Add every new key to both `he.json` and `ru.json` in the same change.
+
+**Files Changed:** `messages/ru.json`
+
 ## [2026-08-24] Share/close buttons overlapping modal title on mobile
 
 **Problem:** On mobile, the "Highlight details" modal (`HighlightsCarousel.tsx`) and the "Event details" modal (`PublicHomepage.tsx`) rendered the `ShareButton` inside the `DialogHeader` flex row next to `DialogTitle`. In RTL, that row places the second flex child (`ShareButton`) at the visual top-left — the exact same corner where `dialog.tsx`'s built-in `DialogPrimitive.Close` (`absolute left-4 top-4`) is rendered. The two controls stacked/overlapped each other and crowded a two-line wrapped title, and the close button's tap target (~16px icon, no padding) was well under the 44x44px minimum touch target.

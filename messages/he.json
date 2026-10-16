@@ -50,7 +50,9 @@
     "myLists": "הרשימות שלי",
     "schoolTools": "כלים לניהול בארי",
     "myEvents": "האירועים שלי",
-    "myGrocery": "הרשימות שלי"
+    "myGrocery": "הרשימות שלי",
+    "openMenu": "פתיחת תפריט",
+    "closeMenu": "סגירת תפריט"
   },
   "auth": {
     "login": "התחברות",
@@ -110,7 +112,12 @@
     "schoolYearTitle": "שנת הלימודים",
     "schoolYearDaysLeft": "{days, plural, one {עוד יום אחד לחופש הגדול ☀️} other {עוד # ימים לחופש הגדול ☀️}}",
     "summerBreak": "חופש גדול! נתראה בספטמבר ☀️",
-    "mascotAlt": "לוגו בית הספר"
+    "mascotAlt": "לוגו בית הספר",
+    "statusNow": "מתקיים כעת",
+    "statusToday": "היום!",
+    "statusTomorrow": "מחר",
+    "statusInDays": "{days, plural, =2 {בעוד יומיים} other {בעוד # ימים}}",
+    "statusEnded": "הסתיים"
   },
   "whatsapp": {
     "title": "קהילת WhatsApp",
@@ -350,10 +357,10 @@
     "shareButton": "שתפו אותנו",
     "modalTitle": "איך תרצו לשתף אותנו?",
     "modalSubtitle": "בחרו את הדרך המתאימה לכם",
-    "whatsappTitle": "💬 שלחו שאלה בWhatsApp",
+    "whatsappTitle": "שאלה לוועד בוואטסאפ",
     "whatsappDescription": "יש לכם שאלה? שלחו לנו הודעה בWhatsApp ונחזור אליכם בהקדם האפשרי.",
-    "feedbackTitle": "שלחו משוב",
-    "feedbackDescription": "שתפו אותנו בדעתכם על האירועים והשירותים שקיבלתם. המשוב שלכם עוזר לנו לשפר!",
+    "feedbackTitle": "דיווח על בעיה",
+    "feedbackDescription": "נתקלתם בתקלה או בבעיה? ספרו לנו ונטפל בה בהקדם.",
     "ideaTitle": "שלחו רעיון",
     "ideaDescription": "יש לכם רעיון לשיפור או תכונה חדשה? שתפו אותנו והרעיונות שלכם יישקלו ויבדקו!"
   },
@@ -469,7 +476,9 @@
     "creatorPhoneSuccess": "מעולה! תוכל למצוא את האירוע בעמוד \"האירועים שלי\"",
     "creatorPhoneInvalid": "מספר טלפון לא תקין (פורמט: 05X-XXX-XXXX)",
     "creatorContactTitle": "פרטי יוצר האירוע",
-    "creatorContactDescription": "לניהול קל יותר של האירועים שיצרת"
+    "creatorContactDescription": "לניהול קל יותר של האירועים שיצרת",
+    "emptyPhotos": "אין עדיין תמונות מאירועים",
+    "emptyEvents": "לא נמצאו אירועים"
   },
   "groups": {
     "title": "קבוצות WhatsApp לפי שכבות",
@@ -868,5 +877,18 @@
     },
     "proposalBadge": "הצעה — טרם אושרה",
     "backToCorner": "חזרה לפינת הוועד"
+  },
+  "tickets": {
+    "title": "כרטיסים זמינים",
+    "subtitle": "כרטיסים למשחקי ספורט והצגות במחירים מיוחדים",
+    "emptyTitle": "כרטיסים לאירועים",
+    "emptySubtitle": "ועד ההורים מספק כרטיסים למשחקי ספורט, הצגות וקונצרטים",
+    "emptyHint": "הכרטיסים הבאים יופיעו כאן ✨",
+    "viewAll": "כל הכרטיסים",
+    "viewAllCount": "צפה בכל הכרטיסים ({count})",
+    "free": "חינם",
+    "soldOut": "אזל מהמלאי",
+    "order": "הזמן כרטיס",
+    "placeholder": "כרטיס"
   }
 }

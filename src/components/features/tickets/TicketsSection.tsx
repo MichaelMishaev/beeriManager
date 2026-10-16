@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { TicketPlaceholderImage } from './TicketPlaceholderImage'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import type { Ticket } from '@/types'
 import { duoCard, DuoButton, DuoIconTile, DuoTag } from '@/components/ui/duo'
 
@@ -13,6 +14,7 @@ interface TicketsSectionProps {
 }
 
 export function TicketsSection({ tickets }: TicketsSectionProps) {
+  const t = useTranslations('tickets')
   // Empty state - show beautiful message
   if (tickets.length === 0) {
     return (
@@ -21,16 +23,16 @@ export function TicketsSection({ tickets }: TicketsSectionProps) {
           <div className="flex items-center gap-3">
             <DuoIconTile icon={TicketIcon} tone="orange" />
             <CardTitle className="text-xl text-[#003153]">
-              כרטיסים לאירועים
+              {t('emptyTitle')}
             </CardTitle>
           </div>
           <CardDescription className="text-base mt-3">
-            ועד ההורים מספק כרטיסים למשחקי ספורט, הצגות וקונצרטים
+            {t('emptySubtitle')}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-gray-600 mb-4">
-            הכרטיסים הבאים יופיעו כאן ✨
+            {t('emptyHint')}
           </p>
         </CardContent>
       </Card>
@@ -44,17 +46,17 @@ export function TicketsSection({ tickets }: TicketsSectionProps) {
           <div className="flex items-center gap-3">
             <DuoIconTile icon={TicketIcon} tone="orange" />
             <CardTitle className="text-xl font-extrabold text-[#003153]">
-              כרטיסים זמינים
+              {t('title')}
             </CardTitle>
           </div>
           <CardDescription className="text-sm md:text-base font-medium mt-2">
-            כרטיסים למשחקי ספורט והצגות במחירים מיוחדים
+            {t('subtitle')}
           </CardDescription>
         </div>
         {tickets.length > 3 && (
           <Button variant="outline" asChild size="sm" className="min-h-[44px]">
             <Link href="/tickets">
-              כל הכרטיסים
+              {t('viewAll')}
             </Link>
           </Button>
         )}
@@ -89,11 +91,11 @@ export function TicketsSection({ tickets }: TicketsSectionProps) {
                     )}
                     <div className="flex items-center gap-2">
                       {isFree ? (
-                        <DuoTag tone="green">חינם</DuoTag>
+                        <DuoTag tone="green">{t('free')}</DuoTag>
                       ) : (
                         <DuoTag tone="yellow">₪{ticket.price_per_ticket}</DuoTag>
                       )}
-                      {isSoldOut && <DuoTag tone="red">אזל מהמלאי</DuoTag>}
+                      {isSoldOut && <DuoTag tone="red">{t('soldOut')}</DuoTag>}
                     </div>
                   </div>
                 </div>
@@ -101,13 +103,13 @@ export function TicketsSection({ tickets }: TicketsSectionProps) {
                 {isSoldOut ? (
                   <DuoButton variant="white" disabled className="w-full">
                     <TicketIcon className="h-5 w-5" />
-                    אזל מהמלאי
+                    {t('soldOut')}
                   </DuoButton>
                 ) : (
                   <DuoButton variant="teal" asChild className="w-full">
                     <a href={ticket.purchase_url} target="_blank" rel="noopener noreferrer">
                       <TicketIcon className="h-5 w-5" />
-                      הזמן כרטיס
+                      {t('order')}
                     </a>
                   </DuoButton>
                 )}
@@ -119,7 +121,7 @@ export function TicketsSection({ tickets }: TicketsSectionProps) {
           <div className="mt-4 text-center">
             <Button variant="ghost" size="sm" asChild className="min-h-[44px]">
               <Link href="/tickets" className="flex items-center gap-2">
-                צפה בכל הכרטיסים ({tickets.length})
+                {t('viewAllCount', { count: tickets.length })}
                 <ArrowLeft className="h-4 w-4" />
               </Link>
             </Button>

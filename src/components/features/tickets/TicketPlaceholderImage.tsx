@@ -1,4 +1,7 @@
+'use client'
+
 import { Ticket as TicketIcon } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 interface TicketPlaceholderImageProps {
   size?: 'sm' | 'md' | 'lg'
@@ -18,6 +21,8 @@ export function TicketPlaceholderImage({ size = 'md', className = '' }: TicketPl
     lg: 'h-24 w-24'
   }
 
+  const t = useTranslations('tickets')
+
   // Solid orange tile on a darker 3D edge (Duolingo icon style); navy icon keeps contrast
   return (
     <div
@@ -27,7 +32,7 @@ export function TicketPlaceholderImage({ size = 'md', className = '' }: TicketPl
         <TicketIcon className={`${iconSizes[size]} text-[#003153]`} strokeWidth={2.5} />
         {size !== 'sm' && (
           <div className="text-[#003153] text-sm font-extrabold mt-2">
-            כרטיס
+            {t('placeholder')}
           </div>
         )}
       </div>
