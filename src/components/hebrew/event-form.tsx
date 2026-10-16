@@ -480,7 +480,7 @@ export function EventForm({
               <div className="text-center py-8 text-muted-foreground">
                 <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
                 <p>אין תפקידי מתנדבים מוגדרים</p>
-                <p className="text-sm">לחץ על "הוסף תפקיד" להוספת תפקידים</p>
+                <p className="text-sm">לחץ על &quot;הוסף תפקיד&quot; להוספת תפקידים</p>
               </div>
             )}
           </CardContent>

@@ -97,7 +97,7 @@ export function EventFeedbackForm({ eventId, eventTitle }: EventFeedbackFormProp
           שליחת משוב על האירוע
         </CardTitle>
         <CardDescription>
-          המשוב שלכם חשוב לנו! שתפו אותנו בחוויה שלכם מהאירוע "{eventTitle}"
+          המשוב שלכם חשוב לנו! שתפו אותנו בחוויה שלכם מהאירוע &quot;{eventTitle}&quot;
         </CardDescription>
       </CardHeader>
       <CardContent>

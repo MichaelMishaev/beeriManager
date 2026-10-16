@@ -154,7 +154,7 @@ export default function IssueStatsPage() {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
               <BarChart3 className="h-4 w-4" />
-              סה"כ בעיות
+              סה&quot;כ בעיות
             </CardTitle>
           </CardHeader>
           <CardContent>

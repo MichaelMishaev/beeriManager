@@ -174,7 +174,7 @@ async function ProtocolStats() {
     <div className="grid gap-4 md:grid-cols-3 mb-6">
       <Card>
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground">סה"כ פרוטוקולים</CardTitle>
+          <CardTitle className="text-sm font-medium text-muted-foreground">סה&quot;כ פרוטוקולים</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{totalCount || 0}</div>
@@ -193,7 +193,7 @@ async function ProtocolStats() {
           <CardTitle className="text-sm font-medium text-muted-foreground">שנה אקדמית</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-lg font-bold">תשפ"ה</div>
+          <div className="text-lg font-bold">תשפ&quot;ה</div>
         </CardContent>
       </Card>
     </div>

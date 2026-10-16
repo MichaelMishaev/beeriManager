@@ -94,7 +94,7 @@ export default function AdminMeetingsPage() {
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">סה"כ פגישות</CardTitle>
+            <CardTitle className="text-sm font-medium">סה&quot;כ פגישות</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.total}</div>
@@ -118,7 +118,7 @@ export default function AdminMeetingsPage() {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">סה"כ רעיונות</CardTitle>
+            <CardTitle className="text-sm font-medium">סה&quot;כ רעיונות</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.totalIdeas}</div>

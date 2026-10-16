@@ -450,11 +450,11 @@ export default function BudgetTrackerPage() {
           <div className="mt-8 pt-6 border-t">
             <div className="grid grid-cols-3 gap-4 text-center">
               <div>
-                <p className="text-sm text-muted-foreground">סה"כ מוקצה</p>
+                <p className="text-sm text-muted-foreground">סה&quot;כ מוקצה</p>
                 <p className="text-xl font-bold">₪{calcAllocated.toLocaleString('he-IL')}</p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">סה"כ הוצאות</p>
+                <p className="text-sm text-muted-foreground">סה&quot;כ הוצאות</p>
                 <p className="text-xl font-bold text-orange-600">₪{calcSpent.toLocaleString('he-IL')}</p>
               </div>
               <div>

@@ -601,7 +601,7 @@ export default function PublicVotingPage() {
 
         {/* Footer */}
         <div className="text-center text-sm text-muted-foreground pt-4">
-          <p>מסיבת סיום כיתה ו' • ועד ההורים</p>
+          <p>מסיבת סיום כיתה ו&apos; • ועד ההורים</p>
         </div>
       </div>
     </div>

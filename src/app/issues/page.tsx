@@ -112,7 +112,7 @@ async function IssuesList() {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">סה"כ פעילות</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">סה&quot;כ פעילות</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-primary">{stats.total}</div>

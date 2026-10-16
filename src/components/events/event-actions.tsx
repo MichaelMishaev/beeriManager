@@ -93,7 +93,7 @@ export function EventActions({ eventId, eventTitle }: EventActionsProps) {
               <AlertDialogTitle>מחיקת אירוע</AlertDialogTitle>
             </div>
             <AlertDialogDescription>
-              האם אתה בטוח שברצונך למחוק את האירוע <strong>"{eventTitle}"</strong>?
+              האם אתה בטוח שברצונך למחוק את האירוע <strong>&quot;{eventTitle}&quot;</strong>?
               <br />
               <br />
               פעולה זו תסמן את האירוע כמבוטל ולא ניתן יהיה לשחזר אותו.

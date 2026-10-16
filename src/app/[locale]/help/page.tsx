@@ -56,7 +56,7 @@ export default function HelpPage() {
           </CardHeader>
           <CardContent>
             <p className="text-sm text-gray-600 mb-3">
-              כנסו לעמוד האירועים, בחרו אירוע ולחצו על "הרשמה לאירוע"
+              כנסו לעמוד האירועים, בחרו אירוע ולחצו על &quot;הרשמה לאירוע&quot;
             </p>
             <Link href="/events">
               <Button variant="link" size="sm" className="p-0 h-auto">
@@ -192,7 +192,7 @@ export default function HelpPage() {
             <ol className="list-decimal list-inside space-y-1 text-sm text-gray-600 mb-4">
               <li>עברו לעמוד הכניסה למנהלים</li>
               <li>הזינו את סיסמת המנהל שקיבלתם</li>
-              <li>לחצו על "כניסה למערכת"</li>
+              <li>לחצו על &quot;כניסה למערכת&quot;</li>
             </ol>
             <Link href="/login">
               <Button variant="outline" size="sm" className="w-full">

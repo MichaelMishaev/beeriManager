@@ -167,7 +167,7 @@ export function TaskActions({ taskId, taskTitle, isCompleted }: TaskActionsProps
               <AlertDialogTitle>מחיקת משימה</AlertDialogTitle>
             </div>
             <AlertDialogDescription>
-              האם אתה בטוח שברצונך למחוק את המשימה <strong>"{taskTitle}"</strong>?
+              האם אתה בטוח שברצונך למחוק את המשימה <strong>&quot;{taskTitle}&quot;</strong>?
               <br />
               <br />
               פעולה זו תסמן את המשימה כמבוטלת ולא ניתן יהיה לשחזר אותה.

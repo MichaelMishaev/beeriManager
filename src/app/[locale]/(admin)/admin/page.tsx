@@ -419,7 +419,7 @@ export default function AdminDashboard() {
                     <li>• <strong>צרו אירוע חדש</strong> - הוסיפו אירוע ללוח השנה (ישתלב אוטומטית עם Google Calendar)</li>
                     <li>• <strong>רשימת אירועים</strong> - ערכו או מחקו אירועים קיימים</li>
                     <li>• <strong>ניהול הרשמות</strong> - צפו במי נרשם לכל אירוע</li>
-                    <li className="text-muted-foreground mt-2">💡 טיפ: השתמשו בסטטוס "טיוטה" לאירועים שעדיין לא מוכנים לפרסום</li>
+                    <li className="text-muted-foreground mt-2">💡 טיפ: השתמשו בסטטוס &quot;טיוטה&quot; לאירועים שעדיין לא מוכנים לפרסום</li>
                   </ul>
                 </div>
 
@@ -448,7 +448,7 @@ export default function AdminDashboard() {
                     <h3 className="font-bold text-lg">וועדות 👥</h3>
                   </div>
                   <ul className="space-y-1 text-sm mr-9">
-                    <li>• <strong>וועדה חדשה</strong> - צרו וועדה תחומית (תרבות, ספורט, וכו')</li>
+                    <li>• <strong>וועדה חדשה</strong> - צרו וועדה תחומית (תרבות, ספורט, וכו&apos;)</li>
                     <li>• <strong>רשימת וועדות</strong> - נהלו חברים ותחומי אחריות</li>
                     <li className="text-muted-foreground mt-2">💡 טיפ: כל וועדה יכולה להיות בעלת תקציב משלה</li>
                   </ul>
@@ -533,8 +533,8 @@ export default function AdminDashboard() {
                     <li>• <strong>ניהול מלאי</strong> - עקבו אחרי כמות הכרטיסים הזמינים</li>
                     <li>• <strong>מחירים</strong> - הגדירו מחיר לכרטיס או השאירו בחינם</li>
                     <li>• <strong>סטטוסים</strong> - פעיל, אזל, פג תוקף, טיוטה או הסתיים</li>
-                    <li>• <strong>סיום אירוע</strong> - סמנו אירוע כ"הסתיים" כדי להסיר מהתצוגה הציבורית</li>
-                    <li className="text-muted-foreground mt-2">💡 טיפ: השתמשו ב"מומלץ" כדי להציג כרטיסים חשובים בראש העמוד!</li>
+                    <li>• <strong>סיום אירוע</strong> - סמנו אירוע כ&quot;הסתיים&quot; כדי להסיר מהתצוגה הציבורית</li>
+                    <li className="text-muted-foreground mt-2">💡 טיפ: השתמשו ב&quot;מומלץ&quot; כדי להציג כרטיסים חשובים בראש העמוד!</li>
                   </ul>
                 </div>
 
@@ -552,7 +552,7 @@ export default function AdminDashboard() {
                     <li>• <strong>קטגוריות</strong> - אחות, הנהלה, מורה, ועד, שירות</li>
                     <li>• <strong>מיון</strong> - שנו את הסדר בעזרת החצים למעלה/למטה</li>
                     <li>• <strong>פרטים</strong> - שם, תפקיד, טלפון ואימייל</li>
-                    <li className="text-muted-foreground mt-2">💡 טיפ: סמנו אנשי קשר כ"ציבורי" כדי שכולם יוכלו לראות אותם!</li>
+                    <li className="text-muted-foreground mt-2">💡 טיפ: סמנו אנשי קשר כ&quot;ציבורי&quot; כדי שכולם יוכלו לראות אותם!</li>
                   </ul>
                 </div>
 
@@ -566,7 +566,7 @@ export default function AdminDashboard() {
                   </div>
                   <ul className="space-y-1 text-sm mr-9">
                     <li>• <strong>ניהול הודעות</strong> - צרו הודעות דחופות שיופיעו בדף הבית</li>
-                    <li>• <strong>חולצה לבנה</strong> - כפתורים מהירים לתזכורת חולצה לבנה (1 יום, שבוע, חודש וכו')</li>
+                    <li>• <strong>חולצה לבנה</strong> - כפתורים מהירים לתזכורת חולצה לבנה (1 יום, שבוע, חודש וכו&apos;)</li>
                     <li>• <strong>סוגי הודעות</strong> - דחוף, מידע, אזהרה, חולצה לבנה</li>
                     <li>• <strong>טווח תאריכים</strong> - הגדירו מתי ההודעה תופיע (תאריך התחלה וסיום)</li>
                     <li>• <strong>דו-לשוני</strong> - כותרת ותיאור בעברית ורוסית</li>
@@ -601,8 +601,8 @@ export default function AdminDashboard() {
                     <h3 className="font-bold text-lg">הגדרות ⚙️</h3>
                   </div>
                   <ul className="space-y-1 text-sm mr-9">
-                    <li>• <strong>ניהול תגיות</strong> - צרו תגיות לקטגוריזציה של משימות (תחזוקה, אירועים, תקציב וכו')</li>
-                    <li>• <strong>התאמה אישית</strong> - שנו צבעים ואימוג'י לכל תגית</li>
+                    <li>• <strong>ניהול תגיות</strong> - צרו תגיות לקטגוריזציה של משימות (תחזוקה, אירועים, תקציב וכו&apos;)</li>
+                    <li>• <strong>התאמה אישית</strong> - שנו צבעים ואימוג&apos;י לכל תגית</li>
                     <li>• <strong>סינון חכם</strong> - השתמשו בתגיות כדי למצוא משימות במהירות</li>
                     <li>• <strong>הגדרות כלליות</strong> - נהלו הרשאות והגדרות מערכת</li>
                     <li className="text-muted-foreground mt-2">💡 טיפ: תגיות עוזרות לארגן ולמצוא משימות בקלות - השתמשו בהן!</li>

@@ -188,7 +188,7 @@ export function TagManager({ tags, onRefresh }: TagManagerProps) {
         <Card>
           <CardContent className="pt-6">
             <div className="text-2xl font-bold">{tags.length}</div>
-            <p className="text-xs text-muted-foreground">סה"כ תגיות</p>
+            <p className="text-xs text-muted-foreground">סה&quot;כ תגיות</p>
           </CardContent>
         </Card>
         <Card>
@@ -308,7 +308,7 @@ export function TagManager({ tags, onRefresh }: TagManagerProps) {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="emoji" className="text-right">
-                  אמוג'י (אופציונלי)
+                  אמוג&apos;י (אופציונלי)
                 </Label>
                 <Input
                   id="emoji"
@@ -426,7 +426,7 @@ export function TagManager({ tags, onRefresh }: TagManagerProps) {
                 </div>
               ) : (
                 <>
-                  האם אתה בטוח שברצונך למחוק את התגית "{deletingTag?.name_he}"?
+                  האם אתה בטוח שברצונך למחוק את התגית &quot;{deletingTag?.name_he}&quot;?
                   {deletingTag && deletingTag.task_count > 0 && (
                     <div className="mt-2 text-orange-600">
                       <AlertTriangle className="h-4 w-4 inline ml-1" />

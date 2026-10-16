@@ -423,7 +423,7 @@ export function MeetingAgendaForm({
               <div className="text-center py-8 text-muted-foreground">
                 <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
                 <p>אין נושאים בסדר היום</p>
-                <p className="text-sm">לחץ על "הוסף נושא" להתחלת בניית סדר היום</p>
+                <p className="text-sm">לחץ על &quot;הוסף נושא&quot; להתחלת בניית סדר היום</p>
               </div>
             )}
           </CardContent>
@@ -513,7 +513,7 @@ export function MeetingAgendaDisplay({
                 <div className="text-right text-sm text-muted-foreground min-w-[100px]">
                   {startTime} - {endTime}
                   <br />
-                  <span className="text-xs">({item.duration} דק')</span>
+                  <span className="text-xs">({item.duration} דק&apos;)</span>
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-2 justify-end">

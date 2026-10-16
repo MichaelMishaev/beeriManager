@@ -51,7 +51,6 @@ export async function performSearch(options: SearchOptions): Promise<SearchRespo
     : types
 
   // Build parallel queries
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const queries: PromiseLike<{ data: any[] | null }>[] = []
   const queryTypes: SearchType[] = []
 

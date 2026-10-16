@@ -138,7 +138,7 @@ export default function PromDashboardPage() {
               תכנון מסיבת סיום
             </h1>
             <p className="text-sm md:text-base text-muted-foreground hidden sm:block">
-              ניהול מסיבות סיום כיתה ו' - השוואת מחירים והצבעות
+              ניהול מסיבות סיום כיתה ו&apos; - השוואת מחירים והצבעות
             </p>
           </div>
         </div>
@@ -160,9 +160,9 @@ export default function PromDashboardPage() {
                 <section>
                   <h3 className="text-lg font-bold mb-3">🚀 איך מתחילים?</h3>
                   <ol className="list-decimal list-inside space-y-2 text-sm">
-                    <li>לחצו על <strong>"אירוע חדש"</strong> כדי ליצור מסיבת סיום</li>
+                    <li>לחצו על <strong>&quot;אירוע חדש&quot;</strong> כדי ליצור מסיבת סיום</li>
                     <li>מלאו פרטים: כותרת, תאריך, תקציב, מספר תלמידים</li>
-                    <li>לחצו על <strong>"השוואת הצעות"</strong> כדי להוסיף הצעות מחיר</li>
+                    <li>לחצו על <strong>&quot;השוואת הצעות&quot;</strong> כדי להוסיף הצעות מחיר</li>
                     <li>הוסיפו הצעות מכל הספקים</li>
                   </ol>
                 </section>
@@ -179,9 +179,9 @@ export default function PromDashboardPage() {
                 <section>
                   <h3 className="text-lg font-bold mb-3">💡 טיפים מהירים</h3>
                   <ul className="list-disc list-inside space-y-2 text-sm">
-                    <li>לחצו על <strong>"השוואת הצעות"</strong> כדי לראות את כל ההצעות ולהשוות</li>
-                    <li>לחצו על <strong>"תקציב"</strong> כדי לעקוב אחר ההוצאות</li>
-                    <li>השתמשו ב<strong>"בונה חבילה"</strong> כדי לבדוק עלות כוללת</li>
+                    <li>לחצו על <strong>&quot;השוואת הצעות&quot;</strong> כדי לראות את כל ההצעות ולהשוות</li>
+                    <li>לחצו על <strong>&quot;תקציב&quot;</strong> כדי לעקוב אחר ההוצאות</li>
+                    <li>השתמשו ב<strong>&quot;בונה חבילה&quot;</strong> כדי לבדוק עלות כוללת</li>
                     <li>פתחו <strong>הצבעה להורים</strong> כדי לאסוף משוב</li>
                   </ul>
                 </section>
@@ -224,7 +224,7 @@ export default function PromDashboardPage() {
           </CardHeader>
           <CardContent className="pb-4">
             <div className="text-3xl md:text-3xl font-bold text-blue-900">{activeEvents}</div>
-            <p className="text-sm md:text-xs text-blue-700">מתוך {promEvents.length} סה"כ</p>
+            <p className="text-sm md:text-xs text-blue-700">מתוך {promEvents.length} סה&quot;כ</p>
           </CardContent>
         </Card>
 

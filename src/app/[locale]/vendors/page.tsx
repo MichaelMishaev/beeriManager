@@ -259,7 +259,7 @@ async function VendorStats() {
     <div className="grid gap-4 md:grid-cols-3 mb-8">
       <Card className="border-2 bg-gradient-to-br from-blue-50 to-blue-100/50">
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium text-blue-900">סה"כ ספקים</CardTitle>
+          <CardTitle className="text-sm font-medium text-blue-900">סה&quot;כ ספקים</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-3xl font-bold text-blue-700">{stats.total}</div>

@@ -38,7 +38,7 @@ function TaskStatsCards({ stats }: { stats: TaskStats }) {
         <CardHeader className="pb-3">
           <CardDescription className="flex items-center gap-2">
             <CheckSquare className="h-4 w-4" />
-            סה"כ משימות
+            סה&quot;כ משימות
           </CardDescription>
         </CardHeader>
         <CardContent>

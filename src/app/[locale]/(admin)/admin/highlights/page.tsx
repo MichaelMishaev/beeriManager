@@ -898,7 +898,7 @@ export default function AdminHighlightsPage() {
         <Card>
           <CardContent className="text-center py-12">
             <Sparkles className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-            <p className="text-muted-foreground">אין הדגשות. לחץ על "הוסף הדגשה חדשה" להתחיל.</p>
+            <p className="text-muted-foreground">אין הדגשות. לחץ על &quot;הוסף הדגשה חדשה&quot; להתחיל.</p>
           </CardContent>
         </Card>
       )}

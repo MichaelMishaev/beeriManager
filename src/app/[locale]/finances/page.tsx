@@ -171,7 +171,7 @@ export default async function FinancesPage() {
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">סה"כ הכנסות</CardTitle>
+            <CardTitle className="text-sm font-medium">סה&quot;כ הכנסות</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">

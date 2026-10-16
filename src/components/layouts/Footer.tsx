@@ -106,7 +106,7 @@ export function Footer({ className }: FooterProps) {
                 </div>
               )}
               <div className="flex items-center gap-2 text-sm text-gray-600">
-                <span>שעות פעילות: א'-ה', 8:00-16:00</span>
+                <span>שעות פעילות: א&apos;-ה&apos;, 8:00-16:00</span>
               </div>
             </div>
 

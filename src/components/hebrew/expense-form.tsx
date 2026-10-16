@@ -437,7 +437,7 @@ export function ExpenseForm({
               <div className="text-center py-8 text-muted-foreground">
                 <Receipt className="h-12 w-12 mx-auto mb-4 opacity-50" />
                 <p>אין קבלות מצורפות</p>
-                <p className="text-sm">לחץ על "הוסף קבלה" להוספת קבלות</p>
+                <p className="text-sm">לחץ על &quot;הוסף קבלה&quot; להוספת קבלות</p>
               </div>
             )}
 

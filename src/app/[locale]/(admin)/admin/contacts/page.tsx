@@ -331,7 +331,7 @@ export default function AdminContactsPage() {
         <Card>
           <CardContent className="text-center py-12">
             <Phone className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-            <p className="text-muted-foreground">אין אנשי קשר. לחץ על "הוסף איש קשר" להתחיל.</p>
+            <p className="text-muted-foreground">אין אנשי קשר. לחץ על &quot;הוסף איש קשר&quot; להתחיל.</p>
           </CardContent>
         </Card>
       )}

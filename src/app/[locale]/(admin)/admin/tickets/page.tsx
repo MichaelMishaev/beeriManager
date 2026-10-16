@@ -297,7 +297,7 @@ export default function TicketsAdminPage() {
                   <div className="bg-purple-100/50 rounded-lg p-3 border border-purple-200">
                     <p className="text-sm text-purple-800">
                       ℹ️ האירוע יוסר מהתצוגה הציבורית ולא יוצג יותר למשתמשים רגילים.
-                      תוכל לראות אותו כאן בפאנל הניהול עם סטטוס "הסתיים".
+                      תוכל לראות אותו כאן בפאנל הניהול עם סטטוס &quot;הסתיים&quot;.
                     </p>
                   </div>
                 </div>

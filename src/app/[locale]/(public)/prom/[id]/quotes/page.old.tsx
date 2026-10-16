@@ -180,7 +180,7 @@ export default function PublicPromQuotesPage() {
               <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
                 <div className="flex items-center gap-2 text-blue-800 text-sm font-medium mb-1">
                   <FileSpreadsheet className="h-4 w-4" />
-                  סה"כ הצעות
+                  סה&quot;כ הצעות
                 </div>
                 <div className="text-3xl font-bold text-blue-900">{totalQuotes}</div>
               </div>

@@ -159,7 +159,7 @@ export default function HomePage() {
               <div className="flex-1">
                 <p className="text-sm font-medium">אירוע חדש נוסף</p>
                 <p className="text-xs text-muted-foreground">
-                  "ישיבת ועד חודשית" - 15/10/2024
+                  &quot;ישיבת ועד חודשית&quot; - 15/10/2024
                 </p>
               </div>
             </div>
@@ -168,7 +168,7 @@ export default function HomePage() {
               <div className="flex-1">
                 <p className="text-sm font-medium">משימה הושלמה</p>
                 <p className="text-xs text-muted-foreground">
-                  "הזמנת כיבוד לאירוע הפתיחה" - על ידי שרה כהן
+                  &quot;הזמנת כיבוד לאירוע הפתיחה&quot; - על ידי שרה כהן
                 </p>
               </div>
             </div>

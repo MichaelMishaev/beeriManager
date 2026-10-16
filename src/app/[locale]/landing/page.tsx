@@ -443,7 +443,7 @@ export default function LandingPage() {
 
                   {/* Quote */}
                   <p className="text-white text-2xl sm:text-3xl mb-8 leading-relaxed text-center font-medium italic">
-                    "{testimonial.quote}"
+                    &quot;{testimonial.quote}&quot;
                   </p>
 
                   {/* Author */}
@@ -750,7 +750,7 @@ export default function LandingPage() {
 
           <div className="bg-gradient-to-br from-[#FFD659]/10 to-[#FFB020]/5 backdrop-blur-xl rounded-3xl p-10 text-center border border-[#FFD659]/20">
             <blockquote className="text-2xl sm:text-3xl text-white font-semibold italic mb-4">
-              "חינוך שמשלב מסורת עשירה עם חדשנות מודרנית"
+              &quot;חינוך שמשלב מסורת עשירה עם חדשנות מודרנית&quot;
             </blockquote>
             <p className="text-white/60">
               מבית ספר קטן של ילדי עובדים ב-1938, לבית ספר מוביל עם 562 תלמידים ב-22 כיתות ב-2025

@@ -479,7 +479,7 @@ export default function AdminUrgentMessagesPage() {
         <Card>
           <CardContent className="text-center py-12">
             <Bell className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-            <p className="text-muted-foreground">אין הודעות דחופות. לחץ על "הוסף הודעה" להתחיל.</p>
+            <p className="text-muted-foreground">אין הודעות דחופות. לחץ על &quot;הוסף הודעה&quot; להתחיל.</p>
           </CardContent>
         </Card>
       )}

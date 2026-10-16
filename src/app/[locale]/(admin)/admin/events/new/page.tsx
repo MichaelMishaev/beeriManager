@@ -225,7 +225,7 @@ export default function NewEventPage() {
                   <SelectItem value="cancelled">בוטל</SelectItem>
                 </SelectContent>
               </Select>
-              <p className="text-xs text-muted-foreground mt-1">רק אירועים "פורסם" גלויים למשתמשים רגילים</p>
+              <p className="text-xs text-muted-foreground mt-1">רק אירועים &quot;פורסם&quot; גלויים למשתמשים רגילים</p>
             </div>
           </CardContent>
         </Card>

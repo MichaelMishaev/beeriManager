@@ -486,7 +486,7 @@ export function TasksPageClient({ initialTasks, initialStats, availableTags }: T
           )}
           {searchQuery && (
             <Badge variant="secondary" className="text-base py-2 px-4">
-              חיפוש: "{searchQuery}"
+              חיפוש: &quot;{searchQuery}&quot;
             </Badge>
           )}
           <Button
