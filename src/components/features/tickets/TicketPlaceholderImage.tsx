@@ -7,32 +7,26 @@ interface TicketPlaceholderImageProps {
 
 export function TicketPlaceholderImage({ size = 'md', className = '' }: TicketPlaceholderImageProps) {
   const sizeClasses = {
-    sm: 'w-16 h-16',
+    sm: 'w-14 h-14',
     md: 'w-48 h-48',
     lg: 'w-full h-64'
   }
 
   const iconSizes = {
-    sm: 'h-8 w-8',
+    sm: 'h-7 w-7',
     md: 'h-16 w-16',
     lg: 'h-24 w-24'
   }
 
+  // Solid orange tile on a darker 3D edge (Duolingo icon style); navy icon keeps contrast
   return (
-    <div className={`${sizeClasses[size]} ${className} rounded-lg bg-gradient-to-br from-[#FF8200]/10 to-[#FFBA00]/10 flex items-center justify-center relative overflow-hidden`}>
-      {/* Subtle background circles */}
-      <div className="absolute inset-0 opacity-[0.03]">
-        <svg viewBox="0 0 200 200" className="w-full h-full">
-          <circle cx="100" cy="50" r="60" fill="currentColor" className="text-[#FF8200]" />
-          <circle cx="100" cy="150" r="60" fill="currentColor" className="text-[#FFBA00]" />
-        </svg>
-      </div>
-
-      {/* Main ticket icon */}
-      <div className="relative z-10 flex flex-col items-center">
-        <TicketIcon className={`${iconSizes[size]} text-[#FF8200]/30`} />
+    <div
+      className={`${sizeClasses[size]} ${className} rounded-2xl bg-[#FF8200] shadow-[0_4px_0_#c25e00] flex items-center justify-center`}
+    >
+      <div className="flex flex-col items-center">
+        <TicketIcon className={`${iconSizes[size]} text-[#003153]`} strokeWidth={2.5} />
         {size !== 'sm' && (
-          <div className="text-[#FF8200]/40 text-sm font-semibold mt-2">
+          <div className="text-[#003153] text-sm font-extrabold mt-2">
             כרטיס
           </div>
         )}

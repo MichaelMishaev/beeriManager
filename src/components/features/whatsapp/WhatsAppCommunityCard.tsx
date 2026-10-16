@@ -10,6 +10,8 @@ import { useTranslations } from 'next-intl'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import type { Locale } from '@/i18n/config'
+import { duoCard, DuoIconTile } from '@/components/ui/duo'
+import { cn } from '@/lib/utils'
 
 export function WhatsAppCommunityCard() {
   const [showGrades, setShowGrades] = useState(false)
@@ -18,14 +20,12 @@ export function WhatsAppCommunityCard() {
   const locale = (params.locale || 'he') as Locale
 
   return (
-    <Card className="group shadow-md shadow-green-100/40 hover:shadow-xl hover:shadow-green-200/40 hover:-translate-y-1 transition-all duration-300 border border-green-200 hover:border-green-400 bg-gradient-to-br from-white via-white to-green-50/40">
+    <Card className={cn(duoCard, 'group')}>
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between gap-3 mb-2">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-full bg-gray-50 group-hover:bg-gray-100 flex items-center justify-center flex-shrink-0 transition-colors duration-300">
-              <MessageCircle className="h-7 w-7 text-green-600 group-hover:scale-110 transition-transform duration-300" />
-            </div>
-            <CardTitle className="text-3xl text-[#003153] group-hover:text-[#0D98BA] transition-colors duration-300">
+            <DuoIconTile icon={MessageCircle} tone="green" size="lg" />
+            <CardTitle className="text-2xl md:text-3xl font-extrabold text-[#003153]">
               {t('title')}
             </CardTitle>
           </div>
@@ -34,7 +34,7 @@ export function WhatsAppCommunityCard() {
             variant="ghost"
             size="icon"
             locale={locale}
-            className="p-2 rounded-full bg-gray-50 hover:bg-gray-100 text-gray-700"
+            className="p-2 rounded-xl border-2 border-[#e5e5e5] shadow-[0_3px_0_#e5e5e5] bg-white text-gray-700 active:translate-y-[3px] active:shadow-none"
           />
         </div>
         <CardDescription className="text-sm text-gray-600">

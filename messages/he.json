@@ -102,7 +102,15 @@
     "showAll": "הצג את כל",
     "showLess": "הצג פחות",
     "representatives": "הנציגים",
-    "copiedToClipboard": "הועתק ללוח!"
+    "copiedToClipboard": "הועתק ללוח!",
+    "greetingMorning": "בוקר טוב!",
+    "greetingAfternoon": "צהריים טובים!",
+    "greetingEvening": "ערב טוב!",
+    "eventsThisWeek": "{count, plural, =0 {בשבוע הקרוב אין אירועים – שבוע רגוע 😌} one {יש אירוע אחד בשבוע הקרוב 🎉} other {יש # אירועים בשבוע הקרוב 🎉}}",
+    "schoolYearTitle": "שנת הלימודים",
+    "schoolYearDaysLeft": "{days, plural, one {עוד יום אחד לחופש הגדול ☀️} other {עוד # ימים לחופש הגדול ☀️}}",
+    "summerBreak": "חופש גדול! נתראה בספטמבר ☀️",
+    "mascotAlt": "לוגו בית הספר"
   },
   "whatsapp": {
     "title": "קהילת WhatsApp",
@@ -336,7 +344,7 @@
     "survey": "הורה מתנדב"
   },
   "feedbackAndIdeas": {
-    "title": "💬💡 יש לכם משוב או רעיון?",
+    "title": "יש לכם משוב או רעיון?",
     "subtitle": "שתפו אותנו - בחרו איך!",
     "description": "המשוב שלכם עוזר לנו לשפר ולארגן אירועים טובים יותר עבור כולם. תוכלו לשלוח פניה או משוב אנונימי על כל נושא.",
     "shareButton": "שתפו אותנו",
@@ -344,9 +352,9 @@
     "modalSubtitle": "בחרו את הדרך המתאימה לכם",
     "whatsappTitle": "💬 שלחו שאלה בWhatsApp",
     "whatsappDescription": "יש לכם שאלה? שלחו לנו הודעה בWhatsApp ונחזור אליכם בהקדם האפשרי.",
-    "feedbackTitle": "💬 שלחו משוב",
+    "feedbackTitle": "שלחו משוב",
     "feedbackDescription": "שתפו אותנו בדעתכם על האירועים והשירותים שקיבלתם. המשוב שלכם עוזר לנו לשפר!",
-    "ideaTitle": "💡 שלחו רעיון",
+    "ideaTitle": "שלחו רעיון",
     "ideaDescription": "יש לכם רעיון לשיפור או תכונה חדשה? שתפו אותנו והרעיונות שלכם יישקלו ויבדקו!"
   },
   "contacts": {

@@ -17,12 +17,8 @@ export function CommitteeCornerCard() {
       <Card
         className="group relative overflow-hidden
                    animate-float-soft hover:[animation-play-state:paused]
-                   shadow-md shadow-blue-100/30 hover:shadow-xl hover:shadow-blue-200/40
-                   hover:-translate-y-1
-                   transition-all duration-300 ease-out
-                   border border-[#0D98BA]/20
-                   hover:border-[#0D98BA]/60
-                   bg-gradient-to-br from-white via-white to-[#87CEEB]/10"
+                   bg-white border-2 border-[#e5e5e5] rounded-2xl shadow-[0_4px_0_#e5e5e5]
+                   transition-colors duration-200 hover:border-[#0D98BA]/60"
       >
         {/* Animated shine sweep — a skewed, brand-tinted light bar looping across the card */}
         <div

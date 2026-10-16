@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
-import { Heebo } from 'next/font/google'
-import { Roboto } from 'next/font/google'
+// Rubik: rounded, friendly (Duolingo-like) and covers Hebrew + Cyrillic
+import { Rubik } from 'next/font/google'
 import { Frank_Ruhl_Libre } from 'next/font/google'
 import { Plus_Jakarta_Sans } from 'next/font/google'
 import { NextIntlClientProvider } from 'next-intl'
@@ -17,18 +17,18 @@ import { ServiceWorkerUpdater } from '@/components/pwa/ServiceWorkerUpdater'
 import { locales, localeDirections, type Locale } from '@/i18n/config'
 import { logger } from '@/lib/logger'
 
-const heebo = Heebo({
+const rubikHebrew = Rubik({
   subsets: ['hebrew', 'latin'],
   variable: '--font-hebrew',
   display: 'swap',
   weight: ['300', '400', '500', '600', '700', '800'],
 })
 
-const roboto = Roboto({
+const rubikCyrillic = Rubik({
   subsets: ['latin', 'cyrillic'],
   variable: '--font-russian',
   display: 'swap',
-  weight: ['300', '400', '500', '700', '900'],
+  weight: ['300', '400', '500', '600', '700', '800'],
   // Only rendered on ru locale — don't block every he-locale page load with this preload
   preload: false,
 })
@@ -178,7 +178,7 @@ export default async function LocaleLayout({
 
   const messages = await getMessages()
   const direction = localeDirections[locale as Locale]
-  const fontClass = `${locale === 'he' ? heebo.variable : roboto.variable} ${frankRuhl.variable} ${plusJakarta.variable}`
+  const fontClass = `${locale === 'he' ? rubikHebrew.variable : rubikCyrillic.variable} ${frankRuhl.variable} ${plusJakarta.variable}`
   const fontFamily = locale === 'he'
     ? 'var(--font-hebrew), system-ui, sans-serif'
     : 'var(--font-russian), system-ui, sans-serif'

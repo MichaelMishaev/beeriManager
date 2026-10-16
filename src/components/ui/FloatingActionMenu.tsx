@@ -48,11 +48,11 @@ export function FloatingActionMenu() {
         isVisible ? "translate-y-0 opacity-100" : "translate-y-20 opacity-0 pointer-events-none"
       )}
     >
-      <div className="flex gap-1.5 bg-white rounded-full shadow-2xl p-1.5 border-2 border-gray-200">
+      <div className="flex gap-1.5 bg-white rounded-3xl p-1.5 pb-2 border-2 border-[#e5e5e5] shadow-[0_4px_0_#e5e5e5,0_12px_32px_rgba(0,49,83,0.18)]">
         <Button
           size="sm"
           onClick={() => scrollToSection('events-section')}
-          className="rounded-full gap-1 bg-blue-600 hover:bg-blue-700 text-white px-2.5 py-2 h-auto text-xs whitespace-nowrap"
+          className="rounded-2xl gap-1 bg-blue-600 hover:bg-blue-700 text-white px-2.5 py-2 h-auto text-xs whitespace-nowrap font-extrabold shadow-[0_3px_0_#1e3a8a] active:translate-y-[3px] active:shadow-none transition-[transform,box-shadow] duration-75"
         >
           <Calendar className="h-4 w-4 flex-shrink-0" />
           <span className="font-medium">{t('events')}</span>
@@ -61,7 +61,7 @@ export function FloatingActionMenu() {
         <Button
           size="sm"
           onClick={() => scrollToSection('whatsapp-section')}
-          className="rounded-full gap-1 bg-green-600 hover:bg-green-700 text-white px-2.5 py-2 h-auto text-xs whitespace-nowrap"
+          className="rounded-2xl gap-1 bg-green-600 hover:bg-green-700 text-white px-2.5 py-2 h-auto text-xs whitespace-nowrap font-extrabold shadow-[0_3px_0_#14532d] active:translate-y-[3px] active:shadow-none transition-[transform,box-shadow] duration-75"
         >
           <MessageCircle className="h-4 w-4 flex-shrink-0" />
           <span className="font-medium">{t('whatsapp')}</span>
@@ -70,7 +70,7 @@ export function FloatingActionMenu() {
         <Button
           size="sm"
           onClick={() => scrollToSection('survey-section')}
-          className="rounded-full gap-1 bg-purple-600 hover:bg-purple-700 text-white px-2.5 py-2 h-auto text-xs whitespace-nowrap"
+          className="rounded-2xl gap-1 bg-purple-600 hover:bg-purple-700 text-white px-2.5 py-2 h-auto text-xs whitespace-nowrap font-extrabold shadow-[0_3px_0_#581c87] active:translate-y-[3px] active:shadow-none transition-[transform,box-shadow] duration-75"
         >
           <GraduationCap className="h-4 w-4 flex-shrink-0" />
           <span className="font-medium">{t('survey')}</span>

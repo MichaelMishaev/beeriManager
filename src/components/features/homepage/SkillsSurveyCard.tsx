@@ -3,12 +3,13 @@
 import { GraduationCap } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { ShareButton } from '@/components/ui/share-button'
-import { Button } from '@/components/ui/button'
 import { formatSkillsSurveyShareData } from '@/lib/utils/share-formatters'
 import { useTranslations } from 'next-intl'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import type { Locale } from '@/i18n/config'
+import { duoCard, DuoButton, DuoIconTile } from '@/components/ui/duo'
+import { cn } from '@/lib/utils'
 
 export function SkillsSurveyCard() {
   const t = useTranslations('skillsSurvey')
@@ -16,18 +17,12 @@ export function SkillsSurveyCard() {
   const locale = (params.locale || 'he') as Locale
 
   return (
-    <Card className="group shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-100 relative overflow-hidden">
-      {/* Decorative accent bar - using brand colors */}
-      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#0D98BA] via-[#00509d] to-[#003153]" />
-
+    <Card className={cn(duoCard, 'group relative overflow-hidden')}>
       <CardHeader className="pb-4 pt-6">
         <div className="flex items-center justify-between gap-3 mb-2">
           <div className="flex items-center gap-3">
-            {/* Icon with neutral background */}
-            <div className="w-12 h-12 rounded-full bg-gray-50 group-hover:bg-gray-100 flex items-center justify-center flex-shrink-0 shadow-sm transition-colors duration-300">
-              <GraduationCap className="h-6 w-6 text-[#0D98BA] group-hover:scale-110 transition-transform duration-300" />
-            </div>
-            <CardTitle className="text-xl md:text-2xl text-[#003153] group-hover:text-[#0D98BA] font-bold transition-colors duration-300">
+            <DuoIconTile icon={GraduationCap} tone="purple" size="lg" />
+            <CardTitle className="text-xl md:text-2xl text-[#003153] font-extrabold">
               {t('title')}
             </CardTitle>
           </div>
@@ -38,7 +33,7 @@ export function SkillsSurveyCard() {
             variant="ghost"
             size="icon"
             locale={locale}
-            className="p-2 rounded-full bg-gray-50 hover:bg-gray-100 text-gray-700"
+            className="p-2 rounded-xl border-2 border-[#e5e5e5] shadow-[0_3px_0_#e5e5e5] bg-white text-gray-700 active:translate-y-[3px] active:shadow-none"
           />
         </div>
 
@@ -54,7 +49,7 @@ export function SkillsSurveyCard() {
         </p>
 
         {/* Key benefits list with emojis */}
-        <div className="space-y-2 bg-gray-50 rounded-lg p-4 border border-gray-200">
+        <div className="space-y-2.5 rounded-2xl p-4 border-2 border-[#e5e5e5]">
           <div className="flex items-start gap-2 text-sm">
             <span className="text-lg flex-shrink-0">🌱</span>
             <span className="text-gray-700">{t('benefit1')}</span>
@@ -70,19 +65,16 @@ export function SkillsSurveyCard() {
         </div>
 
         {/* Primary CTA Button - brand gradient */}
-        <Link href={`/${locale}/surveys/skills`} className="block">
-          <Button
-            className="w-full bg-gradient-to-r from-[#0D98BA] to-[#00509d] hover:from-[#00509d] hover:to-[#003153] text-white shadow-md hover:shadow-lg transition-all duration-300 font-semibold text-sm md:text-base"
-            size="lg"
-          >
+        <DuoButton variant="navy" asChild className="w-full">
+          <Link href={`/${locale}/surveys/skills`}>
             {t('ctaButton')}
-            <GraduationCap className="h-5 w-5 mr-2" />
-          </Button>
-        </Link>
+            <GraduationCap className="h-5 w-5" />
+          </Link>
+        </DuoButton>
 
         {/* Time estimate badge */}
         <div className="text-center">
-          <span className="inline-flex items-center gap-1.5 text-xs text-gray-700 bg-gray-50 px-3 py-1.5 rounded-full border border-gray-200">
+          <span className="inline-flex items-center gap-1.5 text-xs font-bold text-gray-700 px-3 py-1.5 rounded-lg border-2 border-[#e5e5e5]">
             <span>⏱️</span>
             <span>{t('timeEstimate')}</span>
           </span>

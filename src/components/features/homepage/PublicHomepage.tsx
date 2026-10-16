@@ -2,8 +2,11 @@
 
 import { useState, useEffect, useRef } from 'react'
 import dynamic from 'next/dynamic'
-import { motion } from 'framer-motion'
-import { Calendar, ChevronLeft, Camera, ArrowLeft, ChevronDown, ChevronUp, Clock, MapPin } from 'lucide-react'
+import { AnimatePresence, motion, type Variants } from 'framer-motion'
+import { Calendar, ChevronLeft, Camera, ArrowLeft, ChevronDown, Clock, MapPin } from 'lucide-react'
+import { Reveal, EASE_OUT } from '@/components/ui/motion'
+import { DuoButton, duoCard, duoPress } from '@/components/ui/duo'
+import { cn } from '@/lib/utils'
 import { ShareButton } from '@/components/ui/share-button'
 import { formatEventShareData } from '@/lib/utils/share-formatters'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -12,6 +15,8 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { SkillsSurveyCard } from './SkillsSurveyCard'
 import { SchoolStats } from './SchoolStats'
+import { DuoGreeting } from './DuoGreeting'
+import { SchoolYearProgress } from './SchoolYearProgress'
 import { WhatsAppCommunityCard } from '@/components/features/whatsapp/WhatsAppCommunityCard'
 import { CommitteeCornerCard } from './CommitteeCornerCard'
 import { WhiteShirtBanner } from './WhiteShirtBanner'
@@ -51,6 +56,11 @@ const ConnectWithUsCard = dynamic(() => import('./ConnectWithUsCard').then(mod =
     </Card>
   )
 })
+
+const heroItem: Variants = {
+  hidden: { opacity: 0, y: 14 },
+  visible: { opacity: 1, y: 0 },
+}
 
 interface PublicHomepageProps {
   upcomingEvents: Event[]
@@ -105,26 +115,23 @@ function UpcomingEventsCard({
   }
 
   return (
-    <Card className="group relative overflow-hidden
-                   shadow-md shadow-blue-100/30 hover:shadow-xl hover:shadow-blue-200/40
-                   hover:-translate-y-1
-                   transition-all duration-300 ease-out
-                   border border-[#0D98BA]/20
-                   hover:border-[#0D98BA]/60
-                   bg-gradient-to-br from-white via-white to-[#87CEEB]/5">
-      <CardHeader className="pb-3">
-        <div className="flex items-center gap-2 mb-1">
-          <Calendar className="h-5 w-5 text-[#0D98BA] group-hover:scale-110 transition-transform duration-200" />
-          <CardTitle className="text-lg md:text-xl font-bold text-[#003153] group-hover:text-[#0D98BA] transition-colors duration-200">
+    <Card className={cn(duoCard, 'group relative overflow-hidden')}>
+      {/* Solid colored banner header — Duolingo "unit" header */}
+      <CardHeader className="m-2 mb-0 p-4 rounded-xl bg-[#087A96] shadow-[0_4px_0_#05586d] space-y-1">
+        <div className="flex items-center gap-2.5">
+          <span className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center">
+            <Calendar className="h-5 w-5 text-white" />
+          </span>
+          <CardTitle className="text-lg md:text-xl font-extrabold text-white">
             {t('upcomingEvents')}
           </CardTitle>
         </div>
-        <CardDescription className="text-xs md:text-sm text-gray-600">
+        <CardDescription className="text-xs md:text-sm font-medium text-white/90">
           {t('nextSchoolEvents')}
         </CardDescription>
       </CardHeader>
-      <CardContent className="p-3 md:p-4">
-        <div className="space-y-2">
+      <CardContent className="p-3 pt-4 md:p-4 md:pt-5">
+        <div className="space-y-3">
           {upcomingEvents.length > 0 ? (
             <>
               {displayedEvents.map((event, index) => (
@@ -143,20 +150,18 @@ function UpcomingEventsCard({
                 </motion.div>
               ))}
               {hasMore && (
-                <div className="text-center pt-3">
-                  <motion.div className="inline-block" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                    <Button
-                      size="sm"
-                      onClick={() => setShowAllEventsModal(true)}
-                      className="gap-2 rounded-full font-bold bg-[#FFBA00] text-[#003153] border-0 shadow-sm hover:bg-[#e6a800]"
-                    >
-                      {locale === 'ru'
-                        ? `Показать все (${upcomingEvents.length})`
-                        : `הצג הכל (${upcomingEvents.length})`
-                      }
-                      <ChevronLeft className="h-4 w-4" />
-                    </Button>
-                  </motion.div>
+                <div className="pt-3 pb-1">
+                  <DuoButton
+                    variant="yellow"
+                    onClick={() => setShowAllEventsModal(true)}
+                    className="w-full"
+                  >
+                    {locale === 'ru'
+                      ? `Показать все (${upcomingEvents.length})`
+                      : `הצג הכל (${upcomingEvents.length})`
+                    }
+                    <ChevronLeft className="h-4 w-4" />
+                  </DuoButton>
                 </div>
               )}
             </>
@@ -385,19 +390,15 @@ function EventItem({
       onClick={onClick}
       className="block group cursor-pointer"
     >
-      <div className="relative flex items-start gap-3 p-4 rounded-lg
-                    transition-all duration-200 ease-out
-                    bg-white border border-gray-200
-                    hover:bg-gradient-to-br hover:from-gray-50 hover:to-blue-50/30
-                    hover:border-[#0D98BA] hover:shadow-lg
-                    active:scale-[0.98] active:shadow-md
-                    focus-within:ring-4 focus-within:ring-[#0D98BA]/20
-                    min-h-[56px]">
-        {/* Date block - leading, colored by event type */}
+      <div className={cn(
+        duoCard, duoPress,
+        'relative flex items-start gap-3 p-4 focus-within:ring-4 focus-within:ring-[#0D98BA]/20 min-h-[56px]'
+      )}>
+        {/* Date block - leading, colored by event type, chunky 3D tile */}
         <div className="relative flex-shrink-0">
           <div
-            className="w-12 h-12 rounded-xl flex flex-col items-center justify-center leading-none shadow-sm"
-            style={{ backgroundColor: eventVisual.bg }}
+            className="w-12 h-12 rounded-xl flex flex-col items-center justify-center leading-none"
+            style={{ backgroundColor: eventVisual.bg, boxShadow: '0 3px 0 rgba(0,0,0,0.22)' }}
           >
             <span
               className="text-[9px] font-bold uppercase tracking-wide mb-0.5"
@@ -417,11 +418,11 @@ function EventItem({
         {/* Event Info - Primary focus */}
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2 mb-0.5">
-            <h3 className="text-base md:text-lg font-bold text-[#003153] group-hover:text-[#0D98BA] transition-colors leading-tight flex-1">
+            <h3 className="text-base md:text-lg font-extrabold text-[#003153] leading-tight flex-1">
               {title}
             </h3>
             {statusConfig && (
-              <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold ${statusConfig.bgColor} ${statusConfig.textColor} shadow-sm flex-shrink-0`}>
+              <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-extrabold tracking-wide ${statusConfig.bgColor} ${statusConfig.textColor} flex-shrink-0`}>
                 <span className={`w-1.5 h-1.5 rounded-full ${statusConfig.dotColor}`} />
                 {statusConfig.text}
               </span>
@@ -506,7 +507,7 @@ function AllEventsModal({
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-1 mt-4">
+        <div className="space-y-3 mt-4 pb-1">
           {events.map((event, index) => {
             const isFirstUpcoming = index === firstUpcomingIndex
 
@@ -540,8 +541,6 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
   const [settings, setSettings] = useState<{ committee_name?: string; school_name?: string } | null>(null)
   const [holidaysModalOpen, setHolidaysModalOpen] = useState(false)
   const [isCalendarExpanded, setIsCalendarExpanded] = useState(false)
-  const calendarContentRef = useRef<HTMLDivElement>(null)
-  const [calendarContentHeight, setCalendarContentHeight] = useState(0)
   const calendarT = useTranslations('calendar')
 
   useEffect(() => {
@@ -575,13 +574,6 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
     fetchSettings()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
-
-  // Update calendar content height when expanded or events change
-  useEffect(() => {
-    if (calendarContentRef.current) {
-      setCalendarContentHeight(calendarContentRef.current.scrollHeight)
-    }
-  }, [calendarEvents, isCalendarExpanded])
 
   const handleCalendarEventClick = async (event: CalendarEvent) => {
     // If it's a holiday with school closure, navigate to holidays modal
@@ -626,20 +618,35 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
       <div className="bg-gradient-to-br from-[#0D98BA]/5 via-white to-[#003153]/5 py-8 md:py-12">
         <motion.div
           className="container mx-auto px-4 text-center max-w-4xl"
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          initial="hidden"
+          animate="visible"
+          variants={{ visible: { transition: { staggerChildren: 0.1 } } }}
         >
           {/* Value Proposition - Clear & Outcome-Focused */}
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-[#003153] mb-3 leading-tight">
+          <motion.h1
+            variants={heroItem}
+            transition={{ duration: 0.6, ease: EASE_OUT }}
+            className="text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight text-[#003153] mb-3 leading-tight"
+          >
             {t('heroTitle')}
-          </h1>
+          </motion.h1>
 
           {/* Benefits - Scannable Bullet Format */}
-          <p className="text-base md:text-lg text-gray-700 mb-6 leading-relaxed">
+          <motion.p
+            variants={heroItem}
+            transition={{ duration: 0.6, ease: EASE_OUT }}
+            className="text-base md:text-lg text-gray-700 mb-6 leading-relaxed"
+          >
             {t('heroBenefits')}
-          </p>
+          </motion.p>
 
+          {/* Accent underline that draws in after the copy lands */}
+          <motion.div
+            aria-hidden
+            className="mx-auto h-1 w-16 rounded-full bg-gradient-to-l from-[#FFBA00] to-[#FF8200] origin-center"
+            variants={{ hidden: { scaleX: 0, opacity: 0 }, visible: { scaleX: 1, opacity: 1 } }}
+            transition={{ duration: 0.7, delay: 0.1, ease: EASE_OUT }}
+          />
         </motion.div>
       </div>
 
@@ -652,11 +659,19 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
           <UrgentMessagesBanner />
         </div>
 
+        {/* Duolingo-style mascot greeting */}
+        <DuoGreeting upcomingEvents={upcomingEvents} />
+
         {/* Welcome Back Banner - Temporary, visible until Sept 2 2026 */}
         <WelcomeBackBanner />
 
         {/* Highlights Carousel */}
         <HighlightsCarousel />
+
+        {/* School-year XP bar */}
+        <Reveal>
+          <SchoolYearProgress />
+        </Reveal>
 
         {/* Next Holiday Widget - Right after carousel */}
         <div className="mb-3">
@@ -666,44 +681,54 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
         {/* Calendar Toggle - Single Button (2025: Reduce Choices) */}
         <aside aria-label="לוח שנה וחגים" className="mb-3 relative">
           {/* Single Unified Button - Reduces Decision Fatigue */}
-          <motion.div className="relative z-10" whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-            <Button
-              size="default"
+          <div className="relative z-10">
+            <DuoButton
+              variant="navy"
               onClick={() => setIsCalendarExpanded(!isCalendarExpanded)}
-              className="w-full min-h-[44px] text-sm md:text-base rounded-full font-bold
-                       bg-[#003153] text-white border-0 shadow-sm
-                       transition-all duration-200
-                       hover:bg-[#00243e] hover:shadow-md
-                       focus:outline-none focus:ring-4 focus:ring-[#0D98BA]/30"
+              className="w-full"
+              aria-expanded={isCalendarExpanded}
               title={isCalendarExpanded ? calendarT('hideCalendar') : calendarT('showCalendar')}
             >
               <Calendar className="h-5 w-5 ml-2" />
               <span className="font-medium">📅 {calendarT('calendarAndHolidays')}</span>
-              {isCalendarExpanded ? (
-                <ChevronUp className="h-5 w-5 mr-2 transition-transform duration-300" />
-              ) : (
-                <ChevronDown className="h-5 w-5 mr-2 transition-transform duration-300" />
-              )}
-            </Button>
-          </motion.div>
-
-          {/* Collapsible Calendar - Under the buttons with proper z-index */}
-          <div
-            className="overflow-hidden transition-all duration-500 ease-in-out mt-3 relative z-0"
-            style={{
-              maxHeight: isCalendarExpanded ? `${calendarContentHeight}px` : '0px',
-              opacity: isCalendarExpanded ? 1 : 0
-            }}
-          >
-            <div ref={calendarContentRef} className={isCalendarExpanded ? 'animate-in fade-in-50 slide-in-from-top-2 duration-500' : ''}>
-              <MobileCalendar
-                events={calendarEvents}
-                onEventClick={handleCalendarEventClick}
-                showLegend={false}
-                showWeeklySummary={true}
-              />
-            </div>
+              <motion.span
+                className="mr-2 inline-flex"
+                animate={{ rotate: isCalendarExpanded ? 180 : 0 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 22 }}
+              >
+                <ChevronDown className="h-5 w-5" />
+              </motion.span>
+            </DuoButton>
           </div>
+
+          {/* Collapsible Calendar - framer animates to the real "auto" height (no measuring) */}
+          <AnimatePresence initial={false}>
+            {isCalendarExpanded && (
+              <motion.div
+                key="calendar"
+                className="overflow-hidden relative z-0"
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ height: { duration: 0.4, ease: EASE_OUT }, opacity: { duration: 0.25 } }}
+              >
+                <motion.div
+                  className="pt-3"
+                  initial={{ y: -8 }}
+                  animate={{ y: 0 }}
+                  exit={{ y: -8 }}
+                  transition={{ duration: 0.4, ease: EASE_OUT }}
+                >
+                  <MobileCalendar
+                    events={calendarEvents}
+                    onEventClick={handleCalendarEventClick}
+                    showLegend={false}
+                    showWeeklySummary={true}
+                  />
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </aside>
 
         <div className="space-y-3">
@@ -721,27 +746,14 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
         </div>
 
         {/* PROMOTED: WhatsApp Community Card - High Priority */}
-        <motion.div
-          id="whatsapp-section"
-          className="mb-4 scroll-mt-20"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-50px' }}
-          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-        >
+        <Reveal id="whatsapp-section" className="mb-4 scroll-mt-20">
           <WhatsAppCommunityCard />
-        </motion.div>
+        </Reveal>
 
         {/* Committee Corner - hub for regulations, protocols, members & contact */}
-        <motion.div
-          className="mb-4"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-50px' }}
-          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-        >
+        <Reveal className="mb-4">
           <CommitteeCornerCard />
-        </motion.div>
+        </Reveal>
 
       {/* Photos Gallery Section */}
       {eventsWithPhotos.length > 0 && (
@@ -762,16 +774,16 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
           {/* Horizontal Scroll Container */}
           <div className="relative">
             <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-              {eventsWithPhotos.map((event) => {
+              {eventsWithPhotos.map((event, index) => {
                 const eventDate = new Date(event.start_datetime)
                 // Get localized content - fallback to Hebrew if Russian not available
                 const title = (currentLocale === 'ru' && event.title_ru) ? event.title_ru : event.title
                 const location = (currentLocale === 'ru' && event.location_ru) ? event.location_ru : event.location
 
                 return (
+                  <Reveal key={event.id} className="flex-shrink-0 snap-start" delay={index * 0.07} y={12}>
                   <Card
-                    key={event.id}
-                    className="flex-shrink-0 w-[280px] snap-start hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer border border-gray-100"
+                    className={cn(duoCard, duoPress, 'w-[280px] h-full cursor-pointer')}
                   >
                     <a href={event.photos_url} target="_blank" rel="noopener noreferrer">
                       <CardHeader className="pb-3">
@@ -791,13 +803,15 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
                             📍 {location}
                           </p>
                         )}
-                        <Button size="sm" variant="outline" className="w-full gap-2">
+                        {/* Span, not button: it already sits inside the card's <a> */}
+                        <span className="flex w-full items-center justify-center gap-2 min-h-[40px] rounded-xl border-2 border-[#e5e5e5] text-sm font-extrabold text-[#087A96]">
                           <Camera className="h-4 w-4" />
                           {t('viewPhotos')}
-                        </Button>
+                        </span>
                       </CardContent>
                     </a>
                   </Card>
+                  </Reveal>
                 )
               })}
             </div>
@@ -811,31 +825,22 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
         <div className="space-y-4">
           {/* Tickets Section - Only show if there are active tickets */}
           {tickets.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.2 }}
-            >
+            <Reveal>
               <TicketsSection tickets={tickets} />
-            </motion.div>
+            </Reveal>
           )}
         </div>
       </div>
 
       {/* 2025: Contact & Feedback - Consolidated Bento Box (WhatsApp + Feedback + Ideas) */}
-      <motion.div
-        className="mt-6"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.2 }}
-      >
+      <Reveal className="mt-6">
         <ConnectWithUsCard />
-      </motion.div>
+      </Reveal>
 
       {/* 2025: Skills Survey - Moved to Bottom 30% (Progressive Disclosure) */}
-      <div id="survey-section" className="mt-6 scroll-mt-20">
+      <Reveal id="survey-section" className="mt-6 scroll-mt-20">
         <SkillsSurveyCard />
-      </div>
+      </Reveal>
     </main>
 
     {/* Footer Credit */}

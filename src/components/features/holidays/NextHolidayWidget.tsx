@@ -11,6 +11,8 @@ import { format, differenceInDays, parseISO, startOfDay } from 'date-fns'
 import { he, ru } from 'date-fns/locale'
 import { useParams } from 'next/navigation'
 import type { Locale } from '@/i18n/config'
+import { duoCard, duoPress } from '@/components/ui/duo'
+import { cn } from '@/lib/utils'
 
 interface NextHolidayWidgetProps {
   onClick?: () => void
@@ -46,7 +48,7 @@ export function NextHolidayWidget({ onClick }: NextHolidayWidgetProps) {
 
   if (loading) {
     return (
-      <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={onClick}>
+      <Card className={cn(duoCard, 'cursor-pointer')} onClick={onClick}>
         <CardContent className="p-6">
           <div className="animate-pulse space-y-3">
             <div className="h-4 bg-muted rounded w-1/2" />
@@ -79,7 +81,7 @@ export function NextHolidayWidget({ onClick }: NextHolidayWidgetProps) {
 
   return (
     <Card
-      className="group cursor-pointer hover:shadow-lg transition-all hover:scale-[1.02] relative overflow-hidden"
+      className={cn(duoCard, duoPress, 'group cursor-pointer relative overflow-hidden')}
       onClick={onClick}
       role="button"
       tabIndex={0}

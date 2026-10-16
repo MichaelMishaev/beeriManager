@@ -228,7 +228,7 @@ export function HighlightsCarousel() {
       <div className="mb-6 space-y-3 animate-in fade-in-50 duration-700">
         {/* Carousel Card - Clean, no overlapping controls */}
         <div
-          className="relative min-h-[240px] bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-500 group cursor-pointer"
+          className="relative min-h-[240px] bg-gradient-to-br from-[#87CEEB]/15 via-white to-[#FFBA00]/10 rounded-3xl overflow-hidden border-2 border-[#e5e5e5] shadow-[0_5px_0_#e5e5e5] group cursor-pointer"
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
@@ -248,7 +248,7 @@ export function HighlightsCarousel() {
               prevSlide()
               setIsAutoPlaying(false)
             }}
-            className="absolute top-1/2 -translate-y-1/2 left-2 z-20 bg-white/95 backdrop-blur-sm hover:bg-white rounded-full p-2 shadow-md hover:shadow-lg transition-all hover:scale-110 active:scale-95 border border-gray-200/50"
+            className="absolute top-1/2 -translate-y-1/2 left-2 z-20 bg-white rounded-full p-2 border-2 border-[#e5e5e5] shadow-[0_3px_0_#e5e5e5] transition-[margin,box-shadow] duration-75 active:mt-[3px] active:shadow-none"
             aria-label={currentLocale === 'ru' ? 'Предыдущий' : 'הקודם'}
           >
             <ChevronLeft className="h-4 w-4 text-gray-900" />
@@ -259,7 +259,7 @@ export function HighlightsCarousel() {
               nextSlide()
               setIsAutoPlaying(false)
             }}
-            className="absolute top-1/2 -translate-y-1/2 right-2 z-20 bg-white/95 backdrop-blur-sm hover:bg-white rounded-full p-2 shadow-md hover:shadow-lg transition-all hover:scale-110 active:scale-95 border border-gray-200/50"
+            className="absolute top-1/2 -translate-y-1/2 right-2 z-20 bg-white rounded-full p-2 border-2 border-[#e5e5e5] shadow-[0_3px_0_#e5e5e5] transition-[margin,box-shadow] duration-75 active:mt-[3px] active:shadow-none"
             aria-label={currentLocale === 'ru' ? 'Следующий' : 'הבא'}
           >
             <ChevronRight className="h-4 w-4 text-gray-900" />
@@ -287,17 +287,17 @@ export function HighlightsCarousel() {
                     }}
                   >
                     {/* Category Badge */}
-                    <div className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold shadow-md ${highlight.badge_color}`}>
+                    <div className={`inline-flex items-center px-3 py-1 rounded-lg text-xs font-extrabold tracking-wide ${highlight.badge_color}`}>
                       {category}
                     </div>
 
                     {/* Icon */}
-                    <div className="w-12 h-12 bg-white/90 backdrop-blur-sm rounded-xl flex items-center justify-center text-2xl shadow-lg transform group-hover:scale-110 transition-transform duration-300">
+                    <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-3xl border-2 border-[#e5e5e5] shadow-[0_4px_0_#e5e5e5]">
                       {highlight.image_placeholder || highlight.icon}
                     </div>
 
                     {/* Title */}
-                    <h3 className="text-xl md:text-2xl font-bold text-gray-900 leading-tight max-w-2xl px-2">
+                    <h3 className="text-xl md:text-2xl font-extrabold text-[#003153] leading-tight max-w-2xl px-2">
                       {title}
                     </h3>
 
@@ -312,7 +312,7 @@ export function HighlightsCarousel() {
                         variant="default"
                         size="lg"
                         asChild
-                        className="bg-gradient-to-r from-[#0D98BA] to-[#003153] hover:from-[#0D98BA]/90 hover:to-[#003153]/90 shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
+                        className="bg-[#087A96] shadow-[0_4px_0_#05586d]"
                       >
                         <a
                           href={highlight.cta_link}
@@ -332,9 +332,9 @@ export function HighlightsCarousel() {
         </div>
 
         {/* Linear Progress Bar - Below carousel, never overlaps */}
-        <div className="relative h-1 bg-gray-200 rounded-full overflow-hidden">
+        <div className="relative h-2.5 bg-[#e5e5e5] rounded-full overflow-hidden">
           <div
-            className="absolute inset-y-0 left-0 bg-gradient-to-r from-[#0D98BA] via-[#FFBA00] to-[#FF8200] rounded-full transition-all duration-100 ease-linear"
+            className="absolute inset-y-0 start-0 bg-[#FFBA00] rounded-full transition-all duration-100 ease-linear"
             style={{ width: `${isAutoPlaying ? progress : 0}%` }}
           />
         </div>
@@ -453,7 +453,7 @@ export function HighlightsCarousel() {
                       variant="default"
                       size="lg"
                       asChild
-                      className="w-full bg-gradient-to-r from-[#0D98BA] to-[#003153] hover:from-[#0D98BA]/90 hover:to-[#003153]/90 shadow-lg hover:shadow-xl transition-all"
+                      className="w-full bg-[#087A96] shadow-[0_4px_0_#05586d]"
                     >
                       <a
                         href={selectedHighlight.cta_link}

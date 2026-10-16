@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { AnimatePresence, motion } from 'framer-motion'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { useTranslations } from 'next-intl'
@@ -149,14 +150,22 @@ export function Navigation() {
                     href={item.href}
                     onClick={() => handleNavClick(item.href, item.label)}
                     className={cn(
-                      'flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md transition-all',
+                      'relative flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md transition-colors',
                       isActive(item.href)
-                        ? 'bg-background text-foreground shadow-sm'
+                        ? 'text-foreground'
                         : 'text-muted-foreground hover:text-foreground hover:bg-background/50'
                     )}
                   >
-                    <Icon className="h-4 w-4" />
-                    {item.label}
+                    {/* Shared layoutId → the active pill glides between tabs on route change */}
+                    {isActive(item.href) && (
+                      <motion.span
+                        layoutId="nav-active-pill"
+                        className="absolute inset-0 rounded-md bg-background shadow-sm"
+                        transition={{ type: 'spring', stiffness: 400, damping: 32 }}
+                      />
+                    )}
+                    <Icon className="relative h-4 w-4" />
+                    <span className="relative">{item.label}</span>
                   </Link>
                 )
               })}
@@ -308,14 +317,35 @@ export function Navigation() {
                 logger.userAction('Toggle mobile menu', { isOpen: !isOpen })
               }}
             >
-              {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              {/* Icon swap: rotate + fade instead of a hard cut */}
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.span
+                  key={isOpen ? 'close' : 'open'}
+                  className="inline-flex"
+                  initial={{ rotate: -90, opacity: 0 }}
+                  animate={{ rotate: 0, opacity: 1 }}
+                  exit={{ rotate: 90, opacity: 0 }}
+                  transition={{ duration: 0.15 }}
+                >
+                  {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+                </motion.span>
+              </AnimatePresence>
             </Button>
           </div>
         </div>
 
         {/* Mobile Navigation */}
+        <AnimatePresence initial={false}>
         {isOpen && (
-          <div className="md:hidden py-4 space-y-3">
+          <motion.div
+            key="mobile-menu"
+            className="md:hidden overflow-hidden"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ height: { duration: 0.3, ease: [0.16, 1, 0.3, 1] }, opacity: { duration: 0.2 } }}
+          >
+          <div className="py-4 space-y-3">
             {isAuthenticated ? (
               <>
                 {items.map((item) => {
@@ -397,7 +427,9 @@ export function Navigation() {
               </div>
             </div>
           </div>
+          </motion.div>
         )}
+        </AnimatePresence>
       </div>
     </nav>
   )

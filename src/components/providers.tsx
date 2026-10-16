@@ -2,6 +2,7 @@
 
 import React from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { MotionConfig } from 'framer-motion'
 
 // Create a client instance for React Query
 const queryClient = new QueryClient({
@@ -25,7 +26,10 @@ const queryClient = new QueryClient({
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
-      {children}
+      {/* Makes every framer-motion animation respect the OS "Reduce motion" setting */}
+      <MotionConfig reducedMotion="user">
+        {children}
+      </MotionConfig>
     </QueryClientProvider>
   )
 }

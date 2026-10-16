@@ -14,6 +14,6 @@ export const localeDirections: Record<Locale, 'ltr' | 'rtl'> = {
 }
 
 export const localeFonts: Record<Locale, string> = {
-  he: 'Heebo',
-  ru: 'Roboto'
+  he: 'Rubik',
+  ru: 'Rubik'
 }
