@@ -5,26 +5,32 @@ export interface CommitteeMember {
 }
 
 export const committeeMembers: CommitteeMember[] = [
+  { grade: 'א1', name: 'יפה וורקי' },
   { grade: 'א2', name: 'ליאור בן הרוש', phone: '052-6589223' },
-  { grade: 'א4', name: 'לילה ניימרק', phone: '054-2046433' },
+  { grade: 'א4', name: 'ליליה ניימרק', phone: '054-2046433' },
 
-  { grade: 'ב1', name: 'דבי לוי כרדי', phone: '054-3974757' },
+  { grade: 'ב1', name: 'דבי כראדי', phone: '054-3974757' },
   { grade: 'ב2', name: 'ניצן חכימי', phone: '052-2924773' },
+  { grade: 'ב3', name: "אלון שמואלביץ'" },
   { grade: 'ב4', name: 'ורדית צוויג', phone: '050-8591536' },
 
   { grade: 'ג1', name: 'יוסי בן דוד', phone: '054-2101057' },
+  { grade: 'ג2', name: 'יוליה זברסקי' },
+  { grade: 'ג3', name: "אלון שמואלביץ'" },
   { grade: 'ג4', name: 'נועה זנזורי', phone: '052-8242119' },
 
+  { grade: 'ד1', name: 'אלינור מנשרוב' },
+  { grade: 'ד2', name: 'קארין פלוריס' },
   { grade: 'ד3', name: 'אורטל בבלי', phone: '053-6006660' },
   { grade: 'ד4', name: 'רחלי חזנוב', phone: '054-2557976' },
 
-  { grade: 'ה1', name: 'אלמוג ארזי הלל', phone: '050-4499667' },
+  { grade: 'ה1', name: 'אלמוג הלל', phone: '050-4499667' },
   { grade: 'ה2', name: 'יוסי בן דוד', phone: '054-2101057' },
   { grade: 'ה3', name: 'מיכאל מישייב', phone: '054-4345287' },
 
-  { grade: 'ו1', name: 'ולנטינה מטייקה', phone: '054-2501921' },
-  { grade: 'ו2', name: 'מאגי ליבוביץ', phone: '054-2629609' },
-  { grade: 'ו3', name: 'עמית נודלמן טסלר', phone: '054-6800750' },
+  { grade: 'ו1', name: 'ולנטינה מטקווה', phone: '054-2501921' },
+  { grade: 'ו2', name: 'מגי קדר' },
+  { grade: 'ו3', name: 'עמית טסלר', phone: '054-6800750' },
 ]
 
 // Group by grade level (א, ב, ג, ...)
