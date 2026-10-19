@@ -15,9 +15,16 @@ export function Footer() {
   // Hide regulations link when already on regulations page
   const isOnRegulationsPage = pathname?.includes('/regulations')
 
+  // Bottom clearance is only needed on the homepage, where the fixed FloatingActionMenu pill
+  // (mobile) would otherwise cover the footer links. Elsewhere it was just dead white space.
+  const isHomepage = /^\/(he|ru)?\/?$/.test(pathname ?? '')
+
   return (
     <>
-      <footer className="border-t bg-muted/30 mt-auto pb-24 md:pb-0" role="contentinfo">
+      <footer
+        className={`border-t bg-muted/30 mt-auto ${isHomepage ? 'pb-24 md:pb-0' : ''}`}
+        role="contentinfo"
+      >
         <div className="container mx-auto px-4 py-6">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
 
