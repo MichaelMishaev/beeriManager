@@ -17,9 +17,27 @@ export interface NotificationPayload {
 
 export interface PushSubscriptionRow {
   endpoint: string
-  platform: string
+  // Missing on rows read before the platform migration is applied; treated as 'web'
+  platform?: string | null
   subscription_data: any
   token: string | null
+}
+
+/**
+ * Fills the defaults the send route has always applied (icon, badge, tag...), so the
+ * serialized payload a web-push client receives is identical to before the refactor.
+ */
+export function buildNotificationPayload(payload: NotificationPayload): NotificationPayload {
+  return {
+    title: payload.title,
+    body: payload.body,
+    icon: payload.icon || '/icons/icon-192x192.png',
+    badge: payload.badge || '/icons/icon-96x96.png',
+    data: payload.data || {},
+    tag: payload.tag || 'notification',
+    requireInteraction: payload.requireInteraction || false,
+    actions: payload.actions || [],
+  }
 }
 
 export type WebPushSender = (subscription: any, serializedPayload: string) => Promise<any>
@@ -40,8 +58,10 @@ export async function dispatchNotification(
   sendWebPush: WebPushSender = defaultWebPushSender
 ): Promise<void> {
   const serialized = JSON.stringify(payload)
+  // Rows predating the platform column (migration not applied yet) are web subscriptions
+  const platform = sub.platform ?? 'web'
 
-  switch (sub.platform) {
+  switch (platform) {
     case 'web':
       await sendWebPush(sub.subscription_data, serialized)
       return
@@ -50,6 +70,6 @@ export async function dispatchNotification(
     case 'android':
       throw new Error(`Native Android push not yet implemented (endpoint: ${sub.endpoint})`)
     default:
-      throw new Error(`Unknown push platform "${sub.platform}" (endpoint: ${sub.endpoint})`)
+      throw new Error(`Unknown push platform "${platform}" (endpoint: ${sub.endpoint})`)
   }
 }

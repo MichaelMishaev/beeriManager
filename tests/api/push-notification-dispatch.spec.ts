@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test'
-import { dispatchNotification } from '../../src/lib/push/dispatch'
+import { buildNotificationPayload, dispatchNotification } from '../../src/lib/push/dispatch'
 
 const payload = { title: 'Test', body: 'Test body' }
 
@@ -70,5 +70,59 @@ test.describe('dispatchNotification', () => {
     ).rejects.toThrow(/Unknown push platform/)
 
     expect(senderCalled).toBe(false)
+  })
+
+  test('a row without a platform (migration not applied yet) is delivered as web, not rejected', async () => {
+    let calledWith: any = null
+    const fakeSender = async (subscription: any, serializedPayload: string) => {
+      calledWith = { subscription, serializedPayload }
+    }
+
+    // select('*') on a database that does not have the platform column returns no platform key
+    await dispatchNotification(
+      { endpoint: 'https://example.com/ep', subscription_data: { endpoint: 'https://example.com/ep' } } as any,
+      payload,
+      fakeSender
+    )
+    await dispatchNotification(
+      { endpoint: 'https://example.com/ep2', platform: null, subscription_data: { endpoint: 'https://example.com/ep2' }, token: null },
+      payload,
+      fakeSender
+    )
+
+    expect(calledWith).toBeTruthy()
+  })
+})
+
+test.describe('buildNotificationPayload', () => {
+  test('applies the defaults the send route had before the refactor', () => {
+    expect(buildNotificationPayload({ title: 'T', body: 'B' })).toEqual({
+      title: 'T',
+      body: 'B',
+      icon: '/icons/icon-192x192.png',
+      badge: '/icons/icon-96x96.png',
+      data: {},
+      tag: 'notification',
+      requireInteraction: false,
+      actions: [],
+    })
+  })
+
+  test('keeps values the caller provided', () => {
+    const built = buildNotificationPayload({
+      title: 'T',
+      body: 'B',
+      icon: '/x.png',
+      tag: 'urgent',
+      requireInteraction: true,
+      data: { url: '/he/events' },
+      actions: [{ action: 'open', title: 'Open' }],
+    })
+    expect(built.icon).toBe('/x.png')
+    expect(built.tag).toBe('urgent')
+    expect(built.requireInteraction).toBe(true)
+    expect(built.data).toEqual({ url: '/he/events' })
+    expect(built.actions).toEqual([{ action: 'open', title: 'Open' }])
+    expect(built.badge).toBe('/icons/icon-96x96.png')
   })
 })

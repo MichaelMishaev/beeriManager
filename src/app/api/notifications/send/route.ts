@@ -3,7 +3,7 @@ import webpush from 'web-push';
 import { createClient } from '@/lib/supabase/server';
 import { cookies } from 'next/headers';
 import { verifyJWT } from '@/lib/auth/jwt-edge';
-import { dispatchNotification, NotificationPayload } from '@/lib/push/dispatch';
+import { buildNotificationPayload, dispatchNotification, NotificationPayload } from '@/lib/push/dispatch';
 
 // Track if VAPID has been initialized
 let vapidInitialized = false;
@@ -117,11 +117,14 @@ export async function POST(req: NextRequest) {
       });
     }
 
+    // Apply the same payload defaults as before the dispatch refactor (icon, badge, tag, ...)
+    const notificationPayload = buildNotificationPayload(payload);
+
     // Send notifications
     const results = await Promise.allSettled(
       subscriptions.map(async (sub) => {
         try {
-          await dispatchNotification(sub, payload);
+          await dispatchNotification(sub, notificationPayload);
           return { success: true, endpoint: sub.endpoint };
         } catch (error: any) {
           // Handle expired/invalid subscriptions
