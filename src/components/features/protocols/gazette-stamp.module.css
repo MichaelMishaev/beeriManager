@@ -1,0 +1,447 @@
+/* GazetteStamp — pressed rubber-stamp impression.
+   Layout box is exactly size×size; everything inside is absolutely positioned,
+   so the animation never changes layout. Only transform/opacity are animated;
+   all SVG filters are static (each layer is rasterised once).
+
+   NOTE: .stamp must NOT create a stacking context (no opacity/transform/
+   isolation/z-index on it) so that .jolt's multiply blend reaches the paper. */
+
+.stamp {
+  position: relative;
+  display: inline-block;
+  flex: none;
+  vertical-align: middle;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.defs {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+.jolt,
+.press {
+  position: absolute;
+  inset: 0;
+}
+
+/* ink sinks into the paper fibres */
+.jolt {
+  mix-blend-mode: multiply;
+}
+
+.press {
+  transform: rotate(-8deg);
+  transform-origin: 50% 50%;
+}
+
+.layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  overflow: visible;
+}
+
+/* ---------- final (resting) values: SSR / no-JS / reduced-motion state ---------- */
+.ink {
+  opacity: 0.94;
+}
+
+.bleed {
+  opacity: 0.26;
+}
+
+.ghost {
+  opacity: 0.16;
+  transform: translate(0.9%, 0.6%) rotate(0.5deg);
+}
+
+.wet {
+  opacity: 0;
+}
+
+/* debossed paper: shadowed upper-left inner wall, lit lower-right lip */
+.dent {
+  position: absolute;
+  inset: 1%;
+  border-radius: 50%;
+  opacity: 1;
+  box-shadow:
+    inset 1px 1.5px 2.5px rgb(70 52 25 / 0.14),
+    inset -1px -1.2px 1.5px rgb(255 252 240 / 0.28),
+    0.6px 1px 1px rgb(255 252 240 / 0.22),
+    -0.5px -0.8px 1.5px rgb(70 52 25 / 0.08);
+}
+
+.shadow {
+  position: absolute;
+  inset: 6%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(20 16 10 / 0.5), rgb(20 16 10 / 0.22) 55%, rgb(20 16 10 / 0) 100%);
+  opacity: 0;
+  transform: translate(11%, 15%) scale(1.3);
+}
+
+/* expanding ink-pressure ring on the paper */
+.shock {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1.5px solid var(--gzs-ink, #003153);
+  opacity: 0;
+}
+
+.speck {
+  position: absolute;
+  border-radius: 55% 45% 60% 40%;
+  background: var(--gzs-ink, #003153);
+  opacity: var(--o, 0.7);
+  transform: translate(-50%, -50%);
+}
+
+.sheenClip {
+  position: absolute;
+  inset: 2%;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+/* white band: invisible on bare paper (multiply × white = paper), glossy on ink */
+.sheen {
+  position: absolute;
+  top: -20%;
+  bottom: -20%;
+  left: 0;
+  width: 38%;
+  background: linear-gradient(
+    90deg,
+    rgb(255 255 255 / 0) 0%,
+    rgb(255 255 255 / 0.55) 45%,
+    rgb(255 255 255 / 0.8) 52%,
+    rgb(255 255 255 / 0) 100%
+  );
+  opacity: 0;
+  transform: translateX(-120%) rotate(18deg);
+}
+
+/* ---------- armed: initial SSR + client state, waiting for the viewport ----------
+   Only hidden when motion is allowed. Reduced-motion users get the final state
+   from the base rules above; no-JS users get it from the component's <noscript>. */
+@media (prefers-reduced-motion: no-preference) {
+  .stamp[data-state='armed'] .press {
+    opacity: 0;
+    transform: translate(-5%, -9%) scale(1.5) rotate(-15deg);
+  }
+
+  .stamp[data-state='armed'] .ink {
+    opacity: 0.45;
+  }
+
+  .stamp[data-state='armed'] .bleed,
+  .stamp[data-state='armed'] .ghost,
+  .stamp[data-state='armed'] .dent,
+  .stamp[data-state='armed'] .speck {
+    opacity: 0;
+  }
+}
+
+.stamp[data-state='armed'] .press,
+.stamp[data-state='play'] .press,
+.stamp[data-state='play'] .shadow,
+.stamp[data-state='play'] .jolt,
+.stamp[data-state='play'] .shock,
+.stamp[data-state='play'] .sheen {
+  will-change: transform, opacity;
+}
+
+/* ---------- play (≈1.9 s) ----------
+   0–360   hover: fades in high above the paper, drifting, soft shadow
+   360–620 strike: fast ease-in fall, shadow collapses
+   620     impact: squash, paper jolt, pressure ring, splatter specks, dent
+   620–1500 ink wets in; sheen sweeps once (760–1460); wet gloss dries by 1900
+   860–1300 settle: rocks past and back to the final -8° */
+.stamp[data-state='play'] .press {
+  animation: gzsSlam 1300ms both;
+}
+
+.stamp[data-state='play'] .shadow {
+  animation: gzsShadow 620ms both;
+}
+
+.stamp[data-state='play'] .jolt {
+  animation: gzsJolt 130ms linear 620ms both;
+}
+
+.stamp[data-state='play'] .shock {
+  animation: gzsShock 560ms cubic-bezier(0.1, 0.6, 0.3, 1) 620ms both;
+}
+
+.stamp[data-state='play'] .speck {
+  animation: gzsSpeck 240ms cubic-bezier(0.1, 0.8, 0.3, 1) both;
+}
+
+.stamp[data-state='play'] .dent {
+  animation: gzsDent 900ms both;
+}
+
+.stamp[data-state='play'] .ink {
+  animation: gzsInk 1500ms both;
+}
+
+.stamp[data-state='play'] .bleed {
+  animation: gzsBleed 1700ms both;
+}
+
+.stamp[data-state='play'] .ghost {
+  animation: gzsGhost 900ms ease-out both;
+}
+
+.stamp[data-state='play'] .wet {
+  animation: gzsWet 1900ms both;
+}
+
+.stamp[data-state='play'] .sheen {
+  animation: gzsSheen 700ms cubic-bezier(0.45, 0, 0.4, 1) 760ms both;
+}
+
+@keyframes gzsSlam {
+  0% {
+    opacity: 0;
+    transform: translate(-5%, -9%) scale(1.5) rotate(-15deg);
+    animation-timing-function: ease-out;
+  }
+  10% {
+    opacity: 0.5;
+    transform: translate(-4.6%, -8.4%) scale(1.48) rotate(-14.4deg);
+    animation-timing-function: ease-in-out;
+  }
+  27.7% {
+    opacity: 0.6;
+    transform: translate(-4%, -7.4%) scale(1.43) rotate(-13.4deg);
+    animation-timing-function: cubic-bezier(0.55, 0, 0.95, 0.4);
+  }
+  47.7% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1) rotate(-6.4deg);
+    animation-timing-function: cubic-bezier(0.2, 0.6, 0.35, 1);
+  }
+  51.5% {
+    opacity: 1;
+    transform: translate(0, 0) scale(0.965, 0.958) rotate(-6.4deg);
+    animation-timing-function: cubic-bezier(0.3, 0, 0.3, 1);
+  }
+  58.5% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1.008) rotate(-7deg);
+    animation-timing-function: ease-in-out;
+  }
+  68% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1) rotate(-8.7deg);
+    animation-timing-function: ease-in-out;
+  }
+  82% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1) rotate(-7.75deg);
+    animation-timing-function: ease-in-out;
+  }
+  100% {
+    opacity: 1;
+    transform: rotate(-8deg);
+  }
+}
+
+@keyframes gzsShadow {
+  0% {
+    opacity: 0;
+    transform: translate(11%, 15%) scale(1.3);
+    animation-timing-function: ease-out;
+  }
+  25% {
+    opacity: 0.4;
+    transform: translate(11%, 15%) scale(1.3);
+  }
+  58% {
+    opacity: 0.45;
+    transform: translate(9.5%, 13%) scale(1.25);
+    animation-timing-function: cubic-bezier(0.55, 0, 0.95, 0.4);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.92);
+  }
+}
+
+/* 2–3 frame paper jolt */
+@keyframes gzsJolt {
+  0% {
+    transform: translate(0, 0);
+  }
+  20% {
+    transform: translate(1.3%, 1%);
+  }
+  45% {
+    transform: translate(-0.9%, -0.6%);
+  }
+  70% {
+    transform: translate(0.4%, 0.3%);
+  }
+  100% {
+    transform: translate(0, 0);
+  }
+}
+
+@keyframes gzsShock {
+  0% {
+    opacity: 0.38;
+    transform: scale(0.94);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.3);
+  }
+}
+
+@keyframes gzsSpeck {
+  0% {
+    opacity: 0;
+    transform: translate(calc(-50% + var(--fx, 0px)), calc(-50% + var(--fy, 0px))) scale(0.2);
+  }
+  35% {
+    opacity: var(--o, 0.7);
+  }
+  100% {
+    opacity: var(--o, 0.7);
+    transform: translate(-50%, -50%);
+  }
+}
+
+@keyframes gzsDent {
+  0%,
+  68.9% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* ink starved at contact (0.45) → full density, front-loaded after impact */
+@keyframes gzsInk {
+  0%,
+  41.3% {
+    opacity: 0.45;
+    animation-timing-function: cubic-bezier(0.15, 0.7, 0.35, 1);
+  }
+  100% {
+    opacity: 0.94;
+  }
+}
+
+/* bleed creeps outward into the fibres */
+@keyframes gzsBleed {
+  0%,
+  36.5% {
+    opacity: 0;
+    transform: scale(0.985);
+    animation-timing-function: cubic-bezier(0.2, 0.7, 0.3, 1);
+  }
+  100% {
+    opacity: 0.26;
+    transform: scale(1);
+  }
+}
+
+/* slipped second impression appears on the bounce */
+@keyframes gzsGhost {
+  0%,
+  75% {
+    opacity: 0;
+    transform: translate(0, 0) rotate(0deg);
+  }
+  100% {
+    opacity: 0.16;
+    transform: translate(0.9%, 0.6%) rotate(0.5deg);
+  }
+}
+
+/* wet gloss: appears on contact, dries off */
+@keyframes gzsWet {
+  0%,
+  32.6% {
+    opacity: 0;
+  }
+  36% {
+    opacity: 0.6;
+    animation-timing-function: cubic-bezier(0.3, 0, 0.6, 1);
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* one glossy sweep across the fresh ink */
+@keyframes gzsSheen {
+  0% {
+    opacity: 0;
+    transform: translateX(-120%) rotate(18deg);
+  }
+  20% {
+    opacity: 0.9;
+  }
+  75% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(300%) rotate(18deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stamp .press,
+  .stamp .shadow,
+  .stamp .jolt,
+  .stamp .shock,
+  .stamp .speck,
+  .stamp .dent,
+  .stamp .ink,
+  .stamp .bleed,
+  .stamp .ghost,
+  .stamp .wet,
+  .stamp .sheen {
+    animation: none !important;
+    will-change: auto !important;
+  }
+
+  .stamp[data-state] .press {
+    opacity: 1;
+    transform: rotate(-8deg);
+  }
+
+  .stamp[data-state] .ink {
+    opacity: 0.94;
+  }
+
+  .stamp[data-state] .bleed {
+    opacity: 0.26;
+  }
+
+  .stamp[data-state] .ghost {
+    opacity: 0.16;
+  }
+
+  .stamp[data-state] .dent {
+    opacity: 1;
+  }
+
+  .stamp[data-state] .speck {
+    opacity: var(--o, 0.7);
+  }
+}

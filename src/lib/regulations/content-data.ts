@@ -31,7 +31,7 @@ export interface RegulationsData {
 export const regulationsHe: RegulationsData = {
   title: "תקנון הנהגת הורים",
   subtitle: "בית ספר בארי, נתניה",
-  academicYear: "תשפ״ה–תשפ״ו (2025)",
+  academicYear: "תשפ״ו–תשפ״ז (2026)",
   chairman: "יו״ר הנהגת הורים: מיכאל מישייב",
   sections: [
     {
@@ -232,14 +232,14 @@ export const regulationsHe: RegulationsData = {
       },
     ],
   },
-  footer: "✦ תקנון זה אושר על ידי הנהגת ההורים ונכנס לתוקף בשנת הלימודים תשפ״ה–תשפ״ו ✦",
+  footer: "✦ תקנון זה אושר על ידי הנהגת ההורים ונכנס לתוקף בשנת הלימודים תשפ״ו–תשפ״ז ✦",
 }
 
 // Professional Russian Translation
 export const regulationsRu: RegulationsData = {
   title: "Устав родительского комитета",
   subtitle: "Школа Баари, Нетания",
-  academicYear: "Учебный год 2025",
+  academicYear: "Учебный год 2026",
   chairman: "Председатель родительского комитета: Михаэль Мишаев",
   sections: [
     {
@@ -440,7 +440,7 @@ export const regulationsRu: RegulationsData = {
       },
     ],
   },
-  footer: "✦ Данный устав был утверждён родительским комитетом и вступил в силу в учебном году 2025 ✦",
+  footer: "✦ Данный устав был утверждён родительским комитетом и вступил в силу в учебном году 2026 ✦",
 }
 
 // Helper function to get regulations by locale
@@ -450,6 +450,6 @@ export function getRegulationsByLocale(locale: string): RegulationsData {
 
 // Approval status configuration
 export const regulationsStatus = {
-  isApproved: true,
-  approvalDate: "2026-01-07", // ISO format
+  isApproved: false, // pending committee approval — set to true (and approvalDate) once approved
+  approvalDate: "2026-10", // YYYY-MM, shown as MM.YYYY; ignored while isApproved is false
 }
