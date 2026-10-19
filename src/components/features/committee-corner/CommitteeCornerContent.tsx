@@ -159,7 +159,7 @@ export function CommitteeCornerContent() {
               icon={BookOpen}
               title={t('mankalCircular.title')}
               subtitle={t('mankalCircular.subtitle')}
-              href="https://apps.education.gov.il/Mankal/horaa.aspx?siduri=525#_Toc256000035"
+              href={`/${locale}/mankal-circular`}
             />
             <CornerRow
               icon={Users}
