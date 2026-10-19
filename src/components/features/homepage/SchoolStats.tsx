@@ -26,7 +26,7 @@ export function SchoolStats({ variant = 'cards' }: SchoolStatsProps) {
 
   const stats: SchoolStat[] = [
     // Number colors chosen for ≥3:1 (large text) on white
-    { value: '562', labelKey: 'students', icon: Users, color: 'text-[#087A96]', tile: '#0D98BA', tileEdge: '#08718b' },
+    { value: '575', labelKey: 'students', icon: Users, color: 'text-[#087A96]', tile: '#0D98BA', tileEdge: '#08718b' },
     { value: '22', labelKey: 'classes', icon: BookOpen, color: 'text-[#C25E00]', tile: '#FF8200', tileEdge: '#c25e00' }
   ]
 

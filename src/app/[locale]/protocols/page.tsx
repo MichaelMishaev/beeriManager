@@ -244,7 +244,7 @@ export default function ProtocolsPage() {
               תקנון הנהגת הורים
             </h3>
             <p className="text-sm text-muted-foreground mt-1">
-              מסמך רשמי • תשפ״ה–תשפ״ו
+              מסמך רשמי • תשפ״ו–תשפ״ז
             </p>
           </div>
           <RegulationsModal />

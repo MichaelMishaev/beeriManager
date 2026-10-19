@@ -170,7 +170,7 @@ export default function LandingPage() {
   ]
 
   const stats = [
-    { value: '562', label: 'תלמידים', icon: Users },
+    { value: '575', label: 'תלמידים', icon: Users },
     { value: '22', label: 'כיתות', icon: GraduationCap },
     { value: '85', label: 'שנות מצוינות', icon: Award },
     { value: '98%', label: 'שביעות רצון', icon: Smile }
@@ -753,7 +753,7 @@ export default function LandingPage() {
               &quot;חינוך שמשלב מסורת עשירה עם חדשנות מודרנית&quot;
             </blockquote>
             <p className="text-white/60">
-              מבית ספר קטן של ילדי עובדים ב-1938, לבית ספר מוביל עם 562 תלמידים ב-22 כיתות ב-2025
+              מבית ספר קטן של ילדי עובדים ב-1938, לבית ספר מוביל עם 575 תלמידים ב-22 כיתות ב-2026
             </p>
           </div>
         </div>
