@@ -10,7 +10,7 @@ const SOURCE_URL = 'https://apps.education.gov.il/Mankal/horaa.aspx?siduri=525#_
  * Nested numbered list laid out with flex rows (fixed-width marker + wrapping text) instead of the
  * source page's fixed point indents, so long Hebrew lines wrap inside a 360px viewport.
  */
-function PointList({ points, depth = 0 }: { points: MankalPoint[]; depth?: number }) {
+export function PointList({ points, depth = 0 }: { points: MankalPoint[]; depth?: number }) {
   return (
     <ol className={depth === 0 ? 'space-y-4' : 'mt-3 space-y-3 ps-1'}>
       {points.map((point, i) => (

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { CommitteeCornerContent } from '@/components/features/committee-corner/CommitteeCornerContent'
+import { regulationsStatus } from '@/lib/regulations/content-data'
 
 export const metadata: Metadata = {
   title: 'פינת ועד ההורים של בארי | בית ספר בארי נתניה',
@@ -15,5 +16,5 @@ export const metadata: Metadata = {
 }
 
 export default function CommitteeCornerPage() {
-  return <CommitteeCornerContent />
+  return <CommitteeCornerContent regulationsApproved={regulationsStatus.isApproved} />
 }
