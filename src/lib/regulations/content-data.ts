@@ -440,6 +440,6 @@ export function getRegulationsByLocale(locale: string): RegulationsData {
 
 // Approval status configuration
 export const regulationsStatus = {
-  isApproved: false, // pending committee approval — set to true (and approvalDate) once approved
+  isApproved: true, // approved by the committee (see approvalDate)
   approvalDate: "2026-10", // YYYY-MM, shown as MM.YYYY; ignored while isApproved is false
 }

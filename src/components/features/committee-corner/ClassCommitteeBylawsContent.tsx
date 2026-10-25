@@ -202,8 +202,8 @@ export function ClassCommitteeBylawsContent() {
       }
 
       const fileName = locale === 'ru'
-        ? `proekt_ustava_klassnyh_komitetov_${new Date().getFullYear()}.pdf`
-        : `הצעה_לתקנון_ועדי_כיתות_${new Date().getFullYear()}.pdf`
+        ? `ustav_klassnyh_komitetov_${new Date().getFullYear()}.pdf`
+        : `תקנון_ועדי_כיתות_${new Date().getFullYear()}.pdf`
 
       pdf.save(fileName)
       toast.dismiss()
@@ -272,7 +272,7 @@ export function ClassCommitteeBylawsContent() {
               </div>
               <div>
                 <dt>{t('metaStatus')}</dt>
-                <dd className={styles.metaRed}>{t('metaStatusValue')}</dd>
+                <dd>{t('metaStatusValue')}</dd>
               </div>
             </dl>
           </div>
@@ -297,7 +297,7 @@ export function ClassCommitteeBylawsContent() {
               <p className={styles.preambleText}>{data.intro}</p>
             </div>
 
-            {/* Proposal stamp: seal at the foot of the block on mobile, free corner on desktop */}
+            {/* Approval stamp: seal at the foot of the block on mobile, free corner on desktop */}
             <div className={styles.stampWrap}>
               <GazetteStamp
                 label={t('stampLabel')}
@@ -305,7 +305,7 @@ export function ClassCommitteeBylawsContent() {
                 year={t('stampBottom')}
                 ribbon={t('stampRibbon')}
                 ariaLabel={t('stampAria')}
-                ink="red"
+                ink="blue"
                 microText={t('stampMicro')}
                 size={140}
               />
@@ -314,7 +314,7 @@ export function ClassCommitteeBylawsContent() {
 
           {/* ── Status + actions ── */}
           <section className={styles.statusRow}>
-            <span className={`${gz.badge} ${gz.badgeDraft} ${styles.badgeRed}`} role="status">
+            <span className={gz.badge} role="status">
               {t('statusBadge')}
             </span>
             <div className={`${gz.actions} ${styles.actions}`}>
@@ -369,7 +369,7 @@ export function ClassCommitteeBylawsContent() {
               </div>
             ))}
 
-            {/* ── Approval / signature block (empty placeholders — proposal not approved) ── */}
+            {/* ── Approval / signature block (blank lines for signing) ── */}
             <div
               ref={(el) => registerSection(SIGNATURES_KEY, el)}
               data-section={SIGNATURES_KEY}

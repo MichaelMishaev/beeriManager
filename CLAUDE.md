@@ -567,3 +567,6 @@ OPENAI_API_KEY=
 
 ### Honesty
 - Always be extremely and maximally honest — no softening of bad news, no omitting problems
+
+## Committee Corner (פינת ועד ההורים)
+When the user mentions the committee corner, the authority ladder, תקנון / תקנון ועדי כיתות / חוזר מנכ"ל / תקנון עירוני, or their approval status, read `docs/features/committee-corner/README.md` first (also usable by Codex/other agents that read this file).

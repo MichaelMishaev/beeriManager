@@ -141,12 +141,12 @@ export function CommitteeLadder({ locale, regulationsApproved }: { locale: Local
         />
       </LadderLevel>
 
-      <LadderLevel step={4} label={t('ladder.class')} variant="proposal">
+      <LadderLevel step={4} label={t('ladder.class')}>
         <LadderCard
           href={`/${locale}/class-committee-bylaws`}
           title={t('classBylaws.title')}
           subtitle={t('classBylaws.subtitle')}
-          status="proposal"
+          status="inForce"
         />
       </LadderLevel>
     </ol>

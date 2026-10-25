@@ -3,17 +3,16 @@ import { test, expect } from '@playwright/test'
 // Read-only: the regulations page only renders static content, so there is no test data to clean up.
 
 test.describe('Regulations page — gazette design', () => {
-  test('he: renders the masthead, all sections and the pending-approval state', async ({ page }) => {
+  test('he: renders the masthead, all sections and the approved state', async ({ page }) => {
     await page.goto('/he/regulations')
     await page.waitForLoadState('networkidle') // dev server reloads once or twice on first hit (Firefox/WebKit)
 
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('תקנון הנהגת הורים')
     expect(await page.locator('main article').count()).toBeGreaterThanOrEqual(9)
 
-    // Not approved yet: draft badge + red "pending approval" stamp, and no approval claim anywhere
-    await expect(page.getByRole('status').first()).toContainText('ממתין לאישור')
-    await expect(page.getByRole('img', { name: 'ממתין לאישור' })).toBeVisible()
-    await expect(page.getByText('תקנון זה אושר')).toHaveCount(0)
+    // Approved: status badge shows the committee approval, and no pending wording remains
+    await expect(page.getByRole('status').first()).toContainText('מאושר על ידי ועד ההורים')
+    await expect(page.getByText('ממתין לאישור')).toHaveCount(0)
   })
 
   test('ru: renders LTR with the Russian title', async ({ page }) => {

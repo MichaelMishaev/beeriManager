@@ -10,7 +10,7 @@ test.describe('Committee corner — authority ladder', () => {
     await page.waitForLoadState('networkidle') // dev server may self-reload on first hit
   })
 
-  test('shows the 4 levels in order, the proposal badge, and no horizontal scroll', async ({ page }) => {
+  test('shows the 4 levels in order, the in-force badge, and no horizontal scroll', async ({ page }) => {
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('פינת ועד ההורים של בארי')
 
     const levels = page.getByTestId('ladder-level').getByRole('heading', { level: 2 })
@@ -21,10 +21,10 @@ test.describe('Committee corner — authority ladder', () => {
       'כיתתי · ועדי הכיתות',
     ])
 
-    // Proposal status is visible on the class-level card without opening anything
+    // Status is visible on the class-level card without opening anything
     const classCard = page.getByRole('link', { name: /תקנון ועדי כיתות/ })
     await expect(classCard).toHaveAttribute('href', '/he/class-committee-bylaws')
-    await expect(classCard.getByText('הצעה — טרם אושרה')).toBeVisible()
+    await expect(classCard.getByText('בתוקף')).toBeVisible()
 
     const { sw, cw } = await page.evaluate(() => ({
       sw: document.documentElement.scrollWidth,

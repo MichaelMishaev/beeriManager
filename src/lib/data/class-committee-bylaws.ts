@@ -1,5 +1,5 @@
-// Class committee bylaws proposal — bilingual Hebrew and Russian
-// This is a PROPOSAL (not yet approved), distinct from the school-wide regulations
+// Class committee bylaws (approved) — bilingual Hebrew and Russian
+// Distinct from the school-wide regulations
 
 export interface BylawsSection {
   number: number
@@ -15,7 +15,7 @@ export interface ClassCommitteeBylawsData {
 }
 
 export const classCommitteeBylawsHe: ClassCommitteeBylawsData = {
-  title: 'הצעה לתקנון ועדי כיתות',
+  title: 'תקנון ועדי כיתות',
   intro: 'מטרת התקנון היא ליצור כללים ברורים, שקופים ושוויוניים לעבודת ועדי הכיתות ולמנוע מחלוקות מיותרות.',
   sections: [
     {
@@ -102,11 +102,11 @@ export const classCommitteeBylawsHe: ClassCommitteeBylawsData = {
       ],
     },
   ],
-  footer: 'מסמך זה הינו הצעה בלבד ואינו מהווה תקנון מאושר, עד לאישורו על ידי הנהגת ההורים.',
+  footer: 'תקנון זה אושר על ידי הנהגת ההורים.',
 }
 
 export const classCommitteeBylawsRu: ClassCommitteeBylawsData = {
-  title: 'Проект устава классных комитетов',
+  title: 'Устав классных комитетов',
   intro: 'Цель устава — установить чёткие, прозрачные и равноправные правила работы классных комитетов и предотвратить излишние разногласия.',
   sections: [
     {
@@ -193,7 +193,7 @@ export const classCommitteeBylawsRu: ClassCommitteeBylawsData = {
       ],
     },
   ],
-  footer: 'Данный документ является лишь предложением и не представляет собой утверждённый устав до его утверждения родительским комитетом.',
+  footer: 'Настоящий устав утверждён родительским комитетом.',
 }
 
 export function getClassCommitteeBylawsByLocale(locale: string): ClassCommitteeBylawsData {
