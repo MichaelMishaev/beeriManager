@@ -19,6 +19,7 @@ import { DuoGreeting } from './DuoGreeting'
 import { SchoolYearProgress } from './SchoolYearProgress'
 import { WhatsAppCommunityCard } from '@/components/features/whatsapp/WhatsAppCommunityCard'
 import { CommitteeCornerCard } from './CommitteeCornerCard'
+import { KissAndRideCard } from './KissAndRideCard'
 import { WhiteShirtBanner } from './WhiteShirtBanner'
 import { WelcomeBackBanner } from './WelcomeBackBanner'
 import { UrgentMessagesBanner } from '@/components/features/urgent/UrgentMessagesBanner'
@@ -777,9 +778,13 @@ export function PublicHomepage({ upcomingEvents, calendarEvents }: PublicHomepag
             <WhatsAppCommunityCard />
           </Reveal>
 
-          {/* Committee Corner - hub for regulations, protocols, members & contact */}
+          {/* Quick links, side by side: Committee Corner (regulations, protocols, members)
+              and Kiss & Ride (נשק וסע — which class is on drop-off duty and when) */}
           <Reveal className="mb-4">
-            <CommitteeCornerCard />
+            <div className="grid grid-cols-2 gap-3 items-stretch">
+              <CommitteeCornerCard />
+              <KissAndRideCard />
+            </div>
           </Reveal>
         </div>
 

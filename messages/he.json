@@ -957,10 +957,9 @@
     "youAreNext": "הכיתה שלכם הבאה בתור",
     "rowNext": "הבאה",
     "school": {
-      "title": "מי תורנית בבית הספר",
-      "now": "עכשיו",
-      "next": "הבאה",
-      "until": "עד {date}",
+      "title": "בבית הספר עכשיו",
+      "dutyUntil": "{count, plural, =1 {תורנית} other {תורניות}} עד {date}",
+      "next": "{count, plural, =1 {הבאה בתור:} other {הבאות בתור:}}",
       "from": "מ־{date}",
       "nobody": "אין כיתה תורנית",
       "lastOne": "זו התורנות האחרונה השנה",
