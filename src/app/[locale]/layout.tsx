@@ -10,6 +10,7 @@ import { Providers } from '@/components/providers'
 import { Toaster } from '@/components/ui/toaster'
 import { Navigation } from '@/components/layout/Navigation'
 import { Footer } from '@/components/layout/Footer'
+import { BackToHomeGuard } from '@/components/layout/BackToHomeGuard'
 import { GoogleAnalytics } from '@/components/analytics/GoogleAnalytics'
 import { HtmlAttributes } from '@/components/HtmlAttributes'
 import { IOSInstallPrompt } from '@/components/pwa/IOSInstallPrompt'
@@ -201,6 +202,7 @@ export default async function LocaleLayout({
       <div className="min-h-screen flex flex-col bg-background font-sans antialiased" style={{ fontFamily }}>
         <NextIntlClientProvider messages={messages}>
           <Providers>
+            <BackToHomeGuard />
             <Navigation />
             <main className="flex-1">{children}</main>
             <Footer />

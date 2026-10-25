@@ -1,5 +1,11 @@
 # Bugs found + fixed
 
+## 2026-10-25 — Phone Back button left the app from deep pages
+- **How found:** user report: on non-base screens, Back exits the app instead of returning to the base screen.
+- **Root cause:** pages opened directly (WhatsApp link, home-screen shortcut) are the first history entry, so there was no in-app entry under them to go back to. Per-page `router.back()` buttons had the same hole.
+- **Fix:** `BackToHomeGuard` (mounted in `[locale]/layout.tsx`) inserts the home entry under a landing page; Back (system and `router.back()` buttons) now ends on home. The inserted entry has plain `{}` state so Next's popstate handler hard-loads it.
+- **Files:** `src/components/layout/BackToHomeGuard.tsx`, `src/app/[locale]/layout.tsx`.
+
 ## 2026-10-19 — Russian text rendered in Times New Roman on the gazette pages
 - **How found:** an agent building `/ru/class-committee-bylaws` noticed it; confirmed on `/ru/regulations` with CDP `CSS.getPlatformFontsForNode` (Cyrillic glyphs → "Times New Roman", no Noto Serif file ever requested).
 - **Root cause:** next/font emits, for each family, a generated `__Family_Fallback` face with `unicode-range: U+0-10FFFF` (local Times New Roman). It sits right after the real family in the `variable` stack and claims every codepoint, so Cyrillic never reached the Noto Serif face placed later in the chain.
