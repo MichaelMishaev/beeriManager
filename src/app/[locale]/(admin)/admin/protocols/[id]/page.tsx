@@ -1,9 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { Save, Trash2, ClipboardList, Plus, X } from 'lucide-react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { useLocale, useTranslations } from 'next-intl'
+import { AdminFormSection, AdminPageHeader, AiFormatButton } from '@/components/features/admin'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -31,29 +32,33 @@ import { useFormDraft } from '@/hooks/useFormDraft'
 import { useAutoSave } from '@/hooks/useAutoSave'
 import { DraftBanner, DraftSaveIndicator } from '@/components/ui/draft-banner'
 
-const protocolSchema = z.object({
-  title: z.string().min(2, 'כותרת חייבת להכיל לפחות 2 תווים'),
-  protocol_date: z.string().min(1, 'תאריך ישיבה נדרש'),
-  categories: z.array(z.string()),
-  attendees: z.array(z.string()).min(1, 'חייב להיות לפחות משתתף אחד'),
-  is_public: z.boolean(),
-  extracted_text: z.string().optional(),
-  agenda: z.string().optional(),
-  decisions: z.string().optional(),
-  action_items: z.string().optional()
-})
+function createProtocolSchema(messages: {
+  titleMin: string
+  dateRequired: string
+  attendeesMin: string
+}) {
+  return z.object({
+    title: z.string().min(2, messages.titleMin),
+    protocol_date: z.string().min(1, messages.dateRequired),
+    categories: z.array(z.string()),
+    attendees: z.array(z.string()).min(1, messages.attendeesMin),
+    is_public: z.boolean(),
+    extracted_text: z.string().optional(),
+    agenda: z.string().optional(),
+    decisions: z.string().optional(),
+    action_items: z.string().optional()
+  })
+}
 
-type ProtocolFormData = z.infer<typeof protocolSchema>
+type ProtocolFormData = z.infer<ReturnType<typeof createProtocolSchema>>
 
-const categoryOptions = [
-  { value: 'regular', label: 'ישיבה רגילה' },
-  { value: 'special', label: 'ישיבה מיוחדת' },
-  { value: 'annual', label: 'אסיפה שנתית' },
-  { value: 'emergency', label: 'ישיבת חירום' }
-]
+const categoryValues = ['regular', 'special', 'annual', 'emergency'] as const
 
 export default function EditProtocolPage() {
+  const t = useTranslations('admin.records.protocols')
+  const tc = useTranslations('admin.common')
   const router = useRouter()
+  const locale = useLocale()
   const params = useParams()
   const protocolId = params.id as string
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -65,6 +70,16 @@ export default function EditProtocolPage() {
   const [attendeeInput, setAttendeeInput] = useState('')
   const [attendees, setAttendees] = useState<string[]>([])
   const [showDraftBanner, setShowDraftBanner] = useState(false)
+
+  const protocolSchema = useMemo(
+    () =>
+      createProtocolSchema({
+        titleMin: t('validation.titleMin'),
+        dateRequired: t('validation.dateRequired'),
+        attendeesMin: t('validation.attendeesMin'),
+      }),
+    [t]
+  )
 
   const {
     register,
@@ -112,16 +127,16 @@ export default function EditProtocolPage() {
     const draft = restoreDraft()
     if (draft) {
       // Restore all form fields
-      const draftData = draft as any
+      const draftData = draft as Record<string, unknown>
       Object.keys(draftData).forEach((key) => {
         if (key === 'attendees') {
           setAttendees(draftData[key] as string[])
         } else if (key in draftData) {
-          setValue(key as any, draftData[key])
+          setValue(key as keyof ProtocolFormData, draftData[key] as never)
         }
       })
       setShowDraftBanner(false)
-      toast.success('הטיוטה שוחזרה בהצלחה!')
+      toast.success(t('draftRestored'))
     }
   }
 
@@ -129,7 +144,7 @@ export default function EditProtocolPage() {
   const handleDiscardDraft = () => {
     clearDraft()
     setShowDraftBanner(false)
-    toast.success('הטיוטה נמחקה')
+    toast.success(t('draftDiscarded'))
   }
 
   const addAttendee = () => {
@@ -163,8 +178,8 @@ export default function EditProtocolPage() {
         .single()
 
       if (error || !protocol) {
-        toast.error('פרוטוקול לא נמצא')
-        router.push('/admin/protocols')
+        toast.error(t('edit.notFound'))
+        router.push(`/${locale}/protocols`)
         return
       }
 
@@ -185,7 +200,7 @@ export default function EditProtocolPage() {
       setValue('attendees', attendeesList)
     } catch (error) {
       console.error('Error loading protocol:', error)
-      toast.error('שגיאה בטעינת הפרוטוקול')
+      toast.error(t('edit.loadError'))
     } finally {
       setIsLoading(false)
     }
@@ -201,16 +216,16 @@ export default function EditProtocolPage() {
       const result = await response.json()
 
       if (result.success) {
-        toast.success('הפרוטוקול נמחק בהצלחה')
+        toast.success(t('edit.deleteSuccess'))
         setShowDeleteDialog(false)
-        router.push('/he/protocols')
+        router.push(`/${locale}/protocols`)
         router.refresh()
       } else {
-        toast.error(result.error || 'שגיאה במחיקת הפרוטוקול')
+        toast.error(result.error || t('edit.deleteError'))
       }
     } catch (error) {
       console.error('Delete error:', error)
-      toast.error('שגיאה במחיקת הפרוטוקול')
+      toast.error(t('edit.deleteError'))
     } finally {
       setIsDeleting(false)
     }
@@ -218,7 +233,7 @@ export default function EditProtocolPage() {
 
   async function onSubmit(data: ProtocolFormData) {
     if (attendees.length === 0) {
-      toast.error('יש להוסיף לפחות משתתף אחד')
+      toast.error(t('attendeesRequiredToast'))
       return
     }
 
@@ -243,14 +258,14 @@ export default function EditProtocolPage() {
 
       if (result.success) {
         clearDraft() // Clear draft on successful save
-        toast.success('הפרוטוקול עודכן בהצלחה!')
-        router.push(`/he/protocols/${protocolId}`)
+        toast.success(t('edit.toastUpdated'))
+        router.push(`/${locale}/protocols/${protocolId}`)
       } else {
-        toast.error(result.error || 'שגיאה בעדכון הפרוטוקול')
+        toast.error(result.error || t('edit.toastUpdateError'))
       }
     } catch (error) {
       console.error('Error updating protocol:', error)
-      toast.error('שגיאה בעדכון הפרוטוקול')
+      toast.error(t('edit.toastUpdateError'))
     } finally {
       setIsSubmitting(false)
     }
@@ -258,24 +273,19 @@ export default function EditProtocolPage() {
 
   if (isLoading) {
     return (
-      <div className="max-w-4xl mx-auto p-6">
+      <div className="space-y-4">
+        <AdminPageHeader title={t('edit.title')} backHref="/admin/more" />
         <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-gray-200 rounded w-1/3"></div>
-          <div className="h-64 bg-gray-200 rounded"></div>
+          <div className="h-8 w-1/3 rounded bg-gray-200"></div>
+          <div className="h-64 rounded bg-gray-200"></div>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold">עריכת פרוטוקול</h1>
-        <p className="text-muted-foreground mt-2">
-          עדכון פרטי הפרוטוקול
-        </p>
-      </div>
+    <div className="space-y-4">
+      <AdminPageHeader title={t('edit.title')} subtitle={t('edit.subtitle')} backHref="/admin/more" />
 
       {/* Draft Banner */}
       {showDraftBanner && draftTimestamp && (
@@ -287,274 +297,270 @@ export default function EditProtocolPage() {
         />
       )}
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         {/* Basic Information */}
-        <Card>
-          <CardHeader>
-            <CardTitle>פרטי הפרוטוקול</CardTitle>
-            <CardDescription>מידע בסיסי על הישיבה</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
+        <AdminFormSection title={t('detailsTitle')} description={t('detailsDescription')}>
+          <div>
+            <Label htmlFor="title">{t('titleLabel')}</Label>
+            <Input
+              id="title"
+              {...register('title')}
+              placeholder={t('titlePlaceholder')}
+              className={`h-11 ${errors.title ? 'border-red-500' : ''}`}
+            />
+            {errors.title && (
+              <p className="mt-1 text-sm text-red-500">{errors.title.message}</p>
+            )}
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
             <div>
-              <Label htmlFor="title">כותרת הפרוטוקול *</Label>
+              <Label htmlFor="protocol_date">{t('dateLabel')}</Label>
               <Input
-                id="title"
-                {...register('title')}
-                placeholder="לדוגמה: פרוטוקול ישיבת ועד חודש נובמבר"
-                className={errors.title ? 'border-red-500' : ''}
+                id="protocol_date"
+                type="date"
+                {...register('protocol_date')}
+                className={`h-11 ${errors.protocol_date ? 'border-red-500' : ''}`}
               />
-              {errors.title && (
-                <p className="text-sm text-red-500 mt-1">{errors.title.message}</p>
+              {errors.protocol_date && (
+                <p className="mt-1 text-sm text-red-500">{errors.protocol_date.message}</p>
               )}
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2">
-              <div>
-                <Label htmlFor="protocol_date">תאריך הישיבה *</Label>
-                <Input
-                  id="protocol_date"
-                  type="date"
-                  {...register('protocol_date')}
-                  className={errors.protocol_date ? 'border-red-500' : ''}
-                />
-                {errors.protocol_date && (
-                  <p className="text-sm text-red-500 mt-1">{errors.protocol_date.message}</p>
-                )}
-              </div>
-
-              <div>
-                <Label htmlFor="category">סוג הישיבה</Label>
-                <Select
-                  value={selectedCategory}
-                  onValueChange={(value) => setValue('categories', [value])}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categoryOptions.map(option => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+            <div>
+              <Label htmlFor="category">{t('typeLabel')}</Label>
+              <Select
+                value={selectedCategory}
+                onValueChange={(value) => setValue('categories', [value])}
+              >
+                <SelectTrigger className="h-11">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {categoryValues.map(value => (
+                    <SelectItem key={value} value={value}>
+                      {t(`type.${value}`)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
+          </div>
 
-            <div className="flex items-center justify-between p-4 border rounded-lg">
-              <div>
-                <Label htmlFor="is_public">פרוטוקול ציבורי</Label>
-                <p className="text-sm text-muted-foreground">
-                  יוצג לכל ההורים
-                </p>
-              </div>
-              <Switch
-                id="is_public"
-                checked={isPublic}
-                onCheckedChange={(checked) => setValue('is_public', checked)}
-              />
+          <div className="flex items-center justify-between gap-3 rounded-xl border p-3">
+            <div>
+              <Label htmlFor="is_public">{t('publicLabel')}</Label>
+              <p className="text-sm text-muted-foreground">{t('publicHint')}</p>
             </div>
-          </CardContent>
-        </Card>
+            <Switch
+              id="is_public"
+              checked={isPublic}
+              onCheckedChange={(checked) => setValue('is_public', checked)}
+            />
+          </div>
+        </AdminFormSection>
 
         {/* Attendees */}
-        <Card>
-          <CardHeader>
-            <CardTitle>משתתפים *</CardTitle>
-            <CardDescription>רשימת המשתתפים בישיבה</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex gap-2">
-              <Input
-                placeholder="שם המשתתף"
-                value={attendeeInput}
-                onChange={(e) => setAttendeeInput(e.target.value)}
-                onKeyPress={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault()
-                    addAttendee()
-                  }
-                }}
-              />
-              <Button
-                type="button"
-                onClick={addAttendee}
-                variant="outline"
-              >
-                <Plus className="h-4 w-4" />
-                הוסף
-              </Button>
-            </div>
+        <AdminFormSection title={t('attendeesTitle')} description={t('attendeesDescription')}>
+          <div className="flex gap-2">
+            <Input
+              placeholder={t('attendeePlaceholder')}
+              value={attendeeInput}
+              onChange={(e) => setAttendeeInput(e.target.value)}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault()
+                  addAttendee()
+                }
+              }}
+              className="h-11"
+            />
+            <Button
+              type="button"
+              onClick={addAttendee}
+              variant="outline"
+              className="h-11 flex-none"
+            >
+              <Plus className="me-1 h-4 w-4" aria-hidden="true" />
+              {t('addAttendee')}
+            </Button>
+          </div>
 
-            {attendees.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {attendees.map((attendee, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center gap-1 px-3 py-1 bg-secondary rounded-lg"
+          {attendees.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {attendees.map((attendee, index) => (
+                <div
+                  key={index}
+                  className="flex items-center rounded-lg bg-secondary ps-3"
+                >
+                  <span className="text-sm">{attendee}</span>
+                  <button
+                    type="button"
+                    onClick={() => removeAttendee(index)}
+                    aria-label={t('removeAttendee')}
+                    className="flex h-11 w-11 items-center justify-center hover:text-destructive"
                   >
-                    <span className="text-sm">{attendee}</span>
-                    <button
-                      type="button"
-                      onClick={() => removeAttendee(index)}
-                      className="hover:text-destructive"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
+                    <X className="h-4 w-4" aria-hidden="true" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
 
-            {errors.attendees && (
-              <p className="text-sm text-red-500">{errors.attendees.message}</p>
-            )}
-          </CardContent>
-        </Card>
+          {errors.attendees && (
+            <p className="text-sm text-red-500">{errors.attendees.message}</p>
+          )}
+        </AdminFormSection>
 
         {/* Meeting Content */}
-        <Card>
-          <CardHeader>
-            <CardTitle>תוכן הישיבה</CardTitle>
-            <CardDescription>סדר יום, החלטות ומשימות</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <Label htmlFor="agenda">סדר יום</Label>
+        <AdminFormSection title={t('contentTitle')} description={t('contentDescription')}>
+          <div>
+            <div className="mb-2 flex items-center justify-between gap-2">
+              <Label htmlFor="agenda">{t('agendaLabel')}</Label>
+              <div className="flex flex-wrap items-center justify-end gap-2">
+                <AiFormatButton
+                  value={watch('agenda') || ''}
+                  onChange={(value) => setValue('agenda', value)}
+                />
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
                   onClick={() => setTaskDrawerOpen(true)}
-                  className="gap-2"
+                  className="min-h-[44px] gap-2"
                 >
-                  <ClipboardList className="h-4 w-4" />
-                  צפה במשימות
+                  <ClipboardList className="h-4 w-4" aria-hidden="true" />
+                  {t('viewTasks')}
                 </Button>
               </div>
-              <ExpandableTaskMentionTextarea
-                id="agenda"
-                label="סדר יום"
-                value={watch('agenda') || ''}
-                onChange={(value) => setValue('agenda', value)}
-                placeholder="נושאים שנדונו בישיבה... (הקלד @ כדי לקשר משימה)"
-                rows={4}
-              />
             </div>
+            <ExpandableTaskMentionTextarea
+              id="agenda"
+              label={t('agendaLabel')}
+              value={watch('agenda') || ''}
+              onChange={(value) => setValue('agenda', value)}
+              placeholder={t('agendaPlaceholder')}
+              rows={4}
+            />
+          </div>
 
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <Label htmlFor="decisions">החלטות</Label>
+          <div>
+            <div className="mb-2 flex items-center justify-between gap-2">
+              <Label htmlFor="decisions">{t('decisionsLabel')}</Label>
+              <div className="flex flex-wrap items-center justify-end gap-2">
+                <AiFormatButton
+                  value={watch('decisions') || ''}
+                  onChange={(value) => setValue('decisions', value)}
+                />
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
                   onClick={() => setTaskDrawerOpen(true)}
-                  className="gap-2"
+                  className="min-h-[44px] gap-2"
                 >
-                  <ClipboardList className="h-4 w-4" />
-                  צפה במשימות
+                  <ClipboardList className="h-4 w-4" aria-hidden="true" />
+                  {t('viewTasks')}
                 </Button>
               </div>
-              <ExpandableTaskMentionTextarea
-                id="decisions"
-                label="החלטות"
-                value={watch('decisions') || ''}
-                onChange={(value) => setValue('decisions', value)}
-                placeholder="החלטות שהתקבלו בישיבה... (הקלד @ כדי לקשר משימה)"
-                rows={4}
-              />
             </div>
+            <ExpandableTaskMentionTextarea
+              id="decisions"
+              label={t('decisionsLabel')}
+              value={watch('decisions') || ''}
+              onChange={(value) => setValue('decisions', value)}
+              placeholder={t('decisionsPlaceholder')}
+              rows={4}
+            />
+          </div>
 
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <Label htmlFor="action_items">משימות לביצוע</Label>
+          <div>
+            <div className="mb-2 flex items-center justify-between gap-2">
+              <Label htmlFor="action_items">{t('actionItemsLabel')}</Label>
+              <div className="flex flex-wrap items-center justify-end gap-2">
+                <AiFormatButton
+                  value={watch('action_items') || ''}
+                  onChange={(value) => setValue('action_items', value)}
+                />
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
                   onClick={() => setTaskDrawerOpen(true)}
-                  className="gap-2"
+                  className="min-h-[44px] gap-2"
                 >
-                  <ClipboardList className="h-4 w-4" />
-                  צפה במשימות
+                  <ClipboardList className="h-4 w-4" aria-hidden="true" />
+                  {t('viewTasks')}
                 </Button>
               </div>
-              <ExpandableTaskMentionTextarea
-                id="action_items"
-                label="משימות לביצוע"
-                value={watch('action_items') || ''}
-                onChange={(value) => setValue('action_items', value)}
-                placeholder="משימות שנקבעו בישיבה... (הקלד @ כדי לקשר משימה)"
-                rows={4}
-              />
             </div>
-            <p className="text-xs text-muted-foreground">
-              לחץ על &quot;צפה במשימות&quot; לראות את כל המשימות בפרויקט
-            </p>
+            <ExpandableTaskMentionTextarea
+              id="action_items"
+              label={t('actionItemsLabel')}
+              value={watch('action_items') || ''}
+              onChange={(value) => setValue('action_items', value)}
+              placeholder={t('actionItemsPlaceholder')}
+              rows={4}
+            />
+          </div>
+          <p className="text-xs text-muted-foreground">{t('tasksHint')}</p>
 
-            <div>
-              <Label htmlFor="extracted_text">תוכן מעוצב (HTML)</Label>
-              <ExpandableTextarea
-                id="extracted_text"
-                label="תוכן מעוצב (HTML)"
-                value={watch('extracted_text') || ''}
-                onChange={(e) => setValue('extracted_text', e.target.value)}
-                placeholder="תוכן HTML מעוצב..."
-                minRows={8}
-                maxRows={30}
-                className="font-mono text-sm"
-              />
-              <p className="text-xs text-muted-foreground mt-1">
-                תוכן זה מוצג בעמוד הפרוטוקול. ניתן לערוך ידנית או להעלות קובץ חדש.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+          <div>
+            <Label htmlFor="extracted_text">{t('edit.htmlLabel')}</Label>
+            <ExpandableTextarea
+              id="extracted_text"
+              label={t('edit.htmlLabel')}
+              value={watch('extracted_text') || ''}
+              onChange={(e) => setValue('extracted_text', e.target.value)}
+              placeholder={t('edit.htmlPlaceholder')}
+              minRows={8}
+              maxRows={30}
+              className="font-mono text-sm"
+            />
+            <p className="mt-1 text-xs text-muted-foreground">{t('edit.htmlHint')}</p>
+          </div>
+        </AdminFormSection>
 
         {/* Actions */}
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-2">
           {/* Draft Save Indicator */}
           <div className="flex items-center justify-start">
             <DraftSaveIndicator lastSaved={lastSaved} isSaving={isSaving} />
           </div>
-          <div className="flex gap-4">
-            <Button
-              type="submit"
-              disabled={isSubmitting || isDeleting}
-              className="flex-1"
-            >
-              {isSubmitting ? (
-                <>טוען...</>
-              ) : (
-                <>
-                  <Save className="h-4 w-4 ml-2" />
-                  שמור שינויים
-                </>
-              )}
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => router.back()}
-              disabled={isSubmitting || isDeleting}
-            >
-              ביטול
-            </Button>
-          </div>
+          <Button
+            type="submit"
+            disabled={isSubmitting || isDeleting}
+            className="h-11 w-full bg-[#003153] text-white hover:bg-[#003153]/90"
+          >
+            {isSubmitting ? (
+              <>{tc('loading')}</>
+            ) : (
+              <>
+                <Save className="me-2 h-4 w-4" aria-hidden="true" />
+                {t('edit.submit')}
+              </>
+            )}
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => router.back()}
+            disabled={isSubmitting || isDeleting}
+            className="h-11 w-full"
+          >
+            {tc('cancel')}
+          </Button>
 
           {/* Delete Button */}
           <Button
             type="button"
             variant="destructive"
             disabled={isDeleting || isSubmitting}
-            className="w-full"
+            className="mt-2 h-11 w-full"
             onClick={() => setShowDeleteDialog(true)}
           >
-            <Trash2 className="h-4 w-4 ml-2" />
-            מחק פרוטוקול
+            <Trash2 className="me-2 h-4 w-4" aria-hidden="true" />
+            {t('edit.deleteButton')}
           </Button>
         </div>
       </form>
@@ -563,23 +569,23 @@ export default function EditProtocolPage() {
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>האם אתה בטוח?</AlertDialogTitle>
-            <AlertDialogDescription className="text-right">
-              פעולה זו תמחק את הפרוטוקול &quot;{protocolTitle}&quot; לצמיתות.
+            <AlertDialogTitle>{t('edit.deleteTitle')}</AlertDialogTitle>
+            <AlertDialogDescription className="text-start">
+              {t('edit.deleteText', { title: protocolTitle })}
               <br />
-              לא ניתן לשחזר פרוטוקול לאחר מחיקה.
+              {t('edit.deleteNoUndo')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex-row-reverse gap-2">
             <AlertDialogCancel onClick={() => setShowDeleteDialog(false)}>
-              ביטול
+              {tc('cancel')}
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
               disabled={isDeleting}
               variant="destructive"
             >
-              {isDeleting ? 'מוחק...' : 'מחק'}
+              {isDeleting ? t('edit.deleting') : tc('delete')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

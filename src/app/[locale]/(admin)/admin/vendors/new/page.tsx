@@ -1,9 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Store, Save, Phone, Mail, Globe, MapPin } from 'lucide-react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { useTranslations } from 'next-intl'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -13,57 +13,63 @@ import { toast } from 'sonner'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+import { AdminFormSection, AdminPageHeader } from '@/components/features/admin'
 
-const vendorSchema = z.object({
-  name: z.string().min(2, 'שם הספק חייב להכיל לפחות 2 תווים'),
-  description: z.string().optional(),
-  category: z.enum(['catering', 'equipment', 'entertainment', 'transportation', 'venue', 'photography', 'printing', 'other']),
-  contact_person: z.string().optional(),
-  phone: z.string().regex(/^05\d{8}$/, 'מספר טלפון לא תקין').optional().or(z.literal('')),
-  email: z.string().email('כתובת אימייל לא תקינה').optional().or(z.literal('')),
-  website: z.string().url('כתובת אתר לא תקינה').optional().or(z.literal('')),
-  address: z.string().optional(),
-  business_number: z.string().optional(),
-  license_number: z.string().optional(),
-  price_range: z.string().optional(),
-  payment_terms: z.string().optional(),
-  notes: z.string().optional()
-})
+const categoryKeys = [
+  'catering',
+  'equipment',
+  'entertainment',
+  'transportation',
+  'venue',
+  'photography',
+  'printing',
+  'other',
+] as const
 
-type VendorFormData = z.infer<typeof vendorSchema>
+const priceRangeKeys = ['budget', 'moderate', 'premium', 'luxury'] as const
 
-const categoryLabels: Record<string, string> = {
-  catering: 'קייטרינג',
-  equipment: 'ציוד',
-  entertainment: 'בידור',
-  transportation: 'הסעות',
-  venue: 'אולמות',
-  photography: 'צילום',
-  printing: 'הדפסה',
-  other: 'אחר'
-}
-
-const priceRanges = [
-  { value: 'budget', label: 'חסכוני (₪)' },
-  { value: 'moderate', label: 'בינוני (₪₪)' },
-  { value: 'premium', label: 'פרימיום (₪₪₪)' },
-  { value: 'luxury', label: 'יוקרה (₪₪₪₪)' }
-]
+type VendorCategory = (typeof categoryKeys)[number]
 
 export default function NewVendorPage() {
+  const t = useTranslations('admin.org.vendors')
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const vendorSchema = useMemo(
+    () =>
+      z.object({
+        name: z.string().min(2, t('form.validation.nameMin')),
+        description: z.string().optional(),
+        category: z.enum(categoryKeys),
+        contact_person: z.string().optional(),
+        phone: z
+          .string()
+          .regex(/^05\d{8}$/, t('form.validation.phoneInvalid'))
+          .optional()
+          .or(z.literal('')),
+        email: z.string().email(t('form.validation.emailInvalid')).optional().or(z.literal('')),
+        website: z.string().url(t('form.validation.websiteInvalid')).optional().or(z.literal('')),
+        address: z.string().optional(),
+        business_number: z.string().optional(),
+        license_number: z.string().optional(),
+        price_range: z.string().optional(),
+        payment_terms: z.string().optional(),
+        notes: z.string().optional(),
+      }),
+    [t]
+  )
+  type VendorFormData = z.infer<typeof vendorSchema>
 
   const {
     register,
     handleSubmit,
     setValue,
-    formState: { errors }
+    formState: { errors },
   } = useForm<VendorFormData>({
     resolver: zodResolver(vendorSchema),
     defaultValues: {
-      category: 'other'
-    }
+      category: 'other',
+    },
   })
 
   async function onSubmit(data: VendorFormData) {
@@ -82,261 +88,249 @@ export default function NewVendorPage() {
         price_range: data.price_range || null,
         payment_terms: data.payment_terms || null,
         notes: data.notes || null,
-        status: 'active'
+        status: 'active',
       }
 
       const response = await fetch('/api/vendors', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify(vendorData)
+        body: JSON.stringify(vendorData),
       })
 
       const result = await response.json()
 
       if (result.success) {
-        toast.success('הספק נוצר בהצלחה!')
+        toast.success(t('form.toast.created'))
         router.push('/admin/vendors')
       } else {
-        toast.error(result.error || 'שגיאה ביצירת הספק')
+        toast.error(result.error || t('form.toast.createError'))
       }
     } catch (error) {
       console.error('Error creating vendor:', error)
-      toast.error('שגיאה ביצירת הספק')
+      toast.error(t('form.toast.createError'))
     } finally {
       setIsSubmitting(false)
     }
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 px-4 py-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl md:text-3xl font-bold">הוספת ספק חדש</h1>
-        <p className="text-muted-foreground mt-2">
-          הוסף ספק או נותן שירות למאגר
-        </p>
-      </div>
+    <div>
+      <AdminPageHeader
+        title={t('form.newTitle')}
+        subtitle={t('form.newSubtitle')}
+        backHref="/admin/vendors"
+      />
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         {/* Basic Information */}
-        <Card>
-          <CardHeader>
-            <CardTitle>פרטי הספק</CardTitle>
-            <CardDescription>מידע בסיסי על הספק</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="name">שם הספק *</Label>
-              <div className="relative">
-                <Store className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="name"
-                  {...register('name')}
-                  placeholder="לדוגמה: קייטרינג הזהב"
-                  className={`pr-10 ${errors.name ? 'border-red-500' : ''}`}
-                />
-              </div>
-              {errors.name && (
-                <p className="text-sm text-red-500 mt-1">{errors.name.message}</p>
-              )}
-            </div>
-
-            <div>
-              <Label htmlFor="description">תיאור</Label>
-              <Textarea
-                id="description"
-                {...register('description')}
-                placeholder="תיאור הספק והשירותים שהוא מציע..."
-                rows={4}
+        <AdminFormSection title={t('form.detailsTitle')} description={t('form.detailsDescription')}>
+          <div>
+            <Label htmlFor="name">{t('form.nameLabel')}</Label>
+            <div className="relative">
+              <Store
+                className="absolute start-3 top-3.5 h-4 w-4 text-muted-foreground"
+                aria-hidden="true"
+              />
+              <Input
+                id="name"
+                {...register('name')}
+                placeholder={t('form.namePlaceholder')}
+                className={`ps-10 ${errors.name ? 'border-red-500' : ''}`}
               />
             </div>
+            {errors.name && <p className="text-sm text-red-500 mt-1">{errors.name.message}</p>}
+          </div>
 
-            <div className="grid gap-4 md:grid-cols-2">
-              <div>
-                <Label htmlFor="category">קטגוריה *</Label>
-                <Select
-                  onValueChange={(value) => setValue('category', value as any)}
-                  defaultValue="other"
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Object.entries(categoryLabels).map(([value, label]) => (
-                      <SelectItem key={value} value={value}>
-                        {label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+          <div>
+            <Label htmlFor="description">{t('form.descriptionLabel')}</Label>
+            <Textarea
+              id="description"
+              {...register('description')}
+              placeholder={t('form.descriptionPlaceholder')}
+              rows={4}
+            />
+          </div>
 
-              <div>
-                <Label htmlFor="price_range">טווח מחירים</Label>
-                <Select onValueChange={(value) => setValue('price_range', value)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="בחר טווח מחירים (אופציונלי)..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {priceRanges.map((range) => (
-                      <SelectItem key={range.value} value={range.value}>
-                        {range.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <Label htmlFor="category">{t('form.categoryLabel')}</Label>
+              <Select
+                onValueChange={(value) => setValue('category', value as VendorCategory)}
+                defaultValue="other"
+              >
+                <SelectTrigger id="category">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {categoryKeys.map((value) => (
+                    <SelectItem key={value} value={value}>
+                      {t(`categories.${value}`)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
-          </CardContent>
-        </Card>
+
+            <div>
+              <Label htmlFor="price_range">{t('form.priceRangeLabel')}</Label>
+              <Select onValueChange={(value) => setValue('price_range', value)}>
+                <SelectTrigger id="price_range">
+                  <SelectValue placeholder={t('form.priceRangePlaceholder')} />
+                </SelectTrigger>
+                <SelectContent>
+                  {priceRangeKeys.map((value) => (
+                    <SelectItem key={value} value={value}>
+                      {t(`priceRanges.${value}`)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </AdminFormSection>
 
         {/* Contact Information */}
-        <Card>
-          <CardHeader>
-            <CardTitle>פרטי התקשרות</CardTitle>
-            <CardDescription>איך ליצור קשר עם הספק</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="contact_person">איש קשר</Label>
+        <AdminFormSection title={t('form.contactTitle')} description={t('form.contactDescription')}>
+          <div>
+            <Label htmlFor="contact_person">{t('form.contactPersonLabel')}</Label>
+            <Input
+              id="contact_person"
+              {...register('contact_person')}
+              placeholder={t('form.contactPersonPlaceholder')}
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="phone">{t('form.phoneLabel')}</Label>
+            <div className="relative" dir="ltr">
+              <Phone
+                className="absolute start-3 top-3.5 h-4 w-4 text-muted-foreground"
+                aria-hidden="true"
+              />
               <Input
-                id="contact_person"
-                {...register('contact_person')}
-                placeholder="שם איש הקשר"
+                id="phone"
+                {...register('phone')}
+                placeholder="050-1234567"
+                className={`ps-10 ${errors.phone ? 'border-red-500' : ''}`}
+                dir="ltr"
               />
             </div>
+            {errors.phone && <p className="text-sm text-red-500 mt-1">{errors.phone.message}</p>}
+          </div>
 
-            <div>
-              <Label htmlFor="phone">טלפון</Label>
-              <div className="relative">
-                <Phone className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="phone"
-                  {...register('phone')}
-                  placeholder="050-1234567"
-                  className={`pr-10 ${errors.phone ? 'border-red-500' : ''}`}
-                  dir="ltr"
-                />
-              </div>
-              {errors.phone && (
-                <p className="text-sm text-red-500 mt-1">{errors.phone.message}</p>
-              )}
+          <div>
+            <Label htmlFor="email">{t('form.emailLabel')}</Label>
+            <div className="relative" dir="ltr">
+              <Mail
+                className="absolute start-3 top-3.5 h-4 w-4 text-muted-foreground"
+                aria-hidden="true"
+              />
+              <Input
+                id="email"
+                type="email"
+                {...register('email')}
+                placeholder="supplier@example.com"
+                className={`ps-10 ${errors.email ? 'border-red-500' : ''}`}
+                dir="ltr"
+              />
             </div>
+            {errors.email && <p className="text-sm text-red-500 mt-1">{errors.email.message}</p>}
+          </div>
 
-            <div>
-              <Label htmlFor="email">אימייל</Label>
-              <div className="relative">
-                <Mail className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="email"
-                  type="email"
-                  {...register('email')}
-                  placeholder="supplier@example.com"
-                  className={`pr-10 ${errors.email ? 'border-red-500' : ''}`}
-                  dir="ltr"
-                />
-              </div>
-              {errors.email && (
-                <p className="text-sm text-red-500 mt-1">{errors.email.message}</p>
-              )}
+          <div>
+            <Label htmlFor="website">{t('form.websiteLabel')}</Label>
+            <div className="relative" dir="ltr">
+              <Globe
+                className="absolute start-3 top-3.5 h-4 w-4 text-muted-foreground"
+                aria-hidden="true"
+              />
+              <Input
+                id="website"
+                {...register('website')}
+                placeholder="https://example.com"
+                className={`ps-10 ${errors.website ? 'border-red-500' : ''}`}
+                dir="ltr"
+              />
             </div>
+            {errors.website && (
+              <p className="text-sm text-red-500 mt-1">{errors.website.message}</p>
+            )}
+          </div>
 
-            <div>
-              <Label htmlFor="website">אתר אינטרנט</Label>
-              <div className="relative">
-                <Globe className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="website"
-                  {...register('website')}
-                  placeholder="https://example.com"
-                  className={`pr-10 ${errors.website ? 'border-red-500' : ''}`}
-                  dir="ltr"
-                />
-              </div>
-              {errors.website && (
-                <p className="text-sm text-red-500 mt-1">{errors.website.message}</p>
-              )}
+          <div>
+            <Label htmlFor="address">{t('form.addressLabel')}</Label>
+            <div className="relative">
+              <MapPin
+                className="absolute start-3 top-3.5 h-4 w-4 text-muted-foreground"
+                aria-hidden="true"
+              />
+              <Input
+                id="address"
+                {...register('address')}
+                placeholder={t('form.addressPlaceholder')}
+                className="ps-10"
+              />
             </div>
-
-            <div>
-              <Label htmlFor="address">כתובת</Label>
-              <div className="relative">
-                <MapPin className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="address"
-                  {...register('address')}
-                  placeholder="כתובת מלאה"
-                  className="pr-10"
-                />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+          </div>
+        </AdminFormSection>
 
         {/* Business Details */}
-        <Card>
-          <CardHeader>
-            <CardTitle>פרטים עסקיים</CardTitle>
-            <CardDescription>מידע עסקי ומשפטי</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2">
-              <div>
-                <Label htmlFor="business_number">ח.פ / ע.מ</Label>
-                <Input
-                  id="business_number"
-                  {...register('business_number')}
-                  placeholder="מספר עוסק מורשה"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="license_number">מספר רישיון</Label>
-                <Input
-                  id="license_number"
-                  {...register('license_number')}
-                  placeholder="מספר רישיון עסק"
-                />
-              </div>
-            </div>
-
+        <AdminFormSection
+          title={t('form.businessTitle')}
+          description={t('form.businessDescription')}
+        >
+          <div className="grid gap-4 md:grid-cols-2">
             <div>
-              <Label htmlFor="payment_terms">תנאי תשלום</Label>
-              <Textarea
-                id="payment_terms"
-                {...register('payment_terms')}
-                placeholder="לדוגמה: תשלום מראש, שוטף+30, וכו'"
-                rows={3}
+              <Label htmlFor="business_number">{t('form.businessNumberLabel')}</Label>
+              <Input
+                id="business_number"
+                {...register('business_number')}
+                placeholder={t('form.businessNumberPlaceholder')}
               />
             </div>
 
             <div>
-              <Label htmlFor="notes">הערות</Label>
-              <Textarea
-                id="notes"
-                {...register('notes')}
-                placeholder="הערות נוספות על הספק..."
-                rows={3}
+              <Label htmlFor="license_number">{t('form.licenseNumberLabel')}</Label>
+              <Input
+                id="license_number"
+                {...register('license_number')}
+                placeholder={t('form.licenseNumberPlaceholder')}
               />
             </div>
-          </CardContent>
-        </Card>
+          </div>
+
+          <div>
+            <Label htmlFor="payment_terms">{t('form.paymentTermsLabel')}</Label>
+            <Textarea
+              id="payment_terms"
+              {...register('payment_terms')}
+              placeholder={t('form.paymentTermsPlaceholder')}
+              rows={3}
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="notes">{t('form.notesLabel')}</Label>
+            <Textarea
+              id="notes"
+              {...register('notes')}
+              placeholder={t('form.notesPlaceholder')}
+              rows={3}
+            />
+          </div>
+        </AdminFormSection>
 
         {/* Actions */}
-        <div className="flex flex-col sm:flex-row gap-3">
-          <Button
-            type="submit"
-            disabled={isSubmitting}
-            className="flex-1"
-          >
+        <div className="flex flex-col gap-3">
+          <Button type="submit" disabled={isSubmitting} className="min-h-[44px] w-full">
             {isSubmitting ? (
-              <>טוען...</>
+              <>{t('form.saving')}</>
             ) : (
               <>
-                <Save className="h-4 w-4 ml-2" />
-                צור ספק
+                <Save className="h-4 w-4 me-2" />
+                {t('form.submit')}
               </>
             )}
           </Button>
@@ -344,9 +338,9 @@ export default function NewVendorPage() {
             type="button"
             variant="outline"
             onClick={() => router.back()}
-            className="sm:w-auto"
+            className="min-h-[44px] w-full"
           >
-            ביטול
+            {t('form.cancel')}
           </Button>
         </div>
       </form>

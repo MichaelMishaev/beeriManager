@@ -9,7 +9,7 @@ import { validateInput } from '@/lib/ai/input-validator'
 import { analyzeFailure, formatErrorMessage, type FailureType } from '@/lib/ai/error-analyzer'
 import { getContextualExamples, type Example } from '@/lib/ai/examples'
 import ManualEventForm from './ManualEventForm'
-import { RATE_LIMITS, type UsageStats } from '@/lib/ai/rate-limiter'
+import { RATE_LIMITS } from '@/lib/ai/rate-limiter'
 import { trackAIInteraction, EventAction } from '@/lib/analytics'
 import { logger } from '@/lib/logger'
 
@@ -63,7 +63,6 @@ export default function AIChatModal({ isOpen, onClose }: AIChatModalProps) {
   const [manualFormType, setManualFormType] = useState<'event' | 'urgent_message'>('event')
 
   // Phase 3: Rate limiting
-  const [usageStats, setUsageStats] = useState<UsageStats | null>(null)
   const [characterCount, setCharacterCount] = useState(0)
 
   // Summarize feature
@@ -87,26 +86,8 @@ export default function AIChatModal({ isOpen, onClose }: AIChatModalProps) {
     if (isOpen && messages.length === 0) {
       trackAIInteraction(EventAction.AI_CHAT_OPEN, 'AI Chat Modal Opened')
       initializeChat()
-      fetchUsageStats()
     }
   }, [isOpen])
-
-  // Fetch usage stats
-  const fetchUsageStats = async () => {
-    try {
-      const response = await fetch('/api/ai-assistant/check-limit')
-      const data = await response.json()
-      if (data.success && data.stats) {
-        setUsageStats(data.stats)
-      }
-    } catch (error) {
-      logger.error('Failed to fetch usage stats', {
-        component: 'AIChatModal',
-        action: 'fetch_stats',
-        error,
-      })
-    }
-  }
 
   const handleSummarize = async () => {
     if (!input.trim() || isSummarizing) return
@@ -462,26 +443,6 @@ ${conversationContext.originalMessage}
       })
 
       const data = await response.json()
-
-      // Refresh usage stats after API call
-      if (data.stats) {
-        setUsageStats(data.stats)
-      } else {
-        fetchUsageStats()
-      }
-
-      // Handle rate limit errors
-      if (data.rateLimitReached) {
-        setMessages((prev) => [
-          ...prev,
-          {
-            role: 'assistant',
-            content: data.error || 'הגעת למגבלה היומית',
-          },
-        ])
-        setIsLoading(false)
-        return
-      }
 
       // Handle message too long errors
       if (data.messageTooLong) {
@@ -857,7 +818,7 @@ ${conversationContext.originalMessage}
             </div>
             <div>
               <h2 className="text-lg font-bold">עוזר AI - הוספה מהירה</h2>
-              <p className="text-sm text-white/80">מופעל על ידי GPT-5 Mini</p>
+              <p className="text-sm text-white/80">מופעל על ידי GPT-6.1 Terra</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -1005,11 +966,6 @@ ${conversationContext.originalMessage}
           </div>
           <div className="mt-2 flex items-center justify-between text-xs">
             <div className="text-gray-500 text-left" dir="ltr">
-              {usageStats && (
-                <span className={usageStats.remaining <= 5 ? 'text-orange-500 font-medium' : ''}>
-                  📊 {usageStats.remaining}/{usageStats.dailyLimit} שימושים
-                </span>
-              )}
             </div>
             <div className="text-right">
               <span className={characterCount > RATE_LIMITS.MAX_MESSAGE_LENGTH ? 'text-red-500 font-medium' : characterCount > RATE_LIMITS.MAX_MESSAGE_LENGTH * 0.9 ? 'text-orange-500' : 'text-gray-500'}>

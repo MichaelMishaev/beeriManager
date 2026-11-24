@@ -11,18 +11,19 @@ test.describe('Admin Features', () => {
   test('should access admin dashboard', async ({ page }) => {
     const hebrewHelper = new HebrewHelper(page);
 
-    await page.goto('/admin');
+    await page.goto('/he/admin');
 
-    // Check admin dashboard
-    await hebrewHelper.verifyHebrewText('h1', 'פאנל ניהול');
+    // Hub title
+    await hebrewHelper.verifyHebrewText('[data-testid="admin-header-title"]', 'ניהול');
 
-    // Should display statistics
-    await expect(page.locator('[data-testid="stats-upcoming-events"]')).toBeVisible();
-    await expect(page.locator('[data-testid="stats-pending-tasks"]')).toBeVisible();
-    await expect(page.locator('[data-testid="stats-pending-expenses"]')).toBeVisible();
+    // The hub shows the four jobs plus "more tools" (the old stats row, with the
+    // stats-* test ids, no longer exists; those ids were never in the app)
+    for (const row of ['events', 'highlights', 'tickets', 'inbox', 'more']) {
+      await expect(page.locator(`[data-testid="hub-row-${row}"]`)).toBeVisible();
+    }
 
-    // Should have admin navigation
-    await expect(page.locator('[data-testid="admin-nav"]')).toBeVisible();
+    // Admin navigation is the bottom bar (the "admin-nav" test id was never in the app)
+    await expect(page.locator('[data-testid="admin-bottom-bar"]')).toBeVisible();
   });
 
   test('should create new event', async ({ page }) => {
@@ -147,27 +148,16 @@ test.describe('Admin Features', () => {
   });
 
   test('should view feedback', async ({ page }) => {
-    await page.goto('/admin/feedback');
+    // /admin/feedback redirects to the parents inbox; feedback is its first tab
+    await page.goto('/he/admin/feedback');
+    await expect(page).toHaveURL(/\/he\/admin\/inbox\?tab=feedback/);
 
-    // Should display feedback list
-    await expect(page.locator('[data-testid="feedback-list"]')).toBeVisible();
+    await expect(page.locator('[data-testid="admin-tab-feedback"]')).toHaveAttribute('aria-selected', 'true');
+    await expect(page.locator('[data-testid="inbox-panel-feedback"]')).toBeVisible();
 
-    // Find unread feedback (if any)
-    const unreadFeedback = page.locator('[data-status="new"]').first();
-
-    if (await unreadFeedback.isVisible()) {
-      // Click to read
-      await unreadFeedback.click();
-
-      // Should open feedback detail
-      await expect(page.locator('[data-testid="feedback-detail"]')).toBeVisible();
-
-      // Mark as reviewed
-      await page.click('[data-testid="mark-reviewed"]');
-
-      // Should update status
-      await expect(page.locator('.toast-success')).toContainText('הודעה סומנה כנקראה');
-    }
+    // NOTE: the old steps clicked an unread item and a "mark-reviewed" button. Those test ids
+    // (feedback-list, feedback-detail, mark-reviewed) never existed in the app, and clicking a
+    // "new" item marks it read in the real database, so that flow is intentionally not covered here.
   });
 
   test('should export data', async ({ page }) => {

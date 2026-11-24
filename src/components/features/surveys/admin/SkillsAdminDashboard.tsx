@@ -2,22 +2,34 @@
 
 import { useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { useLocale, useTranslations } from 'next-intl'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Download, Search, X, Loader2 } from 'lucide-react'
 import { useDebounce } from '@/hooks/useDebounce'
+import { AdminFormSection } from '@/components/features/admin'
 import { SkillsResponsesTable } from './SkillsResponsesTable'
 import { SkillsStatsCards } from './SkillsStatsCards'
-import type { SkillResponseFilters, SkillResponsesListResponse } from '@/types/parent-skills'
-import { CONTACT_PREFERENCES } from '@/types/parent-skills'
-import { getSortedSkillsWithNames } from '@/lib/utils/skills-sorting'
+import type {
+  ContactPreference,
+  SkillCategory,
+  SkillResponseFilters,
+  SkillResponsesListResponse,
+} from '@/types/parent-skills'
+import { CONTACT_PREFERENCES, SKILL_CATEGORIES } from '@/types/parent-skills'
 
 export function SkillsAdminDashboard() {
+  const t = useTranslations('admin.inbox.survey')
+  const locale = useLocale()
   const [filters, setFilters] = useState<SkillResponseFilters>({})
   const [searchInput, setSearchInput] = useState('')
   const debouncedSearch = useDebounce(searchInput, 300)
+
+  // Skills sorted alphabetically in the active language (Hebrew order in he, as before)
+  const sortedSkills = SKILL_CATEGORIES.map((value) => ({ value, label: t(`skills.${value}`) })).sort((a, b) =>
+    a.label.localeCompare(b.label, locale)
+  )
 
   // Update filters when debounced search changes
   useEffect(() => {
@@ -62,106 +74,97 @@ export function SkillsAdminDashboard() {
       window.URL.revokeObjectURL(url)
     } catch (error) {
       console.error('Export error:', error)
-      alert('שגיאה ביצוא הנתונים')
+      alert(t('exportError'))
     }
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold">מאגר מיומנויות הורים</h1>
-          <p className="text-gray-600 mt-1">ניהול תשובות וחיפוש מתנדבים</p>
-        </div>
-        <Button onClick={handleExport} variant="outline" className="gap-2">
-          <Download className="h-4 w-4" />
-          ייצא לאקסל
-        </Button>
-      </div>
+    <div className="space-y-4">
+      {/* Export */}
+      <Button onClick={handleExport} variant="outline" className="min-h-[44px] w-full gap-2 bg-white sm:w-auto">
+        <Download className="h-4 w-4" aria-hidden="true" />
+        {t('export')}
+      </Button>
 
       {/* Statistics Cards */}
       {data?.stats && <SkillsStatsCards stats={data.stats} />}
 
       {/* Filters */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-xl">חיפוש וסינון</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Search by name/notes/phone */}
-            <div className="relative">
-              <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
-              <Input
-                placeholder="חיפוש לפי שם, טלפון, הערות..."
-                value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
-                className="pr-10 text-right"
-              />
-              {searchInput && (
-                <button
-                  onClick={() => setSearchInput('')}
-                  type="button"
-                  className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                  aria-label="נקה חיפוש"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              )}
-              {debouncedSearch && debouncedSearch !== searchInput && (
-                <div className="absolute -bottom-5 right-0 text-xs text-gray-500 flex items-center gap-1">
-                  <Loader2 className="h-3 w-3 animate-spin" />
-                  <span>מחפש...</span>
-                </div>
-              )}
-            </div>
-
-            {/* Filter by skill */}
-            <Select
-              value={filters.skill || 'all'}
-              onValueChange={(value) => setFilters({ ...filters, skill: value === 'all' ? undefined : (value as any) })}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="כל המיומנויות" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">כל המיומנויות</SelectItem>
-                {getSortedSkillsWithNames().map(({ value, label }) => (
-                  <SelectItem key={value} value={value}>
-                    {label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            {/* Filter by contact preference */}
-            <Select
-              value={filters.contact_preference || 'all'}
-              onValueChange={(value) =>
-                setFilters({ ...filters, contact_preference: value === 'all' ? undefined : (value as any) })
-              }
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="כל אמצעי יצירת הקשר" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">כל אמצעי יצירת הקשר</SelectItem>
-                {CONTACT_PREFERENCES.map((pref) => (
-                  <SelectItem key={pref} value={pref}>
-                    {pref === 'phone' && 'טלפון'}
-                    {pref === 'email' && 'אימייל'}
-                    {pref === 'whatsapp' && 'WhatsApp'}
-                    {pref === 'any' && 'כל אמצעי'}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+      <AdminFormSection title={t('filterTitle')}>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          {/* Search by name/notes/phone */}
+          <div className="relative">
+            <Search className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" aria-hidden="true" />
+            <Input
+              placeholder={t('searchPlaceholder')}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              className="ps-10 text-start"
+            />
+            {searchInput && (
+              <button
+                onClick={() => setSearchInput('')}
+                type="button"
+                className="absolute end-2 top-1/2 -translate-y-1/2 text-gray-400 transition-colors hover:text-gray-600"
+                aria-label={t('clearSearch')}
+              >
+                <X className="h-4 w-4" aria-hidden="true" />
+              </button>
+            )}
+            {debouncedSearch && debouncedSearch !== searchInput && (
+              <div className="absolute -bottom-5 start-0 flex items-center gap-1 text-xs text-gray-500">
+                <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" />
+                <span>{t('searching')}</span>
+              </div>
+            )}
           </div>
-        </CardContent>
-      </Card>
 
-      {/* Results Table */}
+          {/* Filter by skill */}
+          <Select
+            value={filters.skill || 'all'}
+            onValueChange={(value) =>
+              setFilters({ ...filters, skill: value === 'all' ? undefined : (value as SkillCategory) })
+            }
+          >
+            <SelectTrigger>
+              <SelectValue placeholder={t('allSkills')} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{t('allSkills')}</SelectItem>
+              {sortedSkills.map(({ value, label }) => (
+                <SelectItem key={value} value={value}>
+                  {label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {/* Filter by contact preference */}
+          <Select
+            value={filters.contact_preference || 'all'}
+            onValueChange={(value) =>
+              setFilters({
+                ...filters,
+                contact_preference: value === 'all' ? undefined : (value as ContactPreference),
+              })
+            }
+          >
+            <SelectTrigger>
+              <SelectValue placeholder={t('allContacts')} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{t('allContacts')}</SelectItem>
+              {CONTACT_PREFERENCES.map((pref) => (
+                <SelectItem key={pref} value={pref}>
+                  {t(`contact.${pref}`)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </AdminFormSection>
+
+      {/* Results */}
       <SkillsResponsesTable responses={data?.data || []} isLoading={isLoading} onResponseDeleted={() => refetch()} />
     </div>
   )

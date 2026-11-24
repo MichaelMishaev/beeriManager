@@ -2,12 +2,13 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Plus, Edit2, Trash2, AlertTriangle } from 'lucide-react'
+import { Plus, Edit2, Trash2, AlertTriangle, Tags as TagsIcon } from 'lucide-react'
+import { useTranslations } from 'next-intl'
+import { AdminEmptyState, AdminGroup, AdminPageHeader } from '@/components/features/admin'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   Dialog,
   DialogContent,
@@ -37,6 +38,7 @@ interface TagManagerProps {
 
 export function TagManager({ tags, onRefresh }: TagManagerProps) {
   const router = useRouter()
+  const t = useTranslations('admin.tasks.tags')
   const [editingTag, setEditingTag] = useState<TagType | null>(null)
   const [deletingTag, setDeletingTag] = useState<TagType | null>(null)
   const [showCreateDialog, setShowCreateDialog] = useState(false)
@@ -103,11 +105,11 @@ export function TagManager({ tags, onRefresh }: TagManagerProps) {
         resetForm()
         refreshData()
       } else {
-        alert(result.error || 'שגיאה ביצירת התגית')
+        alert(result.error || t('createError'))
       }
     } catch (error) {
       console.error('Error creating tag:', error)
-      alert('שגיאה ביצירת התגית')
+      alert(t('createError'))
     } finally {
       setIsSubmitting(false)
     }
@@ -131,11 +133,11 @@ export function TagManager({ tags, onRefresh }: TagManagerProps) {
         resetForm()
         refreshData()
       } else {
-        alert(result.error || 'שגיאה בעדכון התגית')
+        alert(result.error || t('updateError'))
       }
     } catch (error) {
       console.error('Error updating tag:', error)
-      alert('שגיאה בעדכון התגית')
+      alert(t('updateError'))
     } finally {
       setIsSubmitting(false)
     }
@@ -157,172 +159,166 @@ export function TagManager({ tags, onRefresh }: TagManagerProps) {
         setDeletingTag(null)
         refreshData()
       } else {
-        alert(result.error || 'שגיאה במחיקת התגית')
+        alert(result.error || t('deleteError'))
       }
     } catch (error) {
       console.error('Error deleting tag:', error)
-      alert('שגיאה במחיקת התגית')
+      alert(t('deleteError'))
     } finally {
       setIsSubmitting(false)
     }
   }
 
+  const newTagButton = (
+    <button
+      type="button"
+      onClick={() => setShowCreateDialog(true)}
+      aria-label={t('newTag')}
+      data-testid="admin-tags-new"
+      className="flex h-11 w-11 items-center justify-center rounded-full bg-[#003153] text-white shadow-[0_1px_2px_rgba(0,0,0,0.12)] transition-colors hover:bg-[#003153]/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0D98BA]"
+    >
+      <Plus className="h-5 w-5" aria-hidden="true" />
+    </button>
+  )
+
+  const stats = [
+    { key: 'total', value: tags.length },
+    { key: 'system', value: tags.filter(tag => tag.is_system).length },
+    { key: 'usages', value: tags.reduce((sum, tag) => sum + tag.task_count, 0) },
+  ] as const
+
   return (
-    <div className="space-y-4">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold">ניהול תגיות</h2>
-          <p className="text-muted-foreground">
-            צור וערוך תגיות לקטגוריזציה של משימות
-          </p>
-        </div>
-        <Button onClick={() => setShowCreateDialog(true)}>
-          <Plus className="h-4 w-4 ml-2" />
-          תגית חדשה
-        </Button>
-      </div>
+    <div className="space-y-5">
+      <AdminPageHeader
+        title={t('title')}
+        subtitle={t('subtitle')}
+        backHref="/admin/more"
+        action={newTagButton}
+      />
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-4">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-2xl font-bold">{tags.length}</div>
-            <p className="text-xs text-muted-foreground">סה&quot;כ תגיות</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-2xl font-bold">
-              {tags.filter(t => t.is_system).length}
-            </div>
-            <p className="text-xs text-muted-foreground">תגיות מערכת</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-2xl font-bold">
-              {tags.reduce((sum, t) => sum + t.task_count, 0)}
-            </div>
-            <p className="text-xs text-muted-foreground">שימושים</p>
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-3 divide-x divide-[#eef0f2] overflow-hidden rounded-2xl bg-white shadow-[0_1px_2px_rgba(0,0,0,0.06)] rtl:divide-x-reverse">
+        {stats.map((stat) => (
+          <div key={stat.key} className="px-2 py-3 text-center">
+            <div className="text-2xl font-bold text-[#003153]">{stat.value}</div>
+            <p className="text-xs text-gray-500">{t(`stats.${stat.key}`)}</p>
+          </div>
+        ))}
       </div>
 
       {/* Tags list */}
-      <Card>
-        <CardHeader>
-          <CardTitle>תגיות קיימות</CardTitle>
-          <CardDescription>
-            לחץ על תגית לעריכה או מחיקה
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            {tags.map((tag) => (
-              <div
-                key={tag.id}
-                className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors"
-              >
-                <div className="flex items-center gap-3 flex-1">
-                  <Tag tag={tag} size="md" />
-                  <span className="text-sm text-muted-foreground">
-                    {tag.task_count} משימות
-                  </span>
-                  {tag.is_system && (
-                    <Badge variant="secondary" className="text-xs">
-                      מערכת
-                    </Badge>
-                  )}
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => loadTagIntoForm(tag)}
-                  >
-                    <Edit2 className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setDeletingTag(tag)}
-                    disabled={tag.is_system}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
+      {tags.length === 0 ? (
+        <AdminEmptyState icon={TagsIcon} title={t('empty')} />
+      ) : (
+        <AdminGroup title={t('existing')} description={t('existingHint')}>
+          {tags.map((tag) => (
+            <div
+              key={tag.id}
+              className="flex min-h-[44px] items-center justify-between gap-2 px-3 py-2"
+              data-testid="admin-tag-row"
+            >
+              <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-3 gap-y-1">
+                <Tag tag={tag} size="md" />
+                <span className="text-sm text-gray-500">
+                  {t('taskCount', { count: tag.task_count })}
+                </span>
+                {tag.is_system && (
+                  <Badge variant="secondary" className="text-xs">
+                    {t('systemBadge')}
+                  </Badge>
+                )}
               </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+              <div className="flex flex-none gap-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-11 w-11 p-0"
+                  aria-label={t('editTag')}
+                  onClick={() => loadTagIntoForm(tag)}
+                >
+                  <Edit2 className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-11 w-11 p-0"
+                  aria-label={t('deleteTag')}
+                  onClick={() => setDeletingTag(tag)}
+                  disabled={tag.is_system}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          ))}
+        </AdminGroup>
+      )}
 
       {/* Create/Edit Dialog */}
       <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>
-              {editingTag ? 'עריכת תגית' : 'תגית חדשה'}
+              {editingTag ? t('dialog.editTitle') : t('dialog.newTitle')}
             </DialogTitle>
             <DialogDescription>
               {editingTag
-                ? `עריכת התגית "${editingTag.name_he}"`
-                : 'צור תגית חדשה לקטגוריזציה של משימות'}
+                ? t('dialog.editDescription', { name: editingTag.name_he })
+                : t('dialog.newDescription')}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="name" className="text-right">
-                  שם באנגלית *
+                <Label htmlFor="name" className="text-start">
+                  {t('dialog.nameEn')}
                 </Label>
                 <Input
                   id="name"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   placeholder="maintenance"
-                  className="text-right"
+                  className="text-start"
                   disabled={editingTag?.is_system}
                 />
-                <p className="text-xs text-muted-foreground mt-1">
-                  אותיות קטנות, מקף, מקף תחתון
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {t('dialog.nameEnHint')}
                 </p>
               </div>
 
               <div>
-                <Label htmlFor="name_he" className="text-right">
-                  שם בעברית *
+                <Label htmlFor="name_he" className="text-start">
+                  {t('dialog.nameHe')}
                 </Label>
                 <Input
                   id="name_he"
                   value={formData.name_he}
                   onChange={(e) => setFormData({ ...formData, name_he: e.target.value })}
-                  placeholder="תחזוקה"
-                  className="text-right"
+                  placeholder={t('dialog.nameHePlaceholder')}
+                  className="text-start"
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="emoji" className="text-right">
-                  אמוג&apos;י (אופציונלי)
+                <Label htmlFor="emoji" className="text-start">
+                  {t('dialog.emoji')}
                 </Label>
                 <Input
                   id="emoji"
                   value={formData.emoji}
                   onChange={(e) => setFormData({ ...formData, emoji: e.target.value })}
                   placeholder="🔧"
-                  className="text-right text-xl"
+                  className="text-start text-xl"
                   maxLength={2}
                 />
               </div>
 
               <div>
-                <Label htmlFor="color" className="text-right">
-                  צבע *
+                <Label htmlFor="color" className="text-start">
+                  {t('dialog.color')}
                 </Label>
                 <div className="flex gap-2">
                   <Input
@@ -336,42 +332,42 @@ export function TagManager({ tags, onRefresh }: TagManagerProps) {
                     value={formData.color}
                     onChange={(e) => setFormData({ ...formData, color: e.target.value })}
                     placeholder="#0D98BA"
-                    className="text-right flex-1"
+                    className="flex-1 text-start"
                   />
                 </div>
               </div>
             </div>
 
             <div>
-              <Label htmlFor="description" className="text-right">
-                תיאור
+              <Label htmlFor="description" className="text-start">
+                {t('dialog.description')}
               </Label>
               <Textarea
                 id="description"
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="תיאור התגית..."
-                className="text-right"
+                placeholder={t('dialog.descriptionPlaceholder')}
+                className="text-start"
                 rows={2}
               />
             </div>
 
             <div>
-              <Label htmlFor="display_order" className="text-right">
-                סדר תצוגה
+              <Label htmlFor="display_order" className="text-start">
+                {t('dialog.displayOrder')}
               </Label>
               <Input
                 id="display_order"
                 type="number"
                 value={formData.display_order}
                 onChange={(e) => setFormData({ ...formData, display_order: parseInt(e.target.value) || 0 })}
-                className="text-right"
+                className="text-start"
               />
             </div>
 
             {/* Preview */}
-            <div className="pt-4 border-t">
-              <Label className="text-right mb-2 block">תצוגה מקדימה</Label>
+            <div className="border-t pt-4">
+              <Label className="mb-2 block text-start">{t('dialog.preview')}</Label>
               <Tag
                 tag={{
                   id: 'preview',
@@ -399,13 +395,13 @@ export function TagManager({ tags, onRefresh }: TagManagerProps) {
               onClick={resetForm}
               disabled={isSubmitting}
             >
-              ביטול
+              {t('dialog.cancel')}
             </Button>
             <Button
               onClick={editingTag ? handleUpdate : handleCreate}
               disabled={isSubmitting || !formData.name || !formData.name_he}
             >
-              {isSubmitting ? 'שומר...' : editingTag ? 'עדכן' : 'צור'}
+              {isSubmitting ? t('dialog.saving') : editingTag ? t('dialog.update') : t('dialog.create')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -415,22 +411,22 @@ export function TagManager({ tags, onRefresh }: TagManagerProps) {
       <AlertDialog open={!!deletingTag} onOpenChange={() => setDeletingTag(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-right">מחיקת תגית</AlertDialogTitle>
-            <AlertDialogDescription className="text-right">
+            <AlertDialogTitle className="text-start">{t('delete.title')}</AlertDialogTitle>
+            <AlertDialogDescription className="text-start">
               {deletingTag?.is_system ? (
                 <div className="flex items-start gap-2 text-red-600">
-                  <AlertTriangle className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                  <AlertTriangle className="mt-0.5 h-5 w-5 flex-shrink-0" />
                   <div>
-                    לא ניתן למחוק תגית מערכת. תגיות מערכת הן חלק בסיסי מהמערכת.
+                    {t('delete.systemBlocked')}
                   </div>
                 </div>
               ) : (
                 <>
-                  האם אתה בטוח שברצונך למחוק את התגית &quot;{deletingTag?.name_he}&quot;?
+                  {t('delete.confirm', { name: deletingTag?.name_he ?? '' })}
                   {deletingTag && deletingTag.task_count > 0 && (
                     <div className="mt-2 text-orange-600">
-                      <AlertTriangle className="h-4 w-4 inline ml-1" />
-                      התגית משמשת ב-{deletingTag.task_count} משימות והיא תוסר מהן.
+                      <AlertTriangle className="me-1 inline h-4 w-4" />
+                      {t('delete.inUse', { count: deletingTag.task_count })}
                     </div>
                   )}
                 </>
@@ -439,7 +435,7 @@ export function TagManager({ tags, onRefresh }: TagManagerProps) {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => setDeletingTag(null)}>
-              ביטול
+              {t('delete.cancel')}
             </AlertDialogCancel>
             {!deletingTag?.is_system && (
               <AlertDialogAction
@@ -447,7 +443,7 @@ export function TagManager({ tags, onRefresh }: TagManagerProps) {
                 disabled={isSubmitting}
                 variant="destructive"
               >
-                {isSubmitting ? 'מוחק...' : 'מחק'}
+                {isSubmitting ? t('delete.deleting') : t('delete.confirmButton')}
               </AlertDialogAction>
             )}
           </AlertDialogFooter>

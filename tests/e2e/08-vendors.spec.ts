@@ -11,11 +11,11 @@ test.describe('Vendors Management', () => {
   test('should navigate to vendors page from menu', async ({ page }) => {
     const hebrewHelper = new HebrewHelper(page);
 
-    // Go to admin dashboard
-    await page.goto('/admin');
+    // Vendors left the hub (redesign, Nov 2026): hub -> "more tools" -> vendors
+    await page.goto('/he/admin/more');
 
-    // Click vendors link in navigation
-    await page.click('a[href="/admin/vendors"]');
+    // Click the vendors row
+    await page.getByTestId('more-row-vendors').click();
 
     // Verify vendors page loaded
     await hebrewHelper.verifyHebrewText('h1', 'ספקים ונותני שירותים');

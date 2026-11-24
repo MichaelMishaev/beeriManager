@@ -2,9 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
-import Link from 'next/link'
-import { 
-  ArrowRight,
+import { useLocale, useTranslations } from 'next-intl'
+import {
   DollarSign,
   Users,
   TrendingDown,
@@ -13,10 +12,11 @@ import {
   CheckCircle2,
   PieChart
 } from 'lucide-react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Link } from '@/i18n/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { AdminGroup, AdminPageHeader, StatusPill } from '@/components/features/admin'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 
@@ -46,32 +46,36 @@ interface PromEvent {
   total_budget: number
 }
 
-const categoryConfig: Record<string, { label: string; emoji: string; color: string }> = {
-  venue: { label: 'אולם/מקום', emoji: '🏛️', color: 'bg-blue-500' },
-  catering: { label: 'קייטרינג', emoji: '🍕', color: 'bg-orange-500' },
-  dj: { label: 'DJ/מוזיקה', emoji: '🎵', color: 'bg-purple-500' },
-  photography: { label: 'צילום', emoji: '📷', color: 'bg-pink-500' },
-  decorations: { label: 'קישוטים', emoji: '🎈', color: 'bg-yellow-500' },
-  transportation: { label: 'הסעות', emoji: '🚌', color: 'bg-green-500' },
-  entertainment: { label: 'בידור', emoji: '🎭', color: 'bg-indigo-500' },
-  shirts: { label: 'חולצות', emoji: '👕', color: 'bg-cyan-500' },
-  sound_lighting: { label: 'הגברה ותאורה', emoji: '💡', color: 'bg-amber-500' },
-  yearbook: { label: 'ספר מחזור', emoji: '📚', color: 'bg-rose-500' },
-  recording: { label: 'אולפן הקלטות', emoji: '🎬', color: 'bg-red-500' },
-  scenery: { label: 'תפאורה', emoji: '🎪', color: 'bg-fuchsia-500' },
-  flowers: { label: 'פרחים/זרים', emoji: '💐', color: 'bg-lime-500' },
-  security: { label: 'אבטחה', emoji: '🛡️', color: 'bg-slate-500' },
-  electrician: { label: 'חשמלאי', emoji: '⚡', color: 'bg-sky-500' },
-  moving: { label: 'הובלה', emoji: '🚚', color: 'bg-stone-500' },
-  video_editing: { label: 'עריכת סרטונים', emoji: '🎥', color: 'bg-violet-500' },
-  drums: { label: 'מתופפים', emoji: '🥁', color: 'bg-amber-600' },
-  choreography: { label: 'כוריאוגרפיה', emoji: '💃', color: 'bg-pink-600' },
-  other: { label: 'אחר', emoji: '📦', color: 'bg-gray-500' }
+// Category glyph and bar colour. Labels come from translations (admin.prom.categories.<key>).
+const categoryConfig: Record<string, { emoji: string; color: string }> = {
+  venue: { emoji: '🏛️', color: 'bg-blue-500' },
+  catering: { emoji: '🍕', color: 'bg-orange-500' },
+  dj: { emoji: '🎵', color: 'bg-purple-500' },
+  photography: { emoji: '📷', color: 'bg-pink-500' },
+  decorations: { emoji: '🎈', color: 'bg-yellow-500' },
+  transportation: { emoji: '🚌', color: 'bg-green-500' },
+  entertainment: { emoji: '🎭', color: 'bg-indigo-500' },
+  shirts: { emoji: '👕', color: 'bg-cyan-500' },
+  sound_lighting: { emoji: '💡', color: 'bg-amber-500' },
+  yearbook: { emoji: '📚', color: 'bg-rose-500' },
+  recording: { emoji: '🎬', color: 'bg-red-500' },
+  scenery: { emoji: '🎪', color: 'bg-fuchsia-500' },
+  flowers: { emoji: '💐', color: 'bg-lime-500' },
+  security: { emoji: '🛡️', color: 'bg-slate-500' },
+  electrician: { emoji: '⚡', color: 'bg-sky-500' },
+  moving: { emoji: '🚚', color: 'bg-stone-500' },
+  video_editing: { emoji: '🎥', color: 'bg-violet-500' },
+  drums: { emoji: '🥁', color: 'bg-amber-600' },
+  choreography: { emoji: '💃', color: 'bg-pink-600' },
+  other: { emoji: '📦', color: 'bg-gray-500' }
 }
 
 const allCategories = Object.keys(categoryConfig)
 
 export default function BudgetTrackerPage() {
+  const t = useTranslations('admin.prom')
+  const locale = useLocale()
+  const numLocale = locale === 'ru' ? 'ru-RU' : 'he-IL'
   const params = useParams()
   const promId = params.id as string
   const [isLoading, setIsLoading] = useState(true)
@@ -83,6 +87,7 @@ export default function BudgetTrackerPage() {
 
   useEffect(() => {
     fetchData()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [promId])
 
   async function fetchData() {
@@ -117,7 +122,7 @@ export default function BudgetTrackerPage() {
       }
     } catch (error) {
       console.error('Error fetching data:', error)
-      toast.error('שגיאה בטעינת הנתונים')
+      toast.error(t('budget.toast.loadError'))
     } finally {
       setIsLoading(false)
     }
@@ -151,14 +156,14 @@ export default function BudgetTrackerPage() {
       const data = await response.json()
 
       if (data.success) {
-        toast.success('התקציב נשמר בהצלחה')
+        toast.success(t('budget.toast.saved'))
         fetchData()
       } else {
-        toast.error(data.error || 'שגיאה בשמירה')
+        toast.error(data.error || t('budget.toast.saveError'))
       }
     } catch (error) {
       console.error('Error saving budget:', error)
-      toast.error('שגיאה בשמירה')
+      toast.error(t('budget.toast.saveError'))
     } finally {
       setIsSaving(false)
     }
@@ -173,345 +178,262 @@ export default function BudgetTrackerPage() {
   )
   const calcRemaining = (promEvent?.total_budget || 0) - calcSpent
 
+  const money = (n: number) => `₪${n.toLocaleString(numLocale)}`
+  const totalBudget = promEvent?.total_budget || 0
+  const studentCount = promEvent?.student_count || 0
+  const overall = calcRemaining >= 0
+
   if (isLoading) {
     return (
-      <div className="space-y-6">
-        <div className="h-16 bg-gray-100 rounded-lg animate-pulse" />
-        <div className="grid gap-4 md:grid-cols-4">
-          {[...Array(4)].map((_, i) => (
-            <div key={i} className="h-24 bg-gray-100 rounded-lg animate-pulse" />
-          ))}
-        </div>
-        <div className="h-96 bg-gray-100 rounded-lg animate-pulse" />
+      <div className="space-y-4">
+        <div className="h-12 animate-pulse rounded-2xl bg-white" />
+        <div className="h-40 animate-pulse rounded-2xl bg-white" />
+        <div className="h-96 animate-pulse rounded-2xl bg-white" />
       </div>
     )
   }
 
+  const saveLabel = t('budget.save')
+
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" asChild>
-            <Link href={`/admin/prom/${promId}`}>
-              <ArrowRight className="h-5 w-5" />
-            </Link>
+    <div>
+      <AdminPageHeader
+        title={t('budget.title')}
+        subtitle={promEvent?.title}
+        backHref={`/admin/prom/${promId}`}
+        action={
+          <Button
+            type="button"
+            onClick={handleSave}
+            disabled={isSaving}
+            aria-label={saveLabel}
+            className="h-11 w-11 rounded-full bg-[#0D98BA] p-0 text-white hover:bg-[#0b86a3]"
+          >
+            <Save className="h-5 w-5" aria-hidden="true" />
           </Button>
-          <div>
-            <h1 className="text-2xl font-bold flex items-center gap-2">
-              <DollarSign className="h-6 w-6 text-green-600" />
-              ניהול תקציב
-            </h1>
-            <p className="text-muted-foreground">{promEvent?.title}</p>
+        }
+      />
+
+      <div className="space-y-4">
+        {/* Summary */}
+        <div className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl bg-[#eef0f2] shadow-[0_1px_2px_rgba(0,0,0,0.06)]">
+          <div className={cn('p-3', overall ? 'bg-[#ecfdf5]' : 'bg-[#fef2f2]')}>
+            <div
+              className={cn(
+                'flex items-center gap-1.5 text-xs font-semibold',
+                overall ? 'text-green-800' : 'text-red-800'
+              )}
+            >
+              {overall ? (
+                <CheckCircle2 className="h-4 w-4 shrink-0" aria-hidden="true" />
+              ) : (
+                <AlertTriangle className="h-4 w-4 shrink-0" aria-hidden="true" />
+              )}
+              {t('budget.summary.remaining')}
+            </div>
+            <div className={cn('mt-1 truncate text-2xl font-bold', overall ? 'text-green-900' : 'text-red-900')}>
+              {money(Math.abs(calcRemaining))}
+            </div>
+            <p className={cn('text-xs', overall ? 'text-green-700' : 'text-red-700')}>
+              {overall ? t('budget.summary.leftOfBudget') : t('budget.summary.overBudget')}
+            </p>
+          </div>
+
+          <div className="bg-white p-3">
+            <div className="flex items-center gap-1.5 text-xs font-semibold text-[#5b6570]">
+              <DollarSign className="h-4 w-4 shrink-0" aria-hidden="true" />
+              {t('budget.summary.totalBudget')}
+            </div>
+            <div className="mt-1 truncate text-2xl font-bold text-[#003153]">{money(totalBudget)}</div>
+            <p className="truncate text-xs text-gray-500">
+              {t('budget.summary.allocated', { amount: money(calcAllocated) })}
+            </p>
+          </div>
+
+          <div className="bg-white p-3">
+            <div className="flex items-center gap-1.5 text-xs font-semibold text-[#5b6570]">
+              <TrendingDown className="h-4 w-4 shrink-0" aria-hidden="true" />
+              {t('budget.summary.expenses')}
+            </div>
+            <div className="mt-1 truncate text-2xl font-bold text-[#003153]">{money(calcSpent)}</div>
+            <p className="truncate text-xs text-gray-500">
+              {totalBudget > 0
+                ? t('budget.summary.percentOfBudget', { percent: Math.round((calcSpent / totalBudget) * 100) })
+                : '—'}
+            </p>
+          </div>
+
+          <div className="bg-white p-3">
+            <div className="flex items-center gap-1.5 text-xs font-semibold text-[#5b6570]">
+              <Users className="h-4 w-4 shrink-0" aria-hidden="true" />
+              {t('budget.summary.perStudent')}
+            </div>
+            <div className="mt-1 truncate text-2xl font-bold text-[#003153]">
+              {studentCount > 0 ? `₪${Math.round(calcSpent / studentCount)}` : '—'}
+            </div>
+            <p className="truncate text-xs text-gray-500">
+              {t('budget.summary.studentsCount', { count: studentCount })}
+            </p>
           </div>
         </div>
 
-        <Button 
-          onClick={handleSave} 
-          disabled={isSaving}
-          className="bg-green-600 hover:bg-green-700"
-        >
-          {isSaving ? (
-            <>
-              <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin ml-2" />
-              שומר...
-            </>
-          ) : (
-            <>
-              <Save className="h-4 w-4 ml-2" />
-              שמור שינויים
-            </>
-          )}
-        </Button>
-      </div>
-
-      {/* Summary Cards */}
-      <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
-        <Card className={cn(
-          "border-2",
-          calcRemaining >= 0 ? "border-green-200 bg-green-50" : "border-red-200 bg-red-50"
-        )}>
-          <CardHeader className="pb-2">
-            <CardTitle className={cn(
-              "text-sm font-medium flex items-center gap-2",
-              calcRemaining >= 0 ? "text-green-800" : "text-red-800"
-            )}>
-              {calcRemaining >= 0 ? (
-                <CheckCircle2 className="h-4 w-4" />
-              ) : (
-                <AlertTriangle className="h-4 w-4" />
-              )}
-              יתרה
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className={cn(
-              "text-3xl font-bold",
-              calcRemaining >= 0 ? "text-green-900" : "text-red-900"
-            )}>
-              ₪{Math.abs(calcRemaining).toLocaleString('he-IL')}
-            </div>
-            <p className={cn(
-              "text-xs",
-              calcRemaining >= 0 ? "text-green-700" : "text-red-700"
-            )}>
-              {calcRemaining >= 0 ? 'נותר מתקציב' : 'חריגה מתקציב!'}
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-blue-800 flex items-center gap-2">
-              <DollarSign className="h-4 w-4" />
-              תקציב כולל
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-blue-900">
-              ₪{(promEvent?.total_budget || 0).toLocaleString('he-IL')}
-            </div>
-            <p className="text-xs text-blue-700">
-              הוקצה: ₪{calcAllocated.toLocaleString('he-IL')}
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-orange-800 flex items-center gap-2">
-              <TrendingDown className="h-4 w-4" />
-              הוצאות
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-orange-900">
-              ₪{calcSpent.toLocaleString('he-IL')}
-            </div>
-            <p className="text-xs text-orange-700">
-              {promEvent?.total_budget && promEvent.total_budget > 0
-                ? `${Math.round((calcSpent / promEvent.total_budget) * 100)}% מהתקציב`
-                : '—'}
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-purple-800 flex items-center gap-2">
-              <Users className="h-4 w-4" />
-              עלות לתלמיד
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-purple-900">
-              {promEvent?.student_count && promEvent.student_count > 0
-                ? `₪${Math.round(calcSpent / promEvent.student_count)}`
-                : '—'}
-            </div>
-            <p className="text-xs text-purple-700">
-              {promEvent?.student_count || 0} תלמידים
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Budget Progress */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <PieChart className="h-5 w-5 text-blue-600" />
-            ניצול תקציב
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
+        {/* Budget Progress */}
+        <section className="rounded-2xl bg-white p-4 shadow-[0_1px_2px_rgba(0,0,0,0.06)]">
+          <h2 className="mb-3 flex items-center gap-2 text-[15px] font-bold text-[#003153]">
+            <PieChart className="h-4 w-4 text-[#0D98BA]" aria-hidden="true" />
+            {t('budget.usage.title')}
+          </h2>
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
-              <span>הוצאות מול תקציב</span>
+              <span>{t('budget.usage.spentVsBudget')}</span>
               <span className="font-medium">
-                {promEvent?.total_budget && promEvent.total_budget > 0
-                  ? `${Math.round((calcSpent / promEvent.total_budget) * 100)}%`
-                  : '—'}
+                {totalBudget > 0 ? `${Math.round((calcSpent / totalBudget) * 100)}%` : '—'}
               </span>
             </div>
-            <div className="h-4 bg-gray-100 rounded-full overflow-hidden">
-              <div 
+            <div className="h-4 overflow-hidden rounded-full bg-gray-100">
+              <div
                 className={cn(
-                  "h-full rounded-full transition-all duration-500",
-                  promEvent?.total_budget && calcSpent > promEvent.total_budget
-                    ? "bg-red-500"
-                    : promEvent?.total_budget && (calcSpent / promEvent.total_budget) > 0.9
-                      ? "bg-yellow-500"
-                      : "bg-green-500"
+                  'h-full rounded-full transition-all duration-500',
+                  totalBudget > 0 && calcSpent > totalBudget
+                    ? 'bg-red-500'
+                    : totalBudget > 0 && (calcSpent / totalBudget) > 0.9
+                      ? 'bg-yellow-500'
+                      : 'bg-green-500'
                 )}
-                style={{ 
-                  width: `${Math.min(100, promEvent?.total_budget 
-                    ? (calcSpent / promEvent.total_budget) * 100 
-                    : 0)}%` 
+                style={{
+                  width: `${Math.min(100, totalBudget > 0 ? (calcSpent / totalBudget) * 100 : 0)}%`
                 }}
               />
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </section>
 
-      {/* Category Breakdown */}
-      <Card>
-        <CardHeader>
-          <CardTitle>פירוט לפי קטגוריה</CardTitle>
-          <CardDescription>
-            הגדירו תקציב והזינו הוצאות בפועל לכל קטגוריה
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-6">
-            {allCategories.map((category) => {
-              const config = categoryConfig[category]
-              const allocated = parseFloat(editedItems[category]?.allocated) || 0
-              const spent = parseFloat(editedItems[category]?.spent) || 0
-              const percentage = allocated > 0 ? Math.round((spent / allocated) * 100) : 0
-              const isOverBudget = spent > allocated && allocated > 0
+        {/* Category Breakdown */}
+        <AdminGroup title={t('budget.categories.title')} description={t('budget.categories.description')}>
+          {allCategories.map((category) => {
+            const config = categoryConfig[category]
+            const allocated = parseFloat(editedItems[category]?.allocated) || 0
+            const spent = parseFloat(editedItems[category]?.spent) || 0
+            const percentage = allocated > 0 ? Math.round((spent / allocated) * 100) : 0
+            const isOverBudget = spent > allocated && allocated > 0
 
-              return (
-                <div key={category} className="space-y-3">
-                  <div className="flex items-center gap-3">
-                    <div className={cn(
-                      "w-10 h-10 rounded-lg flex items-center justify-center text-xl",
-                      config.color.replace('bg-', 'bg-opacity-20 '),
-                    )}>
-                      {config.emoji}
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between">
-                        <span className="font-medium">{config.label}</span>
-                        {isOverBudget && (
-                          <Badge variant="destructive" className="text-xs">
-                            <AlertTriangle className="h-3 w-3 ml-1" />
-                            חריגה
-                          </Badge>
-                        )}
-                      </div>
-                      {allocated > 0 && (
-                        <div className="flex items-center gap-2 mt-1">
-                          <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
-                            <div 
-                              className={cn(
-                                "h-full rounded-full",
-                                isOverBudget ? "bg-red-500" : config.color
-                              )}
-                              style={{ width: `${Math.min(100, percentage)}%` }}
-                            />
-                          </div>
-                          <span className="text-xs text-muted-foreground w-12 text-left">
-                            {percentage}%
-                          </span>
-                        </div>
+            return (
+              <div key={category} className="space-y-3 px-3 py-3">
+                <div className="flex items-center gap-3">
+                  <div
+                    className={cn(
+                      'flex h-10 w-10 flex-none items-center justify-center rounded-lg text-xl',
+                      config.color.replace('bg-', 'bg-opacity-20 ')
+                    )}
+                  >
+                    {config.emoji}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="truncate font-medium text-[#003153]">
+                        {t(`categories.${category}`)}
+                      </span>
+                      {isOverBudget && (
+                        <StatusPill tone="danger">
+                          <AlertTriangle className="me-1 h-3 w-3" aria-hidden="true" />
+                          {t('budget.categories.over')}
+                        </StatusPill>
                       )}
                     </div>
+                    {allocated > 0 && (
+                      <div className="mt-1 flex items-center gap-2">
+                        <div className="h-2 flex-1 overflow-hidden rounded-full bg-gray-100">
+                          <div
+                            className={cn('h-full rounded-full', isOverBudget ? 'bg-red-500' : config.color)}
+                            style={{ width: `${Math.min(100, percentage)}%` }}
+                          />
+                        </div>
+                        <span className="w-12 text-end text-xs text-muted-foreground">
+                          {percentage}%
+                        </span>
+                      </div>
+                    )}
                   </div>
+                </div>
 
-                  <div className="grid grid-cols-2 gap-4 mr-13">
-                    <div className="space-y-1">
-                      <Label className="text-xs text-muted-foreground">תקציב מוקצה</Label>
-                      <div className="relative">
-                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">₪</span>
-                        <Input
-                          type="number"
-                          min="0"
-                          value={editedItems[category]?.allocated || '0'}
-                          onChange={(e) => handleItemChange(category, 'allocated', e.target.value)}
-                          className="pr-8"
-                        />
-                      </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <Label className="text-xs text-muted-foreground">{t('budget.categories.allocated')}</Label>
+                    <div className="relative">
+                      <span className="absolute start-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">₪</span>
+                      <Input
+                        type="number"
+                        min="0"
+                        value={editedItems[category]?.allocated || '0'}
+                        onChange={(e) => handleItemChange(category, 'allocated', e.target.value)}
+                        className="ps-8"
+                      />
                     </div>
-                    <div className="space-y-1">
-                      <Label className="text-xs text-muted-foreground">הוצאות בפועל</Label>
-                      <div className="relative">
-                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">₪</span>
-                        <Input
-                          type="number"
-                          min="0"
-                          value={editedItems[category]?.spent || '0'}
-                          onChange={(e) => handleItemChange(category, 'spent', e.target.value)}
-                          className={cn(
-                            "pr-8",
-                            isOverBudget && "border-red-300 bg-red-50"
-                          )}
-                        />
-                      </div>
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs text-muted-foreground">{t('budget.categories.actual')}</Label>
+                    <div className="relative">
+                      <span className="absolute start-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">₪</span>
+                      <Input
+                        type="number"
+                        min="0"
+                        value={editedItems[category]?.spent || '0'}
+                        onChange={(e) => handleItemChange(category, 'spent', e.target.value)}
+                        className={cn('ps-8', isOverBudget && 'border-red-300 bg-red-50')}
+                      />
                     </div>
                   </div>
                 </div>
-              )
-            })}
-          </div>
+              </div>
+            )
+          })}
+        </AdminGroup>
 
-          {/* Totals Summary */}
-          <div className="mt-8 pt-6 border-t">
-            <div className="grid grid-cols-3 gap-4 text-center">
-              <div>
-                <p className="text-sm text-muted-foreground">סה&quot;כ מוקצה</p>
-                <p className="text-xl font-bold">₪{calcAllocated.toLocaleString('he-IL')}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">סה&quot;כ הוצאות</p>
-                <p className="text-xl font-bold text-orange-600">₪{calcSpent.toLocaleString('he-IL')}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">יתרה</p>
-                <p className={cn(
-                  "text-xl font-bold",
-                  calcRemaining >= 0 ? "text-green-600" : "text-red-600"
-                )}>
-                  ₪{Math.abs(calcRemaining).toLocaleString('he-IL')}
-                  {calcRemaining < 0 && ' (חריגה)'}
-                </p>
-              </div>
+        {/* Totals Summary */}
+        <section className="rounded-2xl bg-white p-4 shadow-[0_1px_2px_rgba(0,0,0,0.06)]">
+          <div className="grid grid-cols-3 gap-3 text-center">
+            <div className="min-w-0">
+              <p className="text-xs text-muted-foreground">{t('budget.totals.allocated')}</p>
+              <p className="truncate text-lg font-bold text-[#003153]">{money(calcAllocated)}</p>
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs text-muted-foreground">{t('budget.totals.expenses')}</p>
+              <p className="truncate text-lg font-bold text-orange-600">{money(calcSpent)}</p>
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs text-muted-foreground">{t('budget.totals.remaining')}</p>
+              <p className={cn('truncate text-lg font-bold', overall ? 'text-green-600' : 'text-red-600')}>
+                {money(Math.abs(calcRemaining))}
+                {calcRemaining < 0 && ` ${t('budget.totals.overSuffix')}`}
+              </p>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </section>
 
-      {/* Quick Actions */}
-      <div className="flex justify-center gap-3">
-        <Button variant="outline" asChild>
-          <Link href={`/admin/prom/${promId}/quotes`}>
-            חזור להשוואת הצעות
-          </Link>
-        </Button>
-        <Button 
-          onClick={handleSave} 
-          disabled={isSaving}
-          className="bg-green-600 hover:bg-green-700"
-        >
-          <Save className="h-4 w-4 ml-2" />
-          שמור שינויים
-        </Button>
+        {/* Actions */}
+        <div className="flex flex-col gap-3">
+          <Button
+            onClick={handleSave}
+            disabled={isSaving}
+            className="h-12 w-full bg-[#0D98BA] text-white hover:bg-[#0b86a3]"
+          >
+            {isSaving ? (
+              <>
+                <div className="me-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                {t('form.saving')}
+              </>
+            ) : (
+              <>
+                <Save className="me-2 h-4 w-4" aria-hidden="true" />
+                {saveLabel}
+              </>
+            )}
+          </Button>
+          <Button variant="outline" asChild className="h-12 w-full">
+            <Link href={`/admin/prom/${promId}/quotes`}>{t('budget.backToQuotes')}</Link>
+          </Button>
+        </div>
       </div>
     </div>
   )
 }
-
-// Badge component if not available
-function Badge({ children, variant = 'default', className = '' }: { 
-  children: React.ReactNode
-  variant?: 'default' | 'destructive' | 'outline'
-  className?: string 
-}) {
-  const variantClasses = {
-    default: 'bg-primary text-primary-foreground',
-    destructive: 'bg-red-500 text-white',
-    outline: 'border border-input bg-background'
-  }
-
-  return (
-    <span className={cn(
-      'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold',
-      variantClasses[variant],
-      className
-    )}>
-      {children}
-    </span>
-  )
-}
-

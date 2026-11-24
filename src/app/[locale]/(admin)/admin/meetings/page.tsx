@@ -1,17 +1,26 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Plus, Calendar, Users, Lock, LockOpen, ExternalLink } from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+import { Plus, Calendar, Users, ExternalLink, UsersRound } from 'lucide-react'
+import { useLocale, useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 import { format } from 'date-fns'
-import { he } from 'date-fns/locale'
-import Link from 'next/link'
+import { he, ru } from 'date-fns/locale'
+import { Link } from '@/i18n/navigation'
+import { Button } from '@/components/ui/button'
+import {
+  AdminEmptyState,
+  AdminGroup,
+  AdminPageHeader,
+  AdminRow,
+  StatusPill,
+} from '@/components/features/admin'
 import type { Meeting } from '@/types'
 
 export default function AdminMeetingsPage() {
+  const t = useTranslations('admin.records.meetings')
+  const locale = useLocale()
+  const dateLocale = locale === 'ru' ? ru : he
   const [meetings, setMeetings] = useState<Meeting[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
@@ -30,11 +39,11 @@ export default function AdminMeetingsPage() {
       if (data.success) {
         setMeetings(data.data)
       } else {
-        toast.error('שגיאה בטעינת הפגישות')
+        toast.error(t('loadError'))
       }
     } catch (error) {
       console.error('Error fetching meetings:', error)
-      toast.error('שגיאה בטעינת הפגישות')
+      toast.error(t('loadError'))
     } finally {
       setIsLoading(false)
     }
@@ -56,14 +65,14 @@ export default function AdminMeetingsPage() {
       const result = await response.json()
 
       if (result.success) {
-        toast.success(currentIsOpen ? 'הפגישה נסגרה' : 'הפגישה נפתחה')
+        toast.success(currentIsOpen ? t('toastClosed') : t('toastOpened'))
         fetchMeetings()
       } else {
-        toast.error('שגיאה בעדכון הפגישה')
+        toast.error(t('updateError'))
       }
     } catch (error) {
       console.error('Error toggling meeting:', error)
-      toast.error('שגיאה בעדכון הפגישה')
+      toast.error(t('updateError'))
     }
   }
 
@@ -74,141 +83,110 @@ export default function AdminMeetingsPage() {
     totalIdeas: meetings.reduce((sum, m) => sum + m.ideas_count, 0)
   }
 
+  const statTiles: { key: string; label: string; value: number; className?: string }[] = [
+    { key: 'total', label: t('statsTotal'), value: stats.total },
+    { key: 'open', label: t('statsOpen'), value: stats.open, className: 'text-green-600' },
+    { key: 'closed', label: t('statsClosed'), value: stats.closed, className: 'text-gray-600' },
+    { key: 'ideas', label: t('statsIdeas'), value: stats.totalIdeas },
+  ]
+
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">ניהול פגישות</h1>
-          <p className="text-muted-foreground mt-2">
-            ניהול פגישות ושליחת רעיונות לסדר היום
-          </p>
+    <div className="space-y-4">
+      <AdminPageHeader
+        title={t('title')}
+        subtitle={t('subtitle')}
+        backHref="/admin/more"
+        action={
+          <Link
+            href="/admin/meetings/new"
+            aria-label={t('newMeeting')}
+            data-testid="admin-meetings-new"
+            className="flex h-11 w-11 items-center justify-center rounded-full bg-[#003153] text-white shadow-[0_1px_2px_rgba(0,0,0,0.08)] transition-colors hover:bg-[#003153]/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0D98BA]"
+          >
+            <Plus className="h-5 w-5" aria-hidden="true" />
+          </Link>
+        }
+      />
+
+      <div className="grid grid-cols-2 gap-2">
+        {statTiles.map((tile) => (
+          <div
+            key={tile.key}
+            className="rounded-2xl bg-white p-3 shadow-[0_1px_2px_rgba(0,0,0,0.06)]"
+          >
+            <p className="truncate text-xs text-gray-500">{tile.label}</p>
+            <p className={`mt-1 text-2xl font-bold text-[#003153] ${tile.className ?? ''}`}>
+              {tile.value}
+            </p>
+          </div>
+        ))}
+      </div>
+
+      {isLoading ? (
+        <div className="rounded-2xl bg-white py-10 text-center shadow-[0_1px_2px_rgba(0,0,0,0.06)]">
+          <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-4 border-[#0D98BA] border-t-transparent" />
+          <p className="text-sm text-gray-500">{t('loading')}</p>
         </div>
-        <Link href="/admin/meetings/new">
-          <Button>
-            <Plus className="h-4 w-4 ml-2" />
-            פגישה חדשה
-          </Button>
-        </Link>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">סה&quot;כ פגישות</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.total}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">פגישות פתוחות</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">{stats.open}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">פגישות סגורות</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-gray-600">{stats.closed}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">סה&quot;כ רעיונות</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalIdeas}</div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="space-y-4">
-        {isLoading ? (
-          <Card>
-            <CardContent className="text-center py-8">
-              <div className="h-8 w-8 animate-spin mx-auto mb-4 border-4 border-primary border-t-transparent rounded-full" />
-              <p className="text-muted-foreground">טוען פגישות...</p>
-            </CardContent>
-          </Card>
-        ) : meetings.length === 0 ? (
-          <Card>
-            <CardContent className="text-center py-8">
-              <p className="text-muted-foreground">אין פגישות. צרו פגישה חדשה!</p>
-            </CardContent>
-          </Card>
-        ) : (
-          meetings.map((meeting) => (
-            <Card key={meeting.id}>
-              <CardContent className="pt-6">
-                <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <h3 className="text-lg font-semibold">{meeting.title}</h3>
-                      <Badge variant={meeting.is_open ? 'default' : 'secondary'}>
-                        {meeting.is_open ? (
-                          <>
-                            <LockOpen className="h-3 w-3 ml-1" />
-                            פתוח
-                          </>
-                        ) : (
-                          <>
-                            <Lock className="h-3 w-3 ml-1" />
-                            סגור
-                          </>
-                        )}
-                      </Badge>
-                    </div>
-
-                    {meeting.description && (
-                      <p className="text-sm text-muted-foreground mb-3">
-                        {meeting.description}
-                      </p>
-                    )}
-
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <Calendar className="h-4 w-4" />
-                        {format(new Date(meeting.meeting_date), 'PPP', { locale: he })}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Users className="h-4 w-4" />
-                        {meeting.ideas_count} רעיונות
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-2">
-                    <Link href={`/meetings/${meeting.id}`} target="_blank">
-                      <Button variant="outline" size="sm">
-                        <ExternalLink className="h-4 w-4 ml-2" />
-                        צפה בדף
-                      </Button>
-                    </Link>
-
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => toggleMeetingStatus(meeting.id, meeting.is_open)}
-                    >
-                      {meeting.is_open ? 'סגור' : 'פתח'}
-                    </Button>
-
-                    <Link href={`/admin/meetings/${meeting.id}`}>
-                      <Button variant="outline" size="sm">
-                        נהל
-                      </Button>
-                    </Link>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))
-        )}
-      </div>
+      ) : meetings.length === 0 ? (
+        <AdminEmptyState
+          icon={UsersRound}
+          title={t('empty')}
+          action={
+            <Button asChild className="h-11 bg-[#003153] text-white hover:bg-[#003153]/90">
+              <Link href="/admin/meetings/new">{t('newMeeting')}</Link>
+            </Button>
+          }
+        />
+      ) : (
+        meetings.map((meeting) => (
+          <AdminGroup key={meeting.id}>
+            <AdminRow
+              href={`/admin/meetings/${meeting.id}`}
+              title={meeting.title}
+              subtitle={
+                <span className="flex items-center gap-3">
+                  <span className="flex min-w-0 items-center gap-1">
+                    <Calendar className="h-3.5 w-3.5 flex-none" aria-hidden="true" />
+                    <span className="truncate">
+                      {format(new Date(meeting.meeting_date), 'PPP', { locale: dateLocale })}
+                    </span>
+                  </span>
+                  <span className="flex flex-none items-center gap-1">
+                    <Users className="h-3.5 w-3.5" aria-hidden="true" />
+                    {t('ideasCount', { count: meeting.ideas_count })}
+                  </span>
+                </span>
+              }
+              trailing={
+                <StatusPill tone={meeting.is_open ? 'success' : 'neutral'}>
+                  {meeting.is_open ? t('open') : t('closed')}
+                </StatusPill>
+              }
+            />
+            <div className="space-y-2 px-3 py-2">
+              {meeting.description && (
+                <p className="line-clamp-2 text-xs text-gray-500">{meeting.description}</p>
+              )}
+              <div className="flex flex-wrap gap-2">
+                <Button asChild variant="outline" size="sm" className="min-h-[44px]">
+                  <Link href={`/meetings/${meeting.id}`} target="_blank">
+                    <ExternalLink className="me-2 h-4 w-4" aria-hidden="true" />
+                    {t('viewPage')}
+                  </Link>
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="min-h-[44px]"
+                  onClick={() => toggleMeetingStatus(meeting.id, meeting.is_open)}
+                >
+                  {meeting.is_open ? t('close') : t('openAction')}
+                </Button>
+              </div>
+            </div>
+          </AdminGroup>
+        ))
+      )}
     </div>
   )
 }

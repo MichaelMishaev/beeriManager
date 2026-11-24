@@ -253,6 +253,7 @@ export async function POST(
 
     const response = await openai.chat.completions.create({
       model: AI_CONFIG.model,
+      reasoning_effort: AI_CONFIG.reasoning_effort,
       max_completion_tokens: 3000, // Increased for more detailed summaries
       messages: [
         {

@@ -1,56 +1,51 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import { User, Save, Trash2, Phone, Loader2 } from 'lucide-react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Save, Trash2, Loader2 } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Switch } from '@/components/ui/switch'
 import { toast } from 'sonner'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
 import { format } from 'date-fns'
-import { SmartDatePicker } from '@/components/ui/smart-date-picker'
 import { useFormDraft } from '@/hooks/useFormDraft'
 import { useAutoSave } from '@/hooks/useAutoSave'
 import { DraftBanner, DraftSaveIndicator } from '@/components/ui/draft-banner'
+import { AdminPageHeader } from '@/components/features/admin'
+import {
+  AdminTaskFormFields,
+  buildAdminTaskSchema,
+  type AdminTaskFormData,
+  type LinkOption
+} from '@/components/features/tasks/admin/AdminTaskFormFields'
 
-const taskSchema = z.object({
-  title: z.string().min(2, 'כותרת חייבת להכיל לפחות 2 תווים'),
-  description: z.string().optional(),
-  priority: z.enum(['low', 'normal', 'high', 'urgent']),
-  status: z.enum(['pending', 'in_progress', 'completed', 'cancelled']),
-  owner_name: z.string().min(2, 'שם האחראי נדרש'),
-  owner_phone: z.union([
-    z.string().regex(/^05\d{8}$/, 'מספר טלפון לא תקין'),
-    z.literal(''),
-    z.null(),
-    z.undefined()
-  ]).optional(),
-  due_date: z.union([z.string().min(1), z.literal(''), z.null(), z.undefined()]).optional(),
-  reminder_date: z.union([z.string(), z.literal(''), z.null(), z.undefined()]).optional(),
-  event_id: z.union([z.string(), z.literal(''), z.null(), z.undefined()]).optional(),
-  parent_task_id: z.union([z.string(), z.literal(''), z.null(), z.undefined()]).optional(),
-  auto_remind: z.boolean()
-})
-
-type TaskFormData = z.infer<typeof taskSchema>
+interface ToastAction {
+  label: string
+  onClick: () => void
+}
 
 export default function EditTaskPage({ params }: { params: { id: string } }) {
   const router = useRouter()
+  const t = useTranslations('admin.tasks.form')
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
-  const [events, setEvents] = useState<any[]>([])
-  const [tasks, setTasks] = useState<any[]>([])
+  const [events, setEvents] = useState<LinkOption[]>([])
+  const [tasks, setTasks] = useState<LinkOption[]>([])
   const [dueDate, setDueDate] = useState<string>('')
   const [reminderDate, setReminderDate] = useState<string>('')
   const [showDraftBanner, setShowDraftBanner] = useState(false)
+
+  const taskSchema = useMemo(
+    () =>
+      buildAdminTaskSchema({
+        titleMin: t('validation.titleMin'),
+        ownerRequired: t('validation.ownerRequired'),
+        phoneInvalid: t('validation.phoneInvalid')
+      }),
+    [t]
+  )
 
   const {
     register,
@@ -59,14 +54,12 @@ export default function EditTaskPage({ params }: { params: { id: string } }) {
     setValue,
     reset,
     formState: { errors }
-  } = useForm<TaskFormData>({
+  } = useForm<AdminTaskFormData>({
     resolver: zodResolver(taskSchema)
   })
 
-  const watchDueDate = watch('due_date')
-
   // Draft management
-  const { saveDraft, restoreDraft, clearDraft, hasDraft, draftTimestamp } = useFormDraft<TaskFormData>({
+  const { saveDraft, restoreDraft, clearDraft, hasDraft, draftTimestamp } = useFormDraft<AdminTaskFormData>({
     formType: 'task',
     action: 'edit',
     entityId: params.id
@@ -93,19 +86,18 @@ export default function EditTaskPage({ params }: { params: { id: string } }) {
     const draft = restoreDraft()
     if (draft) {
       // Restore all form fields
-      const draftData = draft as any
-      Object.keys(draftData).forEach((key) => {
+      const draftData: Partial<AdminTaskFormData> = draft
+      const keys = Object.keys(draftData) as (keyof AdminTaskFormData)[]
+      keys.forEach((key) => {
         if (key === 'due_date') {
-          setDueDate(draftData[key] as string)
+          setDueDate((draftData[key] as string | null | undefined) ?? '')
         } else if (key === 'reminder_date') {
-          setReminderDate(draftData[key] as string)
+          setReminderDate((draftData[key] as string | null | undefined) ?? '')
         }
-        if (key in draftData) {
-          setValue(key as any, draftData[key])
-        }
+        setValue(key, draftData[key] as never)
       })
       setShowDraftBanner(false)
-      toast.success('הטיוטה שוחזרה בהצלחה!')
+      toast.success(t('toast.draftRestored'))
     }
   }
 
@@ -113,7 +105,7 @@ export default function EditTaskPage({ params }: { params: { id: string } }) {
   const handleDiscardDraft = () => {
     clearDraft()
     setShowDraftBanner(false)
-    toast.success('הטיוטה נמחקה')
+    toast.success(t('toast.draftDiscarded'))
   }
 
   useEffect(() => {
@@ -149,12 +141,12 @@ export default function EditTaskPage({ params }: { params: { id: string } }) {
           auto_remind: task.auto_remind ?? true
         })
       } else {
-        toast.error('שגיאה בטעינת המשימה')
+        toast.error(t('toast.loadError'))
         router.push('/tasks')
       }
     } catch (error) {
       console.error('Error fetching task:', error)
-      toast.error('שגיאה בטעינת המשימה')
+      toast.error(t('toast.loadError'))
       router.push('/tasks')
     } finally {
       setIsLoading(false)
@@ -179,14 +171,14 @@ export default function EditTaskPage({ params }: { params: { id: string } }) {
       const data = await response.json()
       if (data.success) {
         // Filter out the current task from parent options
-        setTasks(data.data.filter((t: any) => t.id !== params.id))
+        setTasks((data.data as LinkOption[]).filter((task) => task.id !== params.id))
       }
     } catch (error) {
       console.error('Error fetching tasks:', error)
     }
   }
 
-  async function onSubmit(data: TaskFormData) {
+  async function onSubmit(data: AdminTaskFormData) {
     setIsSubmitting(true)
 
     try {
@@ -210,9 +202,9 @@ export default function EditTaskPage({ params }: { params: { id: string } }) {
       // Handle HTTP errors
       if (!response.ok) {
         if (response.status === 404) {
-          toast.error('המשימה לא נמצאה. ייתכן שהיא נמחקה', {
+          toast.error(t('toast.notFound'), {
             action: {
-              label: 'חזור לרשימה',
+              label: t('toast.backToList'),
               onClick: () => router.push('/tasks')
             }
           })
@@ -220,9 +212,9 @@ export default function EditTaskPage({ params }: { params: { id: string } }) {
         }
 
         if (response.status === 401) {
-          toast.error('אין הרשאה. נדרשת התחברות מחדש', {
+          toast.error(t('toast.unauthorized'), {
             action: {
-              label: 'התחבר',
+              label: t('toast.login'),
               onClick: () => router.push('/login')
             }
           })
@@ -230,9 +222,9 @@ export default function EditTaskPage({ params }: { params: { id: string } }) {
         }
 
         if (response.status >= 500) {
-          toast.error('שגיאת שרת. אנא נסה שוב בעוד מספר רגעים', {
+          toast.error(t('toast.serverError'), {
             action: {
-              label: 'נסה שוב',
+              label: t('toast.retry'),
               onClick: () => onSubmit(data)
             }
           })
@@ -244,7 +236,7 @@ export default function EditTaskPage({ params }: { params: { id: string } }) {
 
       if (result.success) {
         clearDraft() // Clear draft on successful save
-        toast.success('המשימה עודכנה בהצלחה!', { duration: 2000 })
+        toast.success(t('toast.updateSuccess'), { duration: 2000 })
 
         // Wait for toast to be visible
         await new Promise(resolve => setTimeout(resolve, 500))
@@ -262,14 +254,14 @@ export default function EditTaskPage({ params }: { params: { id: string } }) {
           const firstError = Object.values(result.fieldErrors)[0] as string
           toast.error(firstError || result.error)
         } else {
-          const errorOptions: any = {}
+          const errorOptions: { action?: ToastAction } = {}
           if (result.action && result.action.onClick === 'retry') {
             errorOptions.action = {
               label: result.action.label,
               onClick: () => onSubmit(data)
             }
           }
-          toast.error(result.error || 'שגיאה בעדכון המשימה', errorOptions)
+          toast.error(result.error || t('toast.updateError'), errorOptions)
         }
         setIsSubmitting(false)
       }
@@ -277,23 +269,23 @@ export default function EditTaskPage({ params }: { params: { id: string } }) {
       console.error('Error updating task:', error)
 
       if (!navigator.onLine) {
-        toast.error('אין חיבור לאינטרנט. בדוק את החיבור ונסה שוב', {
+        toast.error(t('toast.offline'), {
           action: {
-            label: 'נסה שוב',
+            label: t('toast.retry'),
             onClick: () => onSubmit(data)
           }
         })
       } else if (error instanceof SyntaxError) {
-        toast.error('התקבל מידע שגוי מהשרת. נסה לרענן את הדף')
+        toast.error(t('toast.badResponse'))
       } else {
-        toast.error('שגיאה לא צפויה. נסה שוב או פנה לתמיכה')
+        toast.error(t('toast.unexpected'))
       }
       setIsSubmitting(false)
     }
   }
 
   async function handleDelete() {
-    if (!confirm('האם אתה בטוח שברצונך למחוק את המשימה? פעולה זו לא ניתנת לביטול.')) {
+    if (!confirm(t('confirmDelete'))) {
       return
     }
 
@@ -308,9 +300,9 @@ export default function EditTaskPage({ params }: { params: { id: string } }) {
 
       if (!response.ok) {
         if (response.status === 404) {
-          toast.error('המשימה כבר נמחקה', {
+          toast.error(t('toast.alreadyDeleted'), {
             action: {
-              label: 'חזור לרשימה',
+              label: t('toast.backToList'),
               onClick: () => router.push('/tasks')
             }
           })
@@ -323,7 +315,7 @@ export default function EditTaskPage({ params }: { params: { id: string } }) {
       const result = await response.json()
 
       if (result.success) {
-        toast.success('המשימה נמחקה בהצלחה', { duration: 1500 })
+        toast.success(t('toast.deleteSuccess'), { duration: 1500 })
 
         // Wait for user to see toast
         await new Promise(resolve => setTimeout(resolve, 1000))
@@ -331,14 +323,14 @@ export default function EditTaskPage({ params }: { params: { id: string } }) {
         // Navigate (no need to unlock - we're leaving)
         router.push('/tasks')
       } else {
-        toast.error(result.error || 'שגיאה במחיקת המשימה')
+        toast.error(result.error || t('toast.deleteError'))
         // Unlock on error
         setIsDeleting(false)
         setIsSubmitting(false)
       }
     } catch (error) {
       console.error('Error deleting task:', error)
-      toast.error('שגיאה במחיקת המשימה. נסה שוב')
+      toast.error(t('toast.deleteErrorRetry'))
       // Unlock on error
       setIsDeleting(false)
       setIsSubmitting(false)
@@ -348,24 +340,21 @@ export default function EditTaskPage({ params }: { params: { id: string } }) {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
-          <p className="text-muted-foreground">טוען משימה...</p>
+      <div className="space-y-4">
+        <AdminPageHeader title={t('editTitle')} backHref="/admin/tasks" />
+        <div className="flex min-h-[40vh] items-center justify-center">
+          <div className="text-center">
+            <Loader2 className="mx-auto mb-4 h-8 w-8 animate-spin text-primary" />
+            <p className="text-muted-foreground">{t('loadingTask')}</p>
+          </div>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold">עריכת משימה</h1>
-        <p className="text-muted-foreground mt-2">
-          עדכן את פרטי המשימה
-        </p>
-      </div>
+    <div className="space-y-4">
+      <AdminPageHeader title={t('editTitle')} subtitle={t('editSubtitle')} backHref="/admin/tasks" />
 
       {/* Draft Banner */}
       {showDraftBanner && draftTimestamp && (
@@ -377,267 +366,72 @@ export default function EditTaskPage({ params }: { params: { id: string } }) {
         />
       )}
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        {/* Basic Information */}
-        <Card>
-          <CardHeader>
-            <CardTitle>פרטי המשימה</CardTitle>
-            <CardDescription>מידע בסיסי על המשימה</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="title">כותרת המשימה *</Label>
-              <Input
-                id="title"
-                {...register('title')}
-                placeholder="לדוגמה: הזמנת כיבוד לישיבה"
-                className={errors.title ? 'border-red-500' : ''}
-              />
-              {errors.title && (
-                <p className="text-sm text-red-500 mt-1">{errors.title.message}</p>
-              )}
-            </div>
-
-            <div>
-              <Label htmlFor="description">תיאור</Label>
-              <Textarea
-                id="description"
-                {...register('description')}
-                placeholder="תיאור מפורט של המשימה..."
-                rows={4}
-              />
-            </div>
-
-            <div className="grid gap-4 md:grid-cols-2">
-              <div>
-                <Label htmlFor="priority">עדיפות</Label>
-                <Select
-                  onValueChange={(value) => setValue('priority', value as any)}
-                  value={watch('priority')}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="low">נמוכה</SelectItem>
-                    <SelectItem value="normal">רגילה</SelectItem>
-                    <SelectItem value="high">גבוהה</SelectItem>
-                    <SelectItem value="urgent">דחוף</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label htmlFor="status">סטטוס</Label>
-                <Select
-                  onValueChange={(value) => setValue('status', value as any)}
-                  value={watch('status')}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="pending">ממתין</SelectItem>
-                    <SelectItem value="in_progress">בביצוע</SelectItem>
-                    <SelectItem value="completed">הושלם</SelectItem>
-                    <SelectItem value="cancelled">בוטל</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Assignment */}
-        <Card>
-          <CardHeader>
-            <CardTitle>הקצאת משימה</CardTitle>
-            <CardDescription>מי אחראי על ביצוע המשימה</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="owner_name">שם האחראי *</Label>
-              <div className="relative">
-                <User className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="owner_name"
-                  {...register('owner_name')}
-                  placeholder="שם מלא"
-                  className={`pr-10 ${errors.owner_name ? 'border-red-500' : ''}`}
-                />
-              </div>
-              {errors.owner_name && (
-                <p className="text-sm text-red-500 mt-1">{errors.owner_name.message}</p>
-              )}
-            </div>
-
-            <div>
-              <Label htmlFor="owner_phone">טלפון האחראי</Label>
-              <div className="relative">
-                <Phone className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="owner_phone"
-                  {...register('owner_phone')}
-                  placeholder="050-1234567"
-                  className={`pr-10 ${errors.owner_phone ? 'border-red-500' : ''}`}
-                  dir="ltr"
-                />
-              </div>
-              {errors.owner_phone && (
-                <p className="text-sm text-red-500 mt-1">{errors.owner_phone.message}</p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Dates */}
-        <Card>
-          <CardHeader>
-            <CardTitle>תאריכי יעד</CardTitle>
-            <CardDescription>מתי המשימה צריכה להסתיים</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <SmartDatePicker
-              label="תאריך יעד"
-              value={dueDate}
-              onChange={(date) => {
-                setDueDate(date || '')
-                setValue('due_date', date || '')
-              }}
-              helperText="בחר מתי המשימה צריכה להסתיים (אופציונלי)"
-              required={false}
-            />
-
-            <SmartDatePicker
-              label="תאריך תזכורת"
-              value={reminderDate}
-              onChange={(date) => {
-                setReminderDate(date || '')
-                setValue('reminder_date', date || '')
-              }}
-              helperText="תישלח תזכורת לאחראי בתאריך זה"
-              comingSoon={true}
-              relativeTo={watchDueDate || undefined}
-            />
-
-            <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
-              <div>
-                <Label htmlFor="auto_remind">תזכורות אוטומטיות</Label>
-                <p className="text-sm text-muted-foreground">
-                  שלח תזכורות אוטומטיות כשהמשימה מתקרבת לתאריך היעד
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full">
-                  בקרוב 🔔
-                </span>
-                <Switch
-                  id="auto_remind"
-                  checked={watch('auto_remind')}
-                  onCheckedChange={(checked) => setValue('auto_remind', checked)}
-                  disabled
-                />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Relationships */}
-        <Card>
-          <CardHeader>
-            <CardTitle>קישורים (אופציונלי)</CardTitle>
-            <CardDescription>קשר את המשימה לאירוע או למשימת אב</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {events.length > 0 && (
-              <div>
-                <Label htmlFor="event_id">אירוע קשור</Label>
-                <Select
-                  onValueChange={(value) => setValue('event_id', value)}
-                  value={watch('event_id') || undefined}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="בחר אירוע..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">ללא</SelectItem>
-                    {events.map((event) => (
-                      <SelectItem key={event.id} value={event.id}>
-                        {event.title}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-
-            {tasks.length > 0 && (
-              <div>
-                <Label htmlFor="parent_task_id">משימת אב</Label>
-                <Select
-                  onValueChange={(value) => setValue('parent_task_id', value)}
-                  value={watch('parent_task_id') || undefined}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="בחר משימת אב..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">ללא</SelectItem>
-                    {tasks.map((task) => (
-                      <SelectItem key={task.id} value={task.id}>
-                        {task.title}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <AdminTaskFormFields
+          mode="edit"
+          register={register}
+          setValue={setValue}
+          watch={watch}
+          errors={errors}
+          dueDate={dueDate}
+          reminderDate={reminderDate}
+          onDueDateChange={(date) => {
+            setDueDate(date)
+            setValue('due_date', date)
+          }}
+          onReminderDateChange={(date) => {
+            setReminderDate(date)
+            setValue('reminder_date', date)
+          }}
+          events={events}
+          tasks={tasks}
+        />
 
         {/* Actions */}
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-3">
           {/* Draft Save Indicator */}
           <div className="flex items-center justify-start">
             <DraftSaveIndicator lastSaved={lastSaved} isSaving={isSaving} />
           </div>
-          <div className="flex gap-4">
-            <Button
-              type="submit"
-              disabled={isSubmitting}
-              className="flex-1"
-            >
+          <Button
+            type="submit"
+            disabled={isSubmitting}
+            className="min-h-[44px] w-full bg-[#003153] hover:bg-[#003153]/90"
+          >
             {isSubmitting ? (
-              <>טוען...</>
+              <>{t('loading')}</>
             ) : (
               <>
-                <Save className="h-4 w-4 ml-2" />
-                שמור שינויים
+                <Save className="me-2 h-4 w-4" />
+                {t('saveButton')}
               </>
             )}
           </Button>
-          <Button
-            type="button"
-            variant="destructive"
- onClick={handleDelete}
-            disabled={isDeleting}
-          >
-            {isDeleting ? (
-              <>מוחק...</>
-            ) : (
-              <>
-                <Trash2 className="h-4 w-4 ml-2" />
-                מחק משימה
-              </>
-            )}
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
- onClick={() => router.back()}
-          >
-            ביטול
-          </Button>
+          <div className="flex gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => router.back()}
+              className="min-h-[44px] flex-1"
+            >
+              {t('cancel')}
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={handleDelete}
+              disabled={isDeleting}
+              className="min-h-[44px] flex-1"
+            >
+              {isDeleting ? (
+                <>{t('deleting')}</>
+              ) : (
+                <>
+                  <Trash2 className="me-2 h-4 w-4" />
+                  {t('deleteButton')}
+                </>
+              )}
+            </Button>
           </div>
         </div>
       </form>

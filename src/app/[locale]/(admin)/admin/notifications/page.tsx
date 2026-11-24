@@ -2,9 +2,25 @@
 
 import { useState, useEffect } from 'react'
 import { useTranslations } from 'next-intl'
-import { Bell, Send, Users, CheckCircle, XCircle } from 'lucide-react'
+import {
+  CalendarPlus,
+  CheckCircle,
+  CheckSquare,
+  Clock,
+  FileText,
+  Lightbulb,
+  Send,
+  Shirt,
+  Users,
+  XCircle,
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  AdminFormSection,
+  AdminGroup,
+  AdminPageHeader,
+  AdminRow,
+} from '@/components/features/admin'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
@@ -29,7 +45,7 @@ export default function NotificationsPage() {
     body: '',
     url: '/',
   })
-  const t = useTranslations('notifications')
+  const t = useTranslations('admin.messaging.push')
   const { toast } = useToast()
 
   useEffect(() => {
@@ -65,8 +81,8 @@ export default function NotificationsPage() {
 
     if (!formData.title || !formData.body) {
       toast({
-        title: t('validationError') || 'שגיאת אימות',
-        description: t('titleAndBodyRequired') || 'נדרשים כותרת וטקסט',
+        title: t('toast.validationError'),
+        description: t('toast.titleAndBodyRequired'),
         variant: 'destructive',
       })
       return
@@ -103,8 +119,8 @@ export default function NotificationsPage() {
       })
 
       toast({
-        title: t('notificationSent') || 'ההתראה נשלחה',
-        description: `${t('sentTo') || 'נשלח ל'} ${result.sent} ${t('subscribers') || 'מנויים'}`,
+        title: t('toast.sent'),
+        description: t('toast.sentTo', { count: result.sent }),
       })
 
       // Reset form
@@ -121,8 +137,8 @@ export default function NotificationsPage() {
       logger.error('Send notification failed', { error })
 
       toast({
-        title: t('sendFailed') || 'השליחה נכשלה',
-        description: t('sendFailedDescription') || 'אנא נסה שנית',
+        title: t('toast.sendFailed'),
+        description: t('toast.sendFailedDescription'),
         variant: 'destructive',
       })
     } finally {
@@ -138,249 +154,185 @@ export default function NotificationsPage() {
     })
   }
 
+  const templates = [
+    {
+      key: 'newEvent',
+      icon: CalendarPlus,
+      iconClassName: undefined,
+      // Payload text is data: it is what gets sent to subscribers, not admin UI text
+      data: { title: 'אירוע חדש', body: 'אירוע חדש נוסף ללוח השנה. לחצו לצפייה בפרטים.', url: '/events' },
+    },
+    {
+      key: 'newTask',
+      icon: CheckSquare,
+      iconClassName: undefined,
+      data: { title: 'משימה חדשה', body: 'משימה חדשה נוספה. בדקו את רשימת המשימות שלכם.', url: '/tasks' },
+    },
+    {
+      key: 'newProtocol',
+      icon: FileText,
+      iconClassName: undefined,
+      data: { title: 'פרוטוקול חדש', body: 'פרוטוקול ישיבה חדש פורסם. לחצו לקריאה.', url: '/protocols' },
+    },
+    {
+      key: 'reminder',
+      icon: Clock,
+      iconClassName: undefined,
+      data: { title: 'תזכורת', body: 'תזכורת לאירוע הקרוב. נשמח לראותכם!', url: '/events' },
+    },
+    {
+      key: 'whiteShirtTomorrow',
+      icon: Shirt,
+      iconClassName: 'bg-[#FFBA00]/25 text-[#8a5a00]',
+      data: {
+        title: '👕 תזכורת: חולצה לבנה מחר!',
+        body: 'שלום הורים יקרים, מחר יום חולצה לבנה! אנא וודאו שילדכם מגיע עם חולצה לבנה לבית הספר.',
+        url: '/',
+      },
+    },
+    {
+      key: 'whiteShirtWeek',
+      icon: Shirt,
+      iconClassName: 'bg-[#FFBA00]/25 text-[#8a5a00]',
+      data: {
+        title: '👕 תזכורת: חולצה לבנה השבוע',
+        body: 'שלום הורים יקרים, השבוע יש יום חולצה לבנה! אנא וודאו שילדכם מגיע עם חולצה לבנה לבית הספר.',
+        url: '/',
+      },
+    },
+  ] as const
+
+  const fieldHint = 'text-xs text-gray-500'
+
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="space-y-6">
-        {/* Header */}
-        <div>
-          <h1 className="text-3xl font-bold flex items-center gap-2">
-            <Bell className="h-8 w-8" />
-            {t('title') || 'התראות Push'}
-          </h1>
-          <p className="text-muted-foreground mt-2">
-            {t('description') || 'שלח התראות לכל ההורים שהתקינו את האפליקציה'}
+    <div className="space-y-5">
+      <AdminPageHeader title={t('title')} subtitle={t('description')} backHref="/admin/more" />
+
+      {/* Stats */}
+      <AdminGroup>
+        <AdminRow
+          icon={Users}
+          title={t('stats.total')}
+          subtitle={t('stats.totalHint')}
+          trailing={<span className="text-xl font-bold text-[#003153]">{stats.totalSubscriptions}</span>}
+        />
+        <AdminRow
+          icon={CheckCircle}
+          iconClassName="bg-[#d1fae5] text-[#065f46]"
+          title={t('stats.active')}
+          subtitle={t('stats.activeHint')}
+          trailing={<span className="text-xl font-bold text-[#003153]">{stats.activeSubscriptions}</span>}
+        />
+        <AdminRow
+          icon={XCircle}
+          title={t('stats.inactive')}
+          subtitle={t('stats.inactiveHint')}
+          trailing={
+            <span className="text-xl font-bold text-[#003153]">
+              {stats.totalSubscriptions - stats.activeSubscriptions}
+            </span>
+          }
+        />
+      </AdminGroup>
+
+      {/* Send Notification Form */}
+      <form onSubmit={handleSendNotification} className="space-y-3">
+        <AdminFormSection title={t('form.title')} description={t('form.description')}>
+          <div className="space-y-2">
+            <Label htmlFor="title">{t('form.notificationTitle')} *</Label>
+            <Input
+              id="title"
+              className="h-11"
+              value={formData.title}
+              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              placeholder={t('form.titlePlaceholder')}
+              required
+              maxLength={50}
+            />
+            <p className={fieldHint}>
+              {formData.title.length}/50 {t('form.characters')}
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="body">{t('form.notificationBody')} *</Label>
+            <Textarea
+              id="body"
+              value={formData.body}
+              onChange={(e) => setFormData({ ...formData, body: e.target.value })}
+              placeholder={t('form.bodyPlaceholder')}
+              required
+              maxLength={200}
+              rows={4}
+            />
+            <p className={fieldHint}>
+              {formData.body.length}/200 {t('form.characters')}
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="url">{t('form.notificationUrl')}</Label>
+            <Input
+              id="url"
+              className="h-11"
+              value={formData.url}
+              onChange={(e) => setFormData({ ...formData, url: e.target.value })}
+              placeholder="/"
+            />
+            <p className={fieldHint}>{t('form.urlHint')}</p>
+          </div>
+        </AdminFormSection>
+
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <Button
+            type="submit"
+            disabled={isSending || stats.activeSubscriptions === 0}
+            className="min-h-[44px] flex-1"
+          >
+            <Send className="me-2 h-4 w-4 rtl:-scale-x-100" />
+            {isSending ? t('form.sending') : t('form.send', { count: stats.activeSubscriptions })}
+          </Button>
+
+          <Button
+            type="button"
+            variant="outline"
+            className="min-h-[44px]"
+            onClick={sendTestNotification}
+          >
+            {t('form.test')}
+          </Button>
+        </div>
+      </form>
+
+      {/* Quick Templates */}
+      <AdminGroup title={t('templates.title')} description={t('templates.description')}>
+        {templates.map((tpl) => (
+          <AdminRow
+            key={tpl.key}
+            icon={tpl.icon}
+            iconClassName={tpl.iconClassName}
+            title={t(`templates.${tpl.key}`)}
+            onClick={() => setFormData({ ...tpl.data })}
+          />
+        ))}
+      </AdminGroup>
+
+      {/* Tips */}
+      <AdminFormSection>
+        <div className="space-y-2 text-sm">
+          <p className="flex items-center gap-2 font-medium text-[#003153]">
+            <Lightbulb className="h-4 w-4 text-[#FFBA00]" aria-hidden="true" />
+            {t('tips.title')}
           </p>
+          <ul className="list-inside list-disc space-y-1 text-gray-600">
+            <li>{t('tips.tip1')}</li>
+            <li>{t('tips.tip2')}</li>
+            <li>{t('tips.tip3')}</li>
+            <li>{t('tips.tip4')}</li>
+            <li>{t('tips.tip5')}</li>
+          </ul>
         </div>
-
-        {/* Stats Cards */}
-        <div className="grid gap-4 md:grid-cols-3">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                {t('totalSubscribers') || 'סה"כ מנויים'}
-              </CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.totalSubscriptions}</div>
-              <p className="text-xs text-muted-foreground">
-                {t('totalSubscribersDescription') || 'משתמשים רשומים להתראות'}
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                {t('activeSubscribers') || 'מנויים פעילים'}
-              </CardTitle>
-              <CheckCircle className="h-4 w-4 text-green-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.activeSubscriptions}</div>
-              <p className="text-xs text-muted-foreground">
-                {t('activeSubscribersDescription') || 'יקבלו התראות'}
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                {t('inactiveSubscribers') || 'מנויים לא פעילים'}
-              </CardTitle>
-              <XCircle className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {stats.totalSubscriptions - stats.activeSubscriptions}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                {t('inactiveSubscribersDescription') || 'לא יקבלו התראות'}
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Send Notification Form */}
-        <Card>
-          <CardHeader>
-            <CardTitle>{t('sendNotification') || 'שלח התראה חדשה'}</CardTitle>
-            <CardDescription>
-              {t('sendNotificationDescription') || 'ההתראה תישלח לכל המנויים הפעילים'}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSendNotification} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="title">{t('notificationTitle') || 'כותרת'} *</Label>
-                <Input
-                  id="title"
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  placeholder={t('titlePlaceholder') || 'לדוגמה: אירוע חדש נוסף'}
-                  required
-                  maxLength={50}
-                />
-                <p className="text-xs text-muted-foreground">
-                  {formData.title.length}/50 {t('characters') || 'תווים'}
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="body">{t('notificationBody') || 'תוכן ההתראה'} *</Label>
-                <Textarea
-                  id="body"
-                  value={formData.body}
-                  onChange={(e) => setFormData({ ...formData, body: e.target.value })}
-                  placeholder={t('bodyPlaceholder') || 'לדוגמה: נוסף אירוע חדש ללוח השנה - טיול שנתי 2025'}
-                  required
-                  maxLength={200}
-                  rows={4}
-                />
-                <p className="text-xs text-muted-foreground">
-                  {formData.body.length}/200 {t('characters') || 'תווים'}
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="url">{t('notificationUrl') || 'קישור (אופציונלי)'}</Label>
-                <Input
-                  id="url"
-                  value={formData.url}
-                  onChange={(e) => setFormData({ ...formData, url: e.target.value })}
-                  placeholder="/"
-                />
-                <p className="text-xs text-muted-foreground">
-                  {t('urlDescription') || 'הדף שייפתח בלחיצה על ההתראה'}
-                </p>
-              </div>
-
-              <div className="flex gap-2">
-                <Button
-                  type="submit"
-                  disabled={isSending || stats.activeSubscriptions === 0}
-                  className="flex-1"
-                >
-                  <Send className="h-4 w-4 ml-2" />
-                  {isSending
-                    ? t('sending') || 'שולח...'
-                    : `${t('send') || 'שלח'} (${stats.activeSubscriptions} ${t('subscribers') || 'מנויים'})`}
-                </Button>
-
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={sendTestNotification}
-                >
-                  {t('testNotification') || 'התראת בדיקה'}
-                </Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
-
-        {/* Quick Actions */}
-        <Card>
-          <CardHeader>
-            <CardTitle>{t('quickTemplates') || 'תבניות מהירות'}</CardTitle>
-            <CardDescription>
-              {t('quickTemplatesDescription') || 'לחץ להעתקת תבנית'}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-2">
-              <Button
-                variant="outline"
-                className="justify-start"
-                onClick={() => setFormData({
-                  title: 'אירוע חדש',
-                  body: 'אירוע חדש נוסף ללוח השנה. לחצו לצפייה בפרטים.',
-                  url: '/events',
-                })}
-              >
-                📅 אירוע חדש
-              </Button>
-
-              <Button
-                variant="outline"
-                className="justify-start"
-                onClick={() => setFormData({
-                  title: 'משימה חדשה',
-                  body: 'משימה חדשה נוספה. בדקו את רשימת המשימות שלכם.',
-                  url: '/tasks',
-                })}
-              >
-                ✅ משימה חדשה
-              </Button>
-
-              <Button
-                variant="outline"
-                className="justify-start"
-                onClick={() => setFormData({
-                  title: 'פרוטוקול חדש',
-                  body: 'פרוטוקול ישיבה חדש פורסם. לחצו לקריאה.',
-                  url: '/protocols',
-                })}
-              >
-                📄 פרוטוקול חדש
-              </Button>
-
-              <Button
-                variant="outline"
-                className="justify-start"
-                onClick={() => setFormData({
-                  title: 'תזכורת',
-                  body: 'תזכורת לאירוע הקרוב. נשמח לראותכם!',
-                  url: '/events',
-                })}
-              >
-                ⏰ תזכורת
-              </Button>
-
-              <Button
-                variant="outline"
-                className="justify-start bg-yellow-50 hover:bg-yellow-100 border-yellow-200"
-                onClick={() => setFormData({
-                  title: '👕 תזכורת: חולצה לבנה מחר!',
-                  body: 'שלום הורים יקרים, מחר יום חולצה לבנה! אנא וודאו שילדכם מגיע עם חולצה לבנה לבית הספר.',
-                  url: '/',
-                })}
-              >
-                👕 חולצה לבנה מחר
-              </Button>
-
-              <Button
-                variant="outline"
-                className="justify-start bg-yellow-50 hover:bg-yellow-100 border-yellow-200"
-                onClick={() => setFormData({
-                  title: '👕 תזכורת: חולצה לבנה השבוע',
-                  body: 'שלום הורים יקרים, השבוע יש יום חולצה לבנה! אנא וודאו שילדכם מגיע עם חולצה לבנה לבית הספר.',
-                  url: '/',
-                })}
-              >
-                👕 חולצה לבנה השבוע
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Info */}
-        <Card className="border-blue-200 bg-blue-50 dark:bg-blue-950 dark:border-blue-800">
-          <CardContent className="pt-6">
-            <div className="space-y-2 text-sm">
-              <p className="font-medium">💡 {t('tips') || 'טיפים לשליחת התראות:'}</p>
-              <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-                <li>{t('tip1') || 'כתבו כותרת קצרה וברורה (עד 50 תווים)'}</li>
-                <li>{t('tip2') || 'הוסיפו פרטים חשובים בתוכן (עד 200 תווים)'}</li>
-                <li>{t('tip3') || 'הוסיפו קישור לעמוד הרלוונטי'}</li>
-                <li>{t('tip4') || 'אל תשלחו יותר מדי התראות - שמרו על איזון'}</li>
-                <li>{t('tip5') || 'השתמשו בהתראות לעדכונים חשובים בלבד'}</li>
-              </ul>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      </AdminFormSection>
     </div>
   )
 }

@@ -1,4 +1,4 @@
-import { Page, BrowserContext } from '@playwright/test';
+import { expect, Page, BrowserContext } from '@playwright/test';
 
 export class AuthHelper {
   constructor(private page: Page) {}
@@ -6,7 +6,13 @@ export class AuthHelper {
   async loginAsAdmin(password: string = process.env.ADMIN_PASSWORD || 'test-password') {
     await this.page.goto('/he/login');
     await this.page.waitForSelector('#password', { timeout: 10000 });
-    await this.page.fill('#password', password);
+    // Typing before React hydrates is dropped and leaves the submit button disabled:
+    // retry the fill until the button reacts.
+    const submit = this.page.locator('button[type="submit"]');
+    await expect(async () => {
+      await this.page.fill('#password', password);
+      await expect(submit).toBeEnabled({ timeout: 1000 });
+    }).toPass({ timeout: 15000 });
 
     // Click submit and wait for navigation to admin page
     await Promise.all([

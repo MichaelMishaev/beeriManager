@@ -1,15 +1,17 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
+import { useRouter } from '@/i18n/navigation'
 import { TicketForm } from '@/components/features/tickets/TicketForm'
+import type { TicketFormData } from '@/components/features/tickets/TicketForm'
+import { AdminPageHeader } from '@/components/features/admin'
 import { toast } from 'sonner'
-import { ArrowRight, Loader2 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import Link from 'next/link'
+import { Loader2 } from 'lucide-react'
 import type { Ticket } from '@/types'
 
 export default function EditTicketPage({ params }: { params: { id: string } }) {
+  const t = useTranslations('admin.tickets')
   const router = useRouter()
   const [ticket, setTicket] = useState<Ticket | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -17,6 +19,7 @@ export default function EditTicketPage({ params }: { params: { id: string } }) {
 
   useEffect(() => {
     loadTicket()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.id])
 
   async function loadTicket() {
@@ -26,18 +29,18 @@ export default function EditTicketPage({ params }: { params: { id: string } }) {
       if (data.success) {
         setTicket(data.data)
       } else {
-        toast.error('הכרטיס לא נמצא')
+        toast.error(t('edit.notFound'))
         router.push('/admin/tickets')
       }
     } catch (error) {
       console.error('Error loading ticket:', error)
-      toast.error('שגיאה בטעינת הכרטיס')
+      toast.error(t('edit.loadError'))
     } finally {
       setIsLoading(false)
     }
   }
 
-  async function handleSubmit(data: any) {
+  async function handleSubmit(data: TicketFormData) {
     setIsSubmitting(true)
 
     try {
@@ -50,16 +53,16 @@ export default function EditTicketPage({ params }: { params: { id: string } }) {
       const result = await response.json()
 
       if (result.success) {
-        toast.success('הכרטיס עודכן בהצלחה!')
+        toast.success(t('edit.success'))
         router.push('/admin/tickets')
         router.refresh()
       } else {
-        toast.error(result.error || 'שגיאה בעדכון הכרטיס')
+        toast.error(result.error || t('edit.error'))
         setIsSubmitting(false)
       }
     } catch (error) {
       console.error('Error updating ticket:', error)
-      toast.error('שגיאה בעדכון הכרטיס')
+      toast.error(t('edit.error'))
       setIsSubmitting(false)
     }
   }
@@ -67,7 +70,7 @@ export default function EditTicketPage({ params }: { params: { id: string } }) {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <Loader2 className="h-8 w-8 animate-spin text-[#0D98BA]" aria-hidden="true" />
       </div>
     )
   }
@@ -77,18 +80,12 @@ export default function EditTicketPage({ params }: { params: { id: string } }) {
   }
 
   return (
-    <div className="container mx-auto px-4 py-6 max-w-4xl">
-      <div className="mb-6">
-        <Button variant="ghost" asChild size="sm" className="mb-4">
-          <Link href="/admin/tickets">
-            <ArrowRight className="h-4 w-4 ml-2" />
-            חזרה לרשימת כרטיסים
-          </Link>
-        </Button>
-        <h1 className="text-2xl md:text-3xl font-bold">ערוך כרטיס</h1>
-        <p className="text-muted-foreground mt-2">{ticket.title}</p>
-      </div>
-
+    <div>
+      <AdminPageHeader
+        title={t('edit.title')}
+        subtitle={ticket.title}
+        backHref="/admin/tickets"
+      />
       <TicketForm ticket={ticket} onSubmit={handleSubmit} isSubmitting={isSubmitting} />
     </div>
   )

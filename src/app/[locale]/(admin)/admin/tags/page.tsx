@@ -1,11 +1,19 @@
 import { Metadata } from 'next'
+import { getTranslations } from 'next-intl/server'
 import { createClient } from '@/lib/supabase/server'
 import { TagManagerClient } from '@/components/features/tasks/tags/TagManagerClient'
 import type { Tag } from '@/types'
 
-export const metadata: Metadata = {
-  title: 'ניהול תגיות | פורטל בארי',
-  description: 'ניהול תגיות לקטגוריזציה של משימות'
+export async function generateMetadata({
+  params
+}: {
+  params: { locale: string }
+}): Promise<Metadata> {
+  const t = await getTranslations({ locale: params.locale, namespace: 'admin.tasks.tags' })
+  return {
+    title: t('metaTitle'),
+    description: t('metaDescription')
+  }
 }
 
 export const dynamic = 'force-dynamic'
@@ -32,8 +40,6 @@ export default async function TagsAdminPage() {
   const tags = await getTags()
 
   return (
-    <div className="container mx-auto py-6 px-4 max-w-6xl">
-      <TagManagerClient initialTags={tags} />
-    </div>
+    <TagManagerClient initialTags={tags} />
   )
 }

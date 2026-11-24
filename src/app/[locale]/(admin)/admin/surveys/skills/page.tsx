@@ -1,15 +1,14 @@
-import { Metadata } from 'next'
-import { SkillsAdminDashboard } from '@/components/features/surveys/admin/SkillsAdminDashboard'
+import { redirect } from 'next/navigation'
+import { buildInboxRedirect } from '@/components/features/admin/inbox/redirect'
 
-export const metadata: Metadata = {
-  title: 'ניהול מאגר מיומנויות | BeeriManager',
-  description: 'ניהול תשובות מאגר המיומנויות',
+interface PageProps {
+  params: Promise<{ locale: string }> | { locale: string }
+  searchParams?: Promise<Record<string, string | string[] | undefined>> | Record<string, string | string[] | undefined>
 }
 
-export default function AdminSkillsPage() {
-  return (
-    <div className="container mx-auto px-4 py-8">
-      <SkillsAdminDashboard />
-    </div>
-  )
+// Old URL kept alive for bookmarks and links: the content now lives in the parents inbox.
+export default async function Page({ params, searchParams }: PageProps) {
+  const { locale } = await params
+  const query = searchParams ? await searchParams : undefined
+  redirect(buildInboxRedirect(locale, 'survey', query))
 }

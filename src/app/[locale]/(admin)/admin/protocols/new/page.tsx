@@ -1,9 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { Save, Plus, X, ClipboardList } from 'lucide-react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { useTranslations } from 'next-intl'
+import { AdminFormSection, AdminPageHeader, AiFormatButton } from '@/components/features/admin'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -20,30 +21,33 @@ import { useFormDraft } from '@/hooks/useFormDraft'
 import { useAutoSave } from '@/hooks/useAutoSave'
 import { DraftBanner, DraftSaveIndicator } from '@/components/ui/draft-banner'
 
-const protocolSchema = z.object({
-  title: z.string().min(2, 'כותרת חייבת להכיל לפחות 2 תווים'),
-  meeting_date: z.string().min(1, 'תאריך ישיבה נדרש'),
-  protocol_type: z.enum(['regular', 'special', 'annual', 'emergency']),
-  attendees: z.array(z.string()).min(1, 'חייב להיות לפחות משתתף אחד'),
-  agenda: z.string().optional(),
-  decisions: z.string().optional(),
-  action_items: z.string().optional(),
-  document_url: z.string().optional(),
-  attachment_urls: z.array(z.string()).optional(),
-  is_public: z.boolean(),
-  approved: z.boolean()
-})
+function createProtocolSchema(messages: {
+  titleMin: string
+  dateRequired: string
+  attendeesMin: string
+}) {
+  return z.object({
+    title: z.string().min(2, messages.titleMin),
+    meeting_date: z.string().min(1, messages.dateRequired),
+    protocol_type: z.enum(['regular', 'special', 'annual', 'emergency']),
+    attendees: z.array(z.string()).min(1, messages.attendeesMin),
+    agenda: z.string().optional(),
+    decisions: z.string().optional(),
+    action_items: z.string().optional(),
+    document_url: z.string().optional(),
+    attachment_urls: z.array(z.string()).optional(),
+    is_public: z.boolean(),
+    approved: z.boolean()
+  })
+}
 
-type ProtocolFormData = z.infer<typeof protocolSchema>
+type ProtocolFormData = z.infer<ReturnType<typeof createProtocolSchema>>
 
-const protocolTypeOptions = [
-  { value: 'regular', label: 'ישיבה רגילה' },
-  { value: 'special', label: 'ישיבה מיוחדת' },
-  { value: 'annual', label: 'אסיפה שנתית' },
-  { value: 'emergency', label: 'ישיבת חירום' }
-]
+const protocolTypeValues = ['regular', 'special', 'annual', 'emergency'] as const
 
 export default function NewProtocolPage() {
+  const t = useTranslations('admin.records.protocols')
+  const tc = useTranslations('admin.common')
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [attendeeInput, setAttendeeInput] = useState('')
@@ -51,6 +55,16 @@ export default function NewProtocolPage() {
   const [formattedHTML, setFormattedHTML] = useState('')
   const [taskDrawerOpen, setTaskDrawerOpen] = useState(false)
   const [showDraftBanner, setShowDraftBanner] = useState(false)
+
+  const protocolSchema = useMemo(
+    () =>
+      createProtocolSchema({
+        titleMin: t('validation.titleMin'),
+        dateRequired: t('validation.dateRequired'),
+        attendeesMin: t('validation.attendeesMin'),
+      }),
+    [t]
+  )
 
   const {
     register,
@@ -99,18 +113,18 @@ export default function NewProtocolPage() {
     const draft = restoreDraft()
     if (draft) {
       // Restore all form fields
-      const draftData = draft as any
+      const draftData = draft as Record<string, unknown>
       Object.keys(draftData).forEach((key) => {
         if (key === 'attendees') {
           setAttendees(draftData[key] as string[])
         } else if (key === 'formattedHTML') {
           setFormattedHTML(draftData[key] as string)
         } else if (key in draftData) {
-          setValue(key as any, draftData[key])
+          setValue(key as keyof ProtocolFormData, draftData[key] as never)
         }
       })
       setShowDraftBanner(false)
-      toast.success('הטיוטה שוחזרה בהצלחה!')
+      toast.success(t('draftRestored'))
     }
   }
 
@@ -118,7 +132,7 @@ export default function NewProtocolPage() {
   const handleDiscardDraft = () => {
     clearDraft()
     setShowDraftBanner(false)
-    toast.success('הטיוטה נמחקה')
+    toast.success(t('draftDiscarded'))
   }
 
   const addAttendee = () => {
@@ -138,7 +152,7 @@ export default function NewProtocolPage() {
 
   async function onSubmit(data: ProtocolFormData) {
     if (attendees.length === 0) {
-      toast.error('יש להוסיף לפחות משתתף אחד')
+      toast.error(t('attendeesRequiredToast'))
       return
     }
 
@@ -163,28 +177,22 @@ export default function NewProtocolPage() {
 
       if (result.success) {
         clearDraft() // Clear draft on successful save
-        toast.success('הפרוטוקול נוצר בהצלחה!')
+        toast.success(t('new.toastCreated'))
         router.push('/protocols')
       } else {
-        toast.error(result.error || 'שגיאה ביצירת הפרוטוקול')
+        toast.error(result.error || t('new.toastCreateError'))
       }
     } catch (error) {
       console.error('Error creating protocol:', error)
-      toast.error('שגיאה ביצירת הפרוטוקול')
+      toast.error(t('new.toastCreateError'))
     } finally {
       setIsSubmitting(false)
     }
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold">יצירת פרוטוקול חדש</h1>
-        <p className="text-muted-foreground mt-2">
-          תיעוד ישיבות והחלטות ועד ההורים
-        </p>
-      </div>
+    <div className="space-y-4">
+      <AdminPageHeader title={t('new.title')} subtitle={t('new.subtitle')} backHref="/admin/more" />
 
       {/* Draft Banner */}
       {showDraftBanner && draftTimestamp && (
@@ -196,290 +204,282 @@ export default function NewProtocolPage() {
         />
       )}
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         {/* Basic Information */}
-        <Card>
-          <CardHeader>
-            <CardTitle>פרטי הפרוטוקול</CardTitle>
-            <CardDescription>מידע בסיסי על הישיבה</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
+        <AdminFormSection title={t('detailsTitle')} description={t('detailsDescription')}>
+          <div>
+            <Label htmlFor="title">{t('titleLabel')}</Label>
+            <Input
+              id="title"
+              {...register('title')}
+              placeholder={t('titlePlaceholder')}
+              className={`h-11 ${errors.title ? 'border-red-500' : ''}`}
+            />
+            {errors.title && (
+              <p className="mt-1 text-sm text-red-500">{errors.title.message}</p>
+            )}
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
             <div>
-              <Label htmlFor="title">כותרת הפרוטוקול *</Label>
+              <Label htmlFor="meeting_date">{t('dateLabel')}</Label>
               <Input
-                id="title"
-                {...register('title')}
-                placeholder="לדוגמה: פרוטוקול ישיבת ועד חודש נובמבר"
-                className={errors.title ? 'border-red-500' : ''}
+                id="meeting_date"
+                type="date"
+                {...register('meeting_date')}
+                className={`h-11 ${errors.meeting_date ? 'border-red-500' : ''}`}
               />
-              {errors.title && (
-                <p className="text-sm text-red-500 mt-1">{errors.title.message}</p>
+              {errors.meeting_date && (
+                <p className="mt-1 text-sm text-red-500">{errors.meeting_date.message}</p>
               )}
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2">
-              <div>
-                <Label htmlFor="meeting_date">תאריך הישיבה *</Label>
-                <Input
-                  id="meeting_date"
-                  type="date"
-                  {...register('meeting_date')}
-                  className={errors.meeting_date ? 'border-red-500' : ''}
-                />
-                {errors.meeting_date && (
-                  <p className="text-sm text-red-500 mt-1">{errors.meeting_date.message}</p>
-                )}
-              </div>
+            <div>
+              <Label htmlFor="protocol_type">{t('typeLabel')}</Label>
+              <Select
+                onValueChange={(value) => setValue('protocol_type', value as ProtocolFormData['protocol_type'])}
+                defaultValue="regular"
+              >
+                <SelectTrigger className="h-11">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {protocolTypeValues.map(value => (
+                    <SelectItem key={value} value={value}>
+                      {t(`type.${value}`)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
 
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="flex items-center justify-between gap-3 rounded-xl border p-3">
               <div>
-                <Label htmlFor="protocol_type">סוג הישיבה</Label>
-                <Select
-                  onValueChange={(value) => setValue('protocol_type', value as any)}
-                  defaultValue="regular"
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {protocolTypeOptions.map(option => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Label htmlFor="is_public">{t('publicLabel')}</Label>
+                <p className="text-sm text-muted-foreground">{t('publicHint')}</p>
               </div>
+              <Switch
+                id="is_public"
+                checked={isPublic}
+                onCheckedChange={(checked) => setValue('is_public', checked)}
+              />
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="flex items-center justify-between p-4 border rounded-lg">
-                <div>
-                  <Label htmlFor="is_public">פרוטוקול ציבורי</Label>
-                  <p className="text-sm text-muted-foreground">
-                    יוצג לכל ההורים
-                  </p>
-                </div>
-                <Switch
-                  id="is_public"
-                  checked={isPublic}
-                  onCheckedChange={(checked) => setValue('is_public', checked)}
-                />
+            <div className="flex items-center justify-between gap-3 rounded-xl border p-3">
+              <div>
+                <Label htmlFor="approved">{t('approvedLabel')}</Label>
+                <p className="text-sm text-muted-foreground">{t('approvedHint')}</p>
               </div>
-
-              <div className="flex items-center justify-between p-4 border rounded-lg">
-                <div>
-                  <Label htmlFor="approved">מאושר</Label>
-                  <p className="text-sm text-muted-foreground">
-                    האם הפרוטוקול אושר
-                  </p>
-                </div>
-                <Switch
-                  id="approved"
-                  checked={approved}
-                  onCheckedChange={(checked) => setValue('approved', checked)}
-                />
-              </div>
+              <Switch
+                id="approved"
+                checked={approved}
+                onCheckedChange={(checked) => setValue('approved', checked)}
+              />
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </AdminFormSection>
 
         {/* Attendees */}
-        <Card>
-          <CardHeader>
-            <CardTitle>משתתפים *</CardTitle>
-            <CardDescription>רשימת המשתתפים בישיבה</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex gap-2">
-              <Input
-                placeholder="שם המשתתף"
-                value={attendeeInput}
-                onChange={(e) => setAttendeeInput(e.target.value)}
-                onKeyPress={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault()
-                    addAttendee()
-                  }
-                }}
-              />
-              <Button
-                type="button"
- onClick={addAttendee}
-                variant="outline"
-              >
-                <Plus className="h-4 w-4" />
-                הוסף
-              </Button>
-            </div>
+        <AdminFormSection title={t('attendeesTitle')} description={t('attendeesDescription')}>
+          <div className="flex gap-2">
+            <Input
+              placeholder={t('attendeePlaceholder')}
+              value={attendeeInput}
+              onChange={(e) => setAttendeeInput(e.target.value)}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault()
+                  addAttendee()
+                }
+              }}
+              className="h-11"
+            />
+            <Button
+              type="button"
+              onClick={addAttendee}
+              variant="outline"
+              className="h-11 flex-none"
+            >
+              <Plus className="me-1 h-4 w-4" aria-hidden="true" />
+              {t('addAttendee')}
+            </Button>
+          </div>
 
-            {attendees.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {attendees.map((attendee, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center gap-1 px-3 py-1 bg-secondary rounded-lg"
+          {attendees.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {attendees.map((attendee, index) => (
+                <div
+                  key={index}
+                  className="flex items-center rounded-lg bg-secondary ps-3"
+                >
+                  <span className="text-sm">{attendee}</span>
+                  <button
+                    type="button"
+                    onClick={() => removeAttendee(index)}
+                    aria-label={t('removeAttendee')}
+                    className="flex h-11 w-11 items-center justify-center hover:text-destructive"
                   >
-                    <span className="text-sm">{attendee}</span>
-                    <button
-                      type="button"
-                      onClick={() => removeAttendee(index)}
-                      className="hover:text-destructive"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
+                    <X className="h-4 w-4" aria-hidden="true" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
 
-            {errors.attendees && (
-              <p className="text-sm text-red-500">{errors.attendees.message}</p>
-            )}
-          </CardContent>
-        </Card>
+          {errors.attendees && (
+            <p className="text-sm text-red-500">{errors.attendees.message}</p>
+          )}
+        </AdminFormSection>
 
         {/* Meeting Content */}
-        <Card>
-          <CardHeader>
-            <CardTitle>תוכן הישיבה</CardTitle>
-            <CardDescription>סדר יום, החלטות ומשימות</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <Label htmlFor="agenda">סדר יום</Label>
+        <AdminFormSection title={t('contentTitle')} description={t('contentDescription')}>
+          <div>
+            <div className="mb-2 flex items-center justify-between gap-2">
+              <Label htmlFor="agenda">{t('agendaLabel')}</Label>
+              <div className="flex flex-wrap items-center justify-end gap-2">
+                <AiFormatButton
+                  value={watch('agenda') || ''}
+                  onChange={(value) => setValue('agenda', value)}
+                />
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
                   onClick={() => setTaskDrawerOpen(true)}
-                  className="gap-2"
+                  className="min-h-[44px] gap-2"
                 >
-                  <ClipboardList className="h-4 w-4" />
-                  צפה במשימות
+                  <ClipboardList className="h-4 w-4" aria-hidden="true" />
+                  {t('viewTasks')}
                 </Button>
               </div>
-              <TaskMentionTextarea
-                id="agenda"
-                value={watch('agenda') || ''}
-                onChange={(value) => setValue('agenda', value)}
-                placeholder="נושאים שנדונו בישיבה... (הקלד @ כדי לקשר משימה)"
-                rows={4}
-              />
             </div>
+            <TaskMentionTextarea
+              id="agenda"
+              value={watch('agenda') || ''}
+              onChange={(value) => setValue('agenda', value)}
+              placeholder={t('agendaPlaceholder')}
+              rows={8}
+            />
+          </div>
 
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <Label htmlFor="decisions">החלטות</Label>
+          <div>
+            <div className="mb-2 flex items-center justify-between gap-2">
+              <Label htmlFor="decisions">{t('decisionsLabel')}</Label>
+              <div className="flex flex-wrap items-center justify-end gap-2">
+                <AiFormatButton
+                  value={watch('decisions') || ''}
+                  onChange={(value) => setValue('decisions', value)}
+                />
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
                   onClick={() => setTaskDrawerOpen(true)}
-                  className="gap-2"
+                  className="min-h-[44px] gap-2"
                 >
-                  <ClipboardList className="h-4 w-4" />
-                  צפה במשימות
+                  <ClipboardList className="h-4 w-4" aria-hidden="true" />
+                  {t('viewTasks')}
                 </Button>
               </div>
-              <TaskMentionTextarea
-                id="decisions"
-                value={watch('decisions') || ''}
-                onChange={(value) => setValue('decisions', value)}
-                placeholder="החלטות שהתקבלו בישיבה... (הקלד @ כדי לקשר משימה)"
-                rows={4}
-              />
             </div>
+            <TaskMentionTextarea
+              id="decisions"
+              value={watch('decisions') || ''}
+              onChange={(value) => setValue('decisions', value)}
+              placeholder={t('decisionsPlaceholder')}
+              rows={8}
+            />
+          </div>
 
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <Label htmlFor="action_items">משימות לביצוע</Label>
+          <div>
+            <div className="mb-2 flex items-center justify-between gap-2">
+              <Label htmlFor="action_items">{t('actionItemsLabel')}</Label>
+              <div className="flex flex-wrap items-center justify-end gap-2">
+                <AiFormatButton
+                  value={watch('action_items') || ''}
+                  onChange={(value) => setValue('action_items', value)}
+                />
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
                   onClick={() => setTaskDrawerOpen(true)}
-                  className="gap-2"
+                  className="min-h-[44px] gap-2"
                 >
-                  <ClipboardList className="h-4 w-4" />
-                  צפה במשימות
+                  <ClipboardList className="h-4 w-4" aria-hidden="true" />
+                  {t('viewTasks')}
                 </Button>
               </div>
-              <TaskMentionTextarea
-                id="action_items"
-                value={watch('action_items') || ''}
-                onChange={(value) => setValue('action_items', value)}
-                placeholder="משימות שנקבעו בישיבה... (הקלד @ כדי לקשר משימה)"
-                rows={4}
-              />
             </div>
-            <p className="text-xs text-muted-foreground">
-              לחץ על &quot;צפה במשימות&quot; לראות את כל המשימות בפרויקט
-            </p>
-          </CardContent>
-        </Card>
+            <TaskMentionTextarea
+              id="action_items"
+              value={watch('action_items') || ''}
+              onChange={(value) => setValue('action_items', value)}
+              placeholder={t('actionItemsPlaceholder')}
+              rows={8}
+            />
+          </div>
+          <p className="text-xs text-muted-foreground">{t('tasksHint')}</p>
+        </AdminFormSection>
 
         {/* Documents */}
-        <Card>
-          <CardHeader>
-            <CardTitle>מסמכים</CardTitle>
-            <CardDescription>גרור ושחרר קבצים - הטקסט יחולץ ויעוצב אוטומטית עם AI</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Label>קובץ פרוטוקול ראשי</Label>
-              <FileUpload
-                value={watch('document_url') || ''}
-                onChange={(fileName, html) => {
-                  setValue('document_url', fileName as string)
-                  if (html) setFormattedHTML(html)
-                }}
-                multiple={false}
-                accept=".pdf,.doc,.docx"
-                maxSize={10}
-                bucket="protocols"
-              />
-            </div>
+        <AdminFormSection title={t('documentsTitle')} description={t('documentsDescription')}>
+          <div>
+            <Label>{t('mainFileLabel')}</Label>
+            <FileUpload
+              value={watch('document_url') || ''}
+              onChange={(fileName, html) => {
+                setValue('document_url', fileName as string)
+                if (html) setFormattedHTML(html)
+              }}
+              multiple={false}
+              accept=".pdf,.doc,.docx"
+              maxSize={10}
+              bucket="protocols"
+            />
+          </div>
 
-            <div>
-              <Label>מסמכים נוספים</Label>
-              <FileUpload
-                value={watch('attachment_urls') || []}
-                onChange={(fileName, html) => {
-                  setValue('attachment_urls', [fileName] as string[])
-                  if (html) setFormattedHTML(prev => prev ? `${prev}\n\n${html}` : html)
-                }}
-                multiple={true}
-                accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png"
-                maxSize={10}
-                bucket="protocols"
-              />
-            </div>
-          </CardContent>
-        </Card>
+          <div>
+            <Label>{t('extraFilesLabel')}</Label>
+            <FileUpload
+              value={watch('attachment_urls') || []}
+              onChange={(fileName, html) => {
+                setValue('attachment_urls', [fileName] as string[])
+                if (html) setFormattedHTML(prev => prev ? `${prev}\n\n${html}` : html)
+              }}
+              multiple={true}
+              accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png"
+              maxSize={10}
+              bucket="protocols"
+            />
+          </div>
+        </AdminFormSection>
 
         {/* Actions */}
-        <div className="flex gap-4">
+        <div className="flex flex-col gap-2">
           <Button
             type="submit"
             disabled={isSubmitting}
-            className="flex-1"
+            className="h-11 w-full bg-[#003153] text-white hover:bg-[#003153]/90"
           >
             {isSubmitting ? (
-              <>טוען...</>
+              <>{tc('loading')}</>
             ) : (
               <>
-                <Save className="h-4 w-4 ml-2" />
-                שמור פרוטוקול
+                <Save className="me-2 h-4 w-4" aria-hidden="true" />
+                {t('new.submit')}
               </>
             )}
           </Button>
           <Button
             type="button"
             variant="outline"
- onClick={() => router.back()}
+            onClick={() => router.back()}
+            className="h-11 w-full"
           >
-            ביטול
+            {tc('cancel')}
           </Button>
         </div>
 

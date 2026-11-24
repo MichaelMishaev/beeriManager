@@ -880,6 +880,7 @@
     "subtitle": "הורי הכיתה התורנית עוזרים לילדים לרדת מהרכב — כל השאר נשארים ברכב, והכביש נשאר פנוי",
     "homeCardTitle": "נשק וסע — לוח תורנויות",
     "homeCardSubtitle": "איזו כיתה תורנית ומתי — בחרו את הכיתה שלכם",
+    "backHome": "לדף הבית",
     "share": "שיתוף",
     "shareClassText": "נשק וסע: כיתה {class} תורנית {dates}",
     "howTitle": "איך זה עובד",
@@ -1107,5 +1108,1989 @@
     "soldOut": "אזל מהמלאי",
     "order": "הזמן כרטיס",
     "placeholder": "כרטיס"
+  },
+  "admin": {
+    "common": {
+      "adminModeBanner": "מצב ניהול - יש לך הרשאות עריכה מלאות",
+      "aiAssistant": "עוזר AI",
+      "aiAssistantOpen": "פתיחת עוזר ה-AI",
+      "back": "חזור",
+      "save": "שמור",
+      "saving": "שומר...",
+      "cancel": "ביטול",
+      "delete": "מחק",
+      "edit": "ערוך",
+      "create": "צור",
+      "loading": "טוען...",
+      "error": "אירעה שגיאה",
+      "retry": "נסה שוב",
+      "empty": "אין פריטים להצגה",
+      "confirmDeleteTitle": "האם למחוק?",
+      "status": {
+        "published": "פורסם",
+        "draft": "טיוטה",
+        "cancelled": "בוטל",
+        "active": "פעיל",
+        "new": "חדש",
+        "done": "טופל"
+      }
+    },
+    "nav": {
+      "ariaLabel": "ניווט ניהול",
+      "home": "ניהול",
+      "events": "אירועים",
+      "highlights": "קרוסלה",
+      "inbox": "תיבת הורים",
+      "tickets": "כרטיסים"
+    },
+    "hub": {
+      "title": "ניהול",
+      "contentGroup": {
+        "title": "ניהול תוכן",
+        "description": "כל שורה שולטת בחלק אחד שההורים רואים"
+      },
+      "parentsGroup": {
+        "title": "מה הורים שלחו",
+        "description": "משוב, רעיונות ותשובות לסקר במקום אחד"
+      },
+      "events": {
+        "title": "אירועים",
+        "upcoming": "{count, plural, one {קרוב אחד} other {# קרובים}}",
+        "drafts": "{count, plural, one {טיוטה אחת} other {# טיוטות}}"
+      },
+      "highlights": {
+        "title": "קרוסלה",
+        "active": "{count, plural, one {הדגשה פעילה אחת} other {# הדגשות פעילות}}"
+      },
+      "tickets": {
+        "title": "כרטיסים",
+        "active": "{count, plural, one {פעיל אחד} other {# פעילים}}"
+      },
+      "inbox": {
+        "title": "תיבת הורים",
+        "summary": "משוב {feedback} · רעיונות {ideas} · סקר {survey}"
+      },
+      "more": {
+        "title": "כלים נוספים",
+        "subtitle": "משימות, הודעות דחופות, פרוטוקולים ועוד"
+      }
+    },
+    "more": {
+      "title": "כלים נוספים",
+      "groups": {
+        "messages": "הודעות והתראות",
+        "work": "עבודת הוועד",
+        "people": "אנשים וספקים",
+        "planning": "תכנון וכספים",
+        "system": "מערכת"
+      },
+      "tools": {
+        "urgent": {
+          "title": "הודעות דחופות",
+          "subtitle": "כולל חולצה לבנה"
+        },
+        "notifications": {
+          "title": "התראות Push"
+        },
+        "tasks": {
+          "title": "משימות"
+        },
+        "meetings": {
+          "title": "פגישות"
+        },
+        "protocols": {
+          "title": "הוסף פרוטוקול"
+        },
+        "issuesNew": {
+          "title": "דווח על בעיה"
+        },
+        "issuesStats": {
+          "title": "סטטיסטיקת בעיות"
+        },
+        "committees": {
+          "title": "וועדות"
+        },
+        "contacts": {
+          "title": "אנשי קשר"
+        },
+        "vendors": {
+          "title": "ספקים"
+        },
+        "prom": {
+          "title": "מסיבת סיום"
+        },
+        "expenses": {
+          "title": "הוצאות"
+        },
+        "calendar": {
+          "title": "לוח שנה"
+        },
+        "settings": {
+          "title": "הגדרות"
+        },
+        "tags": {
+          "title": "תגיות"
+        }
+      }
+    },
+    "events": {
+      "list": {
+        "title": "אירועים",
+        "newAria": "אירוע חדש",
+        "createEvent": "צור אירוע",
+        "tabs": {
+          "upcoming": "קרובים",
+          "drafts": "טיוטות",
+          "past": "עבר"
+        },
+        "empty": {
+          "upcoming": {
+            "title": "אין אירועים קרובים",
+            "description": "צור אירוע חדש כדי שיופיע כאן."
+          },
+          "drafts": {
+            "title": "אין טיוטות",
+            "description": "אירועים שנשמרו כטיוטה יופיעו כאן."
+          },
+          "past": {
+            "title": "אין אירועי עבר",
+            "description": "אירועים שהסתיימו יופיעו כאן."
+          }
+        },
+        "loadError": "שגיאה בטעינת האירועים",
+        "allDay": "כל היום",
+        "showMore": "הצג עוד",
+        "status": {
+          "ongoing": "מתקיים",
+          "completed": "הסתיים"
+        }
+      },
+      "phone": {
+        "label": "מספר טלפון ליצירת קשר",
+        "optional": "אופציונלי",
+        "hintValid": "✓ מעולה! תוכל למצוא את האירוע בעמוד \"האירועים שלי\"",
+        "hintEmpty": "הזן מספר טלפון כדי למצוא את האירוע בקלות דרך עמוד \"האירועים שלי\""
+      },
+      "form": {
+        "validation": {
+          "titleMin": "כותרת חייבת להכיל לפחות 2 תווים",
+          "startDateRequired": "תאריך התחלה נדרש",
+          "startTimeRequired": "שעת התחלה נדרשת"
+        },
+        "sections": {
+          "basic": {
+            "title": "פרטי האירוע",
+            "description": "מידע בסיסי על האירוע"
+          },
+          "creator": {
+            "title": "פרטי יוצר האירוע",
+            "description": "לניהול קל יותר של האירועים שיצרת"
+          },
+          "timeLocation": {
+            "title": "זמן ומיקום",
+            "description": "מתי ואיפה האירוע מתקיים"
+          },
+          "registration": {
+            "title": "הגדרות הרשמה",
+            "description": "האם נדרשת הרשמה מראש לאירוע"
+          },
+          "budget": {
+            "title": "תקציב",
+            "description": "תקציב מוקצב לאירוע"
+          }
+        },
+        "titlePlaceholder": "לדוגמה: ישיבת ועד חודשית",
+        "descriptionPlaceholder": "תיאור מפורט של האירוע...",
+        "eventType": {
+          "label": "סוג אירוע",
+          "general": "כללי",
+          "meeting": "ישיבה",
+          "fundraiser": "גיוס כספים",
+          "trip": "טיול",
+          "workshop": "סדנה/הרצאה"
+        },
+        "priority": {
+          "label": "עדיפות",
+          "low": "נמוכה",
+          "normal": "רגילה",
+          "high": "גבוהה",
+          "urgent": "דחוף"
+        },
+        "statusLabel": "סטטוס",
+        "locationPlaceholder": "כתובת או שם המקום",
+        "startDate": "תאריך התחלה *",
+        "endDate": "תאריך סיום",
+        "endTime": "שעת סיום",
+        "registrationEnabled": "אפשר הרשמה",
+        "registrationEnabledHint": "משתתפים יוכלו להירשם לאירוע מראש",
+        "maxAttendees": "מספר מקומות מקסימלי",
+        "maxAttendeesPlaceholder": "השאר ריק לללא הגבלה",
+        "deadlineDate": "תאריך סיום הרשמה",
+        "deadlineTime": "שעה",
+        "requiresPayment": "דורש תשלום",
+        "requiresPaymentHint": "האירוע כרוך בתשלום",
+        "paymentAmount": "סכום לתשלום (₪)",
+        "budgetAllocated": "תקציב מוקצב (₪)"
+      },
+      "new": {
+        "title": "יצירת אירוע חדש",
+        "subtitle": "הוסף אירוע חדש ללוח האירועים של ועד ההורים",
+        "titleLabel": "כותרת האירוע *",
+        "descriptionLabel": "תיאור",
+        "locationLabel": "מיקום",
+        "status": {
+          "draft": "טיוטה (לא יופיע באתר)",
+          "published": "פורסם (גלוי לכולם)",
+          "cancelled": "בוטל",
+          "hint": "רק אירועים \"פורסם\" גלויים למשתמשים רגילים"
+        },
+        "startTimeLabel": "שעת התחלה",
+        "startTimePlaceholder": "השאר ריק לאירוע יום שלם",
+        "startTimeHint": "אופציונלי - אם לא מצוין, האירוע יהיה לכל היום",
+        "submit": "צור אירוע",
+        "toast": {
+          "created": "האירוע נוצר בהצלחה!",
+          "createFailed": "שגיאה ביצירת האירוע"
+        }
+      },
+      "edit": {
+        "title": "עריכת אירוע",
+        "subtitle": "עדכן את פרטי האירוע",
+        "loading": "טוען אירוע...",
+        "titleLabel": "כותרת האירוע (עברית) *",
+        "titleRuLabel": "כותרת האירוע (רוסית)",
+        "titleRuPlaceholder": "Введите название...",
+        "descriptionLabel": "תיאור (עברית)",
+        "descriptionRuLabel": "תיאור (רוסית)",
+        "descriptionRuPlaceholder": "Описание...",
+        "locationLabel": "מיקום (עברית)",
+        "locationRuLabel": "מיקום (רוסית)",
+        "locationRuPlaceholder": "Место...",
+        "ruOptionalHint": "אופציונלי - למשתמשי רוסית",
+        "status": {
+          "draft": "טיוטה",
+          "published": "פורסם",
+          "cancelled": "בוטל"
+        },
+        "startTimeLabel": "שעת התחלה *",
+        "submit": "שמור שינויים",
+        "delete": "מחק אירוע",
+        "deleting": "מוחק...",
+        "confirmDelete": "האם למחוק את האירוע? הוא יוסר מהאתר ומרשימת האירועים.",
+        "toast": {
+          "loadFailed": "שגיאה בטעינת האירוע",
+          "updated": "האירוע עודכן בהצלחה!",
+          "updateFailed": "שגיאה בעדכון האירוע",
+          "deleted": "האירוע נמחק בהצלחה",
+          "deleteFailed": "שגיאה במחיקת האירוע"
+        }
+      }
+    },
+    "highlights": {
+      "emojis": {
+        "trophy": "🏆 גביע",
+        "goldMedal": "🥇 מדליית זהב",
+        "silverMedal": "🥈 מדליית כסף",
+        "bronzeMedal": "🥉 מדליית ארד",
+        "medal": "🎖️ מדליה",
+        "star": "⭐ כוכב",
+        "sparkle": "✨ נצנוץ",
+        "glowingStar": "🌟 כוכב זוהר",
+        "soccer": "⚽ כדורגל",
+        "basketball": "🏀 כדורסל",
+        "volleyball": "🏐 כדורעף",
+        "tennis": "🎾 טניס",
+        "football": "🏈 פוטבול",
+        "baseball": "⚾ בייסבול",
+        "softball": "🥎 סופטבול",
+        "tableTennis": "🏓 טניס שולחן",
+        "badminton": "🏸 בדמינטון",
+        "surfing": "🏄 גלישה",
+        "swimming": "🏊 שחייה",
+        "waterPolo": "🤽 כדור מים",
+        "rowing": "🚣 חתירה",
+        "skiing": "🎿 סקי",
+        "snowboard": "🏂 סנובורד",
+        "gymnastics": "🤸 התעמלות",
+        "handball": "🤾 כדוריד",
+        "judo": "🥋 ג'ודו",
+        "boxing": "🥊 אגרוף",
+        "archery": "🎯 חץ וקשת",
+        "party": "🎉 חגיגה",
+        "confetti": "🎊 קונפטי",
+        "balloon": "🎈 בלון",
+        "cake": "🎂 עוגה",
+        "gift": "🎁 מתנה",
+        "megaphone": "📢 מגפון",
+        "announcementIcon": "📣 הכרזה",
+        "bell": "🔔 פעמון",
+        "graduation": "🎓 כובע גמר",
+        "books": "📚 ספרים",
+        "pencil": "✏️ עיפרון",
+        "palette": "🎨 פלטה",
+        "theater": "🎭 תיאטרון",
+        "film": "🎬 סרט",
+        "music": "🎵 מוזיקה",
+        "guitar": "🎸 גיטרה",
+        "fire": "🔥 אש",
+        "strength": "💪 כוח",
+        "applause": "👏 מחיאות כפיים",
+        "raisedHands": "🙌 ידיים באוויר",
+        "heart": "❤️ לב",
+        "blueHeart": "💙 לב כחול"
+      },
+      "pageTitle": "ניהול קרוסלת הדגשות",
+      "addNew": "הוסף הדגשה חדשה",
+      "types": {
+        "achievement": "🏆 הישג",
+        "sports": "⚽ ספורט",
+        "award": "🎖️ פרס",
+        "event": "🎉 אירוע",
+        "announcement": "📢 הודעה"
+      },
+      "colors": {
+        "gold": "🟡 זהב (הישגים)",
+        "green": "🟢 ירוק (ספורט)",
+        "purple": "🟣 סגול (פרסים)",
+        "orange": "🟠 כתום (כדורסל)",
+        "pink": "🩷 ורוד (אירועים)",
+        "blue": "🔵 כחול (מידע)",
+        "red": "🔴 אדום (דחוף)"
+      },
+      "groups": {
+        "achievements": "🏆 הישגים ופרסים",
+        "ballSports": "⚽ ספורט כדורים",
+        "waterSports": "🏄 ספורט מים",
+        "otherSports": "🤸 ספורט אחר",
+        "events": "🎉 אירועים",
+        "announcements": "📢 הודעות",
+        "education": "🎓 חינוך ואמנות",
+        "other": "💪 אחר"
+      },
+      "status": {
+        "active": "פעילה",
+        "hidden": "מוסתרת"
+      },
+      "row": {
+        "order": "סדר: {order}"
+      },
+      "editor": {
+        "missingFields": "חסרים שדות חובה",
+        "readyToSave": "מוכן לשמירה ✓",
+        "fillAllRequired": "יש למלא את כל השדות החובה",
+        "cancelAria": "ביטול עריכה",
+        "editAria": "עריכה",
+        "deleteAria": "מחיקה",
+        "translate": "תרגם לרוסית",
+        "translating": "מתרגם..."
+      },
+      "sections": {
+        "type": "סוג ואייקון",
+        "content": "תוכן",
+        "display": "תצוגה"
+      },
+      "fields": {
+        "type": "סוג הדגשה",
+        "icon": "אייקון",
+        "titleHe": "כותרת (עברית)",
+        "titleRu": "כותרת (רוסית)",
+        "descriptionHe": "תיאור (עברית)",
+        "descriptionRu": "תיאור (רוסית)",
+        "categoryHe": "קטגוריה (עברית)",
+        "categoryRu": "קטגוריה (רוסית)",
+        "badgeColor": "צבע תגית",
+        "order": "סדר תצוגה",
+        "startDate": "תאריך התחלה",
+        "endDate": "תאריך סיום",
+        "active": "הדגשה פעילה"
+      },
+      "hints": {
+        "required": "שדה חובה",
+        "min2": "(לפחות 2 תווים)",
+        "min10": "(לפחות 10 תווים)",
+        "optional": "(אופציונלי)",
+        "order": "מספר גבוה יותר = מוצג ראשון",
+        "startDate": "ריק = מוצג מיד",
+        "endDate": "ריק = מוצג לעולם",
+        "badgeSample": "דוגמה"
+      },
+      "placeholders": {
+        "titleHe": "הישג מדהים!",
+        "titleRu": "Потрясающее достижение!",
+        "descriptionHe": "תיאור מפורט של ההישג...",
+        "descriptionRu": "Подробное описание достижения...",
+        "categoryHe": "הישגים",
+        "categoryRu": "Достижения",
+        "order": "100"
+      },
+      "empty": {
+        "title": "אין הדגשות. לחץ על \"הוסף הדגשה חדשה\" להתחיל."
+      },
+      "note": "<strong>הערה:</strong> ההדגשות יוצגו בקרוסלה בדף הבית לפי סדר התצוגה. הדגשות פעילות בלבד יוצגו למשתמשים.",
+      "toasts": {
+        "noHebrewContent": "אין תוכן בעברית לתרגום",
+        "translated": "תורגם לרוסית בהצלחה!",
+        "translateError": "שגיאה בתרגום",
+        "loadError": "שגיאה בטעינת ההדגשות",
+        "created": "הדגשה נוצרה בהצלחה",
+        "createError": "שגיאה ביצירת הדגשה",
+        "updated": "הדגשה עודכנה בהצלחה",
+        "updateError": "שגיאה בעדכון הדגשה",
+        "removedTemp": "ההדגשה הוסרה",
+        "deleted": "ההדגשה נמחקה",
+        "deleteError": "שגיאה במחיקת ההדגשה",
+        "fillField": "יש למלא את השדה: {field}"
+      },
+      "confirmDelete": "האם למחוק הדגשה זו?"
+    },
+    "inbox": {
+      "title": "תיבת הורים",
+      "tabs": {
+        "feedback": "משוב",
+        "ideas": "רעיונות",
+        "survey": "סקר"
+      },
+      "feedback": {
+        "statsTotal": "סה\"כ משובים",
+        "statsNew": "{count} חדשים",
+        "statsSuggestions": "הצעות",
+        "statsSuggestionsHint": "הצעות לשיפור",
+        "statsComplaints": "פניות",
+        "statsComplaintsHint": "דורשות התייחסות",
+        "statsRating": "דירוג ממוצע",
+        "statsRatingHint": "מתוך 5.0",
+        "filterTitle": "סינון משובים",
+        "categoryPlaceholder": "בחר קטגוריה",
+        "allCategories": "כל הקטגוריות",
+        "statusPlaceholder": "בחר סטטוס",
+        "allStatuses": "כל הסטטוסים",
+        "category": {
+          "general": "כללי",
+          "event": "אירוע",
+          "task": "משימה",
+          "suggestion": "הצעה",
+          "complaint": "פניה",
+          "other": "אחר"
+        },
+        "status": {
+          "new": "חדש",
+          "read": "נקרא",
+          "responded": "נענה",
+          "done": "בוצע",
+          "in_progress": "בטיפול",
+          "other": "אחר"
+        },
+        "taskStatus": {
+          "pending": "ממתין",
+          "in_progress": "בביצוע",
+          "completed": "הושלם",
+          "cancelled": "בוטל"
+        },
+        "priority": {
+          "low": "נמוכה",
+          "normal": "רגילה",
+          "high": "גבוהה",
+          "urgent": "דחופה"
+        },
+        "loading": "טוען משובים...",
+        "empty": "אין משובים להצגה",
+        "anonymous": "משוב אנונימי",
+        "statusLabel": "סטטוס:",
+        "customNotePlaceholder": "הערה מותאמת אישית...",
+        "linkedTask": "מקושר למשימה",
+        "taskOwner": "אחראי: {name}",
+        "taskDue": "יעד: {date}",
+        "viewTask": "צפה במשימה",
+        "noteLabel": "הערה:",
+        "createTask": "צור משימה",
+        "delete": "מחק",
+        "committeeResponse": "תגובת הועד:",
+        "respondedAt": "נענה בתאריך: {date}",
+        "loadError": "שגיאה בטעינת המשובים",
+        "statusUpdated": "הסטטוס עודכן בהצלחה",
+        "statusError": "שגיאה בעדכון הסטטוס",
+        "deleted": "המשוב נמחק בהצלחה",
+        "deleteError": "שגיאה במחיקת המשוב",
+        "deleteConfirm": "האם אתה בטוח שברצונך למחוק משוב זה?",
+        "taskCreated": "המשימה נוצרה בהצלחה!",
+        "taskError": "שגיאה ביצירת המשימה",
+        "defaultTaskTitle": "משימה ממשוב הורים",
+        "taskDialogTitle": "יצירת משימה ממשוב",
+        "taskDialogDescription": "צור משימה חדשה המקושרת למשוב זה. המשוב יעודכן אוטומטית לסטטוס \"בטיפול\".",
+        "taskTitleLabel": "כותרת המשימה *",
+        "taskTitlePlaceholder": "כותרת המשימה",
+        "ownerNameLabel": "שם האחראי *",
+        "ownerNamePlaceholder": "שם האחראי לביצוע המשימה",
+        "ownerPhoneLabel": "טלפון האחראי",
+        "ownerPhonePlaceholder": "050-1234567",
+        "priorityLabel": "עדיפות",
+        "dueDateLabel": "תאריך יעד",
+        "feedbackContent": "תוכן המשוב:",
+        "cancel": "ביטול"
+      },
+      "ideas": {
+        "statsTotal": "סה\"כ רעיונות",
+        "statsNew": "{count} חדשים",
+        "statsNewTitle": "חדשים",
+        "statsNewHint": "ממתינים לבדיקה",
+        "statsApproved": "מאושרים",
+        "statsApprovedHint": "לתכנון יישום",
+        "statsImplemented": "יושמו",
+        "statsImplementedHint": "רעיונות שיושמו",
+        "filterTitle": "סינון רעיונות",
+        "categoryPlaceholder": "בחר קטגוריה",
+        "allCategories": "כל הקטגוריות",
+        "statusPlaceholder": "בחר סטטוס",
+        "allStatuses": "כל הסטטוסים",
+        "category": {
+          "improvement": "שיפור",
+          "feature": "תכונה חדשה",
+          "process": "תהליך",
+          "other": "אחר"
+        },
+        "status": {
+          "new": "חדש",
+          "reviewed": "נבדק",
+          "approved": "מאושר",
+          "implemented": "יושם",
+          "rejected": "נדחה"
+        },
+        "loading": "טוען רעיונות...",
+        "empty": "אין רעיונות להצגה",
+        "anonymous": "רעיון אנונימי",
+        "changeStatus": "שינוי סטטוס",
+        "responseLabel": "תגובה למשלח (אופציונלי)",
+        "responsePlaceholder": "תגובה שתוצג למשלח הרעיון...",
+        "notesLabel": "הערות פנימיות (לא יוצגו להורים)",
+        "notesPlaceholder": "הערות פנימיות למנהלים...",
+        "saveChanges": "שמור שינויים",
+        "cancel": "ביטול",
+        "internalNotes": "הערות פנימיות:",
+        "committeeResponse": "תגובת הועד:",
+        "respondedAt": "נענה בתאריך: {date}",
+        "edit": "עריכה",
+        "delete": "מחק",
+        "deleting": "מוחק...",
+        "deleteTitle": "האם אתה בטוח?",
+        "deleteDescription": "פעולה זו תמחק את הרעיון לצמיתות ולא ניתן יהיה לשחזר אותו. האם אתה בטוח שברצונך להמשיך?",
+        "loadError": "שגיאה בטעינת הרעיונות",
+        "statusUpdated": "הסטטוס עודכן בהצלחה",
+        "statusError": "שגיאה בעדכון הסטטוס",
+        "deleted": "הרעיון נמחק בהצלחה",
+        "deleteError": "שגיאה במחיקת הרעיון"
+      },
+      "survey": {
+        "export": "ייצא לאקסל",
+        "exportError": "שגיאה ביצוא הנתונים",
+        "filterTitle": "חיפוש וסינון",
+        "searchPlaceholder": "חיפוש לפי שם, טלפון, הערות...",
+        "clearSearch": "נקה חיפוש",
+        "searching": "מחפש...",
+        "allSkills": "כל המיומנויות",
+        "allContacts": "כל אמצעי יצירת הקשר",
+        "contact": {
+          "phone": "טלפון",
+          "email": "אימייל",
+          "whatsapp": "WhatsApp",
+          "any": "כל אמצעי"
+        },
+        "statsTotal": "סך הכל תשובות",
+        "statsAnonymous": "{count} אנונימיות",
+        "statsWeek": "תשובות השבוע",
+        "statsWeekHint": "7 ימים אחרונים",
+        "statsWhatsapp": "מעדיפי WhatsApp",
+        "statsPhone": "{count} מעדיפים טלפון",
+        "statsTopSkills": "מיומנויות פופולריות",
+        "noData": "אין נתונים",
+        "loading": "טוען...",
+        "empty": "לא נמצאו תשובות",
+        "anonymous": "אנונימי",
+        "allSkillsLabel": "כל המיומנויות:",
+        "otherDetails": "אחר - פרטים:",
+        "emailLabel": "אימייל:",
+        "notesLabel": "הערות נוספות:",
+        "submittedAt": "נשלח ב-{date} בשעה {time}",
+        "callAction": "התקשר",
+        "whatsappAction": "שלח הודעת WhatsApp",
+        "emailAction": "שלח אימייל",
+        "deleteAction": "מחק תשובה",
+        "deleteTitle": "האם למחוק תשובה זו?",
+        "deleteDescription": "פעולה זו תמחק את התשובה מהמערכת. המחיקה היא מחיקה רכה - הנתונים יישמרו במערכת אך לא יוצגו יותר.",
+        "cancel": "ביטול",
+        "delete": "מחק",
+        "deleting": "מוחק...",
+        "deleteSuccess": "התשובה נמחקה בהצלחה",
+        "deleteError": "שגיאה במחיקת התשובה",
+        "tryAgain": "אנא נסה שוב מאוחר יותר",
+        "skills": {
+          "legal": "משפטי",
+          "medical": "רפואי",
+          "accounting": "חשבונאות",
+          "it_technology": "IT וטכנולוגיה",
+          "teaching_tutoring": "הוראה ושיעורים",
+          "language_tutoring": "שיעורי שפות",
+          "science_stem": "מדע וטכנולוגיה STEM",
+          "library_support": "סיוע בספרייה",
+          "photography": "צילום",
+          "graphic_design": "גרפיקה ועיצוב",
+          "video_editing": "עריכת וידאו",
+          "arts": "אומנות וצביעה",
+          "music": "מוזיקה",
+          "writing_editing": "כתיבה ועריכה",
+          "event_planning": "תכנון אירועים",
+          "cooking_catering": "בישול והסעדה",
+          "social_media": "ניהול רשתות חברתיות",
+          "translation": "תרגום",
+          "handyman": "שיפוצים ותיקונים",
+          "sewing_fashion": "תפירה ואופנה",
+          "driving_transport": "נהיגה והסעות",
+          "gardening": "גינון",
+          "sports_coaching": "אימון ספורט",
+          "childcare": "שמרטפות",
+          "fundraising": "גיוס כספים",
+          "office_admin": "מזכירות וניהול",
+          "other": "אחר"
+        }
+      }
+    },
+    "messaging": {
+      "urgent": {
+        "title": "ניהול הודעות דחופות",
+        "add": "הוסף הודעה",
+        "save": "שמור שינויים",
+        "saving": "שומר...",
+        "quickTitle": "תזכורת מהירה לחולצה לבנה",
+        "quickHint": "לחצו כדי להוסיף תזכורת לחולצה לבנה למשך התקופה הנבחרת",
+        "quick": {
+          "day1": "+ 1 יום",
+          "days3": "+ 3 ימים",
+          "week1": "+ שבוע",
+          "weeks2": "+ שבועיים",
+          "month1": "+ חודש"
+        },
+        "types": {
+          "white_shirt": "👕 חולצה לבנה",
+          "urgent": "🚨 דחוף",
+          "info": "ℹ️ מידע",
+          "warning": "⚠️ אזהרה"
+        },
+        "activeNow": "פעילה כעת",
+        "statusActive": "✅ פעילה",
+        "statusInactive": "❌ לא פעילה",
+        "aria": {
+          "edit": "ערוך",
+          "close": "סגור עריכה",
+          "delete": "מחק"
+        },
+        "fields": {
+          "type": "סוג הודעה",
+          "titleHe": "כותרת (עברית) *",
+          "titleRu": "כותרת (רוסית) *",
+          "descriptionHe": "תיאור (עברית)",
+          "descriptionRu": "תיאור (רוסית)",
+          "startDate": "תאריך התחלה",
+          "endDate": "תאריך סיום",
+          "isActive": "הודעה פעילה"
+        },
+        "empty": "אין הודעות דחופות. לחץ על \"הוסף הודעה\" להתחיל.",
+        "noteLabel": "הערה:",
+        "noteBody": "ההודעות יוצגו בדף הבית רק אם הן פעילות ובטווח התאריכים. לאחר שמירת השינויים, יש לעשות commit ו-push לגיט.",
+        "toast": {
+          "loadError": "שגיאה בטעינת הודעות דחופות",
+          "saveSuccess": "הודעות דחופות נשמרו בהצלחה",
+          "saveError": "שגיאה בשמירת הודעות דחופות",
+          "quickAdded": "נוספה תזכורת לחולצה לבנה ל-{days} ימים",
+          "deleteSuccess": "ההודעה נמחקה",
+          "deleteError": "שגיאה במחיקת ההודעה"
+        },
+        "deleteConfirm": "האם למחוק הודעה זו?"
+      },
+      "push": {
+        "title": "התראות Push",
+        "description": "שלח התראות לכל ההורים שהתקינו את האפליקציה",
+        "stats": {
+          "total": "סה\"כ מנויים",
+          "totalHint": "משתמשים רשומים להתראות",
+          "active": "מנויים פעילים",
+          "activeHint": "יקבלו התראות",
+          "inactive": "מנויים לא פעילים",
+          "inactiveHint": "לא יקבלו התראות"
+        },
+        "form": {
+          "title": "שלח התראה חדשה",
+          "description": "ההתראה תישלח לכל המנויים הפעילים",
+          "notificationTitle": "כותרת",
+          "titlePlaceholder": "לדוגמה: אירוע חדש נוסף",
+          "notificationBody": "תוכן ההתראה",
+          "bodyPlaceholder": "לדוגמה: נוסף אירוע חדש ללוח השנה - טיול שנתי 2025",
+          "notificationUrl": "קישור (אופציונלי)",
+          "urlHint": "הדף שייפתח בלחיצה על ההתראה",
+          "characters": "תווים",
+          "send": "שלח ({count} מנויים)",
+          "sending": "שולח...",
+          "test": "התראת בדיקה"
+        },
+        "templates": {
+          "title": "תבניות מהירות",
+          "description": "לחץ להעתקת תבנית",
+          "newEvent": "אירוע חדש",
+          "newTask": "משימה חדשה",
+          "newProtocol": "פרוטוקול חדש",
+          "reminder": "תזכורת",
+          "whiteShirtTomorrow": "חולצה לבנה מחר",
+          "whiteShirtWeek": "חולצה לבנה השבוע"
+        },
+        "tips": {
+          "title": "טיפים לשליחת התראות:",
+          "tip1": "כתבו כותרת קצרה וברורה (עד 50 תווים)",
+          "tip2": "הוסיפו פרטים חשובים בתוכן (עד 200 תווים)",
+          "tip3": "הוסיפו קישור לעמוד הרלוונטי",
+          "tip4": "אל תשלחו יותר מדי התראות - שמרו על איזון",
+          "tip5": "השתמשו בהתראות לעדכונים חשובים בלבד"
+        },
+        "toast": {
+          "validationError": "שגיאת אימות",
+          "titleAndBodyRequired": "נדרשים כותרת וטקסט",
+          "sent": "ההתראה נשלחה",
+          "sentTo": "נשלח ל {count} מנויים",
+          "sendFailed": "השליחה נכשלה",
+          "sendFailedDescription": "אנא נסה שנית"
+        }
+      },
+      "contacts": {
+        "title": "ניהול אנשי קשר",
+        "add": "הוסף איש קשר",
+        "save": "שמור שינויים",
+        "saving": "שומר...",
+        "fields": {
+          "nameHe": "שם (עברית)",
+          "nameRu": "שם (רוסית)",
+          "roleHe": "תפקיד (עברית)",
+          "roleRu": "תפקיד (רוסית)",
+          "phone": "טלפון",
+          "email": "אימייל",
+          "category": "קטגוריה",
+          "isPublic": "ציבורי (מוצג לכולם)"
+        },
+        "aria": {
+          "moveUp": "הזז למעלה",
+          "moveDown": "הזז למטה",
+          "edit": "ערוך",
+          "close": "סגור עריכה",
+          "delete": "מחק"
+        },
+        "empty": "אין אנשי קשר. לחץ על \"הוסף איש קשר\" להתחיל.",
+        "noteLabel": "הערה:",
+        "noteBody": "לאחר שמירת השינויים, יש לעשות commit ו-push לגיט כדי שהשינויים יישמרו לצמיתות.",
+        "toast": {
+          "loadError": "שגיאה בטעינת אנשי הקשר",
+          "saveSuccess": "אנשי הקשר נשמרו בהצלחה",
+          "saveError": "שגיאה בשמירת אנשי הקשר",
+          "deleted": "איש הקשר נמחק"
+        },
+        "deleteConfirm": "האם למחוק איש קשר זה?"
+      }
+    },
+    "org": {
+      "committees": {
+        "title": "וועדות",
+        "subtitle": "ניהול וועדות תחומיות ותחומי אחריות",
+        "newCommittee": "וועדה חדשה",
+        "emptyTitle": "אין וועדות",
+        "emptyDescription": "עדיין לא נוספו וועדות למערכת",
+        "addCommittee": "הוסף וועדה",
+        "overviewTitle": "סקירה כללית",
+        "totalCommittees": "סך הכל וועדות",
+        "totalMembers": "סך חברי וועדה",
+        "totalResponsibilities": "סך תחומי אחריות",
+        "uniqueMembers": "{count} חברים ייחודיים",
+        "uniqueResponsibilities": "{count} תחומים ייחודיים",
+        "membersLabel": "חברי וועדה:",
+        "responsibilitiesLabel": "תחומי אחריות:",
+        "members": "חברי וועדה",
+        "responsibilities": "תחומי אחריות",
+        "more": "+{count} נוספים",
+        "edit": "ערוך",
+        "form": {
+          "newTitle": "יצירת וועדה חדשה",
+          "newSubtitle": "הגדרת וועדה תחומית עם חברים ותחומי אחריות",
+          "editTitle": "עריכת וועדה",
+          "editSubtitle": "עדכון פרטי הוועדה, חברים ותחומי אחריות",
+          "detailsTitle": "פרטי הוועדה",
+          "detailsDescription": "מידע בסיסי על הוועדה",
+          "nameLabel": "שם הוועדה *",
+          "namePlaceholder": "לדוגמה: ועדת חינוך",
+          "descriptionLabel": "תיאור הוועדה",
+          "descriptionPlaceholder": "תיאור קצר של תפקיד ומטרות הוועדה...",
+          "colorLabel": "צבע זיהוי *",
+          "quickColors": "צבעים מהירים:",
+          "membersTitle": "חברי וועדה *",
+          "membersDescription": "רשימת החברים בוועדה",
+          "memberPlaceholder": "שם חבר וועדה",
+          "responsibilitiesTitle": "תחומי אחריות *",
+          "responsibilitiesDescription": "מילות מפתח לתחומי האחריות של הוועדה",
+          "responsibilityPlaceholderNew": "תחום אחריות (לדוגמה: ארגון הרצאות)",
+          "responsibilityPlaceholderEdit": "תחום אחריות",
+          "add": "הוסף",
+          "remove": "הסר",
+          "saveNew": "שמור וועדה",
+          "saveEdit": "שמור שינויים",
+          "saving": "טוען...",
+          "loading": "טוען...",
+          "cancel": "ביטול",
+          "validation": {
+            "nameMin": "שם הוועדה חייב להכיל לפחות 2 תווים",
+            "colorInvalid": "צבע חייב להיות בפורמט תקין",
+            "responsibilitiesMin": "חייב להיות לפחות תחום אחריות אחד",
+            "membersMin": "חייב להיות לפחות חבר וועדה אחד"
+          },
+          "toast": {
+            "needResponsibility": "יש להוסיף לפחות תחום אחריות אחד",
+            "needMember": "יש להוסיף לפחות חבר וועדה אחד",
+            "created": "הוועדה נוצרה בהצלחה!",
+            "createError": "שגיאה ביצירת הוועדה",
+            "updated": "הוועדה עודכנה בהצלחה!",
+            "updateError": "שגיאה בעדכון הוועדה",
+            "loadError": "שגיאה בטעינת הוועדה"
+          }
+        }
+      },
+      "vendors": {
+        "title": "ספקים ונותני שירותים",
+        "subtitle": "מאגר ספקים מאומתים עם פרטי קשר ודירוגים",
+        "newVendor": "ספק חדש",
+        "search": "חיפוש",
+        "filter": "סינון",
+        "emptyTitle": "אין ספקים",
+        "emptyDescription": "עדיין לא נוספו ספקים למערכת",
+        "addVendor": "הוסף ספק",
+        "vendorsCount": "{count} ספקים",
+        "contactLabel": "איש קשר:",
+        "view": "צפייה",
+        "call": "התקשר",
+        "stats": {
+          "total": "סה\"כ ספקים",
+          "categories": "קטגוריות",
+          "averageRating": "דירוג ממוצע"
+        },
+        "categories": {
+          "catering": "קייטרינג",
+          "equipment": "ציוד",
+          "entertainment": "בידור",
+          "transportation": "הסעות",
+          "venue": "אולמות",
+          "photography": "צילום",
+          "printing": "הדפסה",
+          "other": "אחר"
+        },
+        "priceRanges": {
+          "budget": "חסכוני (₪)",
+          "moderate": "בינוני (₪₪)",
+          "premium": "פרימיום (₪₪₪)",
+          "luxury": "יוקרה (₪₪₪₪)"
+        },
+        "detail": {
+          "call": "התקשר",
+          "sendEmail": "שלח מייל",
+          "website": "אתר אינטרנט",
+          "contactTitle": "פרטי התקשרות",
+          "contactPerson": "איש קשר:",
+          "phone": "טלפון:",
+          "email": "אימייל:",
+          "websiteLabel": "אתר אינטרנט:",
+          "address": "כתובת:",
+          "businessTitle": "פרטים עסקיים",
+          "businessNumber": "ח.פ / ע.מ:",
+          "licenseNumber": "מספר רישיון:",
+          "paymentTerms": "תנאי תשלום:",
+          "notes": "הערות:",
+          "createdAt": "נוצר ב-{date}",
+          "updatedAt": "עודכן לאחרונה ב-{date}",
+          "edit": "ערוך ספק",
+          "backToList": "חזרה לרשימת הספקים"
+        },
+        "form": {
+          "newTitle": "הוספת ספק חדש",
+          "newSubtitle": "הוסף ספק או נותן שירות למאגר",
+          "detailsTitle": "פרטי הספק",
+          "detailsDescription": "מידע בסיסי על הספק",
+          "nameLabel": "שם הספק *",
+          "namePlaceholder": "לדוגמה: קייטרינג הזהב",
+          "descriptionLabel": "תיאור",
+          "descriptionPlaceholder": "תיאור הספק והשירותים שהוא מציע...",
+          "categoryLabel": "קטגוריה *",
+          "priceRangeLabel": "טווח מחירים",
+          "priceRangePlaceholder": "בחר טווח מחירים (אופציונלי)...",
+          "contactTitle": "פרטי התקשרות",
+          "contactDescription": "איך ליצור קשר עם הספק",
+          "contactPersonLabel": "איש קשר",
+          "contactPersonPlaceholder": "שם איש הקשר",
+          "phoneLabel": "טלפון",
+          "emailLabel": "אימייל",
+          "websiteLabel": "אתר אינטרנט",
+          "addressLabel": "כתובת",
+          "addressPlaceholder": "כתובת מלאה",
+          "businessTitle": "פרטים עסקיים",
+          "businessDescription": "מידע עסקי ומשפטי",
+          "businessNumberLabel": "ח.פ / ע.מ",
+          "businessNumberPlaceholder": "מספר עוסק מורשה",
+          "licenseNumberLabel": "מספר רישיון",
+          "licenseNumberPlaceholder": "מספר רישיון עסק",
+          "paymentTermsLabel": "תנאי תשלום",
+          "paymentTermsPlaceholder": "לדוגמה: תשלום מראש, שוטף+30, וכו'",
+          "notesLabel": "הערות",
+          "notesPlaceholder": "הערות נוספות על הספק...",
+          "submit": "צור ספק",
+          "saving": "טוען...",
+          "cancel": "ביטול",
+          "validation": {
+            "nameMin": "שם הספק חייב להכיל לפחות 2 תווים",
+            "phoneInvalid": "מספר טלפון לא תקין",
+            "emailInvalid": "כתובת אימייל לא תקינה",
+            "websiteInvalid": "כתובת אתר לא תקינה"
+          },
+          "toast": {
+            "created": "הספק נוצר בהצלחה!",
+            "createError": "שגיאה ביצירת הספק"
+          }
+        }
+      },
+      "expenses": {
+        "title": "ניהול כספים",
+        "subtitle": "מעקב אחר הכנסות והוצאות של ועד ההורים",
+        "newRecord": "רשומה חדשה",
+        "exportCsv": "ייצא לאקסל",
+        "loading": "טוען נתונים...",
+        "empty": "אין רשומות להצגה",
+        "records": "רשומות",
+        "vendorLabel": "ספק: {name}",
+        "receipt": "קבלה",
+        "approved": "מאושר",
+        "approve": "אשר",
+        "summary": {
+          "income": "הכנסות",
+          "expenses": "הוצאות",
+          "balance": "יתרה",
+          "pending": "ממתין לאישור",
+          "pendingHint": "רשומות לא מאושרות",
+          "surplus": "עודף",
+          "deficit": "גירעון",
+          "recordsCount": "{count} רשומות"
+        },
+        "breakdown": {
+          "title": "פילוח לפי קטגוריות",
+          "description": "סיכום הכנסות והוצאות לפי קטגוריה",
+          "income": "הכנסות:",
+          "expenses": "הוצאות:"
+        },
+        "filters": {
+          "title": "סינון",
+          "month": "חודש",
+          "type": "סוג",
+          "category": "קטגוריה",
+          "approval": "אישור",
+          "typePlaceholder": "בחר סוג",
+          "allTypes": "כל הסוגים",
+          "incomeOnly": "הכנסות בלבד",
+          "expensesOnly": "הוצאות בלבד",
+          "categoryPlaceholder": "בחר קטגוריה",
+          "allCategories": "כל הקטגוריות",
+          "approvalPlaceholder": "סטטוס אישור",
+          "all": "הכל",
+          "approvedOnly": "מאושרים",
+          "unapprovedOnly": "לא מאושרים"
+        },
+        "categories": {
+          "events": "אירועים",
+          "maintenance": "תחזוקה",
+          "equipment": "ציוד",
+          "refreshments": "כיבוד",
+          "transportation": "הסעות",
+          "donations": "תרומות",
+          "fundraising": "גיוס כספים",
+          "other": "אחר"
+        },
+        "paymentMethods": {
+          "cash": "מזומן",
+          "check": "צק",
+          "transfer": "העברה בנקאית",
+          "credit_card": "כרטיס אשראי",
+          "other": "אחר"
+        },
+        "csv": {
+          "date": "תאריך",
+          "type": "סוג",
+          "title": "כותרת",
+          "category": "קטגוריה",
+          "amount": "סכום",
+          "paymentMethod": "אמצעי תשלום",
+          "approved": "מאושר",
+          "income": "הכנסה",
+          "expense": "הוצאה",
+          "yes": "כן",
+          "no": "לא"
+        },
+        "toast": {
+          "loadError": "שגיאה בטעינת הנתונים",
+          "approved": "הרשומה אושרה",
+          "approveError": "שגיאה באישור הרשומה",
+          "exported": "הקובץ הורד בהצלחה",
+          "exportError": "שגיאה בייצוא הנתונים"
+        },
+        "form": {
+          "title": "רישום הכנסה/הוצאה",
+          "subtitle": "תיעוד הכנסות והוצאות של ועד ההורים",
+          "typeTitle": "סוג הרשומה",
+          "typeDescription": "בחר האם זו הכנסה או הוצאה",
+          "income": "הכנסה",
+          "expense": "הוצאה",
+          "detailsTitle": "פרטי הרשומה",
+          "detailsDescriptionIncome": "מידע בסיסי על ההכנסה",
+          "detailsDescriptionExpense": "מידע בסיסי על ההוצאה",
+          "titleLabel": "כותרת *",
+          "titlePlaceholderIncome": "לדוגמה: תרומה מהורים",
+          "titlePlaceholderExpense": "לדוגמה: רכישת ציוד",
+          "descriptionLabel": "תיאור",
+          "descriptionPlaceholder": "תיאור מפורט...",
+          "amountLabel": "סכום (₪) *",
+          "dateLabel": "תאריך *",
+          "categoryLabel": "קטגוריה",
+          "paymentMethodLabel": "אמצעי תשלום",
+          "vendorLabel": "שם הספק/נותן השירות",
+          "vendorPlaceholder": "שם העסק או האדם",
+          "extraTitle": "פרטים נוספים",
+          "extraDescription": "קישור לאירוע והערות",
+          "eventLabel": "אירוע קשור (אופציונלי)",
+          "eventPlaceholder": "בחר אירוע...",
+          "eventNone": "ללא",
+          "notesLabel": "הערות",
+          "notesPlaceholder": "הערות נוספות...",
+          "approvedLabel": "אישור",
+          "approvedHint": "האם הרשומה מאושרת",
+          "receiptTitle": "קבלה/חשבונית",
+          "receiptDescription": "העלה קבלה או חשבונית",
+          "submit": "שמור רשומה",
+          "saving": "טוען...",
+          "cancel": "ביטול",
+          "validation": {
+            "titleMin": "כותרת חייבת להכיל לפחות 2 תווים",
+            "amountRequired": "סכום נדרש",
+            "amountInvalid": "סכום לא תקין",
+            "dateRequired": "תאריך נדרש"
+          },
+          "toast": {
+            "createdIncome": "ההכנסה נוצרה בהצלחה!",
+            "createdExpense": "ההוצאה נוצרה בהצלחה!",
+            "createError": "שגיאה ביצירת הרשומה"
+          }
+        }
+      }
+    },
+    "prom": {
+      "categories": {
+        "venue": "אולם/מקום",
+        "catering": "קייטרינג",
+        "dj": "DJ/מוזיקה",
+        "photography": "צילום",
+        "decorations": "קישוטים",
+        "transportation": "הסעות",
+        "entertainment": "בידור",
+        "shirts": "חולצות",
+        "sound_lighting": "הגברה ותאורה",
+        "yearbook": "ספר מחזור",
+        "recording": "אולפן הקלטות",
+        "scenery": "תפאורה",
+        "flowers": "פרחים/זרים",
+        "security": "אבטחה",
+        "electrician": "חשמלאי",
+        "moving": "הובלה",
+        "video_editing": "עריכת סרטונים",
+        "drums": "מתופפים",
+        "choreography": "כוריאוגרפיה",
+        "other": "אחר"
+      },
+      "status": {
+        "planning": "בתכנון",
+        "voting": "בהצבעה",
+        "confirmed": "מאושר",
+        "completed": "הושלם",
+        "cancelled": "בוטל"
+      },
+      "list": {
+        "title": "תכנון מסיבת סיום",
+        "subtitle": "ניהול מסיבות סיום כיתה ו' - השוואת מחירים והצבעות",
+        "newEvent": "אירוע חדש",
+        "toast": {
+          "loadError": "שגיאה בטעינת האירועים",
+          "deleted": "האירוע נמחק בהצלחה",
+          "deleteError": "שגיאה במחיקת האירוע"
+        },
+        "confirmDelete": "האם אתה בטוח שברצונך למחוק אירוע זה?",
+        "stats": {
+          "activeEvents": "אירועים פעילים",
+          "ofTotal": "מתוך {count} סה\"כ",
+          "totalBudget": "תקציב כולל",
+          "spent": "הוצאו: {amount}",
+          "students": "תלמידים",
+          "perStudent": "{amount} לתלמיד",
+          "noData": "אין נתונים",
+          "votes": "הצבעות",
+          "activeVotes": "{count} הצבעות פעילות"
+        },
+        "empty": {
+          "title": "אין מסיבות סיום",
+          "description": "צרו את מסיבת הסיום הראשונה שלכם",
+          "create": "צור מסיבת סיום"
+        },
+        "groupTitle": "מסיבות סיום",
+        "groupDescription": "רשימת כל מסיבות הסיום בניהול",
+        "votingActive": "הצבעה פעילה",
+        "dateFormat": "dd בMMMM yyyy",
+        "studentsCount": "{count} תלמידים",
+        "quotesCount": "{count} הצעות",
+        "votesCount": "{count} הצבעות",
+        "budget": "תקציב",
+        "actions": {
+          "compare": "השוואה",
+          "budget": "תקציב",
+          "edit": "עריכה",
+          "delete": "מחיקה"
+        },
+        "quickActions": {
+          "title": "פעולות מהירות",
+          "newParty": "מסיבה חדשה",
+          "vendors": "ספקים",
+          "expenses": "הוצאות",
+          "newEvent": "אירוע חדש"
+        },
+        "help": {
+          "button": "מדריך שימוש",
+          "title": "מדריך שימוש - תכנון מסיבת סיום",
+          "description": "מדריך פשוט לשימוש במערכת תכנון מסיבת סיום",
+          "startTitle": "איך מתחילים?",
+          "start1": "לחצו על <b>\"אירוע חדש\"</b> כדי ליצור מסיבת סיום",
+          "start2": "מלאו פרטים: כותרת, תאריך, תקציב, מספר תלמידים",
+          "start3": "לחצו על <b>\"השוואת הצעות\"</b> כדי להוסיף הצעות מחיר",
+          "start4": "הוסיפו הצעות מכל הספקים",
+          "mainTitle": "מה רואים בדף הראשי?",
+          "main1": "<b>כרטיסי סטטיסטיקה:</b> אירועים פעילים, תקציב כולל, תלמידים, הצבעות",
+          "main2": "<b>לחצו על כרטיסים</b> כדי לנווט לדפים רלוונטיים",
+          "main3": "<b>רשימת מסיבות:</b> כל המסיבות שיצרתם עם סטטוס ועדכונים אחרונים",
+          "tipsTitle": "טיפים מהירים",
+          "tip1": "לחצו על <b>\"השוואת הצעות\"</b> כדי לראות את כל ההצעות ולהשוות",
+          "tip2": "לחצו על <b>\"תקציב\"</b> כדי לעקוב אחר ההוצאות",
+          "tip3": "השתמשו ב<b>\"בונה חבילה\"</b> כדי לבדוק עלות כוללת",
+          "tip4": "פתחו <b>הצבעה להורים</b> כדי לאסוף משוב",
+          "moreTitle": "מדריכים נוספים",
+          "moreIntro": "במסך השוואת הצעות יש כפתור עזרה (❓) עם מדריך מפורט על:",
+          "more1": "הוספת הצעות מחיר",
+          "more2": "שימוש בבונה חבילה",
+          "more3": "בחירת זוכים",
+          "more4": "ייצוא ל-CSV",
+          "close": "סגור"
+        }
+      },
+      "form": {
+        "title": "מסיבת סיום חדשה",
+        "subtitle": "יצירת תכנון מסיבת סיום חדשה",
+        "toast": {
+          "titleRequired": "נא להזין כותרת",
+          "created": "המסיבה נוצרה בהצלחה",
+          "createError": "שגיאה ביצירת המסיבה"
+        },
+        "sections": {
+          "basic": "פרטי המסיבה",
+          "basicDescription": "מידע בסיסי על מסיבת הסיום",
+          "dateLocation": "תאריך ומיקום",
+          "dateLocationDescription": "מתי ואיפה תתקיים המסיבה",
+          "budget": "תקציב ותלמידים",
+          "budgetDescription": "הגדרות תקציב ומספר משתתפים"
+        },
+        "fields": {
+          "title": "כותרת (עברית) *",
+          "titleRu": "כותרת (רוסית)",
+          "description": "תיאור (עברית)",
+          "descriptionRu": "תיאור (רוסית)",
+          "status": "סטטוס",
+          "date": "תאריך",
+          "time": "שעה",
+          "venueName": "שם המקום",
+          "venueAddress": "כתובת",
+          "totalBudget": "תקציב כולל (₪)",
+          "studentCount": "מספר תלמידים",
+          "costPerStudent": "עלות לתלמיד (משוער)"
+        },
+        "placeholders": {
+          "title": "מסיבת סיום כיתה ו' תשפ״ה",
+          "titleRu": "Выпускной вечер 6 класса",
+          "description": "תיאור המסיבה...",
+          "descriptionRu": "Описание...",
+          "venueName": "שם האולם / המקום",
+          "venueAddress": "כתובת מלאה"
+        },
+        "saving": "שומר...",
+        "submit": "צור מסיבה",
+        "cancel": "ביטול"
+      },
+      "detail": {
+        "subtitle": "עריכת פרטי מסיבת הסיום",
+        "toast": {
+          "loadError": "שגיאה בטעינת האירוע",
+          "updated": "האירוע עודכן בהצלחה",
+          "updateError": "שגיאה בעדכון האירוע",
+          "deleted": "האירוע נמחק בהצלחה",
+          "deleteError": "שגיאה במחיקת האירוע",
+          "voteLinkCopied": "קישור להצבעה הועתק!",
+          "enableVoting": "הפעל הצבעה כדי לקבל קישור להורים",
+          "perStudent": "תקציב: {budget} לתלמיד | הוצאו: {spent} לתלמיד",
+          "needStudentsBudget": "הזן מספר תלמידים ותקציב לחישוב"
+        },
+        "confirmDelete": "האם אתה בטוח שברצונך למחוק את האירוע?",
+        "compareQuotes": "השוואת הצעות",
+        "quotesCount": "{count} הצעות מחיר",
+        "budget": "תקציב",
+        "spent": "הוצאו {amount}",
+        "votes": "הצבעות",
+        "votesCount": "{count} הצבעות",
+        "copyLink": "העתק קישור",
+        "inactive": "לא פעיל",
+        "perStudent": "לתלמיד",
+        "details": "פרטים",
+        "budgetUsage": "ניצול תקציב",
+        "voting": {
+          "title": "הגדרות הצבעה",
+          "description": "אפשרו להורים להצביע על אפשרויות",
+          "enable": "הפעל הצבעה",
+          "enableHint": "הורים יוכלו להצביע על הצעות המחיר",
+          "startDate": "תאריך התחלה",
+          "endDate": "תאריך סיום",
+          "link": "קישור להצבעה:"
+        },
+        "save": "שמור שינויים",
+        "delete": "מחק מסיבת סיום"
+      },
+      "budget": {
+        "title": "ניהול תקציב",
+        "toast": {
+          "loadError": "שגיאה בטעינת הנתונים",
+          "saved": "התקציב נשמר בהצלחה",
+          "saveError": "שגיאה בשמירה"
+        },
+        "save": "שמור שינויים",
+        "summary": {
+          "remaining": "יתרה",
+          "leftOfBudget": "נותר מתקציב",
+          "overBudget": "חריגה מתקציב!",
+          "totalBudget": "תקציב כולל",
+          "allocated": "הוקצה: {amount}",
+          "expenses": "הוצאות",
+          "percentOfBudget": "{percent}% מהתקציב",
+          "perStudent": "עלות לתלמיד",
+          "studentsCount": "{count} תלמידים"
+        },
+        "usage": {
+          "title": "ניצול תקציב",
+          "spentVsBudget": "הוצאות מול תקציב"
+        },
+        "categories": {
+          "title": "פירוט לפי קטגוריה",
+          "description": "הגדירו תקציב והזינו הוצאות בפועל לכל קטגוריה",
+          "over": "חריגה",
+          "allocated": "תקציב מוקצה",
+          "actual": "הוצאות בפועל"
+        },
+        "totals": {
+          "allocated": "סה\"כ מוקצה",
+          "expenses": "סה\"כ הוצאות",
+          "remaining": "יתרה",
+          "overSuffix": "(חריגה)"
+        },
+        "backToQuotes": "חזור להשוואת הצעות"
+      },
+      "quotes": {
+        "title": "השוואת הצעות מחיר",
+        "count": "{count} הצעות",
+        "share": "שתף",
+        "showQr": "הצג QR",
+        "lightMode": "מצב בהיר",
+        "darkMode": "מצב כהה",
+        "toast": {
+          "loadError": "שגיאה בטעינת הנתונים",
+          "vendorRequired": "נא להזין שם ספק",
+          "updated": "הצעת המחיר עודכנה",
+          "added": "הצעת המחיר נוספה",
+          "saveError": "שגיאה בשמירת הצעת המחיר",
+          "deleted": "הצעת המחיר נמחקה",
+          "deleteError": "שגיאה במחיקה",
+          "downloaded": "הקובץ הורד",
+          "shared": "שותף בהצלחה!",
+          "linkCopied": "✅ קישור הועתק ללוח!"
+        },
+        "confirmDelete": "האם למחוק הצעת מחיר זו?",
+        "csv": {
+          "vendor": "שם ספק",
+          "category": "קטגוריה",
+          "total": "מחיר כולל",
+          "perStudent": "מחיר לתלמיד",
+          "availability": "זמינות",
+          "rating": "דירוג",
+          "pros": "יתרונות",
+          "cons": "חסרונות"
+        },
+        "availability": {
+          "available": "פנוי",
+          "unavailable": "תפוס",
+          "pending": "ממתין",
+          "unknown": "לא ידוע"
+        },
+        "empty": {
+          "title": "אין הצעות מחיר להצגה",
+          "addFirst": "הוסף הצעה ראשונה"
+        },
+        "dialog": {
+          "cancel": "ביטול",
+          "editTitle": "עריכת הצעת מחיר",
+          "newTitle": "הצעת מחיר חדשה",
+          "description": "הזן את פרטי הצעת המחיר מהספק",
+          "mobileTitle": "הצעה חדשה",
+          "update": "עדכן",
+          "add": "הוסף הצעה"
+        },
+        "fields": {
+          "vendorName": "שם הספק *",
+          "category": "קטגוריה *",
+          "priceTotal": "מחיר כולל (₪) *",
+          "phone": "טלפון",
+          "services": "שירותים כלולים",
+          "rating": "דירוג (1-5)"
+        },
+        "placeholders": {
+          "vendorName": "לדוגמה: DJ מוטי כהן",
+          "services": "מערכת הגברה, תאורה, 5 שעות ניגון (הפרד בפסיקים)",
+          "rating": "בחר דירוג"
+        },
+        "qr": {
+          "title": "שתף עם קוד QR",
+          "description": "סרוק את הקוד כדי לפתוח את דף ההשוואה"
+        },
+        "card": {
+          "perStudent": "{amount} לתלמיד",
+          "cheapest": "🟢 הזול ביותר",
+          "highestRated": "⭐ דירוג גבוה",
+          "bestValue": "💎 תמורה לכסף",
+          "callAria": "התקשר ל-{name}",
+          "call": "חייג",
+          "editAria": "ערוך {name}",
+          "deleteAria": "מחק {name}",
+          "tapForDetails": "הקש לפרטים מלאים"
+        },
+        "bottomBar": {
+          "addAria": "הוסף הצעת מחיר חדשה",
+          "add": "הוסף הצעה",
+          "moreAria": "תפריט פעולות נוספות",
+          "exportCsv": "ייצוא ל-CSV",
+          "packageBuilder": "בונה חבילה",
+          "supplierBuilder": "בונה ספקים",
+          "help": "עזרה"
+        }
+      }
+    },
+    "records": {
+      "meetings": {
+        "title": "ניהול פגישות",
+        "subtitle": "ניהול פגישות ושליחת רעיונות לסדר היום",
+        "newMeeting": "פגישה חדשה",
+        "statsTotal": "סה\"כ פגישות",
+        "statsOpen": "פגישות פתוחות",
+        "statsClosed": "פגישות סגורות",
+        "statsIdeas": "סה\"כ רעיונות",
+        "loading": "טוען פגישות...",
+        "empty": "אין פגישות. צרו פגישה חדשה!",
+        "open": "פתוח",
+        "closed": "סגור",
+        "ideasCount": "{count} רעיונות",
+        "viewPage": "צפה בדף",
+        "close": "סגור",
+        "openAction": "פתח",
+        "loadError": "שגיאה בטעינת הפגישות",
+        "toastClosed": "הפגישה נסגרה",
+        "toastOpened": "הפגישה נפתחה",
+        "updateError": "שגיאה בעדכון הפגישה",
+        "new": {
+          "title": "פגישה חדשה",
+          "subtitle": "צור פגישה חדשה לקבלת רעיונות מהורים",
+          "detailsTitle": "פרטי הפגישה",
+          "detailsDescription": "מלאו את פרטי הפגישה. הקישור לשליחת רעיונות יהיה זמין מיד לאחר היצירה.",
+          "titleLabel": "כותרת הפגישה *",
+          "titlePlaceholder": "לדוגמה: פגישת ועד הורים - ינואר 2026",
+          "dateLabel": "תאריך הפגישה *",
+          "descriptionLabel": "תיאור (אופציונלי)",
+          "descriptionPlaceholder": "פרטים נוספים על הפגישה...",
+          "submit": "צור פגישה",
+          "submitting": "יוצר...",
+          "toastCreated": "הפגישה נוצרה בהצלחה!",
+          "toastCreateError": "שגיאה ביצירת הפגישה",
+          "validation": {
+            "titleMin": "כותרת חייבת להכיל לפחות 2 תווים",
+            "dateRequired": "נדרש תאריך פגישה"
+          }
+        },
+        "detail": {
+          "loadingTitle": "פגישה",
+          "loading": "טוען...",
+          "notFound": "הפגישה לא נמצאה",
+          "loadError": "שגיאה בטעינת הפגישה",
+          "confirmDeleteIdea": "האם אתה בטוח שברצונך למחוק רעיון זה?",
+          "ideaDeleted": "הרעיון נמחק בהצלחה",
+          "ideaDeleteError": "שגיאה במחיקת הרעיון",
+          "linkCopied": "הקישור הועתק",
+          "copyLink": "העתק קישור",
+          "statusUpdateError": "שגיאה בעדכון הסטטוס",
+          "noIdeasToExport": "אין רעיונות לייצוא",
+          "preparingPdf": "מכין PDF...",
+          "pdfExported": "הקובץ יוצא בהצלחה",
+          "pdfError": "שגיאה ביצירת PDF",
+          "ideasCount": "{count} רעיונות",
+          "open": "פתוח",
+          "closed": "סגור",
+          "linkTitle": "קישור לשליחת רעיונות",
+          "exportPdf": "ייצוא ל-PDF",
+          "ideasTitle": "רעיונות שנשלחו ({count})",
+          "noIdeas": "עדיין לא נשלחו רעיונות",
+          "anonymous": "אנונימי",
+          "submittedBy": "נשלח על ידי: {name}",
+          "statusPending": "ממתין",
+          "statusDiscussed": "נדון",
+          "statusDecided": "הוחלט",
+          "deleteIdea": "מחק רעיון",
+          "pdf": {
+            "fileSuffix": "רעיונות",
+            "meetingDate": "תאריך פגישה",
+            "exportDate": "תאריך ייצוא",
+            "totalIdeas": "סה״כ רעיונות",
+            "number": "מספר",
+            "title": "כותרת",
+            "description": "תיאור",
+            "submitter": "שם השולח",
+            "dateTime": "תאריך ושעה"
+          }
+        }
+      },
+      "protocols": {
+        "aiFormat": {
+          "button": "עיצוב עם AI",
+          "working": "מעצב...",
+          "undo": "בטל עיצוב",
+          "done": "הטקסט עוצב. אפשר לערוך אותו לפני השמירה",
+          "errors": {
+            "too_long": "הטקסט ארוך מדי לעיצוב (עד {max} תווים). אפשר לחלק אותו ולעצב בחלקים",
+            "ai_unavailable": "שירות ה-AI אינו זמין כרגע",
+            "ai_failed": "העיצוב נכשל. הטקסט שלך לא שונה, אפשר לנסות שוב",
+            "ai_empty": "ה-AI לא החזיר תוצאה. הטקסט שלך לא שונה",
+            "ai_truncated": "הטקסט ארוך מדי כדי לעצב אותו בבת אחת. הטקסט שלך לא שונה",
+            "ai_altered": "התוצאה לא נראתה נאמנה למקור ולכן לא הוחלפה. הטקסט שלך לא שונה",
+            "unauthorized": "פג תוקף ההתחברות. יש להתחבר מחדש",
+            "invalid_input": "אין טקסט לעיצוב",
+            "network": "שגיאת תקשורת. הטקסט שלך לא שונה"
+          }
+        },
+        "validation": {
+          "titleMin": "כותרת חייבת להכיל לפחות 2 תווים",
+          "dateRequired": "תאריך ישיבה נדרש",
+          "attendeesMin": "חייב להיות לפחות משתתף אחד"
+        },
+        "draftRestored": "הטיוטה שוחזרה בהצלחה!",
+        "draftDiscarded": "הטיוטה נמחקה",
+        "attendeesRequiredToast": "יש להוסיף לפחות משתתף אחד",
+        "type": {
+          "regular": "ישיבה רגילה",
+          "special": "ישיבה מיוחדת",
+          "annual": "אסיפה שנתית",
+          "emergency": "ישיבת חירום"
+        },
+        "detailsTitle": "פרטי הפרוטוקול",
+        "detailsDescription": "מידע בסיסי על הישיבה",
+        "titleLabel": "כותרת הפרוטוקול *",
+        "titlePlaceholder": "לדוגמה: פרוטוקול ישיבת ועד חודש נובמבר",
+        "dateLabel": "תאריך הישיבה *",
+        "typeLabel": "סוג הישיבה",
+        "publicLabel": "פרוטוקול ציבורי",
+        "publicHint": "יוצג לכל ההורים",
+        "approvedLabel": "מאושר",
+        "approvedHint": "האם הפרוטוקול אושר",
+        "attendeesTitle": "משתתפים *",
+        "attendeesDescription": "רשימת המשתתפים בישיבה",
+        "attendeePlaceholder": "שם המשתתף",
+        "addAttendee": "הוסף",
+        "removeAttendee": "הסר משתתף",
+        "contentTitle": "תוכן הישיבה",
+        "contentDescription": "סדר יום, החלטות ומשימות",
+        "agendaLabel": "סדר יום",
+        "decisionsLabel": "החלטות",
+        "actionItemsLabel": "משימות לביצוע",
+        "viewTasks": "צפה במשימות",
+        "agendaPlaceholder": "נושאים שנדונו בישיבה... (הקלד @ כדי לקשר משימה)",
+        "decisionsPlaceholder": "החלטות שהתקבלו בישיבה... (הקלד @ כדי לקשר משימה)",
+        "actionItemsPlaceholder": "משימות שנקבעו בישיבה... (הקלד @ כדי לקשר משימה)",
+        "tasksHint": "לחץ על \"צפה במשימות\" לראות את כל המשימות בפרויקט",
+        "documentsTitle": "מסמכים",
+        "documentsDescription": "גרור ושחרר קבצים - הטקסט יחולץ ויעוצב אוטומטית עם AI",
+        "mainFileLabel": "קובץ פרוטוקול ראשי",
+        "extraFilesLabel": "מסמכים נוספים",
+        "new": {
+          "title": "יצירת פרוטוקול חדש",
+          "subtitle": "תיעוד ישיבות והחלטות ועד ההורים",
+          "submit": "שמור פרוטוקול",
+          "toastCreated": "הפרוטוקול נוצר בהצלחה!",
+          "toastCreateError": "שגיאה ביצירת הפרוטוקול"
+        },
+        "edit": {
+          "title": "עריכת פרוטוקול",
+          "subtitle": "עדכון פרטי הפרוטוקול",
+          "submit": "שמור שינויים",
+          "notFound": "פרוטוקול לא נמצא",
+          "loadError": "שגיאה בטעינת הפרוטוקול",
+          "toastUpdated": "הפרוטוקול עודכן בהצלחה!",
+          "toastUpdateError": "שגיאה בעדכון הפרוטוקול",
+          "deleteButton": "מחק פרוטוקול",
+          "deleteSuccess": "הפרוטוקול נמחק בהצלחה",
+          "deleteError": "שגיאה במחיקת הפרוטוקול",
+          "deleteTitle": "האם אתה בטוח?",
+          "deleteText": "פעולה זו תמחק את הפרוטוקול \"{title}\" לצמיתות.",
+          "deleteNoUndo": "לא ניתן לשחזר פרוטוקול לאחר מחיקה.",
+          "deleting": "מוחק...",
+          "htmlLabel": "תוכן מעוצב (HTML)",
+          "htmlPlaceholder": "תוכן HTML מעוצב...",
+          "htmlHint": "תוכן זה מוצג בעמוד הפרוטוקול. ניתן לערוך ידנית או להעלות קובץ חדש."
+        }
+      },
+      "issues": {
+        "new": {
+          "title": "דיווח על בעיה חדשה",
+          "subtitle": "דווח על בעיה שדורשת טיפול של ועד ההורים",
+          "detailsTitle": "פרטי הבעיה",
+          "detailsDescription": "מידע בסיסי על הבעיה",
+          "titleLabel": "כותרת הבעיה *",
+          "titlePlaceholder": "תיאור קצר של הבעיה",
+          "descriptionLabel": "תיאור מפורט *",
+          "descriptionPlaceholder": "תאר את הבעיה בפירוט...",
+          "categoryLabel": "קטגוריה",
+          "priorityLabel": "עדיפות",
+          "statusLabel": "סטטוס",
+          "category": {
+            "safety": "בטיחות",
+            "maintenance": "תחזוקה",
+            "academic": "לימודי",
+            "social": "חברתי",
+            "financial": "כספי",
+            "other": "אחר"
+          },
+          "priority": {
+            "low": "נמוכה",
+            "normal": "רגילה",
+            "high": "גבוהה",
+            "critical": "קריטי"
+          },
+          "status": {
+            "open": "פתוח",
+            "in_progress": "בטיפול",
+            "resolved": "נפתר",
+            "closed": "סגור"
+          },
+          "criticalTitle": "בעיה קריטית",
+          "criticalText": "בעיות קריטיות יטופלו בעדיפות עליונה ויקבלו התייחסות מיידית",
+          "reporterTitle": "פרטי המדווח",
+          "reporterDescription": "מי מדווח על הבעיה",
+          "reporterNameLabel": "שם המדווח *",
+          "reporterNamePlaceholder": "שם מלא",
+          "reporterContactLabel": "פרטי קשר (אופציונלי)",
+          "reporterContactPlaceholder": "טלפון או אימייל",
+          "assignedToLabel": "מוקצה ל (אופציונלי)",
+          "assignedToPlaceholder": "שם האחראי לטיפול",
+          "attachmentsTitle": "קבצים מצורפים",
+          "attachmentsDescription": "צרף תמונות או מסמכים רלוונטיים",
+          "submit": "דווח על הבעיה",
+          "toastCreated": "הבעיה דווחה בהצלחה!",
+          "toastCreateError": "שגיאה בדיווח הבעיה",
+          "validation": {
+            "titleMin": "כותרת חייבת להכיל לפחות 2 תווים",
+            "descriptionMin": "תיאור חייב להכיל לפחות 10 תווים",
+            "reporterRequired": "שם המדווח נדרש"
+          }
+        },
+        "stats": {
+          "title": "סטטיסטיקות בעיות",
+          "subtitle": "מבט כולל על ביצועי טיפול בבעיות",
+          "backToIssues": "חזרה לבעיות",
+          "errorTitle": "שגיאה בטעינת נתונים",
+          "errorText": "לא ניתן לטעון את הסטטיסטיקות",
+          "metrics": {
+            "total": "סה\"כ בעיות",
+            "activeNow": "{count} פעילות כעת",
+            "avgTime": "זמן פתרון ממוצע",
+            "days": "ימים",
+            "rate": "אחוז פתרון",
+            "resolvedCount": "{count} נפתרו",
+            "month": "החודש"
+          },
+          "statusTitle": "פילוח לפי סטטוס",
+          "statusDescription": "מצב בעיות נוכחי",
+          "status": {
+            "open": "פתוחות",
+            "inProgress": "בטיפול",
+            "resolved": "נפתרו",
+            "closed": "סגורות"
+          },
+          "priorityTitle": "פילוח לפי עדיפות",
+          "priorityDescription": "חומרת הבעיות",
+          "priority": {
+            "critical": "קריטית",
+            "high": "גבוהה",
+            "medium": "בינונית",
+            "low": "נמוכה"
+          },
+          "insightsTitle": "תובנות וביצועים",
+          "insightsDescription": "ניתוח מגמות ודפוסים",
+          "insights": {
+            "criticalTitle": "בעיות קריטיות זקוקות לתשומת לב",
+            "criticalText": "יש {count} בעיות קריטיות שדורשות טיפול מיידי",
+            "slowTitle": "זמן פתרון ארוך",
+            "slowText": "זמן הפתרון הממוצע הוא {days} ימים. שקלו להגדיל את המשאבים או לשפר את התהליך",
+            "excellentTitle": "ביצועים מצוינים",
+            "excellentText": "אחוז הפתרון שלכם הוא {rate}% - עבודה מעולה!",
+            "risingTitle": "עלייה במספר הבעיות",
+            "risingText": "נפתחו {opened} בעיות חדשות החודש, אך נפתרו רק {resolved}. ייתכן שנדרש תיעדוף מחדש"
+          }
+        }
+      },
+      "calendar": {
+        "title": "לוח אירועים - מנהל",
+        "subtitle": "ניהול וצפייה באירועים. לחץ על אירוע לעריכה",
+        "loading": "טוען לוח אירועים...",
+        "loadError": "שגיאה בטעינת האירועים"
+      }
+    },
+    "tasks": {
+      "list": {
+        "title": "ניהול משימות",
+        "subtitle": "מעקב וניהול כל המשימות של ועד ההורים",
+        "export": "ייצוא לאקסל",
+        "newTask": "משימה חדשה",
+        "stats": {
+          "title": "סיכום",
+          "total": "סה\"כ משימות",
+          "pending": "ממתינות",
+          "inProgress": "בביצוע",
+          "completed": "הושלמו",
+          "overdue": "באיחור"
+        },
+        "csv": {
+          "title": "כותרת",
+          "description": "תיאור",
+          "status": "סטטוס",
+          "owner": "אחראי",
+          "dueDate": "תאריך יעד",
+          "createdAt": "נוצר ב"
+        }
+      },
+      "form": {
+        "newTitle": "יצירת משימה חדשה",
+        "newSubtitle": "הוסף משימה חדשה למעקב ביצוע",
+        "editTitle": "עריכת משימה",
+        "editSubtitle": "עדכן את פרטי המשימה",
+        "loadingTask": "טוען משימה...",
+        "loading": "טוען...",
+        "deleting": "מוחק...",
+        "createButton": "צור משימה",
+        "saveButton": "שמור שינויים",
+        "deleteButton": "מחק משימה",
+        "cancel": "ביטול",
+        "confirmDelete": "האם אתה בטוח שברצונך למחוק את המשימה? פעולה זו לא ניתנת לביטול.",
+        "comingSoon": "בקרוב",
+        "none": "ללא",
+        "sections": {
+          "basic": {
+            "title": "פרטי המשימה",
+            "description": "מידע בסיסי על המשימה"
+          },
+          "assignment": {
+            "title": "הקצאת משימה",
+            "description": "מי אחראי על ביצוע המשימה"
+          },
+          "dates": {
+            "title": "תאריכי יעד",
+            "description": "מתי המשימה צריכה להסתיים"
+          },
+          "links": {
+            "title": "קישורים (אופציונלי)",
+            "description": "קשר את המשימה לאירוע או למשימת אב"
+          }
+        },
+        "fields": {
+          "title": "כותרת המשימה *",
+          "description": "תיאור",
+          "priority": "עדיפות",
+          "status": "סטטוס",
+          "ownerName": "שם האחראי *",
+          "ownerPhone": "טלפון האחראי",
+          "dueDate": "תאריך יעד",
+          "reminderDate": "תאריך תזכורת",
+          "autoRemind": "תזכורות אוטומטיות",
+          "event": "אירוע קשור",
+          "parentTask": "משימת אב"
+        },
+        "placeholders": {
+          "title": "לדוגמה: הזמנת כיבוד לישיבה",
+          "description": "תיאור מפורט של המשימה...",
+          "ownerName": "שם מלא",
+          "event": "בחר אירוע...",
+          "parentTask": "בחר משימת אב..."
+        },
+        "helpers": {
+          "dueDate": "בחר מתי המשימה צריכה להסתיים (אופציונלי)",
+          "reminderDate": "תישלח תזכורת לאחראי בתאריך זה",
+          "autoRemind": "שלח תזכורות אוטומטיות כשהמשימה מתקרבת לתאריך היעד"
+        },
+        "priority": {
+          "low": "נמוכה",
+          "normal": "רגילה",
+          "high": "גבוהה",
+          "urgent": "דחוף"
+        },
+        "status": {
+          "pending": "ממתין",
+          "in_progress": "בביצוע",
+          "completed": "הושלם",
+          "cancelled": "בוטל"
+        },
+        "validation": {
+          "titleMin": "כותרת חייבת להכיל לפחות 2 תווים",
+          "ownerRequired": "שם האחראי נדרש",
+          "phoneInvalid": "מספר טלפון לא תקין"
+        },
+        "toast": {
+          "draftRestored": "הטיוטה שוחזרה בהצלחה!",
+          "draftDiscarded": "הטיוטה נמחקה",
+          "createSuccess": "המשימה נוצרה בהצלחה!",
+          "createError": "שגיאה ביצירת המשימה",
+          "loadError": "שגיאה בטעינת המשימה",
+          "notFound": "המשימה לא נמצאה. ייתכן שהיא נמחקה",
+          "backToList": "חזור לרשימה",
+          "unauthorized": "אין הרשאה. נדרשת התחברות מחדש",
+          "login": "התחבר",
+          "serverError": "שגיאת שרת. אנא נסה שוב בעוד מספר רגעים",
+          "retry": "נסה שוב",
+          "updateSuccess": "המשימה עודכנה בהצלחה!",
+          "updateError": "שגיאה בעדכון המשימה",
+          "offline": "אין חיבור לאינטרנט. בדוק את החיבור ונסה שוב",
+          "badResponse": "התקבל מידע שגוי מהשרת. נסה לרענן את הדף",
+          "unexpected": "שגיאה לא צפויה. נסה שוב או פנה לתמיכה",
+          "alreadyDeleted": "המשימה כבר נמחקה",
+          "deleteSuccess": "המשימה נמחקה בהצלחה",
+          "deleteError": "שגיאה במחיקת המשימה",
+          "deleteErrorRetry": "שגיאה במחיקת המשימה. נסה שוב"
+        }
+      },
+      "tags": {
+        "metaTitle": "ניהול תגיות | פורטל בארי",
+        "metaDescription": "ניהול תגיות לקטגוריזציה של משימות",
+        "title": "ניהול תגיות",
+        "subtitle": "צור וערוך תגיות לקטגוריזציה של משימות",
+        "newTag": "תגית חדשה",
+        "stats": {
+          "total": "סה\"כ תגיות",
+          "system": "תגיות מערכת",
+          "usages": "שימושים"
+        },
+        "existing": "תגיות קיימות",
+        "existingHint": "לחץ על תגית לעריכה או מחיקה",
+        "empty": "אין תגיות",
+        "taskCount": "{count} משימות",
+        "systemBadge": "מערכת",
+        "editTag": "עריכה",
+        "deleteTag": "מחיקה",
+        "createError": "שגיאה ביצירת התגית",
+        "updateError": "שגיאה בעדכון התגית",
+        "deleteError": "שגיאה במחיקת התגית",
+        "dialog": {
+          "newTitle": "תגית חדשה",
+          "editTitle": "עריכת תגית",
+          "newDescription": "צור תגית חדשה לקטגוריזציה של משימות",
+          "editDescription": "עריכת התגית \"{name}\"",
+          "nameEn": "שם באנגלית *",
+          "nameEnHint": "אותיות קטנות, מקף, מקף תחתון",
+          "nameHe": "שם בעברית *",
+          "nameHePlaceholder": "תחזוקה",
+          "emoji": "אמוג'י (אופציונלי)",
+          "color": "צבע *",
+          "description": "תיאור",
+          "descriptionPlaceholder": "תיאור התגית...",
+          "displayOrder": "סדר תצוגה",
+          "preview": "תצוגה מקדימה",
+          "cancel": "ביטול",
+          "saving": "שומר...",
+          "update": "עדכן",
+          "create": "צור"
+        },
+        "delete": {
+          "title": "מחיקת תגית",
+          "systemBlocked": "לא ניתן למחוק תגית מערכת. תגיות מערכת הן חלק בסיסי מהמערכת.",
+          "confirm": "האם אתה בטוח שברצונך למחוק את התגית \"{name}\"?",
+          "inUse": "התגית משמשת ב-{count} משימות והיא תוסר מהן.",
+          "cancel": "ביטול",
+          "deleting": "מוחק...",
+          "confirmButton": "מחק"
+        }
+      },
+      "settings": {
+        "title": "הגדרות מערכת",
+        "subtitle": "ניהול הגדרות כלליות ותצורה של המערכת",
+        "saving": "שומר...",
+        "saveAll": "שמור את כל השינויים",
+        "gate": {
+          "title": "גישה מוגבלת",
+          "description": "נדרשת סיסמת מנהל לגישה להגדרות",
+          "passwordLabel": "סיסמת מנהל",
+          "passwordPlaceholder": "הזן סיסמה",
+          "enter": "כניסה"
+        },
+        "tabs": {
+          "general": "כללי",
+          "features": "תכונות",
+          "appearance": "תצוגה"
+        },
+        "general": {
+          "title": "פרטי הועד",
+          "description": "מידע בסיסי על ועד ההורים ובית הספר",
+          "committeeName": "שם הועד",
+          "schoolName": "שם בית הספר",
+          "academicYear": "שנת לימודים",
+          "committeeEmail": "אימייל הועד",
+          "committeePhone": "טלפון הועד",
+          "schoolAddress": "כתובת בית הספר",
+          "whatsappLink": "קישור לקבוצת WhatsApp"
+        },
+        "features": {
+          "title": "הפעלת תכונות",
+          "description": "בחר אילו תכונות להפעיל במערכת",
+          "registration": {
+            "label": "הרשמה לאירועים",
+            "description": "אפשר להורים להירשם לאירועים"
+          },
+          "feedback": {
+            "label": "משוב אנונימי",
+            "description": "אפשר להורים לשלוח משוב באופן אנונימי"
+          },
+          "vendorsPassword": {
+            "label": "סיסמה לספקים",
+            "description": "דרוש סיסמה לגישה לדף הספקים"
+          }
+        },
+        "appearance": {
+          "title": "מראה וחוויית משתמש",
+          "description": "התאמה אישית של הממשק",
+          "primaryColor": "צבע ראשי",
+          "secondaryColor": "צבע משני",
+          "maxFileSize": "גודל קובץ מקסימלי (MB)",
+          "sessionTimeout": "זמן פג תוקף הפעלה (דקות)",
+          "sessionTimeoutHint": "1440 דקות = 24 שעות"
+        },
+        "toast": {
+          "wrongPassword": "סיסמה שגויה",
+          "authError": "שגיאה באימות",
+          "loadError": "שגיאה בטעינת ההגדרות",
+          "saveSuccess": "ההגדרות נשמרו בהצלחה",
+          "saveError": "שגיאה בשמירת ההגדרות"
+        }
+      }
+    },
+    "tickets": {
+      "list": {
+        "title": "ניהול כרטיסים",
+        "subtitle": "כרטיסים למשחקי ספורט, הצגות ואירועים",
+        "newTicket": "כרטיס חדש",
+        "emptyTitle": "אין כרטיסים במערכת",
+        "createFirst": "צור כרטיס ראשון",
+        "featured": "מומלץ",
+        "quantityAvailable": "כמות זמינה:",
+        "unlimited": "ללא הגבלה",
+        "quantityOf": "{left} מתוך {total}",
+        "price": "מחיר:",
+        "teams": "{home} נגד {away}",
+        "finishEvent": "סיים אירוע",
+        "deleteConfirm": "האם אתה בטוח שברצונך למחוק כרטיס זה?",
+        "loadError": "שגיאה בטעינת הכרטיסים",
+        "deleteSuccess": "הכרטיס נמחק בהצלחה",
+        "deleteError": "שגיאה במחיקת הכרטיס",
+        "updateError": "שגיאה בעדכון הכרטיס",
+        "finishSuccess": "האירוע הסתיים והוסר מהתצוגה הציבורית",
+        "finishNotDeployed": "הפיצ'ר עדיין לא פרוס לפרודקשן. נסה שוב בעוד דקה."
+      },
+      "status": {
+        "active": "פעיל",
+        "sold_out": "אזל",
+        "expired": "פג תוקף",
+        "draft": "טיוטה",
+        "finished": "הסתיים"
+      },
+      "finishDialog": {
+        "title": "סיום אירוע",
+        "question": "האם לסיים את האירוע?",
+        "info": "האירוע יוסר מהתצוגה הציבורית ולא יוצג יותר למשתמשים רגילים. תוכל לראות אותו כאן בפאנל הניהול עם סטטוס \"הסתיים\"."
+      },
+      "new": {
+        "title": "כרטיס חדש",
+        "subtitle": "צור כרטיס חדש למשחקי ספורט, הצגות או אירועים",
+        "success": "הכרטיס נוצר בהצלחה!",
+        "error": "שגיאה ביצירת הכרטיס"
+      },
+      "edit": {
+        "title": "ערוך כרטיס",
+        "notFound": "הכרטיס לא נמצא",
+        "loadError": "שגיאה בטעינת הכרטיס",
+        "success": "הכרטיס עודכן בהצלחה!",
+        "error": "שגיאה בעדכון הכרטיס"
+      },
+      "form": {
+        "validation": {
+          "titleRequired": "כותרת היא שדה חובה",
+          "imageUrlInvalid": "כתובת תמונה לא תקינה",
+          "purchaseUrlInvalid": "כתובת קניה לא תקינה"
+        },
+        "basicInfo": "מידע בסיסי",
+        "title": "כותרת *",
+        "titlePlaceholder": "לדוגמה: כרטיסים למשחק מכבי תל אביב",
+        "description": "תיאור",
+        "descriptionPlaceholder": "פרטים נוספים על האירוע...",
+        "eventType": "סוג אירוע *",
+        "eventTypes": {
+          "sport": "ספורט",
+          "theater": "תיאטרון",
+          "concert": "קונצרט",
+          "other": "אחר"
+        },
+        "ticketDetails": "פרטי כרטיס",
+        "purchaseUrl": "קישור לקניה/הרשמה",
+        "quantityAvailable": "כמות זמינה",
+        "quantityAvailablePlaceholder": "השאר ריק ללא הגבלה",
+        "quantityAvailableHint": "השאר ריק אם אין הגבלת כמות",
+        "quantitySold": "כמות שנמכרה",
+        "statusAndDisplay": "סטטוס ותצוגה",
+        "status": "סטטוס *",
+        "statusOptions": {
+          "draft": "טיוטה",
+          "active": "פעיל",
+          "sold_out": "אזל מהמלאי",
+          "expired": "פג תוקף",
+          "finished": "הסתיים"
+        },
+        "featured": "הצג כמומלץ בעמוד הבית",
+        "displayOrder": "סדר תצוגה",
+        "displayOrderHint": "מספר נמוך יותר = יופיע ראשון",
+        "submitting": "שומר...",
+        "submitUpdate": "עדכן כרטיס",
+        "submitCreate": "צור כרטיס"
+      }
+    }
   }
 }

@@ -1,9 +1,28 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import { DollarSign, Calendar, Save, TrendingUp, TrendingDown } from 'lucide-react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Banknote,
+  Bus,
+  Calendar,
+  Coffee,
+  Coins,
+  CreditCard,
+  DollarSign,
+  FileText,
+  Heart,
+  Landmark,
+  Package,
+  PartyPopper,
+  RefreshCw,
+  Save,
+  TrendingDown,
+  TrendingUp,
+  Wrench,
+} from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -16,67 +35,94 @@ import { toast } from 'sonner'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/utils/cn'
+import { AdminFormSection, AdminPageHeader } from '@/components/features/admin'
 
-const expenseSchema = z.object({
-  title: z.string().min(2, 'כותרת חייבת להכיל לפחות 2 תווים'),
-  description: z.string().optional(),
-  amount: z.string().min(1, 'סכום נדרש').regex(/^\d+(\.\d{1,2})?$/, 'סכום לא תקין'),
-  expense_type: z.enum(['income', 'expense']),
-  category: z.enum([
-    'events', 'maintenance', 'equipment', 'refreshments',
-    'transportation', 'donations', 'fundraising', 'other'
-  ]),
-  payment_method: z.enum(['cash', 'check', 'transfer', 'credit_card', 'other']),
-  expense_date: z.string().min(1, 'תאריך נדרש'),
-  vendor_name: z.string().optional(),
-  receipt_url: z.string().optional(),
-  event_id: z.string().optional(),
-  approved: z.boolean(),
-  notes: z.string().optional()
-})
+const categoryKeys = [
+  'events',
+  'maintenance',
+  'equipment',
+  'refreshments',
+  'transportation',
+  'donations',
+  'fundraising',
+  'other',
+] as const
 
-type ExpenseFormData = z.infer<typeof expenseSchema>
+const paymentMethodKeys = ['cash', 'check', 'transfer', 'credit_card', 'other'] as const
 
-const categoryOptions = [
-  { value: 'events', label: 'אירועים', icon: '🎉' },
-  { value: 'maintenance', label: 'תחזוקה', icon: '🔧' },
-  { value: 'equipment', label: 'ציוד', icon: '📦' },
-  { value: 'refreshments', label: 'כיבוד', icon: '☕' },
-  { value: 'transportation', label: 'הסעות', icon: '🚌' },
-  { value: 'donations', label: 'תרומות', icon: '💝' },
-  { value: 'fundraising', label: 'גיוס כספים', icon: '💰' },
-  { value: 'other', label: 'אחר', icon: '📝' }
-]
+type ExpenseType = 'income' | 'expense'
+type ExpenseCategory = (typeof categoryKeys)[number]
+type PaymentMethod = (typeof paymentMethodKeys)[number]
 
-const paymentMethodOptions = [
-  { value: 'cash', label: 'מזומן', icon: '💵' },
-  { value: 'check', label: 'צק', icon: '📄' },
-  { value: 'transfer', label: 'העברה בנקאית', icon: '🏦' },
-  { value: 'credit_card', label: 'כרטיס אשראי', icon: '💳' },
-  { value: 'other', label: 'אחר', icon: '🔄' }
-]
+const categoryIcons: Record<ExpenseCategory, LucideIcon> = {
+  events: PartyPopper,
+  maintenance: Wrench,
+  equipment: Package,
+  refreshments: Coffee,
+  transportation: Bus,
+  donations: Heart,
+  fundraising: Coins,
+  other: FileText,
+}
+
+const paymentMethodIcons: Record<PaymentMethod, LucideIcon> = {
+  cash: Banknote,
+  check: FileText,
+  transfer: Landmark,
+  credit_card: CreditCard,
+  other: RefreshCw,
+}
+
+interface EventOption {
+  id: string
+  title: string
+}
 
 export default function NewExpensePage() {
+  const t = useTranslations('admin.org.expenses')
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [events, setEvents] = useState<any[]>([])
+  const [events, setEvents] = useState<EventOption[]>([])
   const [receiptUrl, setReceiptUrl] = useState<string>('')
+
+  const expenseSchema = useMemo(
+    () =>
+      z.object({
+        title: z.string().min(2, t('form.validation.titleMin')),
+        description: z.string().optional(),
+        amount: z
+          .string()
+          .min(1, t('form.validation.amountRequired'))
+          .regex(/^\d+(\.\d{1,2})?$/, t('form.validation.amountInvalid')),
+        expense_type: z.enum(['income', 'expense']),
+        category: z.enum(categoryKeys),
+        payment_method: z.enum(paymentMethodKeys),
+        expense_date: z.string().min(1, t('form.validation.dateRequired')),
+        vendor_name: z.string().optional(),
+        receipt_url: z.string().optional(),
+        event_id: z.string().optional(),
+        approved: z.boolean(),
+        notes: z.string().optional(),
+      }),
+    [t]
+  )
+  type ExpenseFormData = z.infer<typeof expenseSchema>
 
   const {
     register,
     handleSubmit,
     watch,
     setValue,
-    formState: { errors }
+    formState: { errors },
   } = useForm<ExpenseFormData>({
     resolver: zodResolver(expenseSchema),
     defaultValues: {
       expense_type: 'expense',
       category: 'other',
       payment_method: 'cash',
-      approved: false
-    }
+      approved: false,
+    },
   })
 
   const expenseType = watch('expense_type')
@@ -106,321 +152,321 @@ export default function NewExpensePage() {
         ...data,
         amount: parseFloat(data.amount),
         receipt_url: receiptUrl || null,
-        event_id: (data.event_id && data.event_id !== 'none') ? data.event_id : null,
+        event_id: data.event_id && data.event_id !== 'none' ? data.event_id : null,
         vendor_name: data.vendor_name || null,
-        notes: data.notes || null
+        notes: data.notes || null,
       }
 
       const response = await fetch('/api/expenses', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify(expenseData)
+        body: JSON.stringify(expenseData),
       })
 
       const result = await response.json()
 
       if (result.success) {
-        toast.success(`ה${expenseType === 'income' ? 'הכנסה' : 'הוצאה'} נוצרה בהצלחה!`)
+        toast.success(
+          expenseType === 'income' ? t('form.toast.createdIncome') : t('form.toast.createdExpense')
+        )
         router.push('/admin/expenses')
       } else {
-        toast.error(result.error || 'שגיאה ביצירת הרשומה')
+        toast.error(result.error || t('form.toast.createError'))
       }
     } catch (error) {
       console.error('Error creating expense:', error)
-      toast.error('שגיאה ביצירת הרשומה')
+      toast.error(t('form.toast.createError'))
     } finally {
       setIsSubmitting(false)
     }
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold">רישום הכנסה/הוצאה</h1>
-        <p className="text-muted-foreground mt-2">
-          תיעוד הכנסות והוצאות של ועד ההורים
-        </p>
-      </div>
+    <div>
+      <AdminPageHeader
+        title={t('form.title')}
+        subtitle={t('form.subtitle')}
+        backHref="/admin/expenses"
+      />
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         {/* Type Selection */}
-        <Card>
-          <CardHeader>
-            <CardTitle>סוג הרשומה</CardTitle>
-            <CardDescription>בחר האם זו הכנסה או הוצאה</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <RadioGroup
-              value={expenseType}
-              onValueChange={(value) => setValue('expense_type', value as any)}
-            >
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <label
+        <AdminFormSection title={t('form.typeTitle')} description={t('form.typeDescription')}>
+          <RadioGroup
+            value={expenseType}
+            onValueChange={(value) => setValue('expense_type', value as ExpenseType)}
+          >
+            <div className="grid grid-cols-2 gap-3">
+              <label
+                className={cn(
+                  'flex min-h-[56px] cursor-pointer items-center justify-center gap-2 rounded-xl border-2 p-3 transition-colors',
+                  expenseType === 'income'
+                    ? 'border-green-500 bg-green-50'
+                    : 'border-gray-200 hover:border-gray-300'
+                )}
+              >
+                <RadioGroupItem value="income" className="sr-only" />
+                <TrendingUp
                   className={cn(
-                    "flex items-center justify-center gap-2 p-4 border-2 rounded-lg cursor-pointer transition-colors",
-                    expenseType === 'income'
-                      ? "border-green-500 bg-green-50"
-                      : "border-gray-200 hover:border-gray-300"
+                    'h-5 w-5',
+                    expenseType === 'income' ? 'text-green-600' : 'text-gray-500'
+                  )}
+                />
+                <span
+                  className={cn(
+                    'font-medium',
+                    expenseType === 'income' ? 'text-green-600' : 'text-gray-700'
                   )}
                 >
-                  <RadioGroupItem value="income" className="sr-only" />
-                  <TrendingUp className={cn(
-                    "h-5 w-5",
-                    expenseType === 'income' ? "text-green-600" : "text-gray-500"
-                  )} />
-                  <span className={cn(
-                    "font-medium",
-                    expenseType === 'income' ? "text-green-600" : "text-gray-700"
-                  )}>
-                    הכנסה
-                  </span>
-                </label>
+                  {t('form.income')}
+                </span>
+              </label>
 
-                <label
+              <label
+                className={cn(
+                  'flex min-h-[56px] cursor-pointer items-center justify-center gap-2 rounded-xl border-2 p-3 transition-colors',
+                  expenseType === 'expense'
+                    ? 'border-red-500 bg-red-50'
+                    : 'border-gray-200 hover:border-gray-300'
+                )}
+              >
+                <RadioGroupItem value="expense" className="sr-only" />
+                <TrendingDown
                   className={cn(
-                    "flex items-center justify-center gap-2 p-4 border-2 rounded-lg cursor-pointer transition-colors",
-                    expenseType === 'expense'
-                      ? "border-red-500 bg-red-50"
-                      : "border-gray-200 hover:border-gray-300"
+                    'h-5 w-5',
+                    expenseType === 'expense' ? 'text-red-600' : 'text-gray-500'
+                  )}
+                />
+                <span
+                  className={cn(
+                    'font-medium',
+                    expenseType === 'expense' ? 'text-red-600' : 'text-gray-700'
                   )}
                 >
-                  <RadioGroupItem value="expense" className="sr-only" />
-                  <TrendingDown className={cn(
-                    "h-5 w-5",
-                    expenseType === 'expense' ? "text-red-600" : "text-gray-500"
-                  )} />
-                  <span className={cn(
-                    "font-medium",
-                    expenseType === 'expense' ? "text-red-600" : "text-gray-700"
-                  )}>
-                    הוצאה
-                  </span>
-                </label>
-              </div>
-            </RadioGroup>
-          </CardContent>
-        </Card>
+                  {t('form.expense')}
+                </span>
+              </label>
+            </div>
+          </RadioGroup>
+        </AdminFormSection>
 
         {/* Basic Information */}
-        <Card>
-          <CardHeader>
-            <CardTitle>פרטי הרשומה</CardTitle>
-            <CardDescription>מידע בסיסי על ה{expenseType === 'income' ? 'הכנסה' : 'הוצאה'}</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
+        <AdminFormSection
+          title={t('form.detailsTitle')}
+          description={
+            expenseType === 'income'
+              ? t('form.detailsDescriptionIncome')
+              : t('form.detailsDescriptionExpense')
+          }
+        >
+          <div>
+            <Label htmlFor="title">{t('form.titleLabel')}</Label>
+            <Input
+              id="title"
+              {...register('title')}
+              placeholder={
+                expenseType === 'income'
+                  ? t('form.titlePlaceholderIncome')
+                  : t('form.titlePlaceholderExpense')
+              }
+              className={errors.title ? 'border-red-500' : ''}
+            />
+            {errors.title && <p className="text-sm text-red-500 mt-1">{errors.title.message}</p>}
+          </div>
+
+          <div>
+            <Label htmlFor="description">{t('form.descriptionLabel')}</Label>
+            <Textarea
+              id="description"
+              {...register('description')}
+              placeholder={t('form.descriptionPlaceholder')}
+              rows={3}
+            />
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
             <div>
-              <Label htmlFor="title">כותרת *</Label>
-              <Input
-                id="title"
-                {...register('title')}
-                placeholder={expenseType === 'income' ? 'לדוגמה: תרומה מהורים' : 'לדוגמה: רכישת ציוד'}
-                className={errors.title ? 'border-red-500' : ''}
-              />
-              {errors.title && (
-                <p className="text-sm text-red-500 mt-1">{errors.title.message}</p>
+              <Label htmlFor="amount">{t('form.amountLabel')}</Label>
+              <div className="relative" dir="ltr">
+                <DollarSign
+                  className="absolute start-3 top-3.5 h-4 w-4 text-muted-foreground"
+                  aria-hidden="true"
+                />
+                <Input
+                  id="amount"
+                  type="text"
+                  {...register('amount')}
+                  placeholder="0.00"
+                  className={`ps-10 ${errors.amount ? 'border-red-500' : ''}`}
+                  dir="ltr"
+                />
+              </div>
+              {errors.amount && (
+                <p className="text-sm text-red-500 mt-1">{errors.amount.message}</p>
               )}
             </div>
 
             <div>
-              <Label htmlFor="description">תיאור</Label>
-              <Textarea
-                id="description"
-                {...register('description')}
-                placeholder="תיאור מפורט..."
-                rows={3}
-              />
-            </div>
-
-            <div className="grid gap-4 md:grid-cols-2">
-              <div>
-                <Label htmlFor="amount">סכום (₪) *</Label>
-                <div className="relative">
-                  <DollarSign className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="amount"
-                    type="text"
-                    {...register('amount')}
-                    placeholder="0.00"
-                    className={`pr-10 ${errors.amount ? 'border-red-500' : ''}`}
-                    dir="ltr"
-                  />
-                </div>
-                {errors.amount && (
-                  <p className="text-sm text-red-500 mt-1">{errors.amount.message}</p>
-                )}
-              </div>
-
-              <div>
-                <Label htmlFor="expense_date">תאריך *</Label>
-                <div className="relative">
-                  <Calendar className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="expense_date"
-                    type="date"
-                    {...register('expense_date')}
-                    className={`pr-10 ${errors.expense_date ? 'border-red-500' : ''}`}
-                  />
-                </div>
-                {errors.expense_date && (
-                  <p className="text-sm text-red-500 mt-1">{errors.expense_date.message}</p>
-                )}
-              </div>
-            </div>
-
-            <div className="grid gap-4 md:grid-cols-2">
-              <div>
-                <Label htmlFor="category">קטגוריה</Label>
-                <Select
-                  onValueChange={(value) => setValue('category', value as any)}
-                  defaultValue="other"
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categoryOptions.map(option => (
-                      <SelectItem key={option.value} value={option.value}>
-                        <span className="flex items-center gap-2">
-                          <span>{option.icon}</span>
-                          <span>{option.label}</span>
-                        </span>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label htmlFor="payment_method">אמצעי תשלום</Label>
-                <Select
-                  onValueChange={(value) => setValue('payment_method', value as any)}
-                  defaultValue="cash"
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {paymentMethodOptions.map(option => (
-                      <SelectItem key={option.value} value={option.value}>
-                        <span className="flex items-center gap-2">
-                          <span>{option.icon}</span>
-                          <span>{option.label}</span>
-                        </span>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            {expenseType === 'expense' && (
-              <div>
-                <Label htmlFor="vendor_name">שם הספק/נותן השירות</Label>
+              <Label htmlFor="expense_date">{t('form.dateLabel')}</Label>
+              <div className="relative">
+                <Calendar
+                  className="absolute start-3 top-3.5 h-4 w-4 text-muted-foreground"
+                  aria-hidden="true"
+                />
                 <Input
-                  id="vendor_name"
-                  {...register('vendor_name')}
-                  placeholder="שם העסק או האדם"
+                  id="expense_date"
+                  type="date"
+                  {...register('expense_date')}
+                  className={`ps-10 ${errors.expense_date ? 'border-red-500' : ''}`}
                 />
               </div>
-            )}
-          </CardContent>
-        </Card>
+              {errors.expense_date && (
+                <p className="text-sm text-red-500 mt-1">{errors.expense_date.message}</p>
+              )}
+            </div>
+          </div>
 
-        {/* Additional Details */}
-        <Card>
-          <CardHeader>
-            <CardTitle>פרטים נוספים</CardTitle>
-            <CardDescription>קישור לאירוע והערות</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {events.length > 0 && (
-              <div>
-                <Label htmlFor="event_id">אירוע קשור (אופציונלי)</Label>
-                <Select onValueChange={(value) => setValue('event_id', value)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="בחר אירוע..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">ללא</SelectItem>
-                    {events.map((event) => (
-                      <SelectItem key={event.id} value={event.id}>
-                        {event.title}
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <Label htmlFor="category">{t('form.categoryLabel')}</Label>
+              <Select
+                onValueChange={(value) => setValue('category', value as ExpenseCategory)}
+                defaultValue="other"
+              >
+                <SelectTrigger id="category">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {categoryKeys.map((value) => {
+                    const Icon = categoryIcons[value]
+                    return (
+                      <SelectItem key={value} value={value}>
+                        <span className="flex items-center gap-2">
+                          <Icon className="h-4 w-4" aria-hidden="true" />
+                          <span>{t(`categories.${value}`)}</span>
+                        </span>
                       </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
+                    )
+                  })}
+                </SelectContent>
+              </Select>
+            </div>
 
             <div>
-              <Label htmlFor="notes">הערות</Label>
-              <Textarea
-                id="notes"
-                {...register('notes')}
-                placeholder="הערות נוספות..."
-                rows={3}
-              />
+              <Label htmlFor="payment_method">{t('form.paymentMethodLabel')}</Label>
+              <Select
+                onValueChange={(value) => setValue('payment_method', value as PaymentMethod)}
+                defaultValue="cash"
+              >
+                <SelectTrigger id="payment_method">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {paymentMethodKeys.map((value) => {
+                    const Icon = paymentMethodIcons[value]
+                    return (
+                      <SelectItem key={value} value={value}>
+                        <span className="flex items-center gap-2">
+                          <Icon className="h-4 w-4" aria-hidden="true" />
+                          <span>{t(`paymentMethods.${value}`)}</span>
+                        </span>
+                      </SelectItem>
+                    )
+                  })}
+                </SelectContent>
+              </Select>
             </div>
+          </div>
 
-            <div className="flex items-center justify-between p-4 border rounded-lg">
-              <div>
-                <Label htmlFor="approved">אישור</Label>
-                <p className="text-sm text-muted-foreground">
-                  האם הרשומה מאושרת
-                </p>
-              </div>
-              <Switch
-                id="approved"
-                checked={approved}
-                onCheckedChange={(checked) => setValue('approved', checked)}
+          {expenseType === 'expense' && (
+            <div>
+              <Label htmlFor="vendor_name">{t('form.vendorLabel')}</Label>
+              <Input
+                id="vendor_name"
+                {...register('vendor_name')}
+                placeholder={t('form.vendorPlaceholder')}
               />
             </div>
-          </CardContent>
-        </Card>
+          )}
+        </AdminFormSection>
+
+        {/* Additional Details */}
+        <AdminFormSection title={t('form.extraTitle')} description={t('form.extraDescription')}>
+          {events.length > 0 && (
+            <div>
+              <Label htmlFor="event_id">{t('form.eventLabel')}</Label>
+              <Select onValueChange={(value) => setValue('event_id', value)}>
+                <SelectTrigger id="event_id">
+                  <SelectValue placeholder={t('form.eventPlaceholder')} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">{t('form.eventNone')}</SelectItem>
+                  {events.map((event) => (
+                    <SelectItem key={event.id} value={event.id}>
+                      {event.title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          <div>
+            <Label htmlFor="notes">{t('form.notesLabel')}</Label>
+            <Textarea
+              id="notes"
+              {...register('notes')}
+              placeholder={t('form.notesPlaceholder')}
+              rows={3}
+            />
+          </div>
+
+          <div className="flex items-center justify-between gap-3 rounded-xl border p-4">
+            <div>
+              <Label htmlFor="approved">{t('form.approvedLabel')}</Label>
+              <p className="text-sm text-muted-foreground">{t('form.approvedHint')}</p>
+            </div>
+            <Switch
+              id="approved"
+              checked={approved}
+              onCheckedChange={(checked) => setValue('approved', checked)}
+            />
+          </div>
+        </AdminFormSection>
 
         {/* Receipt Upload */}
-        <Card>
-          <CardHeader>
-            <CardTitle>קבלה/חשבונית</CardTitle>
-            <CardDescription>העלה קבלה או חשבונית</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <FileUpload
-              value={receiptUrl}
-              onChange={(url) => setReceiptUrl(url as string)}
-              multiple={false}
-              accept=".pdf,.jpg,.jpeg,.png"
-              maxSize={10}
-              bucket="receipts"
-            />
-          </CardContent>
-        </Card>
+        <AdminFormSection title={t('form.receiptTitle')} description={t('form.receiptDescription')}>
+          <FileUpload
+            value={receiptUrl}
+            onChange={(url) => setReceiptUrl(url as string)}
+            multiple={false}
+            accept=".pdf,.jpg,.jpeg,.png"
+            maxSize={10}
+            bucket="receipts"
+          />
+        </AdminFormSection>
 
         {/* Actions */}
-        <div className="flex gap-4">
-          <Button
-            type="submit"
-            disabled={isSubmitting}
-            className="flex-1"
-          >
+        <div className="flex flex-col gap-3">
+          <Button type="submit" disabled={isSubmitting} className="min-h-[44px] w-full">
             {isSubmitting ? (
-              <>טוען...</>
+              <>{t('form.saving')}</>
             ) : (
               <>
-                <Save className="h-4 w-4 ml-2" />
-                שמור רשומה
+                <Save className="h-4 w-4 me-2" />
+                {t('form.submit')}
               </>
             )}
           </Button>
           <Button
             type="button"
             variant="outline"
- onClick={() => router.back()}
+            onClick={() => router.back()}
+            className="min-h-[44px] w-full"
           >
-            ביטול
+            {t('form.cancel')}
           </Button>
         </div>
       </form>

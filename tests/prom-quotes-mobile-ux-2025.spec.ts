@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test'
+import { loginViaApi } from './helpers/admin.helper'
 
 test.describe('Prom Quotes - Mobile-First UX 2025', () => {
   // Test on mobile viewport
@@ -11,6 +12,8 @@ test.describe('Prom Quotes - Mobile-First UX 2025', () => {
   const BASE_URL = `http://localhost:4500/he/admin/prom/${TEST_PROM_ID}/quotes`
 
   test.beforeEach(async ({ page }) => {
+    // The admin pages need the auth cookie (without it every test lands on the login page)
+    await loginViaApi(page)
     // Navigate to quotes page
     await page.goto(BASE_URL)
     // Wait for page to load
@@ -344,6 +347,10 @@ test.describe('Prom Quotes - Mobile-First UX 2025', () => {
 })
 
 test.describe('Prom Quotes - Desktop Comparison', () => {
+  test.beforeEach(async ({ page }) => {
+    await loginViaApi(page)
+  })
+
   test.use({ viewport: { width: 1280, height: 720 } })
 
   const TEST_PROM_ID = '7da4e5a7-672f-42d7-a83a-fdc011155d58'
@@ -374,6 +381,10 @@ test.describe('Prom Quotes - Desktop Comparison', () => {
 })
 
 test.describe('Prom Quotes - Performance', () => {
+  test.beforeEach(async ({ page }) => {
+    await loginViaApi(page)
+  })
+
   test.use({ viewport: { width: 375, height: 667 } })
 
   const TEST_PROM_ID = '7da4e5a7-672f-42d7-a83a-fdc011155d58'

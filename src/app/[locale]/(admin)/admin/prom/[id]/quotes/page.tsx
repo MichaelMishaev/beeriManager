@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
+import { useTranslations } from 'next-intl'
+import { Moon, QrCode, Share2, Sun } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -22,7 +24,7 @@ import { cn } from '@/lib/utils'
 import { QuoteCard } from '@/components/features/prom/quotes/QuoteCard'
 import { MobileBottomBar } from '@/components/features/prom/quotes/MobileBottomBar'
 import { CategoryFilter } from '@/components/features/prom/quotes/CategoryFilter'
-import { MobileHeader } from '@/components/features/prom/quotes/MobileHeader'
+import { AdminPageHeader } from '@/components/features/admin'
 
 // Dynamic imports for client-only components
 const QRCode = dynamic(() => import('qrcode.react').then(mod => ({ default: mod.QRCodeSVG })), {
@@ -61,34 +63,35 @@ interface PromEvent {
   total_budget: number
 }
 
-const categoryLabels: Record<string, { label: string; emoji: string }> = {
-  venue: { label: 'אולם/מקום', emoji: '🏛️' },
-  catering: { label: 'קייטרינג', emoji: '🍕' },
-  dj: { label: 'DJ/מוזיקה', emoji: '🎵' },
-  photography: { label: 'צילום', emoji: '📷' },
-  decorations: { label: 'קישוטים', emoji: '🎈' },
-  transportation: { label: 'הסעות', emoji: '🚌' },
-  entertainment: { label: 'בידור', emoji: '🎭' },
-  shirts: { label: 'חולצות', emoji: '👕' },
-  sound_lighting: { label: 'הגברה ותאורה', emoji: '💡' },
-  yearbook: { label: 'ספר מחזור', emoji: '📚' },
-  recording: { label: 'אולפן הקלטות', emoji: '🎬' },
-  scenery: { label: 'תפאורה', emoji: '🎪' },
-  flowers: { label: 'פרחים/זרים', emoji: '💐' },
-  security: { label: 'אבטחה', emoji: '🛡️' },
-  electrician: { label: 'חשמלאי', emoji: '⚡' },
-  moving: { label: 'הובלה', emoji: '🚚' },
-  video_editing: { label: 'עריכת סרטונים', emoji: '🎥' },
-  drums: { label: 'מתופפים', emoji: '🥁' },
-  choreography: { label: 'כוריאוגרפיה', emoji: '💃' },
-  other: { label: 'אחר', emoji: '📦' }
+// Glyph per category; labels come from translations (admin.prom.categories.<key>).
+const categoryEmojis: Record<string, string> = {
+  venue: '🏛️',
+  catering: '🍕',
+  dj: '🎵',
+  photography: '📷',
+  decorations: '🎈',
+  transportation: '🚌',
+  entertainment: '🎭',
+  shirts: '👕',
+  sound_lighting: '💡',
+  yearbook: '📚',
+  recording: '🎬',
+  scenery: '🎪',
+  flowers: '💐',
+  security: '🛡️',
+  electrician: '⚡',
+  moving: '🚚',
+  video_editing: '🎥',
+  drums: '🥁',
+  choreography: '💃',
+  other: '📦'
 }
 
-const availabilityLabels: Record<string, { label: string; color: string }> = {
-  available: { label: 'פנוי', color: 'bg-green-100 text-green-800' },
-  unavailable: { label: 'תפוס', color: 'bg-red-100 text-red-800' },
-  pending: { label: 'ממתין', color: 'bg-yellow-100 text-yellow-800' },
-  unknown: { label: 'לא ידוע', color: 'bg-gray-100 text-gray-800' }
+const availabilityColors: Record<string, string> = {
+  available: 'bg-green-100 text-green-800',
+  unavailable: 'bg-red-100 text-red-800',
+  pending: 'bg-yellow-100 text-yellow-800',
+  unknown: 'bg-gray-100 text-gray-800'
 }
 
 const emptyQuote = {
@@ -122,6 +125,13 @@ interface CategoryStats {
 }
 
 export default function QuotesComparisonPageMobileFirst() {
+  const t = useTranslations('admin.prom')
+  const categoryLabels: Record<string, { label: string; emoji: string }> = Object.fromEntries(
+    Object.entries(categoryEmojis).map(([key, emoji]) => [key, { label: t(`categories.${key}`), emoji }])
+  )
+  const availabilityLabels: Record<string, { label: string; color: string }> = Object.fromEntries(
+    Object.entries(availabilityColors).map(([key, color]) => [key, { label: t(`quotes.availability.${key}`), color }])
+  )
   const params = useParams()
   const promId = params.id as string
   const [isLoading, setIsLoading] = useState(true)
@@ -161,7 +171,7 @@ export default function QuotesComparisonPageMobileFirst() {
       }
     } catch (error) {
       console.error('Error fetching data:', error)
-      toast.error('שגיאה בטעינת הנתונים')
+      toast.error(t('quotes.toast.loadError'))
     } finally {
       setIsLoading(false)
     }
@@ -208,7 +218,7 @@ export default function QuotesComparisonPageMobileFirst() {
     e.preventDefault()
 
     if (!formData.vendor_name.trim()) {
-      toast.error('נא להזין שם ספק')
+      toast.error(t('quotes.toast.vendorRequired'))
       return
     }
 
@@ -238,23 +248,23 @@ export default function QuotesComparisonPageMobileFirst() {
       const data = await response.json()
 
       if (data.success) {
-        toast.success(editingQuote ? 'הצעת המחיר עודכנה' : 'הצעת המחיר נוספה')
+        toast.success(editingQuote ? t('quotes.toast.updated') : t('quotes.toast.added'))
         setIsAddDialogOpen(false)
         resetForm()
         fetchData()
       } else {
-        toast.error(data.error || 'שגיאה בשמירת הצעת המחיר')
+        toast.error(data.error || t('quotes.toast.saveError'))
       }
     } catch (error) {
       console.error('Error saving quote:', error)
-      toast.error('שגיאה בשמירת הצעת המחיר')
+      toast.error(t('quotes.toast.saveError'))
     } finally {
       setIsSubmitting(false)
     }
   }
 
   const handleDelete = async (quoteId: string) => {
-    if (!confirm('האם למחוק הצעת מחיר זו?')) return
+    if (!confirm(t('quotes.confirmDelete'))) return
 
     try {
       const response = await fetch(`/api/prom/${promId}/quotes/${quoteId}`, {
@@ -263,19 +273,28 @@ export default function QuotesComparisonPageMobileFirst() {
       const data = await response.json()
 
       if (data.success) {
-        toast.success('הצעת המחיר נמחקה')
+        toast.success(t('quotes.toast.deleted'))
         fetchData()
       } else {
-        toast.error(data.error || 'שגיאה במחיקה')
+        toast.error(data.error || t('quotes.toast.deleteError'))
       }
     } catch (error) {
       console.error('Error deleting quote:', error)
-      toast.error('שגיאה במחיקה')
+      toast.error(t('quotes.toast.deleteError'))
     }
   }
 
   const exportToCSV = () => {
-    const headers = ['שם ספק', 'קטגוריה', 'מחיר כולל', 'מחיר לתלמיד', 'זמינות', 'דירוג', 'יתרונות', 'חסרונות']
+    const headers = [
+      t('quotes.csv.vendor'),
+      t('quotes.csv.category'),
+      t('quotes.csv.total'),
+      t('quotes.csv.perStudent'),
+      t('quotes.csv.availability'),
+      t('quotes.csv.rating'),
+      t('quotes.csv.pros'),
+      t('quotes.csv.cons')
+    ]
     const rows = quotes.map(q => [
       q.vendor_name,
       categoryLabels[q.category]?.label || q.category,
@@ -298,7 +317,7 @@ export default function QuotesComparisonPageMobileFirst() {
     link.download = `quotes_comparison_${new Date().toISOString().split('T')[0]}.csv`
     link.click()
 
-    toast.success('הקובץ הורד')
+    toast.success(t('quotes.toast.downloaded'))
   }
 
   const handleNativeShare = async () => {
@@ -313,17 +332,17 @@ export default function QuotesComparisonPageMobileFirst() {
           text: shareText,
           url: shareUrl
         })
-        toast.success('שותף בהצלחה!')
+        toast.success(t('quotes.toast.shared'))
       } catch (error) {
         if ((error as Error).name !== 'AbortError') {
           console.error('Error sharing:', error)
           navigator.clipboard.writeText(shareUrl)
-          toast.success('✅ קישור הועתק ללוח!')
+          toast.success(t('quotes.toast.linkCopied'))
         }
       }
     } else {
       navigator.clipboard.writeText(shareUrl)
-      toast.success('✅ קישור הועתק ללוח!')
+      toast.success(t('quotes.toast.linkCopied'))
     }
   }
 
@@ -429,17 +448,42 @@ export default function QuotesComparisonPageMobileFirst() {
   }
 
   return (
-    <div className={cn("min-h-screen", isDarkMode && "dark bg-gray-900")}>
-      {/* Mobile Header */}
-      <MobileHeader
-        promId={promId}
-        quotesCount={quotes.length}
-        promTitle={promEvent?.title}
-        isDarkMode={isDarkMode}
-        onToggleDarkMode={toggleDarkMode}
-        onShowQR={handleShowQR}
-        onShare={handleNativeShare}
-      />
+    <div className={cn("min-h-screen bg-[#f1f2f4]", isDarkMode && "dark bg-gray-900")}>
+      <div className="px-4 pt-4">
+        <AdminPageHeader
+          title={t('quotes.title')}
+          subtitle={`${t('quotes.count', { count: quotes.length })}${promEvent?.title ? ` • ${promEvent.title}` : ''}`}
+          backHref={`/admin/prom/${promId}`}
+        />
+        <div className="mb-3 flex justify-center gap-2">
+          <Button
+            variant="outline"
+            onClick={handleNativeShare}
+            aria-label={t('quotes.share')}
+            className="min-h-[44px] min-w-[44px] bg-white"
+          >
+            <Share2 className="h-4 w-4 sm:me-2" aria-hidden="true" />
+            <span className="hidden sm:inline">{t('quotes.share')}</span>
+          </Button>
+          <Button
+            variant="outline"
+            onClick={handleShowQR}
+            aria-label={t('quotes.showQr')}
+            className="min-h-[44px] min-w-[44px] bg-white"
+          >
+            <QrCode className="h-4 w-4 sm:me-2" aria-hidden="true" />
+            <span className="hidden sm:inline">QR</span>
+          </Button>
+          <Button
+            variant="outline"
+            onClick={toggleDarkMode}
+            aria-label={isDarkMode ? t('quotes.lightMode') : t('quotes.darkMode')}
+            className="hidden min-h-[44px] min-w-[44px] bg-white lg:inline-flex"
+          >
+            {isDarkMode ? <Sun className="h-4 w-4" aria-hidden="true" /> : <Moon className="h-4 w-4" aria-hidden="true" />}
+          </Button>
+        </div>
+      </div>
 
       {/* Category Filter */}
       <CategoryFilter
@@ -453,10 +497,10 @@ export default function QuotesComparisonPageMobileFirst() {
       {/* Main Content */}
       <main className="p-4 space-y-3 pb-32">
         {filteredQuotes.length === 0 ? (
-          <Card className="p-8 text-center">
-            <p className="text-gray-500">אין הצעות מחיר להצגה</p>
+          <Card className="rounded-2xl border-0 p-8 text-center shadow-[0_1px_2px_rgba(0,0,0,0.06)]">
+            <p className="text-gray-500">{t('quotes.empty.title')}</p>
             <Button className="mt-4" onClick={() => setIsAddDialogOpen(true)}>
-              הוסף הצעה ראשונה
+              {t('quotes.empty.addFirst')}
             </Button>
           </Card>
         ) : (
@@ -472,7 +516,7 @@ export default function QuotesComparisonPageMobileFirst() {
               isBestValue={isBestValue(quote)}
               categoryLabel={categoryLabels[quote.category]?.label || quote.category}
               categoryEmoji={categoryLabels[quote.category]?.emoji || '📋'}
-              availabilityLabel={availabilityLabels[quote.availability_status]?.label || 'לא ידוע'}
+              availabilityLabel={availabilityLabels[quote.availability_status]?.label || t('quotes.availability.unknown')}
               availabilityColor={availabilityLabels[quote.availability_status]?.color || 'bg-gray-100 text-gray-800'}
             />
           ))
@@ -497,17 +541,17 @@ export default function QuotesComparisonPageMobileFirst() {
                 onClick={() => setIsAddDialogOpen(false)}
                 className="text-gray-500 text-lg sm:hidden"
               >
-                ביטול
+                {t('quotes.dialog.cancel')}
               </button>
               <DialogHeader className="sm:block hidden">
                 <DialogTitle>
-                  {editingQuote ? 'עריכת הצעת מחיר' : 'הצעת מחיר חדשה'}
+                  {editingQuote ? t('quotes.dialog.editTitle') : t('quotes.dialog.newTitle')}
                 </DialogTitle>
                 <DialogDescription>
-                  הזן את פרטי הצעת המחיר מהספק
+                  {t('quotes.dialog.description')}
                 </DialogDescription>
               </DialogHeader>
-              <h2 className="text-xl font-bold sm:hidden">הצעה חדשה</h2>
+              <h2 className="text-xl font-bold sm:hidden">{t('quotes.dialog.mobileTitle')}</h2>
               <div className="w-12 sm:hidden" />
             </div>
           </div>
@@ -515,7 +559,7 @@ export default function QuotesComparisonPageMobileFirst() {
           <form onSubmit={handleSubmit} className="h-full flex flex-col sm:block">
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="vendor_name" className="text-base font-bold">שם הספק *</Label>
+                <Label htmlFor="vendor_name" className="text-base font-bold">{t('quotes.fields.vendorName')}</Label>
                 <Input
                   id="vendor_name"
                   name="vendor_name"
@@ -523,12 +567,12 @@ export default function QuotesComparisonPageMobileFirst() {
                   onChange={handleChange}
                   required
                   className="h-14 text-lg"
-                  placeholder="לדוגמה: DJ מוטי כהן"
+                  placeholder={t('quotes.placeholders.vendorName')}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="category" className="text-base font-bold">קטגוריה *</Label>
+                <Label htmlFor="category" className="text-base font-bold">{t('quotes.fields.category')}</Label>
                 <Select
                   value={formData.category}
                   onValueChange={(v) => handleSelectChange('category', v)}
@@ -547,7 +591,7 @@ export default function QuotesComparisonPageMobileFirst() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="price_total" className="text-base font-bold">מחיר כולל (₪) *</Label>
+                <Label htmlFor="price_total" className="text-base font-bold">{t('quotes.fields.priceTotal')}</Label>
                 <Input
                   id="price_total"
                   name="price_total"
@@ -562,7 +606,7 @@ export default function QuotesComparisonPageMobileFirst() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="vendor_phone" className="text-base font-bold">טלפון</Label>
+                <Label htmlFor="vendor_phone" className="text-base font-bold">{t('quotes.fields.phone')}</Label>
                 <Input
                   id="vendor_phone"
                   name="vendor_phone"
@@ -576,25 +620,25 @@ export default function QuotesComparisonPageMobileFirst() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="services_included" className="text-base font-bold">שירותים כלולים</Label>
+                <Label htmlFor="services_included" className="text-base font-bold">{t('quotes.fields.services')}</Label>
                 <Textarea
                   id="services_included"
                   name="services_included"
                   value={formData.services_included}
                   onChange={handleChange}
                   className="min-h-[80px] text-base"
-                  placeholder="מערכת הגברה, תאורה, 5 שעות ניגון (הפרד בפסיקים)"
+                  placeholder={t('quotes.placeholders.services')}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="rating" className="text-base font-bold">דירוג (1-5)</Label>
+                <Label htmlFor="rating" className="text-base font-bold">{t('quotes.fields.rating')}</Label>
                 <Select
                   value={formData.rating}
                   onValueChange={(v) => handleSelectChange('rating', v)}
                 >
                   <SelectTrigger className="h-14 text-lg">
-                    <SelectValue placeholder="בחר דירוג" />
+                    <SelectValue placeholder={t('quotes.placeholders.rating')} />
                   </SelectTrigger>
                   <SelectContent>
                     {[1, 2, 3, 4, 5].map(n => (
@@ -614,7 +658,7 @@ export default function QuotesComparisonPageMobileFirst() {
                   disabled={isSubmitting}
                   className="w-full h-14 text-lg font-bold bg-gradient-to-r from-purple-600 to-pink-600 sm:w-auto sm:h-auto sm:text-base"
                 >
-                  {isSubmitting ? 'שומר...' : editingQuote ? 'עדכן' : 'הוסף הצעה'}
+                  {isSubmitting ? t('form.saving') : editingQuote ? t('quotes.dialog.update') : t('quotes.dialog.add')}
                 </Button>
               </DialogFooter>
             </div>
@@ -626,9 +670,9 @@ export default function QuotesComparisonPageMobileFirst() {
       <Dialog open={showQRDialog} onOpenChange={setShowQRDialog}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>שתף עם קוד QR</DialogTitle>
+            <DialogTitle>{t('quotes.qr.title')}</DialogTitle>
             <DialogDescription>
-              סרוק את הקוד כדי לפתוח את דף ההשוואה
+              {t('quotes.qr.description')}
             </DialogDescription>
           </DialogHeader>
           <div className="flex justify-center p-6">

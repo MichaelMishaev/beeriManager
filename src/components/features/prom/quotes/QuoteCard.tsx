@@ -2,6 +2,7 @@
 
 import React from 'react'
 import { Star, Phone, Edit2, Trash2 } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { cn } from '@/lib/utils'
 
 interface Quote {
@@ -55,6 +56,7 @@ export const QuoteCard = React.memo(function QuoteCard({
   availabilityLabel,
   availabilityColor
 }: QuoteCardProps) {
+  const t = useTranslations('admin.prom.quotes.card')
   return (
     <article
       onClick={onTap}
@@ -76,13 +78,13 @@ export const QuoteCard = React.memo(function QuoteCard({
           </p>
         </div>
 
-        <div className="text-left mr-3 flex-shrink-0">
+        <div className="text-end ms-3 flex-shrink-0">
           <div className="text-2xl font-bold text-purple-600">
             ₪{quote.price_total.toLocaleString()}
           </div>
           {quote.price_per_student && (
             <div className="text-sm text-gray-500">
-              ₪{quote.price_per_student} לתלמיד
+              {t('perStudent', { amount: `₪${quote.price_per_student}` })}
             </div>
           )}
         </div>
@@ -93,17 +95,17 @@ export const QuoteCard = React.memo(function QuoteCard({
         <div className="flex gap-2 mb-3 flex-wrap">
           {isCheapest && (
             <span className="inline-flex items-center gap-1 bg-green-100 text-green-800 text-sm font-bold px-3 py-1 rounded-full">
-              🟢 הזול ביותר
+              {t('cheapest')}
             </span>
           )}
           {isHighestRated && (
             <span className="inline-flex items-center gap-1 bg-yellow-100 text-yellow-800 text-sm font-bold px-3 py-1 rounded-full">
-              ⭐ דירוג גבוה
+              {t('highestRated')}
             </span>
           )}
           {isBestValue && (
             <span className="inline-flex items-center gap-1 bg-blue-100 text-blue-800 text-sm font-bold px-3 py-1 rounded-full">
-              💎 תמורה לכסף
+              {t('bestValue')}
             </span>
           )}
         </div>
@@ -155,10 +157,10 @@ export const QuoteCard = React.memo(function QuoteCard({
               active:scale-95 transition-transform
               touch-manipulation
             "
-            aria-label={`התקשר ל-${quote.vendor_name}`}
+            aria-label={t('callAria', { name: quote.vendor_name })}
           >
             <Phone className="h-5 w-5" />
-            חייג
+            {t('call')}
           </a>
         )}
 
@@ -174,7 +176,7 @@ export const QuoteCard = React.memo(function QuoteCard({
             touch-manipulation
             flex items-center justify-center
           "
-          aria-label={`ערוך ${quote.vendor_name}`}
+          aria-label={t('editAria', { name: quote.vendor_name })}
         >
           <Edit2 className="h-5 w-5" />
         </button>
@@ -191,7 +193,7 @@ export const QuoteCard = React.memo(function QuoteCard({
             touch-manipulation
             flex items-center justify-center
           "
-          aria-label={`מחק ${quote.vendor_name}`}
+          aria-label={t('deleteAria', { name: quote.vendor_name })}
         >
           <Trash2 className="h-5 w-5 text-red-600" />
         </button>
@@ -199,7 +201,7 @@ export const QuoteCard = React.memo(function QuoteCard({
 
       {/* Tap indicator */}
       <div className="text-center mt-2 text-xs text-gray-400">
-        הקש לפרטים מלאים
+        {t('tapForDetails')}
       </div>
     </article>
   )

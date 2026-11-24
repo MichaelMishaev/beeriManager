@@ -1,26 +1,19 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import Link from 'next/link'
-import { 
-  GraduationCap, 
-  ArrowRight,
-  Calendar,
-  Users,
-  DollarSign,
-  Save,
-  MapPin
-} from 'lucide-react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { useTranslations } from 'next-intl'
+import { Users, DollarSign, Save, MapPin } from 'lucide-react'
+import { Link, useRouter } from '@/i18n/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { AdminFormSection, AdminPageHeader } from '@/components/features/admin'
 import { toast } from 'sonner'
 
 export default function NewPromPage() {
+  const t = useTranslations('admin.prom')
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [formData, setFormData] = useState({
@@ -48,9 +41,9 @@ export default function NewPromPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!formData.title.trim()) {
-      toast.error('נא להזין כותרת')
+      toast.error(t('form.toast.titleRequired'))
       return
     }
 
@@ -66,265 +59,223 @@ export default function NewPromPage() {
       const data = await response.json()
 
       if (data.success) {
-        toast.success('המסיבה נוצרה בהצלחה')
+        toast.success(t('form.toast.created'))
         router.push(`/admin/prom/${data.data.id}`)
       } else {
-        toast.error(data.error || 'שגיאה ביצירת המסיבה')
+        toast.error(data.error || t('form.toast.createError'))
       }
     } catch (error) {
       console.error('Error creating prom event:', error)
-      toast.error('שגיאה ביצירת המסיבה')
+      toast.error(t('form.toast.createError'))
     } finally {
       setIsSubmitting(false)
     }
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" asChild>
-          <Link href="/admin/prom">
-            <ArrowRight className="h-5 w-5" />
-          </Link>
-        </Button>
-        <div className="flex items-center gap-3">
-          <div className="bg-gradient-to-br from-pink-500 to-purple-600 p-3 rounded-xl shadow-lg">
-            <GraduationCap className="h-6 w-6 text-white" />
+    <div>
+      <AdminPageHeader
+        title={t('form.title')}
+        subtitle={t('form.subtitle')}
+        backHref="/admin/prom"
+      />
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Basic Info */}
+        <AdminFormSection title={t('form.sections.basic')} description={t('form.sections.basicDescription')}>
+          <div className="space-y-2">
+            <Label htmlFor="title">{t('form.fields.title')}</Label>
+            <Input
+              id="title"
+              name="title"
+              value={formData.title}
+              onChange={handleChange}
+              placeholder={t('form.placeholders.title')}
+              required
+            />
           </div>
-          <div>
-            <h1 className="text-2xl font-bold">מסיבת סיום חדשה</h1>
-            <p className="text-muted-foreground">יצירת תכנון מסיבת סיום חדשה</p>
+
+          <div className="space-y-2">
+            <Label htmlFor="title_ru">{t('form.fields.titleRu')}</Label>
+            <Input
+              id="title_ru"
+              name="title_ru"
+              value={formData.title_ru}
+              onChange={handleChange}
+              placeholder={t('form.placeholders.titleRu')}
+              dir="ltr"
+            />
           </div>
-        </div>
-      </div>
 
-      <form onSubmit={handleSubmit}>
-        <div className="grid gap-6 md:grid-cols-2">
-          {/* Basic Info */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <GraduationCap className="h-5 w-5 text-pink-600" />
-                פרטי המסיבה
-              </CardTitle>
-              <CardDescription>מידע בסיסי על מסיבת הסיום</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="title">כותרת (עברית) *</Label>
+          <div className="space-y-2">
+            <Label htmlFor="description">{t('form.fields.description')}</Label>
+            <Textarea
+              id="description"
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
+              placeholder={t('form.placeholders.description')}
+              rows={3}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="description_ru">{t('form.fields.descriptionRu')}</Label>
+            <Textarea
+              id="description_ru"
+              name="description_ru"
+              value={formData.description_ru}
+              onChange={handleChange}
+              placeholder={t('form.placeholders.descriptionRu')}
+              rows={3}
+              dir="ltr"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="status">{t('form.fields.status')}</Label>
+            <Select
+              value={formData.status}
+              onValueChange={(value) => handleSelectChange('status', value)}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="planning">{t('status.planning')}</SelectItem>
+                <SelectItem value="voting">{t('status.voting')}</SelectItem>
+                <SelectItem value="confirmed">{t('status.confirmed')}</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </AdminFormSection>
+
+        {/* Date & Location */}
+        <AdminFormSection title={t('form.sections.dateLocation')} description={t('form.sections.dateLocationDescription')}>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="event_date">{t('form.fields.date')}</Label>
+              <Input
+                id="event_date"
+                name="event_date"
+                type="date"
+                value={formData.event_date}
+                onChange={handleChange}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="event_time">{t('form.fields.time')}</Label>
+              <Input
+                id="event_time"
+                name="event_time"
+                type="time"
+                value={formData.event_time}
+                onChange={handleChange}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="venue_name">{t('form.fields.venueName')}</Label>
+            <div className="relative">
+              <MapPin className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+              <Input
+                id="venue_name"
+                name="venue_name"
+                value={formData.venue_name}
+                onChange={handleChange}
+                placeholder={t('form.placeholders.venueName')}
+                className="ps-10"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="venue_address">{t('form.fields.venueAddress')}</Label>
+            <Input
+              id="venue_address"
+              name="venue_address"
+              value={formData.venue_address}
+              onChange={handleChange}
+              placeholder={t('form.placeholders.venueAddress')}
+            />
+          </div>
+        </AdminFormSection>
+
+        {/* Budget & Students */}
+        <AdminFormSection title={t('form.sections.budget')} description={t('form.sections.budgetDescription')}>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="total_budget">{t('form.fields.totalBudget')}</Label>
+              <div className="relative">
+                <DollarSign className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
                 <Input
-                  id="title"
-                  name="title"
-                  value={formData.title}
+                  id="total_budget"
+                  name="total_budget"
+                  type="number"
+                  min="0"
+                  step="100"
+                  value={formData.total_budget}
                   onChange={handleChange}
-                  placeholder="מסיבת סיום כיתה ו' תשפ״ה"
-                  required
+                  placeholder="15000"
+                  className="ps-10"
                 />
               </div>
+            </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="title_ru">כותרת (רוסית)</Label>
+            <div className="space-y-2">
+              <Label htmlFor="student_count">{t('form.fields.studentCount')}</Label>
+              <div className="relative">
+                <Users className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
                 <Input
-                  id="title_ru"
-                  name="title_ru"
-                  value={formData.title_ru}
+                  id="student_count"
+                  name="student_count"
+                  type="number"
+                  min="0"
+                  value={formData.student_count}
                   onChange={handleChange}
-                  placeholder="Выпускной вечер 6 класса"
-                  dir="ltr"
+                  placeholder="60"
+                  className="ps-10"
                 />
               </div>
+            </div>
+          </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="description">תיאור (עברית)</Label>
-                <Textarea
-                  id="description"
-                  name="description"
-                  value={formData.description}
-                  onChange={handleChange}
-                  placeholder="תיאור המסיבה..."
-                  rows={3}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="description_ru">תיאור (רוסית)</Label>
-                <Textarea
-                  id="description_ru"
-                  name="description_ru"
-                  value={formData.description_ru}
-                  onChange={handleChange}
-                  placeholder="Описание..."
-                  rows={3}
-                  dir="ltr"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="status">סטטוס</Label>
-                <Select
-                  value={formData.status}
-                  onValueChange={(value) => handleSelectChange('status', value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="planning">בתכנון</SelectItem>
-                    <SelectItem value="voting">בהצבעה</SelectItem>
-                    <SelectItem value="confirmed">מאושר</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Date & Location */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Calendar className="h-5 w-5 text-blue-600" />
-                תאריך ומיקום
-              </CardTitle>
-              <CardDescription>מתי ואיפה תתקיים המסיבה</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="event_date">תאריך</Label>
-                  <Input
-                    id="event_date"
-                    name="event_date"
-                    type="date"
-                    value={formData.event_date}
-                    onChange={handleChange}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="event_time">שעה</Label>
-                  <Input
-                    id="event_time"
-                    name="event_time"
-                    type="time"
-                    value={formData.event_time}
-                    onChange={handleChange}
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="venue_name">שם המקום</Label>
-                <div className="relative">
-                  <MapPin className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="venue_name"
-                    name="venue_name"
-                    value={formData.venue_name}
-                    onChange={handleChange}
-                    placeholder="שם האולם / המקום"
-                    className="pr-10"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="venue_address">כתובת</Label>
-                <Input
-                  id="venue_address"
-                  name="venue_address"
-                  value={formData.venue_address}
-                  onChange={handleChange}
-                  placeholder="כתובת מלאה"
-                />
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Budget & Students */}
-          <Card className="md:col-span-2">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <DollarSign className="h-5 w-5 text-green-600" />
-                תקציב ותלמידים
-              </CardTitle>
-              <CardDescription>הגדרות תקציב ומספר משתתפים</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-4 md:grid-cols-3">
-                <div className="space-y-2">
-                  <Label htmlFor="total_budget">תקציב כולל (₪)</Label>
-                  <div className="relative">
-                    <DollarSign className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="total_budget"
-                      name="total_budget"
-                      type="number"
-                      min="0"
-                      step="100"
-                      value={formData.total_budget}
-                      onChange={handleChange}
-                      placeholder="15000"
-                      className="pr-10"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="student_count">מספר תלמידים</Label>
-                  <div className="relative">
-                    <Users className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="student_count"
-                      name="student_count"
-                      type="number"
-                      min="0"
-                      value={formData.student_count}
-                      onChange={handleChange}
-                      placeholder="60"
-                      className="pr-10"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>עלות לתלמיד (משוער)</Label>
-                  <div className="h-10 flex items-center px-3 bg-muted rounded-md text-muted-foreground">
-                    {formData.total_budget && formData.student_count && parseInt(formData.student_count) > 0
-                      ? `₪${Math.round(parseInt(formData.total_budget) / parseInt(formData.student_count))}`
-                      : '—'}
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+          <div className="space-y-2">
+            <Label>{t('form.fields.costPerStudent')}</Label>
+            <div className="flex h-10 items-center rounded-md bg-muted px-3 text-muted-foreground">
+              {formData.total_budget && formData.student_count && parseInt(formData.student_count) > 0
+                ? `₪${Math.round(parseInt(formData.total_budget) / parseInt(formData.student_count))}`
+                : '—'}
+            </div>
+          </div>
+        </AdminFormSection>
 
         {/* Submit */}
-        <div className="flex justify-end gap-3 mt-6">
-          <Button variant="outline" asChild>
-            <Link href="/admin/prom">ביטול</Link>
-          </Button>
-          <Button 
-            type="submit" 
+        <div className="flex flex-col gap-3">
+          <Button
+            type="submit"
             disabled={isSubmitting}
-            className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700"
+            className="h-12 w-full bg-[#0D98BA] text-white hover:bg-[#0b86a3]"
           >
             {isSubmitting ? (
               <>
-                <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin ml-2" />
-                שומר...
+                <div className="me-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                {t('form.saving')}
               </>
             ) : (
               <>
-                <Save className="h-4 w-4 ml-2" />
-                צור מסיבה
+                <Save className="me-2 h-4 w-4" aria-hidden="true" />
+                {t('form.submit')}
               </>
             )}
+          </Button>
+          <Button variant="outline" asChild className="h-12 w-full">
+            <Link href="/admin/prom">{t('form.cancel')}</Link>
           </Button>
         </div>
       </form>
     </div>
   )
 }
-

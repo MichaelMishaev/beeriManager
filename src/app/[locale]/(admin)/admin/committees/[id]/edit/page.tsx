@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Save, Plus, X, Loader2 } from 'lucide-react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { useTranslations } from 'next-intl'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -12,26 +12,42 @@ import { toast } from 'sonner'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-
-const committeeSchema = z.object({
-  name: z.string().min(2, 'שם הוועדה חייב להכיל לפחות 2 תווים'),
-  description: z.string().optional(),
-  color: z.string().regex(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/, 'צבע חייב להיות בפורמט תקין'),
-  responsibilities: z.array(z.string()).min(1, 'חייב להיות לפחות תחום אחריות אחד'),
-  members: z.array(z.string()).min(1, 'חייב להיות לפחות חבר וועדה אחד')
-})
-
-type CommitteeFormData = z.infer<typeof committeeSchema>
+import { AdminFormSection, AdminPageHeader } from '@/components/features/admin'
 
 const defaultColors = [
-  '#FF8200', '#0D98BA', '#003153', '#FFBA00', '#87CEEB',
-  '#10B981', '#F43F5E', '#8B5CF6', '#EF4444', '#3B82F6'
+  '#FF8200', // UT Orange
+  '#0D98BA', // Blue-Green
+  '#003153', // Prussian Blue
+  '#FFBA00', // Selective Yellow
+  '#87CEEB', // Sky Blue
+  '#10B981', // Emerald
+  '#F43F5E', // Rose
+  '#8B5CF6', // Violet
+  '#EF4444', // Red
+  '#3B82F6', // Blue
 ]
 
 export default function EditCommitteePage({ params }: { params: { id: string } }) {
+  const t = useTranslations('admin.org.committees.form')
   const router = useRouter()
+  // Keep the load effect from re-running (and overwriting edits) if `t` changes identity
+  const tRef = useRef(t)
+  tRef.current = t
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+
+  const committeeSchema = useMemo(
+    () =>
+      z.object({
+        name: z.string().min(2, t('validation.nameMin')),
+        description: z.string().optional(),
+        color: z.string().regex(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/, t('validation.colorInvalid')),
+        responsibilities: z.array(z.string()).min(1, t('validation.responsibilitiesMin')),
+        members: z.array(z.string()).min(1, t('validation.membersMin')),
+      }),
+    [t]
+  )
+  type CommitteeFormData = z.infer<typeof committeeSchema>
 
   const [responsibilityInput, setResponsibilityInput] = useState('')
   const [responsibilities, setResponsibilities] = useState<string[]>([])
@@ -44,14 +60,14 @@ export default function EditCommitteePage({ params }: { params: { id: string } }
     handleSubmit,
     watch,
     setValue,
-    formState: { errors }
+    formState: { errors },
   } = useForm<CommitteeFormData>({
     resolver: zodResolver(committeeSchema),
     defaultValues: {
       color: '#0D98BA',
       responsibilities: [],
-      members: []
-    }
+      members: [],
+    },
   })
 
   const selectedColor = watch('color')
@@ -72,12 +88,12 @@ export default function EditCommitteePage({ params }: { params: { id: string } }
           setMembers(committee.members || [])
           setValue('members', committee.members || [])
         } else {
-          toast.error('שגיאה בטעינת הוועדה')
+          toast.error(tRef.current('toast.loadError'))
           router.push('/admin/committees')
         }
       } catch (error) {
         console.error('Error loading committee:', error)
-        toast.error('שגיאה בטעינת הוועדה')
+        toast.error(tRef.current('toast.loadError'))
         router.push('/admin/committees')
       } finally {
         setIsLoading(false)
@@ -125,28 +141,28 @@ export default function EditCommitteePage({ params }: { params: { id: string } }
         id: params.id,
         ...data,
         responsibilities,
-        members
+        members,
       }
 
       const response = await fetch('/api/committees', {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify(committeeData)
+        body: JSON.stringify(committeeData),
       })
 
       const result = await response.json()
 
       if (result.success) {
-        toast.success('הוועדה עודכנה בהצלחה!')
+        toast.success(t('toast.updated'))
         router.push('/admin/committees')
       } else {
-        toast.error(result.error || 'שגיאה בעדכון הוועדה')
+        toast.error(result.error || t('toast.updateError'))
       }
     } catch (error) {
       console.error('Error updating committee:', error)
-      toast.error('שגיאה בעדכון הוועדה')
+      toast.error(t('toast.updateError'))
     } finally {
       setIsSubmitting(false)
     }
@@ -154,213 +170,212 @@ export default function EditCommitteePage({ params }: { params: { id: string } }
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin" />
+      <div>
+        <AdminPageHeader title={t('editTitle')} backHref="/admin/committees" />
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="h-8 w-8 animate-spin text-[#003153]" aria-label={t('loading')} />
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">עריכת וועדה</h1>
-        <p className="text-muted-foreground mt-2">
-          עדכון פרטי הוועדה, חברים ותחומי אחריות
-        </p>
-      </div>
+    <div>
+      <AdminPageHeader
+        title={t('editTitle')}
+        subtitle={t('editSubtitle')}
+        backHref="/admin/committees"
+      />
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>פרטי הוועדה</CardTitle>
-            <CardDescription>מידע בסיסי על הוועדה</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="name">שם הוועדה *</Label>
-              <Input
-                id="name"
-                {...register('name')}
-                placeholder="לדוגמה: ועדת חינוך"
-                className={errors.name ? 'border-red-500' : ''}
-              />
-              {errors.name && (
-                <p className="text-sm text-red-500 mt-1">{errors.name.message}</p>
-              )}
-            </div>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        {/* Basic Information */}
+        <AdminFormSection title={t('detailsTitle')} description={t('detailsDescription')}>
+          <div>
+            <Label htmlFor="name">{t('nameLabel')}</Label>
+            <Input
+              id="name"
+              {...register('name')}
+              placeholder={t('namePlaceholder')}
+              className={errors.name ? 'border-red-500' : ''}
+            />
+            {errors.name && <p className="text-sm text-red-500 mt-1">{errors.name.message}</p>}
+          </div>
 
-            <div>
-              <Label htmlFor="description">תיאור הוועדה</Label>
-              <Textarea
-                id="description"
-                {...register('description')}
-                placeholder="תיאור קצר של תפקיד ומטרות הוועדה..."
-                rows={3}
-              />
-            </div>
+          <div>
+            <Label htmlFor="description">{t('descriptionLabel')}</Label>
+            <Textarea
+              id="description"
+              {...register('description')}
+              placeholder={t('descriptionPlaceholder')}
+              rows={3}
+            />
+          </div>
 
-            <div>
-              <Label htmlFor="color">צבע זיהוי *</Label>
-              <div className="space-y-3">
-                <div className="flex gap-2">
-                  <Input
-                    id="color"
-                    type="color"
-                    {...register('color')}
-                    className="w-20 h-10 cursor-pointer"
-                  />
-                  <Input
-                    type="text"
-                    {...register('color')}
-                    placeholder="#0D98BA"
-                    className="flex-1"
-                  />
-                </div>
-
-                <div className="flex flex-wrap gap-2">
-                  <span className="text-sm text-muted-foreground mr-2">צבעים מהירים:</span>
-                  {defaultColors.map((color) => (
-                    <button
-                      key={color}
-                      type="button"
-                      className="w-8 h-8 rounded-md border-2 hover:scale-110 transition-transform"
-                      style={{
-                        backgroundColor: color,
-                        borderColor: selectedColor === color ? '#000' : 'transparent'
-                      }}
-                      onClick={() => setValue('color', color)}
-                      title={color}
-                    />
-                  ))}
-                </div>
+          <div>
+            <Label htmlFor="color">{t('colorLabel')}</Label>
+            <div className="space-y-3">
+              <div className="flex gap-2">
+                <Input
+                  id="color"
+                  type="color"
+                  {...register('color')}
+                  className="w-20 h-11 cursor-pointer"
+                />
+                <Input
+                  type="text"
+                  {...register('color')}
+                  placeholder="#0D98BA"
+                  className="flex-1"
+                  dir="ltr"
+                />
               </div>
-              {errors.color && (
-                <p className="text-sm text-red-500 mt-1">{errors.color.message}</p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>חברי וועדה *</CardTitle>
-            <CardDescription>רשימת החברים בוועדה</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex gap-2">
-              <Input
-                placeholder="שם חבר וועדה"
-                value={memberInput}
-                onChange={(e) => setMemberInput(e.target.value)}
-                onKeyPress={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault()
-                    addMember()
-                  }
-                }}
-              />
-              <Button type="button" onClick={addMember} variant="outline">
-                <Plus className="h-4 w-4" />
-                הוסף
-              </Button>
-            </div>
-
-            {members.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {members.map((member, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center gap-1 px-3 py-1 bg-secondary rounded-lg"
-                  >
-                    <span className="text-sm">{member}</span>
-                    <button
-                      type="button"
-                      onClick={() => removeMember(index)}
-                      className="hover:text-destructive"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {errors.members && (
-              <p className="text-sm text-red-500">{errors.members.message}</p>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>תחומי אחריות *</CardTitle>
-            <CardDescription>מילות מפתח לתחומי האחריות של הוועדה</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex gap-2">
-              <Input
-                placeholder="תחום אחריות"
-                value={responsibilityInput}
-                onChange={(e) => setResponsibilityInput(e.target.value)}
-                onKeyPress={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault()
-                    addResponsibility()
-                  }
-                }}
-              />
-              <Button type="button" onClick={addResponsibility} variant="outline">
-                <Plus className="h-4 w-4" />
-                הוסף
-              </Button>
-            </div>
-
-            {responsibilities.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {responsibilities.map((resp, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center gap-1 px-3 py-1 rounded-lg"
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-sm text-muted-foreground me-2">{t('quickColors')}</span>
+                {defaultColors.map((color) => (
+                  <button
+                    key={color}
+                    type="button"
+                    className="h-11 w-11 rounded-lg border-2 transition-transform hover:scale-105"
                     style={{
-                      backgroundColor: selectedColor + '20',
-                      borderColor: selectedColor,
-                      borderWidth: '1px'
+                      backgroundColor: color,
+                      borderColor: selectedColor === color ? '#000' : 'transparent',
                     }}
-                  >
-                    <span className="text-sm" style={{ color: selectedColor }}>
-                      {resp}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => removeResponsibility(index)}
-                      className="hover:text-destructive"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </div>
+                    onClick={() => setValue('color', color)}
+                    title={color}
+                    aria-label={color}
+                  />
                 ))}
               </div>
-            )}
+            </div>
+            {errors.color && <p className="text-sm text-red-500 mt-1">{errors.color.message}</p>}
+          </div>
+        </AdminFormSection>
 
-            {errors.responsibilities && (
-              <p className="text-sm text-red-500">{errors.responsibilities.message}</p>
-            )}
-          </CardContent>
-        </Card>
+        {/* Members */}
+        <AdminFormSection title={t('membersTitle')} description={t('membersDescription')}>
+          <div className="flex gap-2">
+            <Input
+              placeholder={t('memberPlaceholder')}
+              value={memberInput}
+              onChange={(e) => setMemberInput(e.target.value)}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault()
+                  addMember()
+                }
+              }}
+            />
+            <Button type="button" onClick={addMember} variant="outline" className="min-h-[44px]">
+              <Plus className="h-4 w-4 me-1" />
+              {t('add')}
+            </Button>
+          </div>
 
-        <div className="flex gap-4">
-          <Button type="submit" disabled={isSubmitting} className="flex-1">
+          {members.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {members.map((member, index) => (
+                <div
+                  key={index}
+                  className="flex items-center gap-1 ps-3 pe-1 py-1 bg-secondary rounded-lg"
+                >
+                  <span className="text-sm">{member}</span>
+                  <button
+                    type="button"
+                    onClick={() => removeMember(index)}
+                    aria-label={t('remove')}
+                    className="flex h-8 w-8 items-center justify-center hover:text-destructive"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {errors.members && <p className="text-sm text-red-500">{errors.members.message}</p>}
+        </AdminFormSection>
+
+        {/* Responsibilities */}
+        <AdminFormSection
+          title={t('responsibilitiesTitle')}
+          description={t('responsibilitiesDescription')}
+        >
+          <div className="flex gap-2">
+            <Input
+              placeholder={t('responsibilityPlaceholderEdit')}
+              value={responsibilityInput}
+              onChange={(e) => setResponsibilityInput(e.target.value)}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault()
+                  addResponsibility()
+                }
+              }}
+            />
+            <Button
+              type="button"
+              onClick={addResponsibility}
+              variant="outline"
+              className="min-h-[44px]"
+            >
+              <Plus className="h-4 w-4 me-1" />
+              {t('add')}
+            </Button>
+          </div>
+
+          {responsibilities.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {responsibilities.map((resp, index) => (
+                <div
+                  key={index}
+                  className="flex items-center gap-1 ps-3 pe-1 py-1 rounded-lg"
+                  style={{
+                    backgroundColor: selectedColor + '20',
+                    borderColor: selectedColor,
+                    borderWidth: '1px',
+                  }}
+                >
+                  <span className="text-sm" style={{ color: selectedColor }}>
+                    {resp}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => removeResponsibility(index)}
+                    aria-label={t('remove')}
+                    className="flex h-8 w-8 items-center justify-center hover:text-destructive"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {errors.responsibilities && (
+            <p className="text-sm text-red-500">{errors.responsibilities.message}</p>
+          )}
+        </AdminFormSection>
+
+        {/* Actions */}
+        <div className="flex flex-col gap-3">
+          <Button type="submit" disabled={isSubmitting} className="min-h-[44px] w-full">
             {isSubmitting ? (
-              <>טוען...</>
+              <>{t('saving')}</>
             ) : (
               <>
-                <Save className="h-4 w-4 ml-2" />
-                שמור שינויים
+                <Save className="h-4 w-4 me-2" />
+                {t('saveEdit')}
               </>
             )}
           </Button>
-          <Button type="button" variant="outline" onClick={() => router.back()}>
-            ביטול
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => router.back()}
+            className="min-h-[44px] w-full"
+          >
+            {t('cancel')}
           </Button>
         </div>
       </form>

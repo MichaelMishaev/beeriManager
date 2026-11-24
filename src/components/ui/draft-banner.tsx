@@ -25,8 +25,8 @@ export function DraftBanner({ timestamp, onRestore, onDiscard, onDismiss }: Draf
   return (
     <Alert className="border-blue-200 bg-blue-50 relative">
       <AlertCircle className="h-5 w-5 text-blue-600" />
-      <AlertDescription className="flex items-center justify-between gap-4">
-        <div className="flex-1">
+      <AlertDescription className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+        <div className="min-w-0 flex-1">
           <p className="text-sm font-medium text-blue-900">
             קיימת טיוטה שמורה מ{formatTimestamp(timestamp)}
           </p>
@@ -34,7 +34,7 @@ export function DraftBanner({ timestamp, onRestore, onDiscard, onDismiss }: Draf
             לשחזר את הטיוטה או למחוק אותה?
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Button
             type="button"
             size="sm"

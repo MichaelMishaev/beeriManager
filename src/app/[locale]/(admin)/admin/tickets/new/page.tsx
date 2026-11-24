@@ -1,18 +1,19 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
+import { useRouter } from '@/i18n/navigation'
 import { TicketForm } from '@/components/features/tickets/TicketForm'
+import type { TicketFormData } from '@/components/features/tickets/TicketForm'
+import { AdminPageHeader } from '@/components/features/admin'
 import { toast } from 'sonner'
-import { ArrowRight } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import Link from 'next/link'
 
 export default function NewTicketPage() {
+  const t = useTranslations('admin.tickets')
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  async function handleSubmit(data: any) {
+  async function handleSubmit(data: TicketFormData) {
     setIsSubmitting(true)
 
     try {
@@ -25,35 +26,27 @@ export default function NewTicketPage() {
       const result = await response.json()
 
       if (result.success) {
-        toast.success('הכרטיס נוצר בהצלחה!')
+        toast.success(t('new.success'))
         router.push('/admin/tickets')
         router.refresh()
       } else {
-        toast.error(result.error || 'שגיאה ביצירת הכרטיס')
+        toast.error(result.error || t('new.error'))
         setIsSubmitting(false)
       }
     } catch (error) {
       console.error('Error creating ticket:', error)
-      toast.error('שגיאה ביצירת הכרטיס')
+      toast.error(t('new.error'))
       setIsSubmitting(false)
     }
   }
 
   return (
-    <div className="container mx-auto px-4 py-6 max-w-4xl">
-      <div className="mb-6">
-        <Button variant="ghost" asChild size="sm" className="mb-4">
-          <Link href="/admin/tickets">
-            <ArrowRight className="h-4 w-4 ml-2" />
-            חזרה לרשימת כרטיסים
-          </Link>
-        </Button>
-        <h1 className="text-2xl md:text-3xl font-bold">כרטיס חדש</h1>
-        <p className="text-muted-foreground mt-2">
-          צור כרטיס חדש למשחקי ספורט, הצגות או אירועים
-        </p>
-      </div>
-
+    <div>
+      <AdminPageHeader
+        title={t('new.title')}
+        subtitle={t('new.subtitle')}
+        backHref="/admin/tickets"
+      />
       <TicketForm onSubmit={handleSubmit} isSubmitting={isSubmitting} />
     </div>
   )

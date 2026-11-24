@@ -8,18 +8,18 @@ test.describe('Urgent Messages Admin', () => {
     await authHelper.loginAsAdmin();
   });
 
-  test('should display urgent messages admin card on dashboard', async ({ page }) => {
+  test('should reach urgent messages admin from the hub via "more tools"', async ({ page }) => {
     await page.goto('/he/admin');
 
-    // Check that urgent messages card exists
-    const urgentCard = page.locator('text=הודעות דחופות').first();
-    await expect(urgentCard).toBeVisible();
+    // Urgent messages left the hub (redesign, Nov 2026): hub -> "more tools" -> urgent messages
+    await page.getByTestId('hub-row-more').click();
+    await expect(page).toHaveURL('/he/admin/more');
 
-    // Check description
-    await expect(page.locator('text=ניהול הודעות דחופות ותזכורות (כולל חולצה לבנה)')).toBeVisible();
+    const urgentRow = page.getByTestId('more-row-urgent');
+    await expect(urgentRow).toBeVisible();
 
     // Click to navigate to urgent messages admin
-    await page.locator('a[href="/he/admin/urgent"]').click();
+    await urgentRow.click();
     await expect(page).toHaveURL('/he/admin/urgent');
   });
 

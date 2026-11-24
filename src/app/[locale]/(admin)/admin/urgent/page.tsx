@@ -1,21 +1,36 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Bell, Plus, Trash2, Edit2, Save, X, Calendar, ShirtIcon as Tshirt } from 'lucide-react'
+import { useLocale, useTranslations } from 'next-intl'
+import { Bell, Plus, Trash2, Edit2, Save, X, Calendar, Info, ShirtIcon as Tshirt } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import {
+  AdminEmptyState,
+  AdminFormSection,
+  AdminPageHeader,
+  StatusPill,
+} from '@/components/features/admin'
+import { cn } from '@/lib/utils/cn'
 import { toast } from 'sonner'
 import type { UrgentMessage } from '@/types'
 import { logger } from '@/lib/logger'
 import { Textarea } from '@/components/ui/textarea'
 
 const messageTypes = [
-  { value: 'white_shirt', label: '👕 חולצה לבנה', color: 'bg-yellow-50 border-yellow-200 text-yellow-800' },
-  { value: 'urgent', label: '🚨 דחוף', color: 'bg-red-50 border-red-200 text-red-800' },
-  { value: 'info', label: 'ℹ️ מידע', color: 'bg-blue-50 border-blue-200 text-blue-800' },
-  { value: 'warning', label: '⚠️ אזהרה', color: 'bg-orange-50 border-orange-200 text-orange-800' },
+  { value: 'white_shirt', color: 'bg-yellow-50 border-yellow-200 text-yellow-800' },
+  { value: 'urgent', color: 'bg-red-50 border-red-200 text-red-800' },
+  { value: 'info', color: 'bg-blue-50 border-blue-200 text-blue-800' },
+  { value: 'warning', color: 'bg-orange-50 border-orange-200 text-orange-800' },
+] as const
+
+const quickDurations = [
+  { days: 1, key: 'day1' },
+  { days: 3, key: 'days3' },
+  { days: 7, key: 'week1' },
+  { days: 14, key: 'weeks2' },
+  { days: 30, key: 'month1' },
 ] as const
 
 export default function AdminUrgentMessagesPage() {
@@ -23,6 +38,10 @@ export default function AdminUrgentMessagesPage() {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
+  const t = useTranslations('admin.messaging.urgent')
+  const tc = useTranslations('admin.common')
+  const locale = useLocale()
+  const dateLocale = locale === 'ru' ? 'ru-RU' : 'he-IL'
 
   useEffect(() => {
     loadMessages()
@@ -47,7 +66,7 @@ export default function AdminUrgentMessagesPage() {
     } catch (error) {
       console.error('[LoadMessages] Error:', error)
       logger.error('Failed to load urgent messages', { error })
-      toast.error('שגיאה בטעינת הודעות דחופות')
+      toast.error(t('toast.loadError'))
     } finally {
       setIsLoading(false)
     }
@@ -78,7 +97,7 @@ export default function AdminUrgentMessagesPage() {
       console.log('[SaveMessages] Response data:', data)
 
       if (data.success) {
-        toast.success('הודעות דחופות נשמרו בהצלחה')
+        toast.success(t('toast.saveSuccess'))
         logger.success('Urgent messages saved', { count: messages.length })
         // Small delay to ensure DB consistency before reload
         await new Promise(resolve => setTimeout(resolve, 300))
@@ -90,7 +109,7 @@ export default function AdminUrgentMessagesPage() {
     } catch (error) {
       console.error('[SaveMessages] Error:', error)
       logger.error('Failed to save urgent messages', { error })
-      toast.error('שגיאה בשמירת הודעות דחופות')
+      toast.error(t('toast.saveError'))
     } finally {
       setIsSaving(false)
     }
@@ -139,10 +158,10 @@ export default function AdminUrgentMessagesPage() {
       updated_at: new Date().toISOString(),
     }
     setMessages([...messages, newMessage])
-    toast.success(`נוספה תזכורת לחולצה לבנה ל-${days} ימים`)
+    toast.success(t('toast.quickAdded', { days }))
   }
 
-  function updateMessage(id: string, field: keyof UrgentMessage, value: any) {
+  function updateMessage<K extends keyof UrgentMessage>(id: string, field: K, value: UrgentMessage[K]) {
     setMessages(messages.map(m =>
       m.id === id ? { ...m, [field]: value, updated_at: new Date().toISOString() } : m
     ))
@@ -150,7 +169,7 @@ export default function AdminUrgentMessagesPage() {
 
   async function deleteMessage(id: string) {
     console.log('[Delete] Starting delete for id:', id)
-    if (confirm('האם למחוק הודעה זו?')) {
+    if (confirm(t('deleteConfirm'))) {
       console.log('[Delete] User confirmed')
       // Save original messages for rollback
       const originalMessages = [...messages]
@@ -185,7 +204,7 @@ export default function AdminUrgentMessagesPage() {
         console.log('[Delete] Response data:', data)
 
         if (data.success) {
-          toast.success('ההודעה נמחקה')
+          toast.success(t('toast.deleteSuccess'))
           logger.success('Message deleted', { id })
           // Small delay to ensure DB consistency before reload
           await new Promise(resolve => setTimeout(resolve, 300))
@@ -199,7 +218,7 @@ export default function AdminUrgentMessagesPage() {
       } catch (error) {
         console.error('[Delete] ❌ Error:', error)
         logger.error('Failed to delete message', { error })
-        toast.error('שגיאה במחיקת ההודעה')
+        toast.error(t('toast.deleteError'))
         // Restore the message on error
         setMessages(originalMessages)
       } finally {
@@ -212,283 +231,247 @@ export default function AdminUrgentMessagesPage() {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center">טוען...</div>
-      </div>
+      <div className="py-8 text-center text-gray-500">{tc('loading')}</div>
     )
   }
 
+  const fieldLabel = 'mb-1 block text-sm font-medium text-[#003153]'
+  const inputClass = 'h-11'
+
   return (
-    <div className="container mx-auto px-4 py-8 max-w-5xl">
-      {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold flex items-center gap-2">
-            <Bell className="h-8 w-8" />
-            ניהול הודעות דחופות
-          </h1>
-        </div>
-        <div className="flex flex-col sm:flex-row gap-3">
-          <Button
-            onClick={addMessage}
-            className="gap-2 w-full sm:w-auto"
-          >
-            <Plus className="h-5 w-5" />
-            הוסף הודעה
-          </Button>
-          <Button
-            onClick={saveMessages}
-            disabled={isSaving}
-            variant="default"
-            className="gap-2 w-full sm:w-auto"
-          >
-            <Save className="h-5 w-5" />
-            {isSaving ? 'שומר...' : 'שמור שינויים'}
-          </Button>
-        </div>
+    <div className="space-y-4">
+      <AdminPageHeader title={t('title')} backHref="/admin/more" />
+
+      <div className="flex flex-col gap-3 sm:flex-row">
+        <Button onClick={addMessage} className="min-h-[44px] w-full gap-2 sm:w-auto">
+          <Plus className="h-5 w-5" />
+          {t('add')}
+        </Button>
+        <Button
+          onClick={saveMessages}
+          disabled={isSaving}
+          variant="default"
+          className="min-h-[44px] w-full gap-2 sm:w-auto"
+        >
+          <Save className="h-5 w-5" />
+          {isSaving ? t('saving') : t('save')}
+        </Button>
       </div>
 
       {/* Quick White Shirt Buttons */}
-      <Card className="mb-8 bg-yellow-50 border-yellow-200">
-        <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2">
-            <Tshirt className="h-5 w-5" />
-            תזכורת מהירה לחולצה לבנה
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5">
+      <section className="rounded-2xl border border-yellow-200 bg-yellow-50 p-4">
+        <h2 className="mb-3 flex items-center gap-2 text-[15px] font-bold text-[#003153]">
+          <Tshirt className="h-5 w-5" />
+          {t('quickTitle')}
+        </h2>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5">
+          {quickDurations.map((q) => (
             <Button
-              onClick={() => addWhiteShirtAlert(1)}
+              key={q.key}
+              onClick={() => addWhiteShirtAlert(q.days)}
               variant="outline"
-              className="w-full"
+              className={cn('min-h-[44px] w-full bg-white', q.key === 'month1' && 'col-span-2 sm:col-span-1')}
             >
-              + 1 יום
+              {t(`quick.${q.key}`)}
             </Button>
-            <Button
-              onClick={() => addWhiteShirtAlert(3)}
-              variant="outline"
-              className="w-full"
-            >
-              + 3 ימים
-            </Button>
-            <Button
-              onClick={() => addWhiteShirtAlert(7)}
-              variant="outline"
-              className="w-full"
-            >
-              + שבוע
-            </Button>
-            <Button
-              onClick={() => addWhiteShirtAlert(14)}
-              variant="outline"
-              className="w-full"
-            >
-              + שבועיים
-            </Button>
-            <Button
-              onClick={() => addWhiteShirtAlert(30)}
-              variant="outline"
-              className="w-full sm:col-span-1 col-span-2"
-            >
-              + חודש
-            </Button>
-          </div>
-          <p className="text-sm text-muted-foreground text-center">
-            לחצו כדי להוסיף תזכורת לחולצה לבנה למשך התקופה הנבחרת
-          </p>
-        </CardContent>
-      </Card>
+          ))}
+        </div>
+        <p className="mt-3 text-center text-sm text-gray-600">{t('quickHint')}</p>
+      </section>
 
-      <div className="space-y-4">
+      <div className="space-y-3">
         {messages.map((message) => {
-          const typeInfo = messageTypes.find(t => t.value === message.type)
+          const typeInfo = messageTypes.find(mt => mt.value === message.type)
           const isActive = message.is_active &&
             new Date(message.start_date) <= new Date() &&
             new Date(message.end_date) >= new Date()
 
           return (
-            <Card
+            <div
               key={message.id}
-              className={`
-                ${isActive ? 'border-2 border-green-500' : 'border'}
-                ${editingId === message.id ? 'ring-2 ring-blue-500' : ''}
-              `}
+              className={cn(
+                'rounded-2xl bg-white p-4 shadow-[0_1px_2px_rgba(0,0,0,0.06)]',
+                isActive ? 'border-2 border-green-500' : 'border border-transparent',
+                editingId === message.id && 'ring-2 ring-[#0D98BA]'
+              )}
               data-testid="urgent-message-card"
             >
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Badge className={typeInfo?.color}>
-                      {typeInfo?.label}
-                    </Badge>
-                    {isActive && (
-                      <Badge variant="default" className="bg-green-600">
-                        פעילה כעת
-                      </Badge>
-                    )}
-                  </div>
-                  <div className="flex gap-2">
-                    {editingId === message.id ? (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setEditingId(null)}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    ) : (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setEditingId(message.id)}
-                      >
-                        <Edit2 className="h-4 w-4" />
-                      </Button>
-                    )}
+              <div className="mb-3 flex items-center justify-between gap-2">
+                <div className="flex min-w-0 flex-wrap items-center gap-2">
+                  <Badge className={typeInfo?.color}>
+                    {typeInfo ? t(`types.${typeInfo.value}`) : null}
+                  </Badge>
+                  {isActive && <StatusPill tone="success">{t('activeNow')}</StatusPill>}
+                </div>
+                <div className="flex flex-none gap-1">
+                  {editingId === message.id ? (
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => deleteMessage(message.id)}
-                      className="text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                      className="h-11 w-11 p-0"
+                      aria-label={t('aria.close')}
+                      onClick={() => setEditingId(null)}
                     >
-                      <Trash2 className="h-5 w-5" />
+                      <X className="h-4 w-4" />
                     </Button>
+                  ) : (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-11 w-11 p-0"
+                      aria-label={t('aria.edit')}
+                      onClick={() => setEditingId(message.id)}
+                    >
+                      <Edit2 className="h-4 w-4" />
+                    </Button>
+                  )}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    aria-label={t('aria.delete')}
+                    onClick={() => deleteMessage(message.id)}
+                    className="h-11 w-11 rounded-lg p-0 text-red-600 transition-colors hover:bg-red-50"
+                  >
+                    <Trash2 className="h-5 w-5" />
+                  </Button>
+                </div>
+              </div>
+
+              {editingId === message.id ? (
+                <div className="space-y-4">
+                  <div>
+                    <label className={fieldLabel}>{t('fields.type')}</label>
+                    <select
+                      value={message.type}
+                      onChange={(e) => updateMessage(message.id, 'type', e.target.value as UrgentMessage['type'])}
+                      className="mt-1 h-11 w-full rounded-md border bg-white px-3"
+                    >
+                      {messageTypes.map((type) => (
+                        <option key={type.value} value={type.value}>
+                          {t(`types.${type.value}`)}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div>
+                      <label className={fieldLabel}>{t('fields.titleHe')}</label>
+                      {/* Placeholders are example data in the language of the field, not admin UI text */}
+                      <Input
+                        className={inputClass}
+                        value={message.title_he}
+                        onChange={(e) => updateMessage(message.id, 'title_he', e.target.value)}
+                        placeholder="תזכורת חשובה"
+                      />
+                    </div>
+                    <div>
+                      <label className={fieldLabel}>{t('fields.titleRu')}</label>
+                      <Input
+                        className={inputClass}
+                        value={message.title_ru}
+                        onChange={(e) => updateMessage(message.id, 'title_ru', e.target.value)}
+                        placeholder="Важное напоминание"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div>
+                      <label className={fieldLabel}>{t('fields.descriptionHe')}</label>
+                      <Textarea
+                        value={message.description_he || ''}
+                        onChange={(e) => updateMessage(message.id, 'description_he', e.target.value)}
+                        placeholder="פרטים נוספים..."
+                        rows={2}
+                      />
+                    </div>
+                    <div>
+                      <label className={fieldLabel}>{t('fields.descriptionRu')}</label>
+                      <Textarea
+                        value={message.description_ru || ''}
+                        onChange={(e) => updateMessage(message.id, 'description_ru', e.target.value)}
+                        placeholder="Дополнительная информация..."
+                        rows={2}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div>
+                      <label className={cn(fieldLabel, 'flex items-center gap-2')}>
+                        <Calendar className="h-4 w-4" />
+                        {t('fields.startDate')}
+                      </label>
+                      <Input
+                        className={inputClass}
+                        type="date"
+                        value={message.start_date}
+                        onChange={(e) => updateMessage(message.id, 'start_date', e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <label className={cn(fieldLabel, 'flex items-center gap-2')}>
+                        <Calendar className="h-4 w-4" />
+                        {t('fields.endDate')}
+                      </label>
+                      <Input
+                        className={inputClass}
+                        type="date"
+                        value={message.end_date}
+                        onChange={(e) => updateMessage(message.id, 'end_date', e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex min-h-[44px] items-center gap-2">
+                    <input
+                      type="checkbox"
+                      className="h-5 w-5"
+                      checked={message.is_active}
+                      onChange={(e) => updateMessage(message.id, 'is_active', e.target.checked)}
+                      id={`active-${message.id}`}
+                    />
+                    <label htmlFor={`active-${message.id}`} className="text-sm">
+                      {t('fields.isActive')}
+                    </label>
                   </div>
                 </div>
-              </CardHeader>
-              <CardContent>
-                {editingId === message.id ? (
-                  <div className="space-y-4">
-                    <div>
-                      <label className="text-sm font-medium">סוג הודעה</label>
-                      <select
-                        value={message.type}
-                        onChange={(e) => updateMessage(message.id, 'type', e.target.value)}
-                        className="w-full border rounded-md px-3 py-2 mt-1"
-                      >
-                        {messageTypes.map((type) => (
-                          <option key={type.value} value={type.value}>
-                            {type.label}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="text-sm font-medium">כותרת (עברית) *</label>
-                        <Input
-                          value={message.title_he}
-                          onChange={(e) => updateMessage(message.id, 'title_he', e.target.value)}
-                          placeholder="תזכורת חשובה"
-                        />
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium">כותרת (רוסית) *</label>
-                        <Input
-                          value={message.title_ru}
-                          onChange={(e) => updateMessage(message.id, 'title_ru', e.target.value)}
-                          placeholder="Важное напоминание"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="text-sm font-medium">תיאור (עברית)</label>
-                        <Textarea
-                          value={message.description_he || ''}
-                          onChange={(e) => updateMessage(message.id, 'description_he', e.target.value)}
-                          placeholder="פרטים נוספים..."
-                          rows={2}
-                        />
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium">תיאור (רוסית)</label>
-                        <Textarea
-                          value={message.description_ru || ''}
-                          onChange={(e) => updateMessage(message.id, 'description_ru', e.target.value)}
-                          placeholder="Дополнительная информация..."
-                          rows={2}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="text-sm font-medium flex items-center gap-2">
-                          <Calendar className="h-4 w-4" />
-                          תאריך התחלה
-                        </label>
-                        <Input
-                          type="date"
-                          value={message.start_date}
-                          onChange={(e) => updateMessage(message.id, 'start_date', e.target.value)}
-                        />
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium flex items-center gap-2">
-                          <Calendar className="h-4 w-4" />
-                          תאריך סיום
-                        </label>
-                        <Input
-                          type="date"
-                          value={message.end_date}
-                          onChange={(e) => updateMessage(message.id, 'end_date', e.target.value)}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        checked={message.is_active}
-                        onChange={(e) => updateMessage(message.id, 'is_active', e.target.checked)}
-                        id={`active-${message.id}`}
-                      />
-                      <label htmlFor={`active-${message.id}`} className="text-sm">
-                        הודעה פעילה
-                      </label>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    <div>
-                      <strong className="text-lg">{message.title_he}</strong>
-                      {message.title_ru && (
-                        <span className="text-muted-foreground mr-2">({message.title_ru})</span>
-                      )}
-                    </div>
-                    {message.description_he && (
-                      <p className="text-sm">{message.description_he}</p>
+              ) : (
+                <div className="min-w-0 space-y-2 [overflow-wrap:anywhere]">
+                  <div>
+                    <strong className="text-lg text-[#003153]">{message.title_he}</strong>
+                    {message.title_ru && (
+                      <span className="ms-2 text-gray-500">({message.title_ru})</span>
                     )}
-                    <div className="flex gap-4 text-xs text-muted-foreground">
-                      <span>📅 {new Date(message.start_date).toLocaleDateString('he-IL')} - {new Date(message.end_date).toLocaleDateString('he-IL')}</span>
-                      <span>{message.is_active ? '✅ פעילה' : '❌ לא פעילה'}</span>
-                    </div>
                   </div>
-                )}
-              </CardContent>
-            </Card>
+                  {message.description_he && (
+                    <p className="text-sm">{message.description_he}</p>
+                  )}
+                  <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500">
+                    <span className="inline-flex items-center gap-1">
+                      <Calendar className="h-3.5 w-3.5" aria-hidden="true" />
+                      {new Date(message.start_date).toLocaleDateString(dateLocale)} - {new Date(message.end_date).toLocaleDateString(dateLocale)}
+                    </span>
+                    <span>{message.is_active ? t('statusActive') : t('statusInactive')}</span>
+                  </div>
+                </div>
+              )}
+            </div>
           )
         })}
       </div>
 
-      {messages.length === 0 && (
-        <Card>
-          <CardContent className="text-center py-12">
-            <Bell className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-            <p className="text-muted-foreground">אין הודעות דחופות. לחץ על &quot;הוסף הודעה&quot; להתחיל.</p>
-          </CardContent>
-        </Card>
-      )}
+      {messages.length === 0 && <AdminEmptyState icon={Bell} title={t('empty')} />}
 
-      <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-        <p className="text-sm text-blue-800">
-          <strong>הערה:</strong> ההודעות יוצגו בדף הבית רק אם הן פעילות ובטווח התאריכים. לאחר שמירת השינויים, יש לעשות commit ו-push לגיט.
+      <AdminFormSection>
+        <p className="flex items-start gap-2 text-sm text-[#003153]">
+          <Info className="mt-0.5 h-4 w-4 flex-none" aria-hidden="true" />
+          <span>
+            <strong>{t('noteLabel')}</strong> {t('noteBody')}
+          </span>
         </p>
-      </div>
+      </AdminFormSection>
     </div>
   )
 }

@@ -1,9 +1,9 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useMemo, useState } from 'react'
 import { MapPin, Save } from 'lucide-react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { useTranslations } from 'next-intl'
+import { AdminFormSection, AdminPageHeader } from '@/components/features/admin'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -12,36 +12,50 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch'
 import { toast } from 'sonner'
 import { CreatorPhoneInput } from '@/components/features/events/CreatorPhoneInput'
+import { useRouter } from '@/i18n/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 
-const eventSchema = z.object({
-  title: z.string().min(2, 'כותרת חייבת להכיל לפחות 2 תווים'),
-  description: z.string().optional(),
-  event_type: z.enum(['general', 'meeting', 'fundraiser', 'trip', 'workshop']),
-  priority: z.enum(['low', 'normal', 'high', 'urgent']),
-  status: z.enum(['draft', 'published', 'cancelled']),
-  location: z.string().optional(),
-  start_date: z.string().min(1, 'תאריך התחלה נדרש'),
-  start_time: z.string().optional(),
-  end_date: z.string().optional(),
-  end_time: z.string().optional(),
-  registration_enabled: z.boolean(),
-  max_attendees: z.string().optional(),
-  registration_deadline_date: z.string().optional(),
-  registration_deadline_time: z.string().optional(),
-  requires_payment: z.boolean(),
-  payment_amount: z.string().optional(),
-  budget_allocated: z.string().optional(),
-  creator_phone: z.string().optional()
-})
+function createEventSchema(messages: { titleMin: string; startDateRequired: string }) {
+  return z.object({
+    title: z.string().min(2, messages.titleMin),
+    description: z.string().optional(),
+    event_type: z.enum(['general', 'meeting', 'fundraiser', 'trip', 'workshop']),
+    priority: z.enum(['low', 'normal', 'high', 'urgent']),
+    status: z.enum(['draft', 'published', 'cancelled']),
+    location: z.string().optional(),
+    start_date: z.string().min(1, messages.startDateRequired),
+    start_time: z.string().optional(),
+    end_date: z.string().optional(),
+    end_time: z.string().optional(),
+    registration_enabled: z.boolean(),
+    max_attendees: z.string().optional(),
+    registration_deadline_date: z.string().optional(),
+    registration_deadline_time: z.string().optional(),
+    requires_payment: z.boolean(),
+    payment_amount: z.string().optional(),
+    budget_allocated: z.string().optional(),
+    creator_phone: z.string().optional()
+  })
+}
 
-type EventFormData = z.infer<typeof eventSchema>
+type EventFormData = z.infer<ReturnType<typeof createEventSchema>>
 
 export default function NewEventPage() {
+  const t = useTranslations('admin.events')
+  const tc = useTranslations('admin.common')
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const eventSchema = useMemo(
+    () =>
+      createEventSchema({
+        titleMin: t('form.validation.titleMin'),
+        startDateRequired: t('form.validation.startDateRequired')
+      }),
+    [t]
+  )
 
   const {
     register,
@@ -113,327 +127,310 @@ export default function NewEventPage() {
       const result = await response.json()
 
       if (result.success) {
-        toast.success('האירוע נוצר בהצלחה!')
-        router.push(`/events/${result.data.id}`)
+        toast.success(t('new.toast.created'))
+        router.push('/admin/events')
       } else {
         console.error('API Error:', result)
-        toast.error(result.error || 'שגיאה ביצירת האירוע')
+        toast.error(result.error || t('new.toast.createFailed'))
         if (result.details) {
           console.error('Validation errors:', result.details)
         }
       }
     } catch (error) {
       console.error('Error creating event:', error)
-      toast.error('שגיאה ביצירת האירוע')
+      toast.error(t('new.toast.createFailed'))
     } finally {
       setIsSubmitting(false)
     }
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl md:text-3xl font-bold">יצירת אירוע חדש</h1>
-        <p className="text-muted-foreground mt-2">
-          הוסף אירוע חדש ללוח האירועים של ועד ההורים
-        </p>
-      </div>
+    <div>
+      <AdminPageHeader
+        title={t('new.title')}
+        subtitle={t('new.subtitle')}
+        backHref="/admin/events"
+      />
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         {/* Basic Information */}
-        <Card>
-          <CardHeader>
-            <CardTitle>פרטי האירוע</CardTitle>
-            <CardDescription>מידע בסיסי על האירוע</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
+        <AdminFormSection
+          title={t('form.sections.basic.title')}
+          description={t('form.sections.basic.description')}
+        >
+          <div>
+            <Label htmlFor="title">{t('new.titleLabel')}</Label>
+            <Input
+              id="title"
+              {...register('title')}
+              placeholder={t('form.titlePlaceholder')}
+              className={errors.title ? 'border-red-500' : ''}
+            />
+            {errors.title && (
+              <p className="text-sm text-red-500 mt-1">{errors.title.message}</p>
+            )}
+          </div>
+
+          <div>
+            <Label htmlFor="description">{t('new.descriptionLabel')}</Label>
+            <Textarea
+              id="description"
+              {...register('description')}
+              placeholder={t('form.descriptionPlaceholder')}
+              rows={4}
+            />
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
             <div>
-              <Label htmlFor="title">כותרת האירוע *</Label>
-              <Input
-                id="title"
-                {...register('title')}
-                placeholder="לדוגמה: ישיבת ועד חודשית"
-                className={errors.title ? 'border-red-500' : ''}
-              />
-              {errors.title && (
-                <p className="text-sm text-red-500 mt-1">{errors.title.message}</p>
-              )}
-            </div>
-
-            <div>
-              <Label htmlFor="description">תיאור</Label>
-              <Textarea
-                id="description"
-                {...register('description')}
-                placeholder="תיאור מפורט של האירוע..."
-                rows={4}
-              />
-            </div>
-
-            <div className="grid gap-4 md:grid-cols-2">
-              <div>
-                <Label htmlFor="event_type">סוג אירוע</Label>
-                <Select
-                  onValueChange={(value) => setValue('event_type', value as any)}
-                  defaultValue="general"
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="general">כללי</SelectItem>
-                    <SelectItem value="meeting">ישיבה</SelectItem>
-                    <SelectItem value="fundraiser">גיוס כספים</SelectItem>
-                    <SelectItem value="trip">טיול</SelectItem>
-                    <SelectItem value="workshop">סדנה/הרצאה</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label htmlFor="priority">עדיפות</Label>
-                <Select
-                  onValueChange={(value) => setValue('priority', value as any)}
-                  defaultValue="normal"
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="low">נמוכה</SelectItem>
-                    <SelectItem value="normal">רגילה</SelectItem>
-                    <SelectItem value="high">גבוהה</SelectItem>
-                    <SelectItem value="urgent">דחוף</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div>
-              <Label htmlFor="status">סטטוס</Label>
+              <Label htmlFor="event_type">{t('form.eventType.label')}</Label>
               <Select
-                onValueChange={(value) => setValue('status', value as any)}
-                defaultValue="draft"
+                onValueChange={(value) => setValue('event_type', value as EventFormData['event_type'])}
+                defaultValue="general"
               >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="draft">טיוטה (לא יופיע באתר)</SelectItem>
-                  <SelectItem value="published">פורסם (גלוי לכולם)</SelectItem>
-                  <SelectItem value="cancelled">בוטל</SelectItem>
+                  <SelectItem value="general">{t('form.eventType.general')}</SelectItem>
+                  <SelectItem value="meeting">{t('form.eventType.meeting')}</SelectItem>
+                  <SelectItem value="fundraiser">{t('form.eventType.fundraiser')}</SelectItem>
+                  <SelectItem value="trip">{t('form.eventType.trip')}</SelectItem>
+                  <SelectItem value="workshop">{t('form.eventType.workshop')}</SelectItem>
                 </SelectContent>
               </Select>
-              <p className="text-xs text-muted-foreground mt-1">רק אירועים &quot;פורסם&quot; גלויים למשתמשים רגילים</p>
             </div>
-          </CardContent>
-        </Card>
+
+            <div>
+              <Label htmlFor="priority">{t('form.priority.label')}</Label>
+              <Select
+                onValueChange={(value) => setValue('priority', value as EventFormData['priority'])}
+                defaultValue="normal"
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="low">{t('form.priority.low')}</SelectItem>
+                  <SelectItem value="normal">{t('form.priority.normal')}</SelectItem>
+                  <SelectItem value="high">{t('form.priority.high')}</SelectItem>
+                  <SelectItem value="urgent">{t('form.priority.urgent')}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div>
+            <Label htmlFor="status">{t('form.statusLabel')}</Label>
+            <Select
+              onValueChange={(value) => setValue('status', value as EventFormData['status'])}
+              defaultValue="draft"
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="draft">{t('new.status.draft')}</SelectItem>
+                <SelectItem value="published">{t('new.status.published')}</SelectItem>
+                <SelectItem value="cancelled">{t('new.status.cancelled')}</SelectItem>
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground mt-1">{t('new.status.hint')}</p>
+          </div>
+        </AdminFormSection>
 
         {/* Creator Phone */}
-        <Card className="border-[#13ec80]/20 bg-gradient-to-br from-[#13ec80]/5 to-transparent">
-          <CardHeader>
-            <CardTitle>פרטי יוצר האירוע</CardTitle>
-            <CardDescription>לניהול קל יותר של האירועים שיצרת</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <CreatorPhoneInput
-              value={watch('creator_phone') || ''}
-              onChange={(value) => setValue('creator_phone', value)}
-            />
-          </CardContent>
-        </Card>
+        <AdminFormSection
+          title={t('form.sections.creator.title')}
+          description={t('form.sections.creator.description')}
+        >
+          <CreatorPhoneInput
+            value={watch('creator_phone') || ''}
+            onChange={(value) => setValue('creator_phone', value)}
+          />
+        </AdminFormSection>
 
         {/* Date, Time & Location */}
-        <Card>
-          <CardHeader>
-            <CardTitle>זמן ומיקום</CardTitle>
-            <CardDescription>מתי ואיפה האירוע מתקיים</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
+        <AdminFormSection
+          title={t('form.sections.timeLocation.title')}
+          description={t('form.sections.timeLocation.description')}
+        >
+          <div>
+            <Label htmlFor="location">{t('new.locationLabel')}</Label>
+            <div className="relative">
+              <MapPin className="absolute start-3 top-3 h-4 w-4 text-muted-foreground" aria-hidden="true" />
+              <Input
+                id="location"
+                {...register('location')}
+                placeholder={t('form.locationPlaceholder')}
+                className="ps-10"
+              />
+            </div>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
             <div>
-              <Label htmlFor="location">מיקום</Label>
-              <div className="relative">
-                <MapPin className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="location"
-                  {...register('location')}
-                  placeholder="כתובת או שם המקום"
-                  className="pr-10"
-                />
-              </div>
+              <Label htmlFor="start_date">{t('form.startDate')}</Label>
+              <Input
+                id="start_date"
+                type="date"
+                {...register('start_date')}
+                className={errors.start_date ? 'border-red-500' : ''}
+              />
+              {errors.start_date && (
+                <p className="text-sm text-red-500 mt-1">{errors.start_date.message}</p>
+              )}
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2">
-              <div>
-                <Label htmlFor="start_date">תאריך התחלה *</Label>
-                <Input
-                  id="start_date"
-                  type="date"
-                  {...register('start_date')}
-                  className={errors.start_date ? 'border-red-500' : ''}
-                />
-                {errors.start_date && (
-                  <p className="text-sm text-red-500 mt-1">{errors.start_date.message}</p>
-                )}
-              </div>
-
-              <div>
-                <Label htmlFor="start_time">שעת התחלה</Label>
-                <Input
-                  id="start_time"
-                  type="time"
-                  {...register('start_time')}
-                  placeholder="השאר ריק לאירוע יום שלם"
-                  className={errors.start_time ? 'border-red-500' : ''}
-                />
-                {errors.start_time && (
-                  <p className="text-sm text-red-500 mt-1">{errors.start_time.message}</p>
-                )}
-                <p className="text-xs text-muted-foreground mt-1">אופציונלי - אם לא מצוין, האירוע יהיה לכל היום</p>
-              </div>
+            <div>
+              <Label htmlFor="start_time">{t('new.startTimeLabel')}</Label>
+              <Input
+                id="start_time"
+                type="time"
+                {...register('start_time')}
+                placeholder={t('new.startTimePlaceholder')}
+                className={errors.start_time ? 'border-red-500' : ''}
+              />
+              {errors.start_time && (
+                <p className="text-sm text-red-500 mt-1">{errors.start_time.message}</p>
+              )}
+              <p className="text-xs text-muted-foreground mt-1">{t('new.startTimeHint')}</p>
             </div>
+          </div>
 
-            <div className="grid gap-4 md:grid-cols-2">
-              <div>
-                <Label htmlFor="end_date">תאריך סיום</Label>
-                <Input
-                  id="end_date"
-                  type="date"
-                  {...register('end_date')}
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="end_time">שעת סיום</Label>
-                <Input
-                  id="end_time"
-                  type="time"
-                  {...register('end_time')}
-                />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Registration Settings */}
-        <Card>
-          <CardHeader>
-            <CardTitle>הגדרות הרשמה</CardTitle>
-            <CardDescription>האם נדרשת הרשמה מראש לאירוע</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <Label htmlFor="registration_enabled">אפשר הרשמה</Label>
-                <p className="text-sm text-muted-foreground">
-                  משתתפים יוכלו להירשם לאירוע מראש
-                </p>
-              </div>
-              <Switch
-                id="registration_enabled"
-                checked={registrationEnabled}
-                onCheckedChange={(checked) => setValue('registration_enabled', checked)}
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <Label htmlFor="end_date">{t('form.endDate')}</Label>
+              <Input
+                id="end_date"
+                type="date"
+                {...register('end_date')}
               />
             </div>
 
-            {registrationEnabled && (
-              <>
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div>
-                    <Label htmlFor="max_attendees">מספר מקומות מקסימלי</Label>
-                    <Input
-                      id="max_attendees"
-                      type="number"
-                      {...register('max_attendees')}
-                      placeholder="השאר ריק לללא הגבלה"
-                    />
-                  </div>
+            <div>
+              <Label htmlFor="end_time">{t('form.endTime')}</Label>
+              <Input
+                id="end_time"
+                type="time"
+                {...register('end_time')}
+              />
+            </div>
+          </div>
+        </AdminFormSection>
 
-                  <div className="grid gap-2 grid-cols-2">
-                    <div>
-                      <Label htmlFor="registration_deadline_date">תאריך סיום הרשמה</Label>
-                      <Input
-                        id="registration_deadline_date"
-                        type="date"
-                        {...register('registration_deadline_date')}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="registration_deadline_time">שעה</Label>
-                      <Input
-                        id="registration_deadline_time"
-                        type="time"
-                        {...register('registration_deadline_time')}
-                      />
-                    </div>
-                  </div>
-                </div>
+        {/* Registration Settings */}
+        <AdminFormSection
+          title={t('form.sections.registration.title')}
+          description={t('form.sections.registration.description')}
+        >
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <Label htmlFor="registration_enabled">{t('form.registrationEnabled')}</Label>
+              <p className="text-sm text-muted-foreground">
+                {t('form.registrationEnabledHint')}
+              </p>
+            </div>
+            <Switch
+              id="registration_enabled"
+              checked={registrationEnabled}
+              onCheckedChange={(checked) => setValue('registration_enabled', checked)}
+            />
+          </div>
 
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label htmlFor="requires_payment">דורש תשלום</Label>
-                    <p className="text-sm text-muted-foreground">
-                      האירוע כרוך בתשלום
-                    </p>
-                  </div>
-                  <Switch
-                    id="requires_payment"
-                    checked={requiresPayment}
-                    onCheckedChange={(checked) => setValue('requires_payment', checked)}
+          {registrationEnabled && (
+            <>
+              <div className="grid gap-4 md:grid-cols-2">
+                <div>
+                  <Label htmlFor="max_attendees">{t('form.maxAttendees')}</Label>
+                  <Input
+                    id="max_attendees"
+                    type="number"
+                    {...register('max_attendees')}
+                    placeholder={t('form.maxAttendeesPlaceholder')}
                   />
                 </div>
 
-                {requiresPayment && (
+                <div className="grid gap-2 grid-cols-2">
                   <div>
-                    <Label htmlFor="payment_amount">סכום לתשלום (₪)</Label>
+                    <Label htmlFor="registration_deadline_date">{t('form.deadlineDate')}</Label>
                     <Input
-                      id="payment_amount"
-                      type="number"
-                      step="0.01"
-                      {...register('payment_amount')}
-                      placeholder="0.00"
+                      id="registration_deadline_date"
+                      type="date"
+                      {...register('registration_deadline_date')}
                     />
                   </div>
-                )}
-              </>
-            )}
-          </CardContent>
-        </Card>
+                  <div>
+                    <Label htmlFor="registration_deadline_time">{t('form.deadlineTime')}</Label>
+                    <Input
+                      id="registration_deadline_time"
+                      type="time"
+                      {...register('registration_deadline_time')}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <Label htmlFor="requires_payment">{t('form.requiresPayment')}</Label>
+                  <p className="text-sm text-muted-foreground">
+                    {t('form.requiresPaymentHint')}
+                  </p>
+                </div>
+                <Switch
+                  id="requires_payment"
+                  checked={requiresPayment}
+                  onCheckedChange={(checked) => setValue('requires_payment', checked)}
+                />
+              </div>
+
+              {requiresPayment && (
+                <div>
+                  <Label htmlFor="payment_amount">{t('form.paymentAmount')}</Label>
+                  <Input
+                    id="payment_amount"
+                    type="number"
+                    step="0.01"
+                    {...register('payment_amount')}
+                    placeholder="0.00"
+                  />
+                </div>
+              )}
+            </>
+          )}
+        </AdminFormSection>
 
         {/* Budget */}
-        <Card>
-          <CardHeader>
-            <CardTitle>תקציב</CardTitle>
-            <CardDescription>תקציב מוקצב לאירוע</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div>
-              <Label htmlFor="budget_allocated">תקציב מוקצב (₪)</Label>
-              <Input
-                id="budget_allocated"
-                type="number"
-                step="0.01"
-                {...register('budget_allocated')}
-                placeholder="0.00"
-              />
-            </div>
-          </CardContent>
-        </Card>
+        <AdminFormSection
+          title={t('form.sections.budget.title')}
+          description={t('form.sections.budget.description')}
+        >
+          <div>
+            <Label htmlFor="budget_allocated">{t('form.budgetAllocated')}</Label>
+            <Input
+              id="budget_allocated"
+              type="number"
+              step="0.01"
+              {...register('budget_allocated')}
+              placeholder="0.00"
+            />
+          </div>
+        </AdminFormSection>
 
         {/* Actions */}
-        <div className="flex flex-col sm:flex-row gap-3">
+        <div className="flex flex-col gap-3">
           <Button
             type="submit"
             disabled={isSubmitting}
-            className="flex-1"
+            className="h-11 w-full bg-[#003153] hover:bg-[#003153]/90"
           >
             {isSubmitting ? (
-              <>טוען...</>
+              <>{tc('loading')}</>
             ) : (
               <>
-                <Save className="h-4 w-4 ml-2" />
-                צור אירוע
+                <Save className="h-4 w-4 me-2" aria-hidden="true" />
+                {t('new.submit')}
               </>
             )}
           </Button>
@@ -441,9 +438,9 @@ export default function NewEventPage() {
             type="button"
             variant="outline"
             onClick={() => router.back()}
-            className="sm:w-auto"
+            className="h-11 w-full"
           >
-            ביטול
+            {tc('cancel')}
           </Button>
         </div>
       </form>

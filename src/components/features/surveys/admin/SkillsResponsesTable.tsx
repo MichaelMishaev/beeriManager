@@ -1,10 +1,7 @@
 'use client'
 
-import { useState, Fragment } from 'react'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Card, CardContent } from '@/components/ui/card'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -15,10 +12,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { Phone, Mail, MessageCircle, ChevronDown, ChevronUp, Trash2 } from 'lucide-react'
+import { Phone, Mail, MessageCircle, ChevronDown, ChevronUp, Trash2, ClipboardList } from 'lucide-react'
+import { useLocale, useTranslations } from 'next-intl'
 import type { ParentSkillResponse } from '@/types/parent-skills'
-import { SKILL_NAMES_HE } from '@/types/parent-skills'
 import { useToast } from '@/hooks/use-toast'
+import { AdminEmptyState, StatusPill } from '@/components/features/admin'
 
 interface Props {
   responses: ParentSkillResponse[]
@@ -27,6 +25,9 @@ interface Props {
 }
 
 export function SkillsResponsesTable({ responses, isLoading, onResponseDeleted }: Props) {
+  const t = useTranslations('admin.inbox.survey')
+  const locale = useLocale()
+  const dateLocale = locale === 'ru' ? 'ru-RU' : 'he-IL'
   const [expandedRow, setExpandedRow] = useState<string | null>(null)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [responseToDelete, setResponseToDelete] = useState<string | null>(null)
@@ -67,11 +68,11 @@ export function SkillsResponsesTable({ responses, isLoading, onResponseDeleted }
       const result = await response.json()
 
       if (!response.ok || !result.success) {
-        throw new Error(result.message || 'שגיאה במחיקת התשובה')
+        throw new Error(result.message || t('deleteError'))
       }
 
       toast({
-        title: 'התשובה נמחקה בהצלחה',
+        title: t('deleteSuccess'),
         variant: 'default',
       })
 
@@ -86,8 +87,8 @@ export function SkillsResponsesTable({ responses, isLoading, onResponseDeleted }
     } catch (error) {
       console.error('Error deleting response:', error)
       toast({
-        title: 'שגיאה במחיקת התשובה',
-        description: error instanceof Error ? error.message : 'אנא נסה שוב מאוחר יותר',
+        title: t('deleteError'),
+        description: error instanceof Error ? error.message : t('tryAgain'),
         variant: 'destructive',
       })
     } finally {
@@ -96,189 +97,166 @@ export function SkillsResponsesTable({ responses, isLoading, onResponseDeleted }
   }
 
   if (isLoading) {
-    return <div className="text-center py-8">טוען...</div>
+    return <div className="py-8 text-center text-sm text-gray-500">{t('loading')}</div>
   }
 
   if (!responses.length) {
-    return (
-      <Card>
-        <CardContent className="py-8 text-center text-gray-500">לא נמצאו תשובות</CardContent>
-      </Card>
-    )
+    return <AdminEmptyState icon={ClipboardList} title={t('empty')} />
   }
 
   return (
     <>
-      <Card>
-        <CardContent className="p-0">
-          <div className="overflow-x-auto">
-            <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="text-right">שם</TableHead>
-                <TableHead className="text-right">כיתה</TableHead>
-                <TableHead className="text-right">מיומנויות</TableHead>
-                <TableHead className="text-right">אמצעי קשר</TableHead>
-                <TableHead className="text-right">טלפון</TableHead>
-                <TableHead className="text-right">פעולות</TableHead>
-                <TableHead className="text-right w-12"></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {responses.map((response) => (
-                <Fragment key={response.id}>
-                  <TableRow className="hover:bg-gray-50">
-                    <TableCell className="font-medium">
-                      {response.parent_name || <span className="text-gray-400 italic">אנונימי</span>}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Badge variant="outline" className="font-bold text-base">
-                        {response.student_grade || '-'}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex flex-wrap gap-1">
-                        {response.skills.slice(0, 3).map((skill) => (
-                          <Badge key={skill} variant="secondary" className="text-xs">
-                            {SKILL_NAMES_HE[skill]}
-                          </Badge>
-                        ))}
-                        {response.skills.length > 3 && (
-                          <Badge variant="outline" className="text-xs">
-                            +{response.skills.length - 3}
-                          </Badge>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {response.preferred_contact === 'phone' && 'טלפון'}
-                      {response.preferred_contact === 'email' && 'אימייל'}
-                      {response.preferred_contact === 'whatsapp' && 'WhatsApp'}
-                      {response.preferred_contact === 'any' && 'כל אמצעי'}
-                    </TableCell>
-                    <TableCell className="font-mono text-sm" dir="ltr">
-                      {response.phone_number || '-'}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex gap-2">
-                        {response.phone_number && (
-                          <>
-                            <Button size="sm" variant="outline" asChild>
-                              <a href={`tel:${response.phone_number}`}>
-                                <Phone className="h-4 w-4" />
-                              </a>
-                            </Button>
-                            <Button size="sm" variant="outline" className="bg-green-50 hover:bg-green-100" asChild>
-                              <a
-                                href={`https://wa.me/${formatPhoneForWhatsApp(response.phone_number)}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                              >
-                                <MessageCircle className="h-4 w-4 text-green-600" />
-                              </a>
-                            </Button>
-                          </>
-                        )}
-                        {response.email && (
-                          <Button size="sm" variant="outline" asChild>
-                            <a href={`mailto:${response.email}`}>
-                              <Mail className="h-4 w-4" />
-                            </a>
-                          </Button>
-                        )}
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="bg-red-50 hover:bg-red-100"
-                          onClick={() => handleDeleteClick(response.id)}
-                        >
-                          <Trash2 className="h-4 w-4 text-red-600" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Button size="sm" variant="ghost" onClick={() => toggleRow(response.id)}>
-                        {expandedRow === response.id ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                      </Button>
-                    </TableCell>
-                  </TableRow>
+      <div className="divide-y divide-[#eef0f2] overflow-hidden rounded-2xl bg-white shadow-[0_1px_2px_rgba(0,0,0,0.06)]">
+        {responses.map((response) => {
+          const expanded = expandedRow === response.id
+          return (
+            <div key={response.id} className="p-3">
+              {/* Summary (tap to expand) */}
+              <button
+                type="button"
+                onClick={() => toggleRow(response.id)}
+                aria-expanded={expanded}
+                className="flex min-h-[44px] w-full items-start gap-2 text-start"
+              >
+                <span className="min-w-0 flex-1 space-y-1.5">
+                  <span className="flex flex-wrap items-center gap-2">
+                    <span className="text-[14.5px] font-semibold text-[#003153]">
+                      {response.parent_name || <span className="italic text-gray-400">{t('anonymous')}</span>}
+                    </span>
+                    {response.student_grade && <StatusPill tone="info">{response.student_grade}</StatusPill>}
+                  </span>
+                  <span className="flex flex-wrap gap-1">
+                    {response.skills.slice(0, 3).map((skill) => (
+                      <StatusPill key={skill} tone="neutral">
+                        {t(`skills.${skill}`)}
+                      </StatusPill>
+                    ))}
+                    {response.skills.length > 3 && <StatusPill tone="info">+{response.skills.length - 3}</StatusPill>}
+                  </span>
+                  <span className="flex flex-wrap items-center gap-x-2 text-xs text-gray-500">
+                    <span>{t(`contact.${response.preferred_contact}`)}</span>
+                    {response.phone_number && (
+                      <span className="font-mono" dir="ltr">
+                        {response.phone_number}
+                      </span>
+                    )}
+                  </span>
+                </span>
+                {expanded ? (
+                  <ChevronUp className="mt-1 h-4 w-4 flex-none text-[#b6bcc4]" aria-hidden="true" />
+                ) : (
+                  <ChevronDown className="mt-1 h-4 w-4 flex-none text-[#b6bcc4]" aria-hidden="true" />
+                )}
+              </button>
 
-                  {/* Expanded Details */}
-                  {expandedRow === response.id && (
-                    <TableRow>
-                      <TableCell colSpan={7} className="bg-gray-50">
-                        <div className="p-4 space-y-3">
-                          <div>
-                            <span className="font-semibold text-sm">כל המיומנויות:</span>
-                            <div className="flex flex-wrap gap-1 mt-1">
-                              {response.skills.map((skill) => (
-                                <Badge key={skill} variant="secondary">
-                                  {SKILL_NAMES_HE[skill]}
-                                </Badge>
-                              ))}
-                            </div>
-                          </div>
+              {/* Actions */}
+              <div className="mt-2 flex flex-wrap gap-2">
+                {response.phone_number && (
+                  <>
+                    <Button size="sm" variant="outline" className="min-h-[44px] min-w-[44px]" asChild>
+                      <a href={`tel:${response.phone_number}`} aria-label={t('callAction')}>
+                        <Phone className="h-4 w-4" aria-hidden="true" />
+                      </a>
+                    </Button>
+                    <Button size="sm" variant="outline" className="min-h-[44px] min-w-[44px] bg-green-50 hover:bg-green-100" asChild>
+                      <a
+                        href={`https://wa.me/${formatPhoneForWhatsApp(response.phone_number)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={t('whatsappAction')}
+                      >
+                        <MessageCircle className="h-4 w-4 text-green-600" aria-hidden="true" />
+                      </a>
+                    </Button>
+                  </>
+                )}
+                {response.email && (
+                  <Button size="sm" variant="outline" className="min-h-[44px] min-w-[44px]" asChild>
+                    <a href={`mailto:${response.email}`} aria-label={t('emailAction')}>
+                      <Mail className="h-4 w-4" aria-hidden="true" />
+                    </a>
+                  </Button>
+                )}
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="min-h-[44px] min-w-[44px] bg-red-50 hover:bg-red-100"
+                  onClick={() => handleDeleteClick(response.id)}
+                  aria-label={t('deleteAction')}
+                >
+                  <Trash2 className="h-4 w-4 text-red-600" aria-hidden="true" />
+                </Button>
+              </div>
 
-                          {response.other_specialty && response.skills.includes('other') && (
-                            <div>
-                              <span className="font-semibold text-sm">אחר - פרטים:</span>
-                              <p className="text-sm text-gray-700 mt-1 bg-yellow-50 p-2 rounded border border-yellow-200">
-                                {response.other_specialty}
-                              </p>
-                            </div>
-                          )}
+              {/* Expanded Details */}
+              {expanded && (
+                <div className="mt-3 space-y-3 rounded-xl bg-[#f1f2f4] p-3">
+                  <div>
+                    <span className="text-sm font-semibold">{t('allSkillsLabel')}</span>
+                    <div className="mt-1 flex flex-wrap gap-1">
+                      {response.skills.map((skill) => (
+                        <StatusPill key={skill} tone="neutral">
+                          {t(`skills.${skill}`)}
+                        </StatusPill>
+                      ))}
+                    </div>
+                  </div>
 
-                          {response.email && (
-                            <div>
-                              <span className="font-semibold text-sm">אימייל:</span>
-                              <p className="text-sm" dir="ltr">
-                                {response.email}
-                              </p>
-                            </div>
-                          )}
-
-                          {response.additional_notes && (
-                            <div>
-                              <span className="font-semibold text-sm">הערות נוספות:</span>
-                              <p className="text-sm text-gray-700 mt-1">{response.additional_notes}</p>
-                            </div>
-                          )}
-
-                          <div className="text-xs text-gray-500">
-                            נשלח ב-{new Date(response.created_at).toLocaleDateString('he-IL')} בשעה{' '}
-                            {new Date(response.created_at).toLocaleTimeString('he-IL', {
-                              hour: '2-digit',
-                              minute: '2-digit',
-                            })}
-                          </div>
-                        </div>
-                      </TableCell>
-                    </TableRow>
+                  {response.other_specialty && response.skills.includes('other') && (
+                    <div>
+                      <span className="text-sm font-semibold">{t('otherDetails')}</span>
+                      <p className="mt-1 rounded border border-yellow-200 bg-yellow-50 p-2 text-sm text-gray-700">
+                        {response.other_specialty}
+                      </p>
+                    </div>
                   )}
-                </Fragment>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      </CardContent>
-    </Card>
 
-    <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>האם למחוק תשובה זו?</AlertDialogTitle>
-          <AlertDialogDescription>
-            פעולה זו תמחק את התשובה מהמערכת. המחיקה היא מחיקה רכה - הנתונים יישמרו במערכת אך לא יוצגו יותר.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter className="gap-2">
-          <AlertDialogCancel disabled={isDeleting}>ביטול</AlertDialogCancel>
-          <AlertDialogAction onClick={handleDeleteConfirm} disabled={isDeleting} className="bg-red-600 hover:bg-red-700">
-            {isDeleting ? 'מוחק...' : 'מחק'}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
-  </>
+                  {response.email && (
+                    <div>
+                      <span className="text-sm font-semibold">{t('emailLabel')}</span>
+                      <p className="break-all text-sm" dir="ltr">
+                        {response.email}
+                      </p>
+                    </div>
+                  )}
+
+                  {response.additional_notes && (
+                    <div>
+                      <span className="text-sm font-semibold">{t('notesLabel')}</span>
+                      <p className="mt-1 text-sm text-gray-700">{response.additional_notes}</p>
+                    </div>
+                  )}
+
+                  <div className="text-xs text-gray-500">
+                    {t('submittedAt', {
+                      date: new Date(response.created_at).toLocaleDateString(dateLocale),
+                      time: new Date(response.created_at).toLocaleTimeString(dateLocale, {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      }),
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+          )
+        })}
+      </div>
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('deleteTitle')}</AlertDialogTitle>
+            <AlertDialogDescription>{t('deleteDescription')}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="gap-2">
+            <AlertDialogCancel disabled={isDeleting}>{t('cancel')}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteConfirm} disabled={isDeleting} className="bg-red-600 hover:bg-red-700">
+              {isDeleting ? t('deleting') : t('delete')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   )
 }

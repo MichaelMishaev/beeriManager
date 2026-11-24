@@ -12,9 +12,10 @@ import {
   validateUrgentMessageArgs,
   validateHighlightArgs,
 } from '@/lib/ai/tools'
-import { incrementAiUsage, validateMessageLength } from '@/lib/ai/rate-limiter'
+import { validateMessageLength } from '@/lib/ai/rate-limiter'
 import { aiLogger } from '@/lib/ai/logger'
 import { calculateCost } from '@/lib/ai/cost-tracker'
+import { verifyJWT } from '@/lib/auth/jwt'
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic'
@@ -35,11 +36,21 @@ interface AIAssistantRequest {
 export async function POST(req: NextRequest) {
   let requestBody: AIAssistantRequest | null = null
   try {
+    // Admin only: the assistant is opened from the admin area and every call costs money
+    const token = req.cookies.get('auth-token')
+    const payload = token ? await verifyJWT(token.value) : null
+    if (!payload || payload.role !== 'admin') {
+      return NextResponse.json(
+        { success: false, error: 'נדרשת הרשאת מנהל' },
+        { status: 401 }
+      )
+    }
+
     requestBody = await req.json()
     if (!requestBody) throw new Error('Request body is required')
     const { messages, action = 'extract_data', context } = requestBody
 
-    // Handle initial greeting (no rate limit check - doesn't use GPT)
+    // Handle initial greeting (doesn't use GPT)
     if (action === 'initial') {
       aiLogger.logInitial()
       return NextResponse.json({
@@ -54,37 +65,7 @@ export async function POST(req: NextRequest) {
       })
     }
 
-    // TEMPORARY: Rate limit check disabled for testing
-    // TODO: Re-enable after database migration completes
-    const rateLimitResult = await incrementAiUsage()
-
-    // Log rate limit check
-    aiLogger.logRateLimit({
-      usageCount: rateLimitResult.stats.currentCount,
-      dailyLimit: rateLimitResult.stats.dailyLimit,
-      rateLimitReached: rateLimitResult.stats.limitReached,
-    })
-
-    // COMMENTED OUT TEMPORARILY - Rate limit disabled
-    // if (!rateLimitResult.success || rateLimitResult.stats.limitReached) {
-    //   aiLogger.logRateLimit({
-    //     usageCount: rateLimitResult.stats.currentCount,
-    //     dailyLimit: rateLimitResult.stats.dailyLimit,
-    //     rateLimitReached: true,
-    //   })
-    //   return NextResponse.json({
-    //     success: false,
-    //     error: `הגעת למגבלה היומית של 50 שימושים 😔
-
-    // נסה שוב מחר או צור קשר עם המנהל.
-
-    // שימושים היום: ${rateLimitResult.stats.currentCount}/${rateLimitResult.stats.dailyLimit}`,
-    //     rateLimitReached: true,
-    //     stats: rateLimitResult.stats,
-    //   })
-    // }
-
-    // Validate message length (400 chars max)
+    // Validate message length
     const lastUserMessage = messages[messages.length - 1]?.content || ''
     const lengthValidation = validateMessageLength(lastUserMessage)
 
@@ -203,6 +184,7 @@ export async function POST(req: NextRequest) {
 
       const response = await openai.chat.completions.create({
         model: AI_CONFIG.model,
+        reasoning_effort: AI_CONFIG.reasoning_effort,
         max_completion_tokens: 300,
         messages: [
           { role: 'system', content: SUMMARIZE_PROMPT },
@@ -257,6 +239,7 @@ export async function POST(req: NextRequest) {
 
       const response = await openai.chat.completions.create({
         model: AI_CONFIG.model,
+        reasoning_effort: AI_CONFIG.reasoning_effort,
         max_completion_tokens: AI_CONFIG.max_completion_tokens,
         messages: requestMessages,
         // No function calling for understanding - just text response
@@ -333,8 +316,9 @@ export async function POST(req: NextRequest) {
 
       const response = await openai.chat.completions.create({
         model: AI_CONFIG.model,
+        reasoning_effort: AI_CONFIG.reasoning_effort,
         max_completion_tokens: AI_CONFIG.max_completion_tokens,
-        // Note: temperature is not included - GPT-5 Mini only supports default value (1)
+        // Note: temperature is not included - reasoning models only support the default value
         messages: requestMessages,
         tools: AI_TOOLS,
         // Use 'auto' instead of 'required' to allow AI to ask for clarification if needed

@@ -196,6 +196,37 @@ test.describe('Kiss & Ride — schedule page', () => {
     await expect(page.getByTestId('school-next')).toHaveCount(0)
   })
 
+  test('a visible home link is the first thing in the header, 44px tall, and goes to the locale home', async ({ page }) => {
+    await open(page)
+    const home = page.getByTestId('back-home')
+    await expect(home).toHaveText('לדף הבית')
+    await expect(home).toHaveAttribute('href', '/he')
+    const box = await home.boundingBox()
+    expect(box && box.height).toBeGreaterThanOrEqual(44)
+
+    // It sits above the title and does not push the class picker off the first screen
+    const title = await page.getByRole('heading', { level: 1 }).boundingBox()
+    expect(box && title && box.y < title.y).toBe(true)
+    const select = await page.getByTestId('class-select').boundingBox()
+    expect(select && select.y + select.height).toBeLessThan(812)
+
+    await home.click()
+    await expect(page).toHaveURL(/\/he\/?$/)
+  })
+
+  test('the home link works in Russian and nothing overflows at 320px', async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 640 })
+    await open(page, '/ru/kiss-and-ride')
+    const home = page.getByTestId('back-home')
+    await expect(home).toHaveText('На главную')
+    await expect(home).toHaveAttribute('href', '/ru')
+    const { sw, cw } = await page.evaluate(() => ({
+      sw: document.documentElement.scrollWidth,
+      cw: document.documentElement.clientWidth,
+    }))
+    expect(sw).toBe(cw)
+  })
+
   test('renders in Russian with LTR direction', async ({ page }) => {
     await open(page, '/ru/kiss-and-ride')
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Поцелуй и поезжай')

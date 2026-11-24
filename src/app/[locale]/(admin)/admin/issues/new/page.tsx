@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { AlertTriangle, User, Phone, Save } from 'lucide-react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { useTranslations } from 'next-intl'
+import { AdminFormSection, AdminPageHeader } from '@/components/features/admin'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -15,47 +16,51 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 
-const issueSchema = z.object({
-  title: z.string().min(2, 'כותרת חייבת להכיל לפחות 2 תווים'),
-  description: z.string().min(10, 'תיאור חייב להכיל לפחות 10 תווים'),
-  category: z.enum(['safety', 'maintenance', 'academic', 'social', 'financial', 'other']),
-  priority: z.enum(['low', 'normal', 'high', 'critical']),
-  status: z.enum(['open', 'in_progress', 'resolved', 'closed']),
-  reporter_name: z.string().min(2, 'שם המדווח נדרש'),
-  reporter_contact: z.string().optional(),
-  assigned_to: z.string().optional(),
-  attachment_urls: z.array(z.string()).optional()
-})
+function createIssueSchema(messages: {
+  titleMin: string
+  descriptionMin: string
+  reporterRequired: string
+}) {
+  return z.object({
+    title: z.string().min(2, messages.titleMin),
+    description: z.string().min(10, messages.descriptionMin),
+    category: z.enum(['safety', 'maintenance', 'academic', 'social', 'financial', 'other']),
+    priority: z.enum(['low', 'normal', 'high', 'critical']),
+    status: z.enum(['open', 'in_progress', 'resolved', 'closed']),
+    reporter_name: z.string().min(2, messages.reporterRequired),
+    reporter_contact: z.string().optional(),
+    assigned_to: z.string().optional(),
+    attachment_urls: z.array(z.string()).optional()
+  })
+}
 
-type IssueFormData = z.infer<typeof issueSchema>
+type IssueFormData = z.infer<ReturnType<typeof createIssueSchema>>
 
-const categoryOptions = [
-  { value: 'safety', label: 'בטיחות' },
-  { value: 'maintenance', label: 'תחזוקה' },
-  { value: 'academic', label: 'לימודי' },
-  { value: 'social', label: 'חברתי' },
-  { value: 'financial', label: 'כספי' },
-  { value: 'other', label: 'אחר' }
-]
-
+const categoryValues = ['safety', 'maintenance', 'academic', 'social', 'financial', 'other'] as const
 const priorityOptions = [
-  { value: 'low', label: 'נמוכה', color: 'text-gray-600' },
-  { value: 'normal', label: 'רגילה', color: 'text-blue-600' },
-  { value: 'high', label: 'גבוהה', color: 'text-orange-600' },
-  { value: 'critical', label: 'קריטי', color: 'text-red-600' }
-]
-
-const statusOptions = [
-  { value: 'open', label: 'פתוח' },
-  { value: 'in_progress', label: 'בטיפול' },
-  { value: 'resolved', label: 'נפתר' },
-  { value: 'closed', label: 'סגור' }
-]
+  { value: 'low', color: 'text-gray-600' },
+  { value: 'normal', color: 'text-blue-600' },
+  { value: 'high', color: 'text-orange-600' },
+  { value: 'critical', color: 'text-red-600' }
+] as const
+const statusValues = ['open', 'in_progress', 'resolved', 'closed'] as const
 
 export default function NewIssuePage() {
+  const t = useTranslations('admin.records.issues.new')
+  const tc = useTranslations('admin.common')
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [attachmentUrls, setAttachmentUrls] = useState<string[]>([])
+
+  const issueSchema = useMemo(
+    () =>
+      createIssueSchema({
+        titleMin: t('validation.titleMin'),
+        descriptionMin: t('validation.descriptionMin'),
+        reporterRequired: t('validation.reporterRequired'),
+      }),
+    [t]
+  )
 
   const {
     register,
@@ -97,215 +102,186 @@ export default function NewIssuePage() {
       const result = await response.json()
 
       if (result.success) {
-        toast.success('הבעיה דווחה בהצלחה!')
+        toast.success(t('toastCreated'))
         router.push('/issues')
       } else {
-        toast.error(result.error || 'שגיאה בדיווח הבעיה')
+        toast.error(result.error || t('toastCreateError'))
       }
     } catch (error) {
       console.error('Error creating issue:', error)
-      toast.error('שגיאה בדיווח הבעיה')
+      toast.error(t('toastCreateError'))
     } finally {
       setIsSubmitting(false)
     }
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl md:text-3xl font-bold">דיווח על בעיה חדשה</h1>
-        <p className="text-muted-foreground mt-2">
-          דווח על בעיה שדורשת טיפול של ועד ההורים
-        </p>
-      </div>
+    <div className="space-y-4">
+      <AdminPageHeader title={t('title')} subtitle={t('subtitle')} backHref="/admin/more" />
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        {/* Basic Information */}
-        <Card>
-          <CardHeader>
-            <CardTitle>פרטי הבעיה</CardTitle>
-            <CardDescription>מידע בסיסי על הבעיה</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="title">כותרת הבעיה *</Label>
-              <Input
-                id="title"
-                {...register('title')}
-                placeholder="תיאור קצר של הבעיה"
-                className={errors.title ? 'border-red-500' : ''}
-              />
-              {errors.title && (
-                <p className="text-sm text-red-500 mt-1">{errors.title.message}</p>
-              )}
-            </div>
-
-            <div>
-              <Label htmlFor="description">תיאור מפורט *</Label>
-              <Textarea
-                id="description"
-                {...register('description')}
-                placeholder="תאר את הבעיה בפירוט..."
-                rows={6}
-                className={errors.description ? 'border-red-500' : ''}
-              />
-              {errors.description && (
-                <p className="text-sm text-red-500 mt-1">{errors.description.message}</p>
-              )}
-            </div>
-
-            <div className="grid gap-4 md:grid-cols-3">
-              <div>
-                <Label htmlFor="category">קטגוריה</Label>
-                <Select
-                  onValueChange={(value) => setValue('category', value as any)}
-                  defaultValue="other"
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categoryOptions.map(option => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label htmlFor="priority">עדיפות</Label>
-                <Select
-                  onValueChange={(value) => setValue('priority', value as any)}
-                  defaultValue="normal"
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {priorityOptions.map(option => (
-                      <SelectItem key={option.value} value={option.value}>
-                        <span className={option.color}>{option.label}</span>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label htmlFor="status">סטטוס</Label>
-                <Select
-                  onValueChange={(value) => setValue('status', value as any)}
-                  defaultValue="open"
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {statusOptions.map(option => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            {selectedPriority === 'critical' && (
-              <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-                <div className="flex items-center gap-2 text-red-800">
-                  <AlertTriangle className="h-5 w-5" />
-                  <p className="font-medium">בעיה קריטית</p>
-                </div>
-                <p className="text-sm text-red-700 mt-1">
-                  בעיות קריטיות יטופלו בעדיפות עליונה ויקבלו התייחסות מיידית
-                </p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Reporter Information */}
-        <Card>
-          <CardHeader>
-            <CardTitle>פרטי המדווח</CardTitle>
-            <CardDescription>מי מדווח על הבעיה</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="reporter_name">שם המדווח *</Label>
-              <div className="relative">
-                <User className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="reporter_name"
-                  {...register('reporter_name')}
-                  placeholder="שם מלא"
-                  className={`pr-10 ${errors.reporter_name ? 'border-red-500' : ''}`}
-                />
-              </div>
-              {errors.reporter_name && (
-                <p className="text-sm text-red-500 mt-1">{errors.reporter_name.message}</p>
-              )}
-            </div>
-
-            <div>
-              <Label htmlFor="reporter_contact">פרטי קשר (אופציונלי)</Label>
-              <div className="relative">
-                <Phone className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="reporter_contact"
-                  {...register('reporter_contact')}
-                  placeholder="טלפון או אימייל"
-                  className="pr-10"
-                />
-              </div>
-            </div>
-
-            <div>
-              <Label htmlFor="assigned_to">מוקצה ל (אופציונלי)</Label>
-              <Input
-                id="assigned_to"
-                {...register('assigned_to')}
-                placeholder="שם האחראי לטיפול"
-              />
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Attachments */}
-        <Card>
-          <CardHeader>
-            <CardTitle>קבצים מצורפים</CardTitle>
-            <CardDescription>צרף תמונות או מסמכים רלוונטיים</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <FileUpload
-              value={attachmentUrls}
-              onChange={(urls) => setAttachmentUrls(urls as string[])}
-              multiple={true}
-              accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-              maxSize={10}
-              bucket="issues"
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <AdminFormSection title={t('detailsTitle')} description={t('detailsDescription')}>
+          <div>
+            <Label htmlFor="title">{t('titleLabel')}</Label>
+            <Input
+              id="title"
+              {...register('title')}
+              placeholder={t('titlePlaceholder')}
+              className={`h-11 ${errors.title ? 'border-red-500' : ''}`}
             />
-          </CardContent>
-        </Card>
+            {errors.title && (
+              <p className="mt-1 text-sm text-red-500">{errors.title.message}</p>
+            )}
+          </div>
 
-        {/* Actions */}
-        <div className="flex flex-col sm:flex-row gap-3">
+          <div>
+            <Label htmlFor="description">{t('descriptionLabel')}</Label>
+            <Textarea
+              id="description"
+              {...register('description')}
+              placeholder={t('descriptionPlaceholder')}
+              rows={6}
+              className={errors.description ? 'border-red-500' : ''}
+            />
+            {errors.description && (
+              <p className="mt-1 text-sm text-red-500">{errors.description.message}</p>
+            )}
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-3">
+            <div>
+              <Label htmlFor="category">{t('categoryLabel')}</Label>
+              <Select
+                onValueChange={(value) => setValue('category', value as IssueFormData['category'])}
+                defaultValue="other"
+              >
+                <SelectTrigger className="h-11">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {categoryValues.map(value => (
+                    <SelectItem key={value} value={value}>
+                      {t(`category.${value}`)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="priority">{t('priorityLabel')}</Label>
+              <Select
+                onValueChange={(value) => setValue('priority', value as IssueFormData['priority'])}
+                defaultValue="normal"
+              >
+                <SelectTrigger className="h-11">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {priorityOptions.map(option => (
+                    <SelectItem key={option.value} value={option.value}>
+                      <span className={option.color}>{t(`priority.${option.value}`)}</span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="status">{t('statusLabel')}</Label>
+              <Select
+                onValueChange={(value) => setValue('status', value as IssueFormData['status'])}
+                defaultValue="open"
+              >
+                <SelectTrigger className="h-11">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {statusValues.map(value => (
+                    <SelectItem key={value} value={value}>
+                      {t(`status.${value}`)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {selectedPriority === 'critical' && (
+            <div className="rounded-xl border border-red-200 bg-red-50 p-4">
+              <div className="flex items-center gap-2 text-red-800">
+                <AlertTriangle className="h-5 w-5" aria-hidden="true" />
+                <p className="font-medium">{t('criticalTitle')}</p>
+              </div>
+              <p className="mt-1 text-sm text-red-700">{t('criticalText')}</p>
+            </div>
+          )}
+        </AdminFormSection>
+
+        <AdminFormSection title={t('reporterTitle')} description={t('reporterDescription')}>
+          <div>
+            <Label htmlFor="reporter_name">{t('reporterNameLabel')}</Label>
+            <div className="relative">
+              <User className="absolute start-3 top-3.5 h-4 w-4 text-muted-foreground" aria-hidden="true" />
+              <Input
+                id="reporter_name"
+                {...register('reporter_name')}
+                placeholder={t('reporterNamePlaceholder')}
+                className={`h-11 ps-10 ${errors.reporter_name ? 'border-red-500' : ''}`}
+              />
+            </div>
+            {errors.reporter_name && (
+              <p className="mt-1 text-sm text-red-500">{errors.reporter_name.message}</p>
+            )}
+          </div>
+
+          <div>
+            <Label htmlFor="reporter_contact">{t('reporterContactLabel')}</Label>
+            <div className="relative">
+              <Phone className="absolute start-3 top-3.5 h-4 w-4 text-muted-foreground" aria-hidden="true" />
+              <Input
+                id="reporter_contact"
+                {...register('reporter_contact')}
+                placeholder={t('reporterContactPlaceholder')}
+                className="h-11 ps-10"
+              />
+            </div>
+          </div>
+
+          <div>
+            <Label htmlFor="assigned_to">{t('assignedToLabel')}</Label>
+            <Input
+              id="assigned_to"
+              {...register('assigned_to')}
+              placeholder={t('assignedToPlaceholder')}
+              className="h-11"
+            />
+          </div>
+        </AdminFormSection>
+
+        <AdminFormSection title={t('attachmentsTitle')} description={t('attachmentsDescription')}>
+          <FileUpload
+            value={attachmentUrls}
+            onChange={(urls) => setAttachmentUrls(urls as string[])}
+            multiple={true}
+            accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+            maxSize={10}
+            bucket="issues"
+          />
+        </AdminFormSection>
+
+        <div className="flex flex-col gap-2">
           <Button
             type="submit"
             disabled={isSubmitting}
-            className="flex-1"
+            className="h-11 w-full bg-[#003153] text-white hover:bg-[#003153]/90"
           >
             {isSubmitting ? (
-              <>טוען...</>
+              <>{tc('loading')}</>
             ) : (
               <>
-                <Save className="h-4 w-4 ml-2" />
-                דווח על הבעיה
+                <Save className="me-2 h-4 w-4" aria-hidden="true" />
+                {t('submit')}
               </>
             )}
           </Button>
@@ -313,9 +289,9 @@ export default function NewIssuePage() {
             type="button"
             variant="outline"
             onClick={() => router.back()}
-            className="sm:w-auto"
+            className="h-11 w-full"
           >
-            ביטול
+            {tc('cancel')}
           </Button>
         </div>
       </form>

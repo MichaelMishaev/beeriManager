@@ -1,14 +1,18 @@
 import OpenAI from 'openai'
 
-// Initialize OpenAI client with GPT-5.1
+// Initialize OpenAI client
 export const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 })
 
 // Model configuration
 export const AI_CONFIG = {
-  model: 'gpt-5.1', // GPT-5.1 for superior long-context handling and better reasoning
+  model: 'gpt-6.1-terra', // GPT-6.1 Terra: fast, efficient, 1.05M context
   max_completion_tokens: 5000, // Extra headroom for complex responses
+  // Terra defaults to medium reasoning, which Chat Completions rejects together with function
+  // tools ("Function tools with reasoning_effort are not supported"). 'none' also matches the
+  // previous gpt-5.1 default and keeps reasoning tokens from eating max_completion_tokens.
+  reasoning_effort: 'none',
 } as const
 
 // Focused prompt for summarizing long official messages before extraction

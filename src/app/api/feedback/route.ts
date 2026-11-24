@@ -51,7 +51,7 @@ export async function GET(req: NextRequest) {
     // Order by created date
     query = query
       .order('created_at', { ascending: false })
-      .limit(Math.min(limit, 100))
+      .limit(Math.min(limit, 1000))
 
     const { data, error } = await query
 

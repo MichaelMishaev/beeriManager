@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useCallback } from 'react'
-import { Phone, Sparkles } from 'lucide-react'
+import { AlertTriangle, Check, Phone, Sparkles } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
@@ -16,6 +17,7 @@ export function CreatorPhoneInput({
   onChange,
   error
 }: CreatorPhoneInputProps) {
+  const t = useTranslations('admin.events')
   const [isFocused, setIsFocused] = useState(false)
 
   // Auto-format Israeli phone: 05X-XXX-XXXX
@@ -43,12 +45,12 @@ export function CreatorPhoneInput({
           htmlFor="creator_phone"
           className="flex items-center gap-2 text-sm font-medium"
         >
-          <Phone className="h-4 w-4 text-[#13ec80]" />
-          <span>מספר טלפון ליצירת קשר</span>
+          <Phone className="h-4 w-4 text-[#0D98BA]" />
+          <span>{t('phone.label')}</span>
         </Label>
 
         <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
-          אופציונלי
+          {t('phone.optional')}
         </span>
       </div>
 
@@ -68,18 +70,16 @@ export function CreatorPhoneInput({
           className={`
             text-lg tracking-wide text-center
             transition-all duration-200
-            ${isFocused ? 'ring-2 ring-[#13ec80]/30 border-[#13ec80]' : ''}
+            ${isFocused ? 'ring-2 ring-[#0D98BA]/30 border-[#0D98BA]' : ''}
             ${error ? 'border-red-500 ring-2 ring-red-500/20' : ''}
-            ${isValid && hasValue ? 'border-[#13ec80] bg-[#13ec80]/5' : ''}
+            ${isValid && hasValue ? 'border-[#0D98BA] bg-[#0D98BA]/5' : ''}
           `}
         />
 
         {isValid && hasValue && (
-          <div className="absolute left-3 top-1/2 -translate-y-1/2">
-            <div className="flex items-center justify-center w-5 h-5 rounded-full bg-[#13ec80]">
-              <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-              </svg>
+          <div className="absolute end-3 top-1/2 -translate-y-1/2">
+            <div className="flex items-center justify-center w-5 h-5 rounded-full bg-[#0D98BA]">
+              <Check className="w-3 h-3 text-white" strokeWidth={3} aria-hidden="true" />
             </div>
           </div>
         )}
@@ -87,7 +87,7 @@ export function CreatorPhoneInput({
 
       {error && (
         <p id="phone-error" className="text-sm text-red-600 flex items-center gap-1" role="alert">
-          <span>⚠️</span> {error}
+          <AlertTriangle className="h-4 w-4" aria-hidden="true" /> {error}
         </p>
       )}
 
@@ -97,16 +97,16 @@ export function CreatorPhoneInput({
           flex items-start gap-2 p-3 rounded-lg
           transition-colors duration-200
           ${hasValue && isValid
-            ? 'bg-[#13ec80]/10 border border-[#13ec80]/20'
+            ? 'bg-[#0D98BA]/10 border border-[#0D98BA]/20'
             : 'bg-muted/50'
           }
         `}
       >
-        <Sparkles className={`h-4 w-4 mt-0.5 flex-shrink-0 ${hasValue && isValid ? 'text-[#13ec80]' : 'text-muted-foreground'}`} />
-        <p className={`text-sm ${hasValue && isValid ? 'text-[#13ec80] font-medium' : 'text-muted-foreground'}`}>
+        <Sparkles className={`h-4 w-4 mt-0.5 flex-shrink-0 ${hasValue && isValid ? 'text-[#0D98BA]' : 'text-muted-foreground'}`} />
+        <p className={`text-sm ${hasValue && isValid ? 'text-[#0D98BA] font-medium' : 'text-muted-foreground'}`}>
           {hasValue && isValid
-            ? '✓ מעולה! תוכל למצוא את האירוע בעמוד "האירועים שלי"'
-            : 'הזן מספר טלפון כדי למצוא את האירוע בקלות דרך עמוד "האירועים שלי"'
+            ? t('phone.hintValid')
+            : t('phone.hintEmpty')
           }
         </p>
       </div>

@@ -2,6 +2,7 @@
 
 import React from 'react'
 import { Plus, MoreVertical, Download, Package } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,6 +25,7 @@ export function MobileBottomBar({
   onToggleSupplierBuilder,
   onShowHelp
 }: MobileBottomBarProps) {
+  const t = useTranslations('admin.prom.quotes.bottomBar')
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg z-50 lg:hidden safe-area-inset-bottom">
       <div className="flex gap-3 p-4">
@@ -39,10 +41,10 @@ export function MobileBottomBar({
             flex items-center justify-center gap-2
             focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-purple-500
           "
-          aria-label="הוסף הצעת מחיר חדשה"
+          aria-label={t('addAria')}
         >
           <Plus className="h-6 w-6" />
-          הוסף הצעה
+          {t('add')}
         </button>
 
         <DropdownMenu>
@@ -56,7 +58,7 @@ export function MobileBottomBar({
                 flex items-center justify-center
                 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-gray-500
               "
-              aria-label="תפריט פעולות נוספות"
+              aria-label={t('moreAria')}
             >
               <MoreVertical className="h-6 w-6" />
             </button>
@@ -64,26 +66,26 @@ export function MobileBottomBar({
           <DropdownMenuContent align="end" className="w-56">
             {onExportCSV && (
               <DropdownMenuItem onClick={onExportCSV} className="min-h-[48px] text-base">
-                <Download className="ml-2 h-5 w-5" />
-                <span>ייצוא ל-CSV</span>
+                <Download className="me-2 h-5 w-5" />
+                <span>{t('exportCsv')}</span>
               </DropdownMenuItem>
             )}
             {onTogglePackageBuilder && (
               <DropdownMenuItem onClick={onTogglePackageBuilder} className="min-h-[48px] text-base">
-                <Package className="ml-2 h-5 w-5" />
-                <span>בונה חבילה</span>
+                <Package className="me-2 h-5 w-5" />
+                <span>{t('packageBuilder')}</span>
               </DropdownMenuItem>
             )}
             {onToggleSupplierBuilder && (
               <DropdownMenuItem onClick={onToggleSupplierBuilder} className="min-h-[48px] text-base">
-                <Package className="ml-2 h-5 w-5" />
-                <span>בונה ספקים</span>
+                <Package className="me-2 h-5 w-5" />
+                <span>{t('supplierBuilder')}</span>
               </DropdownMenuItem>
             )}
             {onShowHelp && (
               <DropdownMenuItem onClick={onShowHelp} className="min-h-[48px] text-base">
-                <span className="ml-2">❓</span>
-                <span>עזרה</span>
+                <span className="me-2">❓</span>
+                <span>{t('help')}</span>
               </DropdownMenuItem>
             )}
           </DropdownMenuContent>

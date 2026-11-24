@@ -178,7 +178,7 @@ export function NotificationBell() {
               {/* Ideas Notification */}
               {counts.ideas > 0 && (
                 <Link
-                  href="/admin/ideas"
+                  href="/admin/inbox?tab=ideas"
                   onClick={handleNavigation}
                   className="flex items-start gap-3 p-3 rounded-lg hover:bg-accent transition-colors"
                 >
@@ -202,7 +202,7 @@ export function NotificationBell() {
               {/* Feedback Notification */}
               {counts.feedback > 0 && (
                 <Link
-                  href="/admin/feedback"
+                  href="/admin/inbox?tab=feedback"
                   onClick={handleNavigation}
                   className="flex items-start gap-3 p-3 rounded-lg hover:bg-accent transition-colors"
                 >

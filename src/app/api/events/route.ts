@@ -70,8 +70,10 @@ export async function GET(req: NextRequest) {
       query = query.order('start_datetime', { ascending: false })
     }
 
-    // Apply limit
-    query = query.limit(Math.min(limit, 100)) // Max 100 events
+    // Apply limit: 100 for the public, 1000 for a logged-in admin (the admin list shows all)
+    const token = req.cookies.get('auth-token')
+    const isAdmin = !!token && !!(await verifyJWT(token.value))
+    query = query.limit(Math.min(limit, isAdmin ? 1000 : 100))
 
     const { data, error } = await query
 
@@ -161,68 +163,6 @@ export async function POST(req: NextRequest) {
     console.error('Events POST error:', error)
     return NextResponse.json(
       { success: false, error: 'שגיאה ביצירת האירוע' },
-      { status: 500 }
-    )
-  }
-}
-
-export async function DELETE(req: NextRequest) {
-  try {
-    // Only admins can delete events
-    const token = req.cookies.get('auth-token')
-    if (!token || !(await verifyJWT(token.value))) {
-      return NextResponse.json(
-        { success: false, error: 'נדרשת הרשאת מנהל' },
-        { status: 401 }
-      )
-    }
-
-    const supabase = await createClient()
-
-    // Delete all events (get all IDs first, then delete)
-    const { data: allEvents, error: fetchError } = await supabase
-      .from('events')
-      .select('id')
-
-    if (fetchError) {
-      console.error('Events fetch error:', fetchError)
-      return NextResponse.json(
-        { success: false, error: 'שגיאה בטעינת האירועים' },
-        { status: 500 }
-      )
-    }
-
-    if (!allEvents || allEvents.length === 0) {
-      return NextResponse.json({
-        success: true,
-        message: 'אין אירועים למחיקה'
-      })
-    }
-
-    // Bulk delete all events at once (row-level triggers still fire per row)
-    const eventIds = allEvents.map(e => e.id)
-    const { error: deleteError } = await supabase
-      .from('events')
-      .delete()
-      .in('id', eventIds)
-
-    if (deleteError) {
-      console.error('Bulk delete error:', deleteError)
-      return NextResponse.json(
-        { success: false, error: 'שגיאה במחיקת האירועים' },
-        { status: 500 }
-      )
-    }
-
-    return NextResponse.json({
-      success: true,
-      message: `${eventIds.length} אירועים נמחקו בהצלחה`
-    })
-
-  } catch (error) {
-    console.error('Events DELETE error:', error)
-    return NextResponse.json(
-      { success: false, error: 'שגיאה במחיקת האירועים' },
       { status: 500 }
     )
   }

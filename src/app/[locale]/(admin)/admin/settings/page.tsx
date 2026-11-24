@@ -1,15 +1,22 @@
 'use client'
 
 import { useState } from 'react'
-import { Settings, Save, Key, Shield, Palette, Lock } from 'lucide-react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Save, Key, Lock } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
-import { Separator } from '@/components/ui/separator'
 import { toast } from 'sonner'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import {
+  AdminFormSection,
+  AdminGroup,
+  AdminPageHeader,
+  AdminRow,
+  AdminSegmentedTabs
+} from '@/components/features/admin'
+
+type SettingsTab = 'general' | 'features' | 'appearance'
 
 interface AppSettings {
   // General
@@ -38,6 +45,8 @@ interface AppSettings {
 }
 
 export default function AdminSettingsPage() {
+  const t = useTranslations('admin.tasks.settings')
+  const [activeTab, setActiveTab] = useState<SettingsTab>('general')
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -83,7 +92,7 @@ export default function AdminSettingsPage() {
       })
 
       if (response.status === 401) {
-        toast.error('סיסמה שגויה')
+        toast.error(t('toast.wrongPassword'))
         setPassword('')
         return
       }
@@ -91,7 +100,7 @@ export default function AdminSettingsPage() {
       setIsAuthenticated(true)
       fetchSettings()
     } catch (error) {
-      toast.error('שגיאה באימות')
+      toast.error(t('toast.authError'))
       setPassword('')
     }
   }
@@ -107,7 +116,7 @@ export default function AdminSettingsPage() {
       }
     } catch (error) {
       console.error('Error fetching settings:', error)
-      toast.error('שגיאה בטעינת ההגדרות')
+      toast.error(t('toast.loadError'))
     } finally {
       setIsLoading(false)
     }
@@ -128,13 +137,13 @@ export default function AdminSettingsPage() {
       const data = await response.json()
 
       if (data.success) {
-        toast.success('ההגדרות נשמרו בהצלחה')
+        toast.success(t('toast.saveSuccess'))
       } else {
-        toast.error(data.error || 'שגיאה בשמירת ההגדרות')
+        toast.error(data.error || t('toast.saveError'))
       }
     } catch (error) {
       console.error('Error saving settings:', error)
-      toast.error('שגיאה בשמירת ההגדרות')
+      toast.error(t('toast.saveError'))
     } finally {
       setIsSaving(false)
     }
@@ -142,323 +151,234 @@ export default function AdminSettingsPage() {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <Card className="w-full max-w-md">
-          <CardHeader>
-            <div className="flex items-center justify-center mb-4">
-              <div className="p-3 rounded-full bg-primary/10">
-                <Lock className="h-8 w-8 text-primary" />
-              </div>
+      <div className="space-y-4">
+        <AdminPageHeader title={t('title')} backHref="/admin/more" />
+        <AdminFormSection>
+          <div className="flex flex-col items-center text-center">
+            <div className="mb-3 rounded-full bg-primary/10 p-3">
+              <Lock className="h-8 w-8 text-primary" />
             </div>
-            <CardTitle className="text-center">גישה מוגבלת</CardTitle>
-            <CardDescription className="text-center">
-              נדרשת סיסמת מנהל לגישה להגדרות
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handlePasswordSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="password">סיסמת מנהל</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="הזן סיסמה"
-                  className="text-center"
-                  autoFocus
-                />
-              </div>
-              <Button type="submit" className="w-full">
-                <Key className="h-4 w-4 ml-2" />
-                כניסה
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
+            <h2 className="text-[15px] font-bold text-[#003153]">{t('gate.title')}</h2>
+            <p className="mt-0.5 text-sm text-gray-500">{t('gate.description')}</p>
+          </div>
+          <form onSubmit={handlePasswordSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="password">{t('gate.passwordLabel')}</Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder={t('gate.passwordPlaceholder')}
+                className="text-center"
+                autoFocus
+              />
+            </div>
+            <Button type="submit" className="min-h-[44px] w-full bg-[#003153] hover:bg-[#003153]/90">
+              <Key className="me-2 h-4 w-4" />
+              {t('gate.enter')}
+            </Button>
+          </form>
+        </AdminFormSection>
       </div>
     )
   }
 
   if (isLoading) {
     return (
-      <div className="space-y-6">
-        <div className="h-8 w-48 bg-gray-200 rounded animate-pulse" />
-        <Card>
-          <CardContent className="p-8">
-            <div className="space-y-4">
-              {[...Array(5)].map((_, i) => (
-                <div key={i} className="h-12 bg-gray-200 rounded animate-pulse" />
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+      <div className="space-y-4">
+        <AdminPageHeader title={t('title')} backHref="/admin/more" />
+        <div className="space-y-3 rounded-2xl bg-white p-6">
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="h-12 animate-pulse rounded bg-gray-200" />
+          ))}
+        </div>
       </div>
     )
   }
 
-  return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-start">
-        <div>
-          <h1 className="text-3xl font-bold">הגדרות מערכת</h1>
-          <p className="text-muted-foreground mt-2">
-            ניהול הגדרות כלליות ותצורה של המערכת
-          </p>
-        </div>
-        <Button onClick={saveSettings} disabled={isSaving}>
-          <Save className="h-4 w-4 ml-2" />
-          {isSaving ? 'שומר...' : 'שמור שינויים'}
-        </Button>
+  const colorField = (
+    id: 'primary_color' | 'secondary_color',
+    label: string,
+    placeholder: string
+  ) => (
+    <div className="space-y-2">
+      <Label htmlFor={id}>{label}</Label>
+      <div className="flex gap-2">
+        <Input
+          id={id}
+          type="color"
+          value={settings[id]}
+          onChange={(e) => setSettings({ ...settings, [id]: e.target.value })}
+          className="h-10 w-20"
+        />
+        <Input
+          value={settings[id]}
+          onChange={(e) => setSettings({ ...settings, [id]: e.target.value })}
+          placeholder={placeholder}
+          dir="ltr"
+          className="text-start"
+        />
       </div>
+    </div>
+  )
 
-      <Tabs defaultValue="general" dir="rtl">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="general">כללי</TabsTrigger>
-          <TabsTrigger value="features">תכונות</TabsTrigger>
-          <TabsTrigger value="appearance">תצוגה</TabsTrigger>
-        </TabsList>
+  const featureRows: {
+    key: 'registration_enabled' | 'feedback_enabled' | 'vendors_require_password'
+    label: string
+    description: string
+  }[] = [
+    { key: 'registration_enabled', label: t('features.registration.label'), description: t('features.registration.description') },
+    { key: 'feedback_enabled', label: t('features.feedback.label'), description: t('features.feedback.description') },
+    { key: 'vendors_require_password', label: t('features.vendorsPassword.label'), description: t('features.vendorsPassword.description') },
+  ]
 
-        {/* General Settings */}
-        <TabsContent value="general" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Settings className="h-5 w-5" />
-                פרטי הועד
-              </CardTitle>
-              <CardDescription>
-                מידע בסיסי על ועד ההורים ובית הספר
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="committee_name">שם הועד</Label>
-                  <Input
-                    id="committee_name"
-                    value={settings.committee_name}
-                    onChange={(e) => setSettings({ ...settings, committee_name: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="school_name">שם בית הספר</Label>
-                  <Input
-                    id="school_name"
-                    value={settings.school_name}
-                    onChange={(e) => setSettings({ ...settings, school_name: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="academic_year">שנת לימודים</Label>
-                  <Input
-                    id="academic_year"
-                    value={settings.academic_year}
-                    onChange={(e) => setSettings({ ...settings, academic_year: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="committee_email">אימייל הועד</Label>
-                  <Input
-                    id="committee_email"
-                    type="email"
-                    value={settings.committee_email || ''}
-                    onChange={(e) => setSettings({ ...settings, committee_email: e.target.value || null })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="committee_phone">טלפון הועד</Label>
-                  <Input
-                    id="committee_phone"
-                    value={settings.committee_phone || ''}
-                    onChange={(e) => setSettings({ ...settings, committee_phone: e.target.value || null })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="school_address">כתובת בית הספר</Label>
-                  <Input
-                    id="school_address"
-                    value={settings.school_address || ''}
-                    onChange={(e) => setSettings({ ...settings, school_address: e.target.value || null })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="whatsapp_group_link">קישור לקבוצת WhatsApp</Label>
-                  <Input
-                    id="whatsapp_group_link"
-                    value={settings.whatsapp_group_link || ''}
-                    onChange={(e) => setSettings({ ...settings, whatsapp_group_link: e.target.value || null })}
-                    placeholder="https://chat.whatsapp.com/..."
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+  return (
+    <div className="space-y-4">
+      <AdminPageHeader title={t('title')} subtitle={t('subtitle')} backHref="/admin/more" />
 
-        {/* Features Settings */}
-        <TabsContent value="features" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Shield className="h-5 w-5" />
-                הפעלת תכונות
-              </CardTitle>
-              <CardDescription>
-                בחר אילו תכונות להפעיל במערכת
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label>הרשמה לאירועים</Label>
-                  <p className="text-sm text-muted-foreground">
-                    אפשר להורים להירשם לאירועים
-                  </p>
-                </div>
+      <AdminSegmentedTabs<SettingsTab>
+        tabs={[
+          { value: 'general', label: t('tabs.general') },
+          { value: 'features', label: t('tabs.features') },
+          { value: 'appearance', label: t('tabs.appearance') },
+        ]}
+        value={activeTab}
+        onChange={setActiveTab}
+      />
+
+      {/* General Settings */}
+      {activeTab === 'general' && (
+        <AdminFormSection title={t('general.title')} description={t('general.description')}>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="committee_name">{t('general.committeeName')}</Label>
+              <Input
+                id="committee_name"
+                value={settings.committee_name}
+                onChange={(e) => setSettings({ ...settings, committee_name: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="school_name">{t('general.schoolName')}</Label>
+              <Input
+                id="school_name"
+                value={settings.school_name}
+                onChange={(e) => setSettings({ ...settings, school_name: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="academic_year">{t('general.academicYear')}</Label>
+              <Input
+                id="academic_year"
+                value={settings.academic_year}
+                onChange={(e) => setSettings({ ...settings, academic_year: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="committee_email">{t('general.committeeEmail')}</Label>
+              <Input
+                id="committee_email"
+                type="email"
+                value={settings.committee_email || ''}
+                onChange={(e) => setSettings({ ...settings, committee_email: e.target.value || null })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="committee_phone">{t('general.committeePhone')}</Label>
+              <Input
+                id="committee_phone"
+                value={settings.committee_phone || ''}
+                onChange={(e) => setSettings({ ...settings, committee_phone: e.target.value || null })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="school_address">{t('general.schoolAddress')}</Label>
+              <Input
+                id="school_address"
+                value={settings.school_address || ''}
+                onChange={(e) => setSettings({ ...settings, school_address: e.target.value || null })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="whatsapp_group_link">{t('general.whatsappLink')}</Label>
+              <Input
+                id="whatsapp_group_link"
+                value={settings.whatsapp_group_link || ''}
+                onChange={(e) => setSettings({ ...settings, whatsapp_group_link: e.target.value || null })}
+                placeholder="https://chat.whatsapp.com/..."
+                dir="ltr"
+                className="text-start"
+              />
+            </div>
+          </div>
+        </AdminFormSection>
+      )}
+
+      {/* Features Settings */}
+      {activeTab === 'features' && (
+        <AdminGroup title={t('features.title')} description={t('features.description')}>
+          {featureRows.map((row) => (
+            <AdminRow
+              key={row.key}
+              title={row.label}
+              subtitle={row.description}
+              testId={`admin-settings-feature-${row.key}`}
+              trailing={
                 <Switch
-                  checked={settings.registration_enabled}
-                  onCheckedChange={(checked) =>
-                    setSettings({ ...settings, registration_enabled: checked })
-                  }
+                  aria-label={row.label}
+                  checked={settings[row.key]}
+                  onCheckedChange={(checked) => setSettings({ ...settings, [row.key]: checked })}
                 />
-              </div>
+              }
+            />
+          ))}
+        </AdminGroup>
+      )}
 
-              <Separator />
+      {/* Appearance Settings */}
+      {activeTab === 'appearance' && (
+        <AdminFormSection title={t('appearance.title')} description={t('appearance.description')}>
+          {colorField('primary_color', t('appearance.primaryColor'), '#0D98BA')}
+          {colorField('secondary_color', t('appearance.secondaryColor'), '#FF8200')}
 
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label>משוב אנונימי</Label>
-                  <p className="text-sm text-muted-foreground">
-                    אפשר להורים לשלוח משוב באופן אנונימי
-                  </p>
-                </div>
-                <Switch
-                  checked={settings.feedback_enabled}
-                  onCheckedChange={(checked) =>
-                    setSettings({ ...settings, feedback_enabled: checked })
-                  }
-                />
-              </div>
+          <div className="space-y-2">
+            <Label htmlFor="max_file_size_mb">{t('appearance.maxFileSize')}</Label>
+            <Input
+              id="max_file_size_mb"
+              type="number"
+              min="1"
+              max="100"
+              value={settings.max_file_size_mb}
+              onChange={(e) => setSettings({ ...settings, max_file_size_mb: parseInt(e.target.value) || 10 })}
+            />
+          </div>
 
-              <Separator />
+          <div className="space-y-2">
+            <Label htmlFor="session_timeout_minutes">{t('appearance.sessionTimeout')}</Label>
+            <Input
+              id="session_timeout_minutes"
+              type="number"
+              min="30"
+              max="10080"
+              value={settings.session_timeout_minutes}
+              onChange={(e) => setSettings({ ...settings, session_timeout_minutes: parseInt(e.target.value) || 1440 })}
+            />
+            <p className="text-xs text-muted-foreground">{t('appearance.sessionTimeoutHint')}</p>
+          </div>
+        </AdminFormSection>
+      )}
 
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label>סיסמה לספקים</Label>
-                  <p className="text-sm text-muted-foreground">
-                    דרוש סיסמה לגישה לדף הספקים
-                  </p>
-                </div>
-                <Switch
-                  checked={settings.vendors_require_password}
-                  onCheckedChange={(checked) =>
-                    setSettings({ ...settings, vendors_require_password: checked })
-                  }
-                />
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-
-        {/* Appearance Settings */}
-        <TabsContent value="appearance" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Palette className="h-5 w-5" />
-                מראה וחוויית משתמש
-              </CardTitle>
-              <CardDescription>
-                התאמה אישית של הממשק
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="primary_color">צבע ראשי</Label>
-                <div className="flex gap-2">
-                  <Input
-                    id="primary_color"
-                    type="color"
-                    value={settings.primary_color}
-                    onChange={(e) => setSettings({ ...settings, primary_color: e.target.value })}
-                    className="w-20 h-10"
-                  />
-                  <Input
-                    value={settings.primary_color}
-                    onChange={(e) => setSettings({ ...settings, primary_color: e.target.value })}
-                    placeholder="#0D98BA"
-                  />
-                </div>
-              </div>
-
-              <Separator />
-
-              <div className="space-y-2">
-                <Label htmlFor="secondary_color">צבע משני</Label>
-                <div className="flex gap-2">
-                  <Input
-                    id="secondary_color"
-                    type="color"
-                    value={settings.secondary_color}
-                    onChange={(e) => setSettings({ ...settings, secondary_color: e.target.value })}
-                    className="w-20 h-10"
-                  />
-                  <Input
-                    value={settings.secondary_color}
-                    onChange={(e) => setSettings({ ...settings, secondary_color: e.target.value })}
-                    placeholder="#FF8200"
-                  />
-                </div>
-              </div>
-
-              <Separator />
-
-              <div className="space-y-2">
-                <Label htmlFor="max_file_size_mb">גודל קובץ מקסימלי (MB)</Label>
-                <Input
-                  id="max_file_size_mb"
-                  type="number"
-                  min="1"
-                  max="100"
-                  value={settings.max_file_size_mb}
-                  onChange={(e) => setSettings({ ...settings, max_file_size_mb: parseInt(e.target.value) || 10 })}
-                />
-              </div>
-
-              <Separator />
-
-              <div className="space-y-2">
-                <Label htmlFor="session_timeout_minutes">זמן פג תוקף הפעלה (דקות)</Label>
-                <Input
-                  id="session_timeout_minutes"
-                  type="number"
-                  min="30"
-                  max="10080"
-                  value={settings.session_timeout_minutes}
-                  onChange={(e) => setSettings({ ...settings, session_timeout_minutes: parseInt(e.target.value) || 1440 })}
-                />
-                <p className="text-xs text-muted-foreground">
-                  1440 דקות = 24 שעות
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
-
-      {/* Save Button - Fixed at bottom */}
-      <div className="sticky bottom-4 flex justify-center">
+      {/* Save Button - sticks above the admin bottom bar */}
+      <div className="sticky bottom-[calc(env(safe-area-inset-bottom,0px)+5.5rem)] z-30 flex justify-center">
         <Button
           onClick={saveSettings}
           disabled={isSaving}
           size="lg"
-          className="shadow-lg"
+          className="min-h-[44px] bg-[#003153] shadow-lg hover:bg-[#003153]/90"
         >
-          <Save className="h-5 w-5 ml-2" />
-          {isSaving ? 'שומר...' : 'שמור את כל השינויים'}
+          <Save className="me-2 h-5 w-5" />
+          {isSaving ? t('saving') : t('saveAll')}
         </Button>
       </div>
     </div>

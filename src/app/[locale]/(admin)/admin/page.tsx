@@ -1,724 +1,97 @@
 'use client'
 
-import Link from 'next/link'
-import { useState, useEffect } from 'react'
-import { Calendar, CheckSquare, AlertTriangle, FileText, Users, DollarSign, MessageSquare, Settings, Plus, Edit, BarChart, HelpCircle, Ticket, Tags, Phone, Bell, Sparkles, GraduationCap, Store, Lightbulb } from 'lucide-react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog'
-import { createClient } from '@/lib/supabase/client'
-import { AdminSectionGroup } from '@/components/features/dashboard/AdminSectionGroup'
+import { Calendar, MessageSquare, MoreHorizontal, Sparkles, Ticket } from 'lucide-react'
+import { useTranslations } from 'next-intl'
+import { AdminGroup, AdminPageHeader, AdminRow } from '@/components/features/admin'
+import { useAdminCounts } from '@/hooks/useAdminCounts'
 
-const defaultAdminSections = [
-  {
-    id: 'events',
-    title: 'אירועים',
-    description: 'ניהול אירועים, הרשמות ולוח שנה',
-    icon: Calendar,
-    color: 'text-blue-600',
-    bgColor: 'bg-blue-50',
-    links: [
-      { href: '/admin/events/new', label: 'צור אירוע חדש', icon: Plus },
-      { href: '/events', label: 'רשימת אירועים', icon: Edit },
-      { href: '/admin/events/registrations', label: 'ניהול הרשמות', icon: Users }
-    ]
-  },
-  {
-    id: 'tasks',
-    title: 'משימות',
-    description: 'הקצאת משימות ומעקב ביצוע',
-    icon: CheckSquare,
-    color: 'text-green-600',
-    bgColor: 'bg-green-50',
-    links: [
-      { href: '/admin/tasks/new', label: 'צור משימה חדשה', icon: Plus },
-      { href: '/tasks', label: 'רשימת משימות', icon: Edit },
-      { href: '/admin/tasks/assign', label: 'הקצאת משימות', icon: Users }
-    ]
-  },
-  {
-    id: 'committees',
-    title: 'וועדות',
-    description: 'ניהול וועדות תחומיות ותחומי אחריות',
-    icon: Users,
-    color: 'text-teal-600',
-    bgColor: 'bg-teal-50',
-    links: [
-      { href: '/admin/committees/new', label: 'וועדה חדשה', icon: Plus },
-      { href: '/admin/committees', label: 'רשימת וועדות', icon: Edit }
-    ]
-  },
-  {
-    id: 'issues',
-    title: 'בעיות',
-    description: 'ניהול בעיות ופניות',
-    icon: AlertTriangle,
-    color: 'text-orange-600',
-    bgColor: 'bg-orange-50',
-    links: [
-      { href: '/admin/issues/new', label: 'דווח על בעיה', icon: Plus },
-      { href: '/issues', label: 'רשימת בעיות', icon: Edit },
-      { href: '/admin/issues/stats', label: 'סטטיסטיקות', icon: BarChart }
-    ]
-  },
-  {
-    id: 'protocols',
-    title: 'פרוטוקולים',
-    description: 'ניהול מסמכים ופרוטוקולים',
-    icon: FileText,
-    color: 'text-purple-600',
-    bgColor: 'bg-purple-50',
-    links: [
-      { href: '/admin/protocols/new', label: 'הוסף פרוטוקול', icon: Plus },
-      { href: '/protocols', label: 'ארכיון פרוטוקולים', icon: Edit },
-      { href: '/admin/protocols/upload', label: 'העלאת מסמכים', icon: FileText }
-    ]
-  },
-  {
-    id: 'vendors',
-    title: 'ספקים',
-    description: 'ניהול ספקים ונותני שירותים',
-    icon: Store,
-    color: 'text-rose-600',
-    bgColor: 'bg-rose-50',
-    links: [
-      { href: '/admin/vendors/new', label: 'ספק חדש', icon: Plus },
-      { href: '/admin/vendors', label: 'רשימת ספקים', icon: Edit }
-    ]
-  },
-  {
-    id: 'feedback',
-    title: 'משוב',
-    description: 'משוב אנונימי מהורים',
-    icon: MessageSquare,
-    color: 'text-indigo-600',
-    bgColor: 'bg-indigo-50',
-    links: [
-      { href: '/admin/feedback', label: 'צפייה במשובים', icon: MessageSquare },
-      { href: '/admin/feedback/stats', label: 'סטטיסטיקות', icon: BarChart },
-      { href: '/admin/feedback/export', label: 'ייצוא נתונים', icon: FileText }
-    ]
-  },
-  {
-    id: 'prom',
-    title: 'מסיבת סיום',
-    description: 'תכנון מסיבת סיום כיתה ו\' - השוואת מחירים והצבעות',
-    icon: GraduationCap,
-    color: 'text-pink-600',
-    bgColor: 'bg-pink-50',
-    links: [
-      { href: '/admin/prom/new', label: 'מסיבה חדשה', icon: Plus },
-      { href: '/admin/prom', label: 'ניהול מסיבות', icon: Edit },
-      { href: '/admin/prom', label: 'השוואת הצעות', icon: DollarSign }
-    ]
-  },
-  {
-    id: 'tickets',
-    title: 'כרטיסים',
-    description: 'כרטיסים למשחקי ספורט, הצגות ואירועים',
-    icon: Ticket,
-    color: 'text-orange-600',
-    bgColor: 'bg-orange-50',
-    links: [
-      { href: '/admin/tickets/new', label: 'כרטיס חדש', icon: Plus },
-      { href: '/admin/tickets', label: 'ניהול כרטיסים', icon: Edit },
-      { href: '/tickets', label: 'צפייה ציבורית', icon: Ticket }
-    ]
-  },
-  {
-    id: 'contacts',
-    title: 'אנשי קשר',
-    description: 'ניהול אנשי קשר חשובים בבית הספר',
-    icon: Phone,
-    color: 'text-cyan-600',
-    bgColor: 'bg-cyan-50',
-    links: [
-      { href: '/admin/contacts', label: 'ניהול אנשי קשר', icon: Edit }
-    ]
-  },
-  {
-    id: 'urgent',
-    title: 'הודעות דחופות',
-    description: 'ניהול הודעות דחופות ותזכורות (כולל חולצה לבנה)',
-    icon: Bell,
-    color: 'text-red-600',
-    bgColor: 'bg-red-50',
-    links: [
-      { href: '/admin/urgent', label: 'ניהול הודעות דחופות', icon: Edit }
-    ]
-  },
-  {
-    id: 'highlights',
-    title: 'קרוסלת הדגשות',
-    description: 'ניהול הדגשות להישגים, ספורט, פרסים ואירועים',
-    icon: Sparkles,
-    color: 'text-yellow-600',
-    bgColor: 'bg-yellow-50',
-    links: [
-      { href: '/admin/highlights', label: 'ניהול הדגשות', icon: Edit }
-    ]
-  },
-  {
-    id: 'notifications',
-    title: 'התראות Push',
-    description: 'שלח התראות למנויים (כולל תזכורות חולצה לבנה)',
-    icon: Bell,
-    color: 'text-purple-600',
-    bgColor: 'bg-purple-50',
-    links: [
-      { href: '/admin/notifications', label: 'שלח התראות', icon: Bell }
-    ]
-  },
-  {
-    id: 'skills',
-    title: 'מאגר מיומנויות',
-    description: 'מיומנויות הורים - מי יכול לעזור בתחומים שונים',
-    icon: Sparkles,
-    color: 'text-violet-600',
-    bgColor: 'bg-violet-50',
-    links: [
-      { href: '/surveys/skills', label: 'טופס למילוי', icon: Plus },
-      { href: '/admin/surveys/skills', label: 'צפייה בתשובות', icon: Edit },
-      { href: '/admin/surveys/skills', label: 'ייצוא לאקסל', icon: FileText }
-    ]
-  },
-  {
-    id: 'meetings',
-    title: 'פגישות ורעיונות',
-    description: 'איסוף רעיונות לסדר היום של פגישות ועד',
-    icon: MessageSquare,
-    color: 'text-emerald-600',
-    bgColor: 'bg-emerald-50',
-    links: [
-      { href: '/admin/meetings/new', label: 'פגישה חדשה', icon: Plus },
-      { href: '/admin/meetings', label: 'ניהול פגישות', icon: Edit },
-      { href: '/admin/meetings', label: 'רעיונות שנשלחו', icon: MessageSquare }
-    ]
-  },
-  {
-    id: 'settings',
-    title: 'הגדרות',
-    description: 'הגדרות מערכת וניהול תצורה',
-    icon: Settings,
-    color: 'text-gray-600',
-    bgColor: 'bg-gray-50',
-    links: [
-      { href: '/admin/tags', label: 'ניהול תגיות', icon: Tags },
-      { href: '/admin/settings', label: 'הגדרות כלליות', icon: Settings }
-    ]
-  }
-]
-
-// Category groupings for organized dashboard
-const categoryGroups = [
-  {
-    id: 'content',
-    title: 'ניהול תוכן',
-    icon: FileText,
-    defaultOpen: true,
-    sections: ['events', 'protocols', 'highlights']
-  },
-  {
-    id: 'tasks',
-    title: 'משימות ובעיות',
-    icon: CheckSquare,
-    defaultOpen: true,
-    sections: ['tasks', 'issues', 'tickets']
-  },
-  {
-    id: 'organization',
-    title: 'ארגון ואנשים',
-    icon: Users,
-    defaultOpen: false,
-    sections: ['committees', 'contacts', 'feedback', 'meetings', 'skills']
-  },
-  {
-    id: 'external',
-    title: 'שותפים חיצוניים',
-    icon: Store,
-    defaultOpen: false,
-    sections: ['vendors', 'prom']
-  },
-  {
-    id: 'system',
-    title: 'מערכת ותקשורת',
-    icon: Settings,
-    defaultOpen: false,
-    sections: ['urgent', 'notifications', 'meetings', 'settings']
-  }
-]
-
-function DashboardStats() {
-  const [stats, setStats] = useState({
-    eventsThisMonth: 0,
-    draftEvents: 0,
-    openTasks: 0,
-    overdueTasks: 0,
-    openIssues: 0,
-    criticalIssues: 0,
-    registrations: 0,
-  })
-  const [isLoading, setIsLoading] = useState(true)
-
-  useEffect(() => {
-    async function fetchStats() {
-      const supabase = createClient()
-
-      // Get current month date range
-      const now = new Date()
-      const firstDay = new Date(now.getFullYear(), now.getMonth(), 1)
-      const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0)
-
-      // Fetch all stats in parallel
-      const [eventsData, tasksData, issuesData, registrationsData] = await Promise.all([
-        // Events this month (future only, until end of month)
-        supabase
-          .from('events')
-          .select('id, status', { count: 'exact' })
-          .gte('start_datetime', now.toISOString())
-          .lte('start_datetime', lastDay.toISOString()),
-
-        // Open tasks
-        supabase
-          .from('tasks')
-          .select('id, status, due_date', { count: 'exact' })
-          .in('status', ['pending', 'in_progress']),
-
-        // Open issues
-        supabase
-          .from('issues')
-          .select('id, priority', { count: 'exact' })
-          .neq('status', 'closed'),
-
-        // Event registrations this month
-        supabase
-          .from('event_registrations')
-          .select('id', { count: 'exact' })
-          .gte('created_at', firstDay.toISOString())
-      ])
-
-      const publishedEvents = eventsData.data?.filter(e => e.status === 'published').length || 0
-      const draftEvents = eventsData.data?.filter(e => e.status === 'draft').length || 0
-
-      setStats({
-        eventsThisMonth: publishedEvents + draftEvents, // Only count published + draft (exclude cancelled)
-        draftEvents: draftEvents,
-        openTasks: tasksData.count || 0,
-        overdueTasks: tasksData.data?.filter(t => t.due_date && new Date(t.due_date) < now).length || 0,
-        openIssues: issuesData.count || 0,
-        criticalIssues: issuesData.data?.filter(i => i.priority === 'critical').length || 0,
-        registrations: registrationsData.count || 0,
-      })
-      setIsLoading(false)
-    }
-
-    fetchStats()
-  }, [])
-
-  if (isLoading) {
-    return (
-      <Card>
-        <CardContent className="pt-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="text-center">
-                <div className="h-6 bg-gray-200 rounded animate-pulse w-12 mx-auto mb-1" />
-                <div className="h-3 bg-gray-200 rounded animate-pulse w-20 mx-auto" />
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-    )
-  }
-
-  return (
-    <Card>
-      <CardContent className="pt-6">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          <Link href={stats.draftEvents > 0 ? "/events?showDrafts=true" : "/events"} className="text-center hover:bg-accent p-3 rounded-lg transition-colors">
-            <div className="text-2xl md:text-3xl font-bold">{stats.eventsThisMonth}</div>
-            <div className="text-sm font-medium text-muted-foreground mt-1">אירועים החודש</div>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              {stats.draftEvents > 0 ? `${stats.draftEvents} בטיוטה` : 'הכל פורסם'}
-            </p>
-          </Link>
-
-          <Link href="/tasks" className="text-center hover:bg-accent p-3 rounded-lg transition-colors">
-            <div className="text-2xl md:text-3xl font-bold">{stats.openTasks}</div>
-            <div className="text-sm font-medium text-muted-foreground mt-1">משימות פתוחות</div>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              {stats.overdueTasks > 0 ? `${stats.overdueTasks} באיחור` : 'הכל בזמן'}
-            </p>
-          </Link>
-
-          <Link href="/issues" className="text-center hover:bg-accent p-3 rounded-lg transition-colors">
-            <div className="text-2xl md:text-3xl font-bold">{stats.openIssues}</div>
-            <div className="text-sm font-medium text-muted-foreground mt-1">בעיות לטיפול</div>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              {stats.criticalIssues > 0 ? `${stats.criticalIssues} קריטיות` : 'אין קריטיות'}
-            </p>
-          </Link>
-
-          <Link href="/events" className="text-center hover:bg-accent p-3 rounded-lg transition-colors">
-            <div className="text-2xl md:text-3xl font-bold">{stats.registrations}</div>
-            <div className="text-sm font-medium text-muted-foreground mt-1">נרשמים החודש</div>
-            <p className="text-xs text-muted-foreground mt-0.5">לאירועים</p>
-          </Link>
-        </div>
-      </CardContent>
-    </Card>
-  )
+function SubtitleSkeleton() {
+  return <span className="inline-block h-3 w-32 animate-pulse rounded bg-gray-200 align-middle" />
 }
 
-export default function AdminDashboard() {
+export default function AdminHubPage() {
+  const t = useTranslations('admin.hub')
+  const { counts, isLoading } = useAdminCounts()
+
+  // Skeleton while loading; omitted entirely when the request failed (counts === null).
+  const subtitle = (text: string | undefined) =>
+    isLoading ? <SubtitleSkeleton /> : text
+
+  const eventsText = counts
+    ? [
+        t('events.upcoming', { count: counts.events.upcoming }),
+        counts.events.drafts > 0 ? t('events.drafts', { count: counts.events.drafts }) : null,
+      ]
+        .filter(Boolean)
+        .join(' · ')
+    : undefined
+
+  const highlightsText = counts
+    ? t('highlights.active', { count: counts.highlights.active })
+    : undefined
+
+  const ticketsText = counts ? t('tickets.active', { count: counts.tickets.active }) : undefined
+
+  const inboxText = counts
+    ? t('inbox.summary', {
+        feedback: counts.inbox.feedback,
+        ideas: counts.inbox.ideas,
+        survey: counts.inbox.survey,
+      })
+    : undefined
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-foreground">לוח בקרה למנהל</h1>
-          <p className="text-muted-foreground mt-2">
-            ניהול מרכזי של כל פעילויות ועד ההורים
-          </p>
-        </div>
-        <div className="flex gap-2 w-full sm:w-auto">
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button variant="outline" size="sm" className="flex-1 sm:flex-initial">
-                <HelpCircle className="h-4 w-4 ml-2" />
-                הוראות שימוש
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle className="text-2xl">📚 הוראות שימוש למנהלים</DialogTitle>
-                <DialogDescription>
-                  מדריך פשוט ואינטראקטיבי לניהול ועד ההורים
-                </DialogDescription>
-              </DialogHeader>
+    <div className="space-y-5">
+      <AdminPageHeader title={t('title')} hideBack />
 
-              <div className="space-y-6 mt-4">
-                {/* אירועים */}
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <div className="bg-blue-50 p-2 rounded-lg">
-                      <Calendar className="h-5 w-5 text-blue-600" />
-                    </div>
-                    <h3 className="font-bold text-lg">אירועים 📅</h3>
-                  </div>
-                  <ul className="space-y-1 text-sm mr-9">
-                    <li>• <strong>צרו אירוע חדש</strong> - הוסיפו אירוע ללוח השנה (ישתלב אוטומטית עם Google Calendar)</li>
-                    <li>• <strong>רשימת אירועים</strong> - ערכו או מחקו אירועים קיימים</li>
-                    <li>• <strong>ניהול הרשמות</strong> - צפו במי נרשם לכל אירוע</li>
-                    <li className="text-muted-foreground mt-2">💡 טיפ: השתמשו בסטטוס &quot;טיוטה&quot; לאירועים שעדיין לא מוכנים לפרסום</li>
-                  </ul>
-                </div>
+      <AdminGroup title={t('contentGroup.title')} description={t('contentGroup.description')}>
+        <AdminRow
+          href="/admin/events"
+          testId="hub-row-events"
+          icon={Calendar}
+          iconClassName="bg-[#87CEEB]/30 text-[#003153]"
+          title={t('events.title')}
+          subtitle={subtitle(eventsText)}
+        />
+        <AdminRow
+          href="/admin/highlights"
+          testId="hub-row-highlights"
+          icon={Sparkles}
+          iconClassName="bg-[#FFBA00]/20 text-[#003153]"
+          title={t('highlights.title')}
+          subtitle={subtitle(highlightsText)}
+        />
+        <AdminRow
+          href="/admin/tickets"
+          testId="hub-row-tickets"
+          icon={Ticket}
+          iconClassName="bg-[#FF8200]/15 text-[#003153]"
+          title={t('tickets.title')}
+          subtitle={subtitle(ticketsText)}
+        />
+      </AdminGroup>
 
-                {/* משימות */}
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <div className="bg-green-50 p-2 rounded-lg">
-                      <CheckSquare className="h-5 w-5 text-green-600" />
-                    </div>
-                    <h3 className="font-bold text-lg">משימות ✅</h3>
-                  </div>
-                  <ul className="space-y-1 text-sm mr-9">
-                    <li>• <strong>צרו משימה</strong> - הקצו משימה לחבר ועד עם תאריך יעד</li>
-                    <li>• <strong>רשימת משימות</strong> - עקבו אחרי התקדמות כל המשימות</li>
-                    <li>• <strong>הקצאת משימות</strong> - חלקו משימות בין חברי הועד</li>
-                    <li className="text-muted-foreground mt-2">💡 טיפ: הלוח מציג כמה משימות באיחור - תנו עדיפות לאלו!</li>
-                  </ul>
-                </div>
+      <AdminGroup title={t('parentsGroup.title')} description={t('parentsGroup.description')}>
+        <AdminRow
+          href="/admin/inbox"
+          testId="hub-row-inbox"
+          icon={MessageSquare}
+          iconClassName="bg-[#0D98BA]/15 text-[#0D98BA]"
+          title={t('inbox.title')}
+          subtitle={subtitle(inboxText)}
+          badge={counts ? counts.inbox.feedback + counts.inbox.ideas : undefined}
+        />
+      </AdminGroup>
 
-                {/* וועדות */}
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <div className="bg-teal-50 p-2 rounded-lg">
-                      <Users className="h-5 w-5 text-teal-600" />
-                    </div>
-                    <h3 className="font-bold text-lg">וועדות 👥</h3>
-                  </div>
-                  <ul className="space-y-1 text-sm mr-9">
-                    <li>• <strong>וועדה חדשה</strong> - צרו וועדה תחומית (תרבות, ספורט, וכו&apos;)</li>
-                    <li>• <strong>רשימת וועדות</strong> - נהלו חברים ותחומי אחריות</li>
-                    <li className="text-muted-foreground mt-2">💡 טיפ: כל וועדה יכולה להיות בעלת תקציב משלה</li>
-                  </ul>
-                </div>
-
-                {/* בעיות */}
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <div className="bg-orange-50 p-2 rounded-lg">
-                      <AlertTriangle className="h-5 w-5 text-orange-600" />
-                    </div>
-                    <h3 className="font-bold text-lg">בעיות 🚨</h3>
-                  </div>
-                  <ul className="space-y-1 text-sm mr-9">
-                    <li>• <strong>דווחו על בעיה</strong> - תעדו בעיה שדורשת טיפול</li>
-                    <li>• <strong>רשימת בעיות</strong> - עקבו אחרי סטטוס כל בעיה</li>
-                    <li>• <strong>סטטיסטיקות</strong> - ראו כמה בעיות נפתרו בזמן</li>
-                    <li className="text-muted-foreground mt-2">💡 טיפ: הלוח מציג כמה בעיות קריטיות - טפלו בהן ראשונות!</li>
-                  </ul>
-                </div>
-
-                {/* פרוטוקולים */}
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <div className="bg-purple-50 p-2 rounded-lg">
-                      <FileText className="h-5 w-5 text-purple-600" />
-                    </div>
-                    <h3 className="font-bold text-lg">פרוטוקולים 📝</h3>
-                  </div>
-                  <ul className="space-y-1 text-sm mr-9">
-                    <li>• <strong>הוסיפו פרוטוקול</strong> - העלו פרוטוקול של ישיבה</li>
-                    <li>• <strong>ארכיון</strong> - כל הפרוטוקולים ההיסטוריים</li>
-                    <li>• <strong>העלאת מסמכים</strong> - העלו קבצי PDF או DOCX (המערכת תמיר אותם אוטומטית)</li>
-                    <li className="text-muted-foreground mt-2">💡 טיפ: ניתן להעלות קובץ והמערכת תחלץ את הטקסט ותעצב אותו</li>
-                  </ul>
-                </div>
-
-                {/* ספקים */}
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <div className="bg-rose-50 p-2 rounded-lg">
-                      <Store className="h-5 w-5 text-rose-600" />
-                    </div>
-                    <h3 className="font-bold text-lg">ספקים 🏪</h3>
-                  </div>
-                  <ul className="space-y-1 text-sm mr-9">
-                    <li>• <strong>ספק חדש</strong> - הוסיפו ספק או נותן שירות למאגר</li>
-                    <li>• <strong>רשימת ספקים</strong> - צפו בכל הספקים מאורגנים לפי קטגוריות</li>
-                    <li>• <strong>קטגוריות</strong> - קייטרינג, ציוד, בידור, הסעות, אולמות, צילום והדפסה</li>
-                    <li>• <strong>דירוגים</strong> - נהלו דירוגים וביקורות עבור כל ספק</li>
-                    <li>• <strong>שיתוף</strong> - שתפו פרטי ספקים בווטסאפ עם הורים אחרים</li>
-                    <li className="text-muted-foreground mt-2">💡 טיפ: נהלו מאגר ספקים מומלצים כדי לחסוך זמן בתכנון אירועים!</li>
-                  </ul>
-                </div>
-
-                {/* משוב */}
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <div className="bg-indigo-50 p-2 rounded-lg">
-                      <MessageSquare className="h-5 w-5 text-indigo-600" />
-                    </div>
-                    <h3 className="font-bold text-lg">משוב הורים 💬</h3>
-                  </div>
-                  <ul className="space-y-1 text-sm mr-9">
-                    <li>• <strong>צפייה במשובים</strong> - קראו משוב אנונימי מהורים</li>
-                    <li>• <strong>סטטיסטיקות</strong> - ראו מגמות במשובים</li>
-                    <li>• <strong>ייצוא נתונים</strong> - הורידו את כל המשובים לקובץ</li>
-                    <li className="text-muted-foreground mt-2">💡 טיפ: משוב הוא אנונימי לחלוטין - עודדו הורים לשתף</li>
-                  </ul>
-                </div>
-
-                {/* כרטיסים */}
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <div className="bg-orange-50 p-2 rounded-lg">
-                      <Ticket className="h-5 w-5 text-orange-600" />
-                    </div>
-                    <h3 className="font-bold text-lg">כרטיסים 🎟️</h3>
-                  </div>
-                  <ul className="space-y-1 text-sm mr-9">
-                    <li>• <strong>כרטיס חדש</strong> - צרו כרטיס למשחק ספורט, הצגה או אירוע</li>
-                    <li>• <strong>ניהול מלאי</strong> - עקבו אחרי כמות הכרטיסים הזמינים</li>
-                    <li>• <strong>מחירים</strong> - הגדירו מחיר לכרטיס או השאירו בחינם</li>
-                    <li>• <strong>סטטוסים</strong> - פעיל, אזל, פג תוקף, טיוטה או הסתיים</li>
-                    <li>• <strong>סיום אירוע</strong> - סמנו אירוע כ&quot;הסתיים&quot; כדי להסיר מהתצוגה הציבורית</li>
-                    <li className="text-muted-foreground mt-2">💡 טיפ: השתמשו ב&quot;מומלץ&quot; כדי להציג כרטיסים חשובים בראש העמוד!</li>
-                  </ul>
-                </div>
-
-                {/* אנשי קשר */}
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <div className="bg-cyan-50 p-2 rounded-lg">
-                      <Phone className="h-5 w-5 text-cyan-600" />
-                    </div>
-                    <h3 className="font-bold text-lg">אנשי קשר 📞</h3>
-                  </div>
-                  <ul className="space-y-1 text-sm mr-9">
-                    <li>• <strong>ניהול אנשי קשר</strong> - הוסיפו אנשי קשר חשובים בבית הספר</li>
-                    <li>• <strong>דו-לשוני</strong> - תמיכה בעברית ורוסית לשם ותפקיד</li>
-                    <li>• <strong>קטגוריות</strong> - אחות, הנהלה, מורה, ועד, שירות</li>
-                    <li>• <strong>מיון</strong> - שנו את הסדר בעזרת החצים למעלה/למטה</li>
-                    <li>• <strong>פרטים</strong> - שם, תפקיד, טלפון ואימייל</li>
-                    <li className="text-muted-foreground mt-2">💡 טיפ: סמנו אנשי קשר כ&quot;ציבורי&quot; כדי שכולם יוכלו לראות אותם!</li>
-                  </ul>
-                </div>
-
-                {/* הודעות דחופות */}
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <div className="bg-red-50 p-2 rounded-lg">
-                      <Bell className="h-5 w-5 text-red-600" />
-                    </div>
-                    <h3 className="font-bold text-lg">הודעות דחופות 🔔</h3>
-                  </div>
-                  <ul className="space-y-1 text-sm mr-9">
-                    <li>• <strong>ניהול הודעות</strong> - צרו הודעות דחופות שיופיעו בדף הבית</li>
-                    <li>• <strong>חולצה לבנה</strong> - כפתורים מהירים לתזכורת חולצה לבנה (1 יום, שבוע, חודש וכו&apos;)</li>
-                    <li>• <strong>סוגי הודעות</strong> - דחוף, מידע, אזהרה, חולצה לבנה</li>
-                    <li>• <strong>טווח תאריכים</strong> - הגדירו מתי ההודעה תופיע (תאריך התחלה וסיום)</li>
-                    <li>• <strong>דו-לשוני</strong> - כותרת ותיאור בעברית ורוסית</li>
-                    <li className="text-muted-foreground mt-2">💡 טיפ: הודעות פעילות מסומנות במסגרת ירוקה - הן יופיעו בדף הבית!</li>
-                  </ul>
-                </div>
-
-                {/* פעמון התראות */}
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <div className="bg-blue-50 p-2 rounded-lg">
-                      <Bell className="h-5 w-5 text-blue-600" />
-                    </div>
-                    <h3 className="font-bold text-lg">פעמון התראות 🔔</h3>
-                  </div>
-                  <ul className="space-y-1 text-sm mr-9">
-                    <li>• <strong>התראות אוטומטיות</strong> - הפעמון בראש העמוד מציג התראות חדשות</li>
-                    <li>• <strong>משימות חדשות</strong> - קבלו התראה על משימות שנוצרו</li>
-                    <li>• <strong>רעיונות חדשים</strong> - קבלו התראה כשהורים שולחים רעיון</li>
-                    <li>• <strong>משוב חדש</strong> - קבלו התראה על משוב חדש מהורים</li>
-                    <li>• <strong>עדכון כל 30 שניות</strong> - המערכת בודקת התראות חדשות אוטומטית</li>
-                    <li className="text-muted-foreground mt-2">💡 טיפ: פתיחת הפעמון מסמנת את כל ההתראות כנצפו!</li>
-                  </ul>
-                </div>
-
-                {/* הגדרות ותגיות */}
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <div className="bg-gray-50 p-2 rounded-lg">
-                      <Settings className="h-5 w-5 text-gray-600" />
-                    </div>
-                    <h3 className="font-bold text-lg">הגדרות ⚙️</h3>
-                  </div>
-                  <ul className="space-y-1 text-sm mr-9">
-                    <li>• <strong>ניהול תגיות</strong> - צרו תגיות לקטגוריזציה של משימות (תחזוקה, אירועים, תקציב וכו&apos;)</li>
-                    <li>• <strong>התאמה אישית</strong> - שנו צבעים ואימוג&apos;י לכל תגית</li>
-                    <li>• <strong>סינון חכם</strong> - השתמשו בתגיות כדי למצוא משימות במהירות</li>
-                    <li>• <strong>הגדרות כלליות</strong> - נהלו הרשאות והגדרות מערכת</li>
-                    <li className="text-muted-foreground mt-2">💡 טיפ: תגיות עוזרות לארגן ולמצוא משימות בקלות - השתמשו בהן!</li>
-                  </ul>
-                </div>
-
-                {/* טיפים כלליים */}
-                <div className="bg-sky-50 p-4 rounded-lg border-2 border-sky-200">
-                  <h3 className="font-bold text-lg mb-2">🌟 טיפים לשימוש יעיל</h3>
-                  <ul className="space-y-1 text-sm">
-                    <li>✨ <strong>קטגוריות מסודרות</strong> - הלוח מחולק לקטגוריות לוגיות - לחצו על הקטגוריה כדי להרחיב או לצמצם</li>
-                    <li>✨ <strong>הסטטיסטיקות למעלה</strong> - לחצו עליהן כדי לעבור ישירות למקטע המתאים</li>
-                    <li>✨ <strong>פעמון ההתראות</strong> - שימו לב לפעמון בראש העמוד - הוא יתריע על פעילות חדשה!</li>
-                    <li>✨ <strong>שתפו קישורים</strong> - כל עמוד במערכת יכול להישלח בווטסאפ</li>
-                    <li>✨ <strong>גרסת מובייל</strong> - כל המערכת מותאמת לסלולר - עובדת גם ללא אינטרנט!</li>
-                  </ul>
-                </div>
-
-                {/* רעיונות והצעות */}
-                <div className="bg-green-50 p-4 rounded-lg border-2 border-green-200">
-                  <h3 className="font-bold text-lg mb-2">💡 רעיונות והצעות לשיפור</h3>
-                  <p className="text-sm mb-2">יש לכם רעיון לשיפור המערכת? הצעה לתכונה חדשה? נשמח לשמוע!</p>
-                  <Button asChild variant="default" className="w-full bg-green-600 hover:bg-green-700">
-                    <a
-                      href="https://wa.me/972544345287?text=שלום, יש לי רעיון לשיפור המערכת:"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <MessageSquare className="h-4 w-4 ml-2" />
-                      שלחו הצעה בווטסאפ
-                    </a>
-                  </Button>
-                </div>
-              </div>
-            </DialogContent>
-          </Dialog>
-
-          <Button asChild size="sm" className="flex-1 sm:flex-initial">
-            <Link href="/admin/settings">
-              <Settings className="h-4 w-4 ml-2" />
-              הגדרות
-            </Link>
-          </Button>
-        </div>
-      </div>
-
-      {/* Quick Stats */}
-      <DashboardStats />
-
-      {/* Admin Sections - Grouped by Category */}
-      <div className="space-y-4">
-        {categoryGroups.map((group) => {
-          const groupSections = defaultAdminSections.filter(section =>
-            group.sections.includes(section.id)
-          )
-
-          return (
-            <AdminSectionGroup
-              key={group.id}
-              id={group.id}
-              title={group.title}
-              icon={group.icon}
-              sections={groupSections}
-              defaultOpen={group.defaultOpen}
-            />
-          )
-        })}
-      </div>
-
-      {/* Quick Actions */}
-      <Card>
-        <CardHeader>
-          <CardTitle>פעולות מהירות</CardTitle>
-          <CardDescription>פעולות נפוצות לניהול יומיומי</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2">
-            <Button asChild size="sm">
-              <Link href="/admin/events/new">
-                <Calendar className="h-4 w-4 ml-2" />
-                אירוע חדש
-              </Link>
-            </Button>
-            <Button variant="outline" asChild size="sm">
-              <Link href="/admin/tasks/new">
-                <CheckSquare className="h-4 w-4 ml-2" />
-                משימה חדשה
-              </Link>
-            </Button>
-            <Button variant="outline" asChild size="sm">
-              <Link href="/admin/protocols/new">
-                <FileText className="h-4 w-4 ml-2" />
-                פרוטוקול חדש
-              </Link>
-            </Button>
-            <Button variant="outline" asChild size="sm">
-              <Link href="/admin/broadcast">
-                <MessageSquare className="h-4 w-4 ml-2" />
-                שליחת הודעה
-              </Link>
-            </Button>
-            <Button variant="outline" asChild size="sm">
-              <Link href="/admin/reports">
-                <BarChart className="h-4 w-4 ml-2" />
-                דוחות
-              </Link>
-            </Button>
-            <Button variant="outline" asChild size="sm">
-              <Link href="/admin/ideas">
-                <Lightbulb className="h-4 w-4 ml-2" />
-                ניהול רעיונות
-              </Link>
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+      <AdminGroup>
+        <AdminRow
+          href="/admin/more"
+          testId="hub-row-more"
+          icon={MoreHorizontal}
+          title={t('more.title')}
+          subtitle={t('more.subtitle')}
+        />
+      </AdminGroup>
     </div>
   )
 }

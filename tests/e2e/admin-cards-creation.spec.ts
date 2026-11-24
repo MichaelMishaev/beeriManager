@@ -37,8 +37,9 @@ test.describe('Admin Dashboard - Create Entities from Cards', () => {
     // Navigate to admin dashboard
     await page.goto('http://localhost:4500/admin');
 
-    // Wait for the page to load
-    await page.waitForSelector('.grid.gap-6.md\\:grid-cols-2.lg\\:grid-cols-3', { timeout: 10000 });
+    // The hub no longer has per-entity "create" cards (redesign, Nov 2026): each test opens its
+    // create form directly instead of clicking a card button.
+    await page.waitForLoadState('networkidle');
   });
 
   test('should create new event from אירועים card', async ({ page }) => {
@@ -48,7 +49,7 @@ test.describe('Admin Dashboard - Create Entities from Cards', () => {
     await page.screenshot({ path: 'test-results/screenshots/01-admin-dashboard.png', fullPage: true });
 
     // Find and click the "צור אירוע חדש" button in the אירועים card
-    await page.locator('text=אירועים').locator('..').locator('..').locator('text=צור אירוע חדש').click();
+    await page.goto('http://localhost:4500/he/admin/events/new');
 
     // Wait for navigation to /admin/events/new
     await page.waitForURL(/.*\/admin\/events\/new/, { timeout: 10000 });
@@ -93,10 +94,9 @@ test.describe('Admin Dashboard - Create Entities from Cards', () => {
 
     // Navigate back to admin dashboard
     await page.goto('http://localhost:4500/admin');
-    await page.waitForSelector('.grid.gap-6.md\\:grid-cols-2.lg\\:grid-cols-3');
 
     // Find and click the "צור משימה חדשה" button in the משימות card
-    await page.locator('text=משימות').locator('..').locator('..').locator('text=צור משימה חדשה').click();
+    await page.goto('http://localhost:4500/he/admin/tasks/new');
 
     // Wait for navigation
     await page.waitForURL(/.*\/admin\/tasks\/new/, { timeout: 10000 });
@@ -136,10 +136,9 @@ test.describe('Admin Dashboard - Create Entities from Cards', () => {
 
     // Navigate back to admin dashboard
     await page.goto('http://localhost:4500/admin');
-    await page.waitForSelector('.grid.gap-6.md\\:grid-cols-2.lg\\:grid-cols-3');
 
     // Find and click the "וועדה חדשה" button in the וועדות card
-    await page.locator('text=וועדות').locator('..').locator('..').locator('text=וועדה חדשה').click();
+    await page.goto('http://localhost:4500/he/admin/committees/new');
 
     // Wait for navigation
     await page.waitForURL(/.*\/admin\/committees\/new/, { timeout: 10000 });
@@ -187,10 +186,9 @@ test.describe('Admin Dashboard - Create Entities from Cards', () => {
 
     // Navigate back to admin dashboard
     await page.goto('http://localhost:4500/admin');
-    await page.waitForSelector('.grid.gap-6.md\\:grid-cols-2.lg\\:grid-cols-3');
 
     // Find and click the "דווח על בעיה" button in the בעיות card
-    await page.locator('text=בעיות').locator('..').locator('..').locator('text=דווח על בעיה').click();
+    await page.goto('http://localhost:4500/he/admin/issues/new');
 
     // Wait for navigation
     await page.waitForURL(/.*\/admin\/issues\/new/, { timeout: 10000 });
@@ -224,10 +222,9 @@ test.describe('Admin Dashboard - Create Entities from Cards', () => {
 
     // Navigate back to admin dashboard
     await page.goto('http://localhost:4500/admin');
-    await page.waitForSelector('.grid.gap-6.md\\:grid-cols-2.lg\\:grid-cols-3');
 
     // Find and click the "הוסף פרוטוקול" button in the פרוטוקולים card
-    await page.locator('text=פרוטוקולים').locator('..').locator('..').locator('text=הוסף פרוטוקול').click();
+    await page.goto('http://localhost:4500/he/admin/protocols/new');
 
     // Wait for navigation
     await page.waitForURL(/.*\/admin\/protocols\/new/, { timeout: 10000 });
@@ -272,10 +269,9 @@ test.describe('Admin Dashboard - Create Entities from Cards', () => {
 
     // Navigate back to admin dashboard
     await page.goto('http://localhost:4500/admin');
-    await page.waitForSelector('.grid.gap-6.md\\:grid-cols-2.lg\\:grid-cols-3');
 
     // Find and click the "הוסף הוצאה" button in the כספים card
-    await page.locator('text=כספים').locator('..').locator('..').locator('text=הוסף הוצאה').click();
+    await page.goto('http://localhost:4500/he/admin/expenses/new');
 
     // Wait for navigation
     await page.waitForURL(/.*\/admin\/expenses\/new/, { timeout: 10000 });

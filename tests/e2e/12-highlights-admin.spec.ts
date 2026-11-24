@@ -7,18 +7,15 @@ test.describe('Highlights Admin', () => {
     await authHelper.loginAsAdmin();
   });
 
-  test('should display highlights admin card on dashboard', async ({ page }) => {
+  test('should display highlights row on the admin hub', async ({ page }) => {
     await page.goto('/he/admin');
 
-    // Check that highlights card exists
-    const highlightsCard = page.locator('text=קרוסלת הדגשות').first();
-    await expect(highlightsCard).toBeVisible();
-
-    // Check description
-    await expect(page.locator('text=ניהול הדגשות להישגים, ספורט, פרסים ואירועים')).toBeVisible();
+    // The hub (redesign, Nov 2026) has one row per job; highlights is the "carousel" row
+    const highlightsRow = page.getByTestId('hub-row-highlights');
+    await expect(highlightsRow).toBeVisible();
 
     // Click to navigate to highlights admin
-    await page.locator('a[href="/he/admin/highlights"]').click();
+    await highlightsRow.click();
     await expect(page).toHaveURL('/he/admin/highlights');
   });
 

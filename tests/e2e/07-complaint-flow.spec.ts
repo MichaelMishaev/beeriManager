@@ -430,8 +430,8 @@ test.describe('Admin Feedback View', () => {
     // Now login as admin
     await authHelper.loginAsAdmin();
 
-    // Navigate to feedback page
-    await page.goto('/admin/feedback');
+    // Feedback now lives in the parents inbox (/admin/feedback redirects here)
+    await page.goto('/he/admin/inbox?tab=feedback');
 
     // Should display feedback list
     await expect(page.locator('h1')).toBeVisible();
@@ -453,7 +453,7 @@ test.describe('Admin Feedback View', () => {
     const authHelper = new AuthHelper(page);
     await authHelper.loginAsAdmin();
 
-    await page.goto('/admin/feedback');
+    await page.goto('/he/admin/inbox?tab=feedback');
 
     // Wait for page load
     await page.waitForTimeout(1000);
@@ -479,7 +479,7 @@ test.describe('Admin Feedback View', () => {
     const authHelper = new AuthHelper(page);
     await authHelper.loginAsAdmin();
 
-    await page.goto('/admin/feedback');
+    await page.goto('/he/admin/inbox?tab=feedback');
     await page.waitForTimeout(1000);
 
     // Look for sort button/header
@@ -548,7 +548,7 @@ test.describe('Complete End-to-End Flow', () => {
     // Step 6: View feedback in admin panel
     console.log('\nStep 6: View feedback in admin panel');
     const step6Start = performance.now();
-    await page.goto('/admin/feedback');
+    await page.goto('/he/admin/inbox?tab=feedback');
     await page.waitForTimeout(1000); // Wait for data to load
     const step6Time = performance.now() - step6Start;
     console.log(`✓ Admin feedback view time: ${step6Time.toFixed(2)}ms`);

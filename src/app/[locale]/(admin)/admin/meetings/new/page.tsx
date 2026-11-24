@@ -1,9 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowRight } from 'lucide-react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { useTranslations } from 'next-intl'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -12,19 +11,33 @@ import { toast } from 'sonner'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
+import { AdminFormSection, AdminPageHeader } from '@/components/features/admin'
 
-const meetingSchema = z.object({
-  title: z.string().min(2, 'כותרת חייבת להכיל לפחות 2 תווים').max(200),
-  meeting_date: z.string().min(1, 'נדרש תאריך פגישה'),
-  description: z.string().optional()
-})
+function createMeetingSchema(messages: { titleMin: string; dateRequired: string }) {
+  return z.object({
+    title: z.string().min(2, messages.titleMin).max(200),
+    meeting_date: z.string().min(1, messages.dateRequired),
+    description: z.string().optional()
+  })
+}
 
-type MeetingFormData = z.infer<typeof meetingSchema>
+type MeetingFormData = z.infer<ReturnType<typeof createMeetingSchema>>
 
 export default function NewMeetingPage() {
+  const t = useTranslations('admin.records.meetings.new')
+  const tc = useTranslations('admin.common')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const router = useRouter()
+
+  const meetingSchema = useMemo(
+    () =>
+      createMeetingSchema({
+        titleMin: t('validation.titleMin'),
+        dateRequired: t('validation.dateRequired'),
+      }),
+    [t]
+  )
 
   const {
     register,
@@ -53,94 +66,74 @@ export default function NewMeetingPage() {
       const result = await response.json()
 
       if (result.success) {
-        toast.success('הפגישה נוצרה בהצלחה!')
+        toast.success(t('toastCreated'))
         router.push('/admin/meetings')
       } else {
-        toast.error(result.error || 'שגיאה ביצירת הפגישה')
+        toast.error(result.error || t('toastCreateError'))
       }
     } catch (error) {
       console.error('Error creating meeting:', error)
-      toast.error('שגיאה ביצירת הפגישה')
+      toast.error(t('toastCreateError'))
     } finally {
       setIsSubmitting(false)
     }
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <Link href="/admin/meetings">
-          <Button variant="ghost" size="sm" className="mb-4">
-            <ArrowRight className="h-4 w-4 ml-2" />
-            חזור לפגישות
+    <div className="space-y-4">
+      <AdminPageHeader title={t('title')} subtitle={t('subtitle')} backHref="/admin/meetings" />
+
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <AdminFormSection title={t('detailsTitle')} description={t('detailsDescription')}>
+          <div>
+            <Label htmlFor="title">{t('titleLabel')}</Label>
+            <Input
+              id="title"
+              {...register('title')}
+              placeholder={t('titlePlaceholder')}
+              className={`h-11 ${errors.title ? 'border-red-500' : ''}`}
+            />
+            {errors.title && (
+              <p className="mt-1 text-sm text-red-500">{errors.title.message}</p>
+            )}
+          </div>
+
+          <div>
+            <Label htmlFor="meeting_date">{t('dateLabel')}</Label>
+            <Input
+              id="meeting_date"
+              type="datetime-local"
+              {...register('meeting_date')}
+              className={`h-11 ${errors.meeting_date ? 'border-red-500' : ''}`}
+            />
+            {errors.meeting_date && (
+              <p className="mt-1 text-sm text-red-500">{errors.meeting_date.message}</p>
+            )}
+          </div>
+
+          <div>
+            <Label htmlFor="description">{t('descriptionLabel')}</Label>
+            <Textarea
+              id="description"
+              {...register('description')}
+              placeholder={t('descriptionPlaceholder')}
+              rows={4}
+            />
+          </div>
+        </AdminFormSection>
+
+        <div className="flex flex-col gap-2">
+          <Button
+            type="submit"
+            disabled={isSubmitting}
+            className="h-11 w-full bg-[#003153] text-white hover:bg-[#003153]/90"
+          >
+            {isSubmitting ? t('submitting') : t('submit')}
           </Button>
-        </Link>
-        <h1 className="text-3xl font-bold">פגישה חדשה</h1>
-        <p className="text-muted-foreground mt-2">
-          צור פגישה חדשה לקבלת רעיונות מהורים
-        </p>
-      </div>
-
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <Card>
-          <CardHeader>
-            <CardTitle>פרטי הפגישה</CardTitle>
-            <CardDescription>
-              מלאו את פרטי הפגישה. הקישור לשליחת רעיונות יהיה זמין מיד לאחר היצירה.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="title">כותרת הפגישה *</Label>
-              <Input
-                id="title"
-                {...register('title')}
-                placeholder="לדוגמה: פגישת ועד הורים - ינואר 2026"
-                className={errors.title ? 'border-red-500' : ''}
-              />
-              {errors.title && (
-                <p className="text-sm text-red-500 mt-1">{errors.title.message}</p>
-              )}
-            </div>
-
-            <div>
-              <Label htmlFor="meeting_date">תאריך הפגישה *</Label>
-              <Input
-                id="meeting_date"
-                type="datetime-local"
-                {...register('meeting_date')}
-                className={errors.meeting_date ? 'border-red-500' : ''}
-              />
-              {errors.meeting_date && (
-                <p className="text-sm text-red-500 mt-1">{errors.meeting_date.message}</p>
-              )}
-            </div>
-
-            <div>
-              <Label htmlFor="description">תיאור (אופציונלי)</Label>
-              <Textarea
-                id="description"
-                {...register('description')}
-                placeholder="פרטים נוספים על הפגישה..."
-                rows={4}
-              />
-            </div>
-
-            <div className="flex gap-2 pt-4">
-              <Button
-                type="submit"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? 'יוצר...' : 'צור פגישה'}
-              </Button>
-              <Link href="/admin/meetings">
-                <Button variant="outline" type="button">
-                  ביטול
-                </Button>
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
+          <Button asChild variant="outline" className="h-11 w-full">
+            <Link href="/admin/meetings">{tc('cancel')}</Link>
+          </Button>
+        </div>
       </form>
     </div>
   )
