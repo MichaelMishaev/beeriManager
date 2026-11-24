@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { ChevronDown } from 'lucide-react'
+import Link from 'next/link'
+import { ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react'
 import { ShareButton } from '@/components/ui/share-button'
 import type { Locale } from '@/i18n/config'
 import { KissRideCalendar } from './KissRideCalendar'
@@ -119,10 +120,22 @@ export function KissAndRideContent() {
         }
       : { title: t('title'), text: t('subtitle'), url: `${origin}/${locale}/kiss-and-ride` }
 
+  // "Back" points toward the start of the line: right in RTL, left in LTR.
+  const BackIcon = dir === 'rtl' ? ChevronRight : ChevronLeft
+
   return (
     <div className="min-h-dvh bg-[#F4F8FA] text-[#003153]" dir={dir}>
       <header className="bg-[#003153] text-white">
-        <div className="mx-auto flex max-w-md flex-col gap-1 px-4 pt-4 pb-4">
+        <div className="mx-auto flex max-w-md flex-col gap-1 px-4 pt-1 pb-4">
+          {/* Parents mostly arrive on this page from a WhatsApp/shared link: always give a one-tap way to the main page. */}
+          <Link
+            href={`/${locale}`}
+            data-testid="back-home"
+            className="-ms-2 inline-flex min-h-11 w-fit items-center gap-0.5 rounded-lg px-2 text-sm font-medium text-[#D6E6EE] transition-colors hover:text-white active:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+          >
+            <BackIcon className="h-4 w-4 shrink-0" aria-hidden="true" />
+            {t('backHome')}
+          </Link>
           <div className="flex items-center justify-between gap-3">
             <h1 className="text-[22px] font-bold leading-tight">
               {t('title')}

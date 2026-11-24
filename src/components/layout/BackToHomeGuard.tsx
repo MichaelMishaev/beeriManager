@@ -44,8 +44,13 @@ export function BackToHomeGuard() {
 
     const current = window.history.state
     const here = window.location.href
-    window.history.replaceState({}, '', homePath)
-    window.history.pushState(current, '', here)
+    // Use the browser's native methods, not `window.history.replaceState/pushState`: Next's App Router
+    // patches those on the instance (14.x) to sync every URL change into its router and to copy its own
+    // state (`__NA`) into plain objects. Going through the patch made the router believe the page was `/he`,
+    // so its history updater rewrote the address bar to `/he` (refresh then loaded the home page), and the
+    // home entry stopped being a plain `{}` entry.
+    History.prototype.replaceState.call(window.history, {}, '', homePath)
+    History.prototype.pushState.call(window.history, current, '', here)
   }, [locale, pathname])
 
   return null
